@@ -1,0 +1,11 @@
+{
+    "name": "Schemes",
+    "alias": "schemes",
+    "description": "",
+    "keywords": [],
+    "priority": 0,
+    "providers": [
+        "Modules\\Schemes\\Providers\\SchemesServiceProvider"
+    ],
+    "files": []
+}

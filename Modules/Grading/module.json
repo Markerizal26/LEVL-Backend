@@ -1,0 +1,11 @@
+{
+    "name": "Grading",
+    "alias": "grading",
+    "description": "",
+    "keywords": [],
+    "priority": 0,
+    "providers": [
+        "Modules\\Grading\\Providers\\GradingServiceProvider"
+    ],
+    "files": []
+}
