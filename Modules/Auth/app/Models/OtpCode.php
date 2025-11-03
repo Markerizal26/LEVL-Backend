@@ -25,6 +25,7 @@ class OtpCode extends Model
         'provider',
         'purpose',
         'code',
+        'meta',
         'expires_at',
         'consumed_at',
     ];
@@ -43,6 +44,7 @@ class OtpCode extends Model
         'user_id' => 'integer',
         'expires_at' => 'datetime',
         'consumed_at' => 'datetime',
+        'meta' => 'array',
     ];
 
     /**
