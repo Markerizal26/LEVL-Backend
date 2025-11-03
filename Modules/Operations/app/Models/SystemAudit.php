@@ -1,6 +1,6 @@
 <?php
 
-namespace Modules\Operations\Entities;
+namespace Modules\Operations\Models;
 
 use Illuminate\Database\Eloquent\Model;
 
@@ -18,6 +18,6 @@ class SystemAudit extends Model
 
     public function user()
     {
-        return $this->belongsTo(\Modules\Auth\Entities\User::class);
+        return $this->belongsTo(\Modules\Auth\Models\User::class);
     }
 }

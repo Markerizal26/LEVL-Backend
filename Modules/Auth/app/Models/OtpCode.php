@@ -19,11 +19,13 @@ class OtpCode extends Model
      * The attributes that are mass assignable.
      */
     protected $fillable = [
+        'uuid',
         'user_id',
         'channel',
         'provider',
         'purpose',
         'code',
+        'meta',
         'expires_at',
         'consumed_at',
     ];
@@ -42,6 +44,7 @@ class OtpCode extends Model
         'user_id' => 'integer',
         'expires_at' => 'datetime',
         'consumed_at' => 'datetime',
+        'meta' => 'array',
     ];
 
     /**

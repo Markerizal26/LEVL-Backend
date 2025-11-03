@@ -11,7 +11,7 @@ return new class extends Migration {
             $table->id();
             $table->enum('scope_type', ['exercise', 'assignment']);
             $table->unsignedBigInteger('scope_id');
-            $table->string('criteria', 255);
+            $table->json('criteria');
             $table->text('description')->nullable();
             $table->integer('max_score')->default(10);
             $table->integer('weight')->default(1); 

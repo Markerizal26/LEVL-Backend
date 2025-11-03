@@ -28,6 +28,15 @@ class SystemSettingSeeder extends Seeder
             ['key' => 'auth.otp_expiration_minutes', 'value' => '10', 'type' => 'number'],
             ['key' => 'auth.password_reset_expiration_minutes', 'value' => '30', 'type' => 'number'],
 
+            ['key' => 'auth.login_rate_limit_enabled', 'value' => 'true', 'type' => 'boolean'],
+            ['key' => 'auth.login_rate_limit_max_attempts', 'value' => '5', 'type' => 'number'],
+            ['key' => 'auth.login_rate_limit_decay_minutes', 'value' => '1', 'type' => 'number'],
+
+            ['key' => 'auth.lockout_enabled', 'value' => 'true', 'type' => 'boolean'],
+            ['key' => 'auth.lockout_failed_attempts_threshold', 'value' => '5', 'type' => 'number'],
+            ['key' => 'auth.lockout_window_minutes', 'value' => '60', 'type' => 'number'],
+            ['key' => 'auth.lockout_duration_minutes', 'value' => '15', 'type' => 'number'],
+
             ['key' => 'learning.progression_mode', 'value' => 'sequential', 'type' => 'string'],
             ['key' => 'learning.max_attempts_per_quiz', 'value' => '3', 'type' => 'number'],
             ['key' => 'learning.auto_complete_lesson', 'value' => 'true', 'type' => 'boolean'],

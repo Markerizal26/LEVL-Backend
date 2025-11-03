@@ -48,7 +48,7 @@ class JwtRefreshToken extends Model
      */
     public function user(): BelongsTo
     {
-        return $this->belongsTo(User::class);
+        return $this->belongsTo(\Modules\Auth\Models\User::class);
     }
 
     /**
