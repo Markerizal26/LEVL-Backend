@@ -1,14 +1,12 @@
 <?php
 
-namespace Modules\Schemes\Entities;
+namespace Modules\Schemes\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
-use Modules\Schemes\Entities\CourseTag;
-use Modules\Schemes\Entities\Unit;
 
 class Course extends Model
 {
@@ -19,7 +17,7 @@ class Course extends Model
         'level_tag', 'category', 'tags_json', 'outcomes_json',
         'prereq_text', 'duration_estimate', 'thumbnail_path',
         'banner_path', 'visibility', 'progression_mode',
-        'status', 'published_at', 'instructor_id'
+        'status', 'published_at', 'instructor_id',
     ];
 
     protected $casts = [
@@ -43,7 +41,7 @@ class Course extends Model
      */
     public function instructor(): BelongsTo
     {
-        return $this->belongsTo(\Modules\Auth\Entities\User::class, 'instructor_id');
+        return $this->belongsTo(\Modules\Auth\Models\User::class, 'instructor_id');
     }
 
     /**
@@ -52,7 +50,7 @@ class Course extends Model
     public function admins(): BelongsToMany
     {
         return $this->belongsToMany(
-            \Modules\Auth\Entities\User::class,
+            \Modules\Auth\Models\User::class,
             'course_admins',
             'course_id',
             'user_id'
@@ -64,7 +62,7 @@ class Course extends Model
      */
     public function courseAdmins(): HasMany
     {
-        return $this->hasMany(CourseAdmin::class);
+        return $this->hasMany(\Modules\Schemes\Models\CourseAdmin::class);
     }
 
     /**

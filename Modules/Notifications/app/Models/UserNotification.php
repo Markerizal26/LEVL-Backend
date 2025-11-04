@@ -1,13 +1,13 @@
 <?php
 
-namespace Modules\Notifications\Entities;
+namespace Modules\Notifications\Models;
 
 use Illuminate\Database\Eloquent\Model;
 
 class UserNotification extends Model
 {
     protected $fillable = [
-        'user_id', 'notification_id', 'status', 'read_at'
+        'user_id', 'notification_id', 'status', 'read_at',
     ];
 
     protected $casts = [
@@ -21,6 +21,6 @@ class UserNotification extends Model
 
     public function user()
     {
-        return $this->belongsTo(\Modules\Auth\Entities\User::class);
+        return $this->belongsTo(\Modules\Auth\Models\User::class);
     }
 }

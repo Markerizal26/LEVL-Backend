@@ -1,24 +1,23 @@
 <?php
 
-namespace Modules\Schemes\Entities;
+namespace Modules\Schemes\Models;
 
 use Illuminate\Database\Eloquent\Model;
-use Modules\Schemes\Entities\Lesson;
 
 class Unit extends Model
 {
     protected $fillable = [
         'course_id', 'code', 'slug', 'title', 'description',
-        'order', 'estimated_duration'
+        'order', 'estimated_duration',
     ];
 
     public function course()
     {
-        return $this->belongsTo(Course::class);
+        return $this->belongsTo(\Modules\Schemes\Models\Course::class);
     }
 
     public function lessons()
     {
-        return $this->hasMany(Lesson::class);
+        return $this->hasMany(\Modules\Schemes\Models\Lesson::class);
     }
 }

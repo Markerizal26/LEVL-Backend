@@ -1,6 +1,6 @@
 <?php
 
-namespace Modules\Schemes\Entities;
+namespace Modules\Schemes\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -30,7 +30,7 @@ class CourseAdmin extends Model
      */
     public function course(): BelongsTo
     {
-        return $this->belongsTo(Course::class);
+        return $this->belongsTo(\Modules\Schemes\Models\Course::class);
     }
 
     /**
@@ -38,7 +38,6 @@ class CourseAdmin extends Model
      */
     public function user(): BelongsTo
     {
-        return $this->belongsTo(\Modules\Auth\Entities\User::class);
+        return $this->belongsTo(\Modules\Auth\Models\User::class);
     }
 }
-

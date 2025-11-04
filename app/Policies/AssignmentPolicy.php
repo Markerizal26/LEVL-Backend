@@ -3,7 +3,7 @@
 namespace App\Policies;
 
 use Modules\Auth\Models\User;
-use Modules\Learning\Entities\Assignment;
+use Modules\Learning\Models\Assignment;
 
 class AssignmentPolicy
 {
@@ -37,5 +37,3 @@ class AssignmentPolicy
         return $user->can('learning.tasks.submit');
     }
 }
-
-

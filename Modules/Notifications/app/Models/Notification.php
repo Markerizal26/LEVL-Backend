@@ -1,6 +1,6 @@
 <?php
 
-namespace Modules\Notifications\Entities;
+namespace Modules\Notifications\Models;
 
 use Illuminate\Database\Eloquent\Model;
 
@@ -8,7 +8,7 @@ class Notification extends Model
 {
     protected $fillable = [
         'type', 'title', 'message', 'channel',
-        'priority', 'is_broadcast', 'scheduled_at', 'sent_at'
+        'priority', 'is_broadcast', 'scheduled_at', 'sent_at',
     ];
 
     protected $casts = [
@@ -19,7 +19,7 @@ class Notification extends Model
 
     public function users()
     {
-        return $this->belongsToMany(\Modules\Auth\Entities\User::class, 'user_notifications')
+        return $this->belongsToMany(\Modules\Auth\Models\User::class, 'user_notifications')
             ->withPivot(['status', 'read_at'])
             ->withTimestamps();
     }

@@ -1,12 +1,12 @@
 <?php
 
-namespace Modules\Notifications\Entities;
+namespace Modules\Notifications\Models;
 
 use Illuminate\Database\Eloquent\Model;
 
 class NotificationTemplate extends Model
 {
     protected $fillable = [
-        'code', 'title', 'body', 'channel'
+        'code', 'title', 'body', 'channel',
     ];
 }

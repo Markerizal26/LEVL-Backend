@@ -1,6 +1,6 @@
 <?php
 
-namespace Modules\Learning\Entities;
+namespace Modules\Learning\Models;
 
 use Illuminate\Database\Eloquent\Model;
 
@@ -9,7 +9,7 @@ class Assignment extends Model
     protected $fillable = [
         'lesson_id', 'created_by', 'title', 'description',
         'type', 'submission_type', 'max_score',
-        'available_from', 'deadline_at', 'status'
+        'available_from', 'deadline_at', 'status',
     ];
 
     protected $casts = [
@@ -19,12 +19,12 @@ class Assignment extends Model
 
     public function lesson()
     {
-        return $this->belongsTo(\Modules\Schemes\Entities\Lesson::class);
+        return $this->belongsTo(\Modules\Schemes\Models\Lesson::class);
     }
 
     public function creator()
     {
-        return $this->belongsTo(\Modules\Auth\Entities\User::class, 'created_by');
+        return $this->belongsTo(\Modules\Auth\Models\User::class, 'created_by');
     }
 
     public function submissions()

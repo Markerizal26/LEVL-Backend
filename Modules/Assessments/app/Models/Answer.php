@@ -1,6 +1,6 @@
 <?php
 
-namespace Modules\Assessments\Entities;
+namespace Modules\Assessments\Models;
 
 use Illuminate\Database\Eloquent\Model;
 
@@ -8,7 +8,7 @@ class Answer extends Model
 {
     protected $fillable = [
         'attempt_id', 'question_id', 'selected_option_id',
-        'answer_text', 'score_awarded', 'feedback'
+        'answer_text', 'score_awarded', 'feedback',
     ];
 
     public function attempt()

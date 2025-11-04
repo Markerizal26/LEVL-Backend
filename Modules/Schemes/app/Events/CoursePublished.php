@@ -5,7 +5,7 @@ namespace Modules\Schemes\Events;
 use Illuminate\Broadcasting\InteractsWithSockets;
 use Illuminate\Foundation\Events\Dispatchable;
 use Illuminate\Queue\SerializesModels;
-use Modules\Schemes\Entities\Course;
+use Modules\Schemes\Models\Course;
 
 class CoursePublished
 {

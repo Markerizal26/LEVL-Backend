@@ -1,6 +1,6 @@
 <?php
 
-namespace Modules\Enrollments\Entities;
+namespace Modules\Enrollments\Models;
 
 use Illuminate\Database\Eloquent\Model;
 
@@ -11,7 +11,7 @@ class LessonProgress extends Model
     protected $fillable = [
         'enrollment_id', 'lesson_id', 'status',
         'progress_percent', 'attempt_count',
-        'started_at', 'completed_at'
+        'started_at', 'completed_at',
     ];
 
     protected $casts = [
@@ -27,6 +27,6 @@ class LessonProgress extends Model
 
     public function lesson()
     {
-        return $this->belongsTo(\Modules\Schemes\Entities\Lesson::class);
+        return $this->belongsTo(\Modules\Schemes\Models\Lesson::class);
     }
 }

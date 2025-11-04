@@ -1,6 +1,6 @@
 <?php
 
-namespace Modules\Assessments\Entities;
+namespace Modules\Assessments\Models;
 
 use Illuminate\Database\Eloquent\Model;
 
@@ -11,7 +11,7 @@ class Exercise extends Model
         'title', 'description', 'type',
         'time_limit_minutes', 'max_score',
         'total_questions', 'status',
-        'available_from', 'available_until'
+        'available_from', 'available_until',
     ];
 
     protected $casts = [
@@ -23,15 +23,15 @@ class Exercise extends Model
     public function scope()
     {
         return match ($this->scope_type) {
-            'course' => $this->belongsTo(\Modules\Schemes\Entities\Course::class, 'scope_id'),
-            'unit'   => $this->belongsTo(\Modules\Schemes\Entities\Unit::class, 'scope_id'),
-            'lesson' => $this->belongsTo(\Modules\Schemes\Entities\Lesson::class, 'scope_id'),
+            'course' => $this->belongsTo(\Modules\Schemes\Models\Course::class, 'scope_id'),
+            'unit' => $this->belongsTo(\Modules\Schemes\Models\Unit::class, 'scope_id'),
+            'lesson' => $this->belongsTo(\Modules\Schemes\Models\Lesson::class, 'scope_id'),
         };
     }
 
     public function creator()
     {
-        return $this->belongsTo(\Modules\Auth\Entities\User::class, 'created_by');
+        return $this->belongsTo(\Modules\Auth\Models\User::class, 'created_by');
     }
 
     public function questions()

@@ -3,7 +3,7 @@
 namespace App\Policies;
 
 use Modules\Auth\Models\User;
-use Modules\Grading\Entities\Grade;
+use Modules\Grading\Models\Grade;
 
 class GradePolicy
 {
@@ -32,5 +32,3 @@ class GradePolicy
         return $user->can('grading.view');
     }
 }
-
-

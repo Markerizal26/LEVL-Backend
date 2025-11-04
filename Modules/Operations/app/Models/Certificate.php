@@ -1,6 +1,6 @@
 <?php
 
-namespace Modules\Operations\Entities;
+namespace Modules\Operations\Models;
 
 use Illuminate\Database\Eloquent\Model;
 
@@ -8,7 +8,7 @@ class Certificate extends Model
 {
     protected $fillable = [
         'user_id', 'course_id', 'certificate_number', 'file_path',
-        'issued_at', 'expired_at', 'status'
+        'issued_at', 'expired_at', 'status',
     ];
 
     protected $casts = [
@@ -18,11 +18,11 @@ class Certificate extends Model
 
     public function user()
     {
-        return $this->belongsTo(\Modules\Auth\Entities\User::class);
+        return $this->belongsTo(\Modules\Auth\Models\User::class);
     }
 
     public function course()
     {
-        return $this->belongsTo(\Modules\Schemes\Entities\Course::class);
+        return $this->belongsTo(\Modules\Schemes\Models\Course::class);
     }
 }

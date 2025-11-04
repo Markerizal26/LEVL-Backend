@@ -1,6 +1,6 @@
 <?php
 
-namespace Modules\Assessments\Entities;
+namespace Modules\Assessments\Models;
 
 use Illuminate\Database\Eloquent\Model;
 
@@ -9,7 +9,7 @@ class Attempt extends Model
     protected $fillable = [
         'exercise_id', 'user_id', 'enrollment_id',
         'score', 'total_questions', 'correct_answers',
-        'status', 'started_at', 'finished_at', 'duration_seconds'
+        'status', 'started_at', 'finished_at', 'duration_seconds',
     ];
 
     protected $casts = [
@@ -24,7 +24,7 @@ class Attempt extends Model
 
     public function user()
     {
-        return $this->belongsTo(\Modules\Auth\Entities\User::class);
+        return $this->belongsTo(\Modules\Auth\Models\User::class);
     }
 
     public function answers()

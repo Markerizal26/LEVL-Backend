@@ -3,7 +3,6 @@
 namespace Modules\Common\Database\Seeders;
 
 use Illuminate\Database\Seeder;
-use Modules\Common\Entities\SystemSetting;
 use Modules\Common\Models\SystemSetting as ModelsSystemSetting;
 
 class SystemSettingSeeder extends Seeder

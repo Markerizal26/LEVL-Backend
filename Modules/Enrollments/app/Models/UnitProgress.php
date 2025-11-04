@@ -1,6 +1,6 @@
 <?php
 
-namespace Modules\Enrollments\Entities;
+namespace Modules\Enrollments\Models;
 
 use Illuminate\Database\Eloquent\Model;
 
@@ -10,7 +10,7 @@ class UnitProgress extends Model
 
     protected $fillable = [
         'enrollment_id', 'unit_id', 'status',
-        'progress_percent', 'started_at', 'completed_at'
+        'progress_percent', 'started_at', 'completed_at',
     ];
 
     protected $casts = [
@@ -26,6 +26,6 @@ class UnitProgress extends Model
 
     public function unit()
     {
-        return $this->belongsTo(\Modules\Schemes\Entities\Unit::class);
+        return $this->belongsTo(\Modules\Schemes\Models\Unit::class);
     }
 }

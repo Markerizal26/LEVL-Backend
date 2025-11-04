@@ -5,10 +5,10 @@ namespace Modules\Schemes\Services;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Str;
-use Modules\Schemes\Entities\Course;
 use Modules\Schemes\Events\CourseCreated;
 use Modules\Schemes\Events\CourseDeleted;
 use Modules\Schemes\Events\CoursePublished;
+use Modules\Schemes\Models\Course;
 use Modules\Schemes\Repositories\CourseRepository;
 
 class CourseService

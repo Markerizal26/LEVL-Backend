@@ -3,7 +3,7 @@
 namespace App\Policies;
 
 use Modules\Auth\Models\User;
-use Modules\Schemes\Entities\Lesson;
+use Modules\Schemes\Models\Lesson;
 
 class LessonPolicy
 {
@@ -32,5 +32,3 @@ class LessonPolicy
         return $user->can('schemes.manage');
     }
 }
-
-
