@@ -2,6 +2,8 @@
 
 namespace App\Support;
 
+use Illuminate\Contracts\Pagination\LengthAwarePaginator;
+
 trait ApiResponse
 {
     protected function success(array $data = [], string $message = 'Berhasil', int $status = 200)
@@ -27,8 +29,28 @@ trait ApiResponse
         if ($errors !== null) {
             $body['errors'] = $errors;
         }
+
         return response()->json($body, $status);
     }
+
+    protected function paginateResponse(LengthAwarePaginator $paginator, string $message = 'Berhasil')
+    {
+        return $this->success([
+            'items' => $paginator->items(),
+            'meta' => [
+                'current_page' => $paginator->currentPage(),
+                'per_page' => $paginator->perPage(),
+                'total' => $paginator->total(),
+                'last_page' => $paginator->lastPage(),
+                'from' => $paginator->firstItem(),
+                'to' => $paginator->lastItem(),
+                'has_more' => $paginator->hasMorePages(),
+            ],
+        ], $message);
+    }
+
+    protected function validationError(array $errors)
+    {
+        return $this->error('Data yang Anda kirim tidak valid. Periksa kembali isian Anda.', 422, $errors);
+    }
 }
-
-

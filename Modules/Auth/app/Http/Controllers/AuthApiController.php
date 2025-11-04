@@ -3,29 +3,29 @@
 namespace Modules\Auth\Http\Controllers;
 
 use App\Http\Controllers\Controller;
+use App\Support\ApiResponse;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Validation\ValidationException;
 use Laravel\Socialite\Contracts\Factory as SocialiteFactory;
+use Laravel\Socialite\Two\AbstractProvider as SocialiteAbstractProvider;
+use Modules\Auth\Http\Requests\CreateManagedUserRequest;
 use Modules\Auth\Http\Requests\LoginRequest;
+use Modules\Auth\Http\Requests\LogoutRequest;
+use Modules\Auth\Http\Requests\RefreshTokenRequest;
 use Modules\Auth\Http\Requests\RegisterRequest;
+use Modules\Auth\Interfaces\AuthRepositoryInterface;
 use Modules\Auth\Models\SocialAccount;
 use Modules\Auth\Models\User;
-use Modules\Auth\Interfaces\AuthRepositoryInterface;
 use Modules\Auth\Services\AuthService;
 use Modules\Auth\Services\EmailVerificationService;
-use App\Support\ApiResponse;
 use Tymon\JWTAuth\JWTAuth;
-use Laravel\Socialite\Two\AbstractProvider as SocialiteAbstractProvider;
 
 class AuthApiController extends Controller
 {
     use ApiResponse;
 
-    public function __construct(private readonly AuthService $auth, private readonly EmailVerificationService $emailVerification)
-    {
-        
-    }
+    public function __construct(private readonly AuthService $auth, private readonly EmailVerificationService $emailVerification) {}
 
     public function register(RegisterRequest $request): JsonResponse
     {
@@ -56,12 +56,29 @@ class AuthApiController extends Controller
         return $this->success($data, 'Login berhasil.');
     }
 
-    public function refresh(Request $request): JsonResponse
+    public function createInstructor(CreateManagedUserRequest $request): JsonResponse
     {
-        $request->validate([
-            'refresh_token' => ['required', 'string'],
-        ]);
+        $data = $this->auth->createInstructor($request->validated());
 
+        return $this->created($data, 'Instructor berhasil dibuat.');
+    }
+
+    public function createAdmin(CreateManagedUserRequest $request): JsonResponse
+    {
+        $data = $this->auth->createAdmin($request->validated());
+
+        return $this->created($data, 'Admin berhasil dibuat.');
+    }
+
+    public function createSuperAdmin(CreateManagedUserRequest $request): JsonResponse
+    {
+        $data = $this->auth->createSuperAdmin($request->validated());
+
+        return $this->created($data, 'Super admin berhasil dibuat.');
+    }
+
+    public function refresh(RefreshTokenRequest $request): JsonResponse
+    {
         try {
             /** @var \Modules\Auth\Models\User $authUser */
             $authUser = auth('api')->user();
@@ -73,20 +90,16 @@ class AuthApiController extends Controller
         return $this->success($data, 'Token akses berhasil diperbarui.');
     }
 
-    public function logout(Request $request): JsonResponse
+    public function logout(LogoutRequest $request): JsonResponse
     {
-        $request->validate([
-            'refresh_token' => ['nullable', 'string'],
-        ]);
-
         /** @var \Modules\Auth\Models\User|null $user */
         $user = auth('api')->user();
-        if (!$user) {
+        if (! $user) {
             return $this->error('Tidak terotorisasi.', 401);
         }
 
         $currentJwt = $request->bearerToken();
-        if (!$currentJwt) {
+        if (! $currentJwt) {
             return $this->error('Tidak terotorisasi.', 401);
         }
 
@@ -99,7 +112,7 @@ class AuthApiController extends Controller
     {
         /** @var \Modules\Auth\Models\User|null $user */
         $user = auth('api')->user();
-        if (!$user) {
+        if (! $user) {
             return $this->error('Tidak terotorisasi.', 401);
         }
 
@@ -110,7 +123,7 @@ class AuthApiController extends Controller
     {
         /** @var \Modules\Auth\Models\User|null $user */
         $user = auth('api')->user();
-        if (!$user) {
+        if (! $user) {
             return $this->error('Tidak terotorisasi.', 401);
         }
 
@@ -158,7 +171,7 @@ class AuthApiController extends Controller
             'target_id' => $user->id,
             'ip_address' => $request->ip(),
             'user_agent' => $request->userAgent(),
-            'meta' => [ 'action' => 'profile.update', 'changes' => $changes ],
+            'meta' => ['action' => 'profile.update', 'changes' => $changes],
             'logged_at' => now(),
         ]);
 
@@ -174,7 +187,7 @@ class AuthApiController extends Controller
             /** @var SocialiteAbstractProvider $provider */
             $provider = $provider->stateless();
             $redirectResponse = $provider->redirect();
-            // For APIs, returning a redirect is acceptable; client follows to Google
+
             return $redirectResponse;
         } catch (\Throwable $e) {
             return $this->error('Tidak dapat menginisiasi Google OAuth. Silakan login manual.', 400);
@@ -201,7 +214,7 @@ class AuthApiController extends Controller
 
         // Find existing user by email or create a new one
         $user = User::query()->where('email', $email)->first();
-        if (!$user) {
+        if (! $user) {
             // Generate unique username from email local part
             $baseUsername = preg_replace('/[^a-z0-9_\.\-]/i', '', explode('@', (string) $email)[0] ?: 'google');
             $username = $baseUsername;
@@ -232,7 +245,6 @@ class AuthApiController extends Controller
         $account->refresh_token = $googleUser->refreshToken ?? null;
         $account->save();
 
-        // Issue JWT + refresh token using existing repository and JWT service
         /** @var JWTAuth $jwt */
         $jwt = app(JWTAuth::class);
         $accessToken = $jwt->fromUser($user);
@@ -246,8 +258,11 @@ class AuthApiController extends Controller
             ttlMinutes: (int) config('jwt.refresh_ttl')
         );
 
+        $userArray = $user->toArray();
+        $userArray['roles'] = $user->getRoleNames()->values();
+
         return $this->success([
-            'user' => $user->toArray(),
+            'user' => $userArray,
             'access_token' => $accessToken,
             'expires_in' => $jwt->factory()->getTTL() * 60,
             'refresh_token' => $refresh->getAttribute('plain_token'),
@@ -259,7 +274,7 @@ class AuthApiController extends Controller
     {
         /** @var \Modules\Auth\Models\User|null $user */
         $user = auth('api')->user();
-        if (!$user) {
+        if (! $user) {
             return $this->error('Tidak terotorisasi.', 401);
         }
 
@@ -279,17 +294,21 @@ class AuthApiController extends Controller
     {
         /** @var \Modules\Auth\Models\User|null $user */
         $user = auth('api')->user();
-        if (!$user) {
+        if (! $user) {
             return $this->error('Tidak terotorisasi.', 401);
         }
 
-        $validated = $request->validate([
-            'new_email' => ['required', 'email:rfc', 'max:191', 'unique:users,email,'.$user->id],
-        ], [
-            'new_email.required' => 'Email baru wajib diisi.',
-            'new_email.email' => 'Format email tidak valid.',
-            'new_email.unique' => 'Email tersebut sudah digunakan.',
-        ]);
+        try {
+            $validated = $request->validate([
+                'new_email' => ['required', 'email:rfc', 'max:191', 'unique:users,email,'.$user->id],
+            ], [
+                'new_email.required' => 'Email baru wajib diisi.',
+                'new_email.email' => 'Format email tidak valid.',
+                'new_email.unique' => 'Email tersebut sudah digunakan.',
+            ]);
+        } catch (ValidationException $e) {
+            return $this->validationError($e->errors());
+        }
 
         $uuid = $this->emailVerification->sendChangeEmailLink($user, $validated['new_email']);
 
@@ -301,7 +320,7 @@ class AuthApiController extends Controller
             'target_id' => $user->id,
             'ip_address' => $request->ip(),
             'user_agent' => $request->userAgent(),
-            'meta' => [ 'action' => 'email.change.request', 'new_email' => $validated['new_email'], 'uuid' => $uuid ],
+            'meta' => ['action' => 'email.change.request', 'new_email' => $validated['new_email'], 'uuid' => $uuid],
             'logged_at' => now(),
         ]);
 
@@ -310,13 +329,17 @@ class AuthApiController extends Controller
 
     public function verifyEmailChange(Request $request): JsonResponse
     {
-        $validated = $request->validate([
-            'uuid' => ['required', 'string'],
-            'code' => ['required', 'string'],
-        ], [
-            'uuid.required' => 'UUID wajib diisi.',
-            'code.required' => 'Kode wajib diisi.',
-        ]);
+        try {
+            $validated = $request->validate([
+                'uuid' => ['required', 'string'],
+                'code' => ['required', 'string'],
+            ], [
+                'uuid.required' => 'UUID wajib diisi.',
+                'code.required' => 'Kode wajib diisi.',
+            ]);
+        } catch (ValidationException $e) {
+            return $this->validationError($e->errors());
+        }
 
         $result = $this->emailVerification->verifyChangeByCode($validated['uuid'], $validated['code']);
 
@@ -341,10 +364,14 @@ class AuthApiController extends Controller
 
     public function verifyEmail(Request $request): JsonResponse
     {
-        $request->validate([
-            'uuid' => ['required', 'string'],
-            'code' => ['required', 'string'],
-        ]);
+        try {
+            $request->validate([
+                'uuid' => ['required', 'string'],
+                'code' => ['required', 'string'],
+            ]);
+        } catch (ValidationException $e) {
+            return $this->validationError($e->errors());
+        }
 
         $result = $this->emailVerification->verifyByCode($request->string('uuid'), $request->string('code'));
 
@@ -366,6 +393,32 @@ class AuthApiController extends Controller
 
         return $this->error('Verifikasi gagal.', 422);
     }
+
+    public function resendCredentials(Request $request): JsonResponse
+    {
+        try {
+            $validated = $request->validate([
+                'user_id' => ['required', 'integer', 'exists:users,id'],
+            ]);
+        } catch (ValidationException $e) {
+            return $this->validationError($e->errors());
+        }
+
+        $target = User::query()->find($validated['user_id']);
+        if (! $target) {
+            return $this->error('User tidak ditemukan', 404);
+        }
+
+        if (! ($target->hasRole('admin') || $target->hasRole('instructor'))) {
+            return $this->error('Hanya untuk akun admin atau instruktur.', 422);
+        }
+
+        $passwordPlain = (new \ReflectionClass($this->auth))->getMethod('generatePasswordFromNameEmail')->invoke($this->auth, $target->name, $target->email);
+        $target->password = \Illuminate\Support\Facades\Hash::make($passwordPlain);
+        $target->save();
+
+        (new \ReflectionClass($this->auth))->getMethod('sendGeneratedPasswordEmail')->invoke($this->auth, $target, $passwordPlain);
+
+        return $this->success(['user' => $target->toArray()], 'Kredensial berhasil dikirim ulang.');
+    }
 }
-
-

@@ -5,11 +5,10 @@ namespace Modules\Auth\Http\Requests;
 use Illuminate\Foundation\Http\FormRequest;
 use Modules\Auth\Http\Requests\Concerns\HasApiValidation;
 use Modules\Auth\Http\Requests\Concerns\HasAuthRequestRules;
-use Modules\Auth\Http\Requests\Concerns\HasPasswordRules;
 
-class ChangePasswordRequest extends FormRequest
+class RefreshTokenRequest extends FormRequest
 {
-    use HasApiValidation, HasAuthRequestRules, HasPasswordRules;
+    use HasApiValidation, HasAuthRequestRules;
 
     public function authorize(): bool
     {
@@ -18,11 +17,11 @@ class ChangePasswordRequest extends FormRequest
 
     public function rules(): array
     {
-        return $this->rulesChangePassword();
+        return $this->rulesRefresh();
     }
 
     public function messages(): array
     {
-        return $this->messagesChangePassword();
+        return $this->messagesRefresh();
     }
 }

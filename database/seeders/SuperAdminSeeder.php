@@ -1,0 +1,39 @@
+<?php
+
+namespace Database\Seeders;
+
+use Illuminate\Database\Seeder;
+use Illuminate\Support\Facades\Hash;
+use Modules\Auth\Models\User;
+use Spatie\Permission\Models\Role;
+
+class SuperAdminSeeder extends Seeder
+{
+    public function run(): void
+    {
+        Role::findOrCreate('super-admin', 'api');
+        Role::findOrCreate('admin', 'api');
+        Role::findOrCreate('instructor', 'api');
+        Role::findOrCreate('student', 'api');
+
+        $email = env('SUPERADMIN_EMAIL', 'superadmin@example.com');
+        $name = env('SUPERADMIN_NAME', 'Super Admin');
+        $username = env('SUPERADMIN_USERNAME', 'superadmin');
+        $password = env('SUPERADMIN_PASSWORD', 'supersecret');
+
+        $user = User::query()->firstOrCreate(
+            ['email' => $email],
+            [
+                'name' => $name,
+                'username' => $username,
+                'password' => Hash::make($password),
+                'status' => 'active',
+                'email_verified_at' => now(),
+            ]
+        );
+
+        if (! $user->hasRole('super-admin')) {
+            $user->assignRole('super-admin');
+        }
+    }
+}
