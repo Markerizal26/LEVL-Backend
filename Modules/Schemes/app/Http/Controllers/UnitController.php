@@ -5,8 +5,10 @@ namespace Modules\Schemes\Http\Controllers;
 use App\Support\ApiResponse;
 use Illuminate\Http\Request;
 use Illuminate\Routing\Controller;
+use Illuminate\Support\Facades\Gate;
 use Modules\Schemes\Http\Requests\ReorderUnitsRequest;
 use Modules\Schemes\Http\Requests\UnitRequest;
+use Modules\Schemes\Models\Course;
 use Modules\Schemes\Services\UnitService;
 
 class UnitController extends Controller
@@ -25,6 +27,29 @@ class UnitController extends Controller
 
     public function store(UnitRequest $request, int $course)
     {
+        /** @var \Modules\Auth\Models\User $user */
+        $user = auth('api')->user();
+
+        $courseModel = Course::find($course);
+        if (! $courseModel) {
+            return $this->error('Course tidak ditemukan.', 404);
+        }
+
+        $authorized = false;
+        if ($user->hasRole('super-admin')) {
+            $authorized = true;
+        } elseif ($user->hasRole('admin')) {
+            if ((int) $courseModel->instructor_id === (int) $user->id) {
+                $authorized = true;
+            } elseif (method_exists($courseModel, 'hasAdmin') && $courseModel->hasAdmin($user)) {
+                $authorized = true;
+            }
+        }
+
+        if (! $authorized) {
+            return $this->error('Anda hanya dapat membuat unit untuk course yang Anda buat atau course yang Anda kelola sebagai admin.', 403);
+        }
+
         $data = $request->validated();
         $unit = $this->service->create($course, $data);
 
@@ -43,27 +68,66 @@ class UnitController extends Controller
 
     public function update(UnitRequest $request, int $course, int $unit)
     {
-        $data = $request->validated();
-        $updated = $this->service->update($course, $unit, $data);
-        if (! $updated) {
+        $found = $this->service->show($course, $unit);
+        if (! $found) {
             return $this->error('Unit tidak ditemukan.', 404);
         }
+
+        /** @var \Modules\Auth\Models\User $user */
+        $user = auth('api')->user();
+        if (! Gate::forUser($user)->allows('update', $found)) {
+            return $this->error('Anda tidak memiliki akses untuk mengubah unit ini.', 403);
+        }
+
+        $data = $request->validated();
+        $updated = $this->service->update($course, $unit, $data);
 
         return $this->success(['unit' => $updated], 'Unit berhasil diperbarui.');
     }
 
     public function destroy(int $course, int $unit)
     {
-        $ok = $this->service->delete($course, $unit);
-        if (! $ok) {
+        $found = $this->service->show($course, $unit);
+        if (! $found) {
             return $this->error('Unit tidak ditemukan.', 404);
         }
+
+        /** @var \Modules\Auth\Models\User $user */
+        $user = auth('api')->user();
+        if (! Gate::forUser($user)->allows('delete', $found)) {
+            return $this->error('Anda tidak memiliki akses untuk menghapus unit ini.', 403);
+        }
+
+        $ok = $this->service->delete($course, $unit);
 
         return $this->success([], 'Unit berhasil dihapus.');
     }
 
     public function reorder(ReorderUnitsRequest $request, int $course)
     {
+        /** @var \Modules\Auth\Models\User $user */
+        $user = auth('api')->user();
+
+        $courseModel = Course::find($course);
+        if (! $courseModel) {
+            return $this->error('Course tidak ditemukan.', 404);
+        }
+
+        $authorized = false;
+        if ($user->hasRole('super-admin')) {
+            $authorized = true;
+        } elseif ($user->hasRole('admin')) {
+            if ((int) $courseModel->instructor_id === (int) $user->id) {
+                $authorized = true;
+            } elseif (method_exists($courseModel, 'hasAdmin') && $courseModel->hasAdmin($user)) {
+                $authorized = true;
+            }
+        }
+
+        if (! $authorized) {
+            return $this->error('Anda hanya dapat mengatur urutan unit untuk course yang Anda buat atau course yang Anda kelola sebagai admin.', 403);
+        }
+
         $data = $request->validated();
 
         $unitIds = $data['units'];
