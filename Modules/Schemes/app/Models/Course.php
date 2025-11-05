@@ -27,6 +27,26 @@ class Course extends Model
         'published_at' => 'datetime',
     ];
 
+    protected $appends = ['thumbnail_url', 'banner_url'];
+
+    public function getThumbnailUrlAttribute(): ?string
+    {
+        if (! $this->thumbnail_path) {
+            return null;
+        }
+
+        return asset('storage/'.$this->thumbnail_path);
+    }
+
+    public function getBannerUrlAttribute(): ?string
+    {
+        if (! $this->banner_path) {
+            return null;
+        }
+
+        return asset('storage/'.$this->banner_path);
+    }
+
     public function tags(): HasMany
     {
         return $this->hasMany(CourseTag::class);
