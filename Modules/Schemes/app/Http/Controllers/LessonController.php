@@ -7,6 +7,7 @@ use Illuminate\Http\Request;
 use Illuminate\Routing\Controller;
 use Illuminate\Support\Facades\Gate;
 use Modules\Schemes\Http\Requests\LessonRequest;
+use Modules\Schemes\Models\Lesson;
 use Modules\Schemes\Models\Course;
 use Modules\Schemes\Models\Unit;
 use Modules\Schemes\Services\LessonService;
@@ -17,20 +18,17 @@ class LessonController extends Controller
 
     public function __construct(private LessonService $service) {}
 
-    public function index(Request $request, int $course, int $unit)
+    public function index(Request $request, Course $course, Unit $unit)
     {
         /** @var \Modules\Auth\Models\User $user */
         $user = auth('api')->user();
 
-        $unitModel = Unit::find($unit);
-        if (! $unitModel || (int) $unitModel->course_id !== $course) {
+        $unitModel = $unit;
+        if ((int) $unitModel->course_id !== (int) $course->id) {
             return $this->error('Unit tidak ditemukan di course ini.', 404);
         }
 
-        $courseModel = Course::find($course);
-        if (! $courseModel) {
-            return $this->error('Course tidak ditemukan.', 404);
-        }
+        $courseModel = $course;
 
         $authorized = false;
         if ($user->hasRole('super-admin')) {
@@ -56,25 +54,22 @@ class LessonController extends Controller
         }
 
         $params = $request->all();
-        $paginator = $this->service->listByUnit($unit, $params);
+        $paginator = $this->service->listByUnit($unit->id, $params);
 
         return $this->paginateResponse($paginator);
     }
 
-    public function store(LessonRequest $request, int $course, int $unit)
+    public function store(LessonRequest $request, Course $course, Unit $unit)
     {
         /** @var \Modules\Auth\Models\User $user */
         $user = auth('api')->user();
 
-        $unitModel = Unit::find($unit);
-        if (! $unitModel || (int) $unitModel->course_id !== $course) {
+        $unitModel = $unit;
+        if ((int) $unitModel->course_id !== (int) $course->id) {
             return $this->error('Unit tidak ditemukan di course ini.', 404);
         }
 
-        $courseModel = Course::find($course);
-        if (! $courseModel) {
-            return $this->error('Course tidak ditemukan.', 404);
-        }
+        $courseModel = $course;
 
         $authorized = false;
         if ($user->hasRole('super-admin')) {
@@ -92,30 +87,27 @@ class LessonController extends Controller
         }
 
         $data = $request->validated();
-        $lesson = $this->service->create($unit, $data);
+        $lesson = $this->service->create($unit->id, $data);
 
         return $this->created(['lesson' => $lesson], 'Lesson berhasil dibuat.');
     }
 
-    public function show(int $course, int $unit, int $lesson)
+    public function show(Course $course, Unit $unit, Lesson $lesson)
     {
         /** @var \Modules\Auth\Models\User $user */
         $user = auth('api')->user();
 
-        $unitModel = Unit::find($unit);
-        if (! $unitModel || (int) $unitModel->course_id !== $course) {
+        $unitModel = $unit;
+        if ((int) $unitModel->course_id !== (int) $course->id) {
             return $this->error('Unit tidak ditemukan di course ini.', 404);
         }
 
-        $found = $this->service->show($unit, $lesson);
+        $found = $this->service->show($unit->id, $lesson->id);
         if (! $found) {
             return $this->error('Lesson tidak ditemukan.', 404);
         }
 
-        $courseModel = Course::find($course);
-        if (! $courseModel) {
-            return $this->error('Course tidak ditemukan.', 404);
-        }
+        $courseModel = $course;
 
         $authorized = false;
         if ($user->hasRole('super-admin')) {
@@ -143,9 +135,9 @@ class LessonController extends Controller
         return $this->success(['lesson' => $found]);
     }
 
-    public function update(LessonRequest $request, int $course, int $unit, int $lesson)
+    public function update(LessonRequest $request, Course $course, Unit $unit, Lesson $lesson)
     {
-        $found = $this->service->show($unit, $lesson);
+        $found = $this->service->show($unit->id, $lesson->id);
         if (! $found) {
             return $this->error('Lesson tidak ditemukan.', 404);
         }
@@ -157,14 +149,14 @@ class LessonController extends Controller
         }
 
         $data = $request->validated();
-        $updated = $this->service->update($unit, $lesson, $data);
+        $updated = $this->service->update($unit->id, $lesson->id, $data);
 
         return $this->success(['lesson' => $updated], 'Lesson berhasil diperbarui.');
     }
 
-    public function destroy(int $course, int $unit, int $lesson)
+    public function destroy(Course $course, Unit $unit, Lesson $lesson)
     {
-        $found = $this->service->show($unit, $lesson);
+        $found = $this->service->show($unit->id, $lesson->id);
         if (! $found) {
             return $this->error('Lesson tidak ditemukan.', 404);
         }
@@ -175,14 +167,14 @@ class LessonController extends Controller
             return $this->error('Anda tidak memiliki akses untuk menghapus lesson ini.', 403);
         }
 
-        $ok = $this->service->delete($unit, $lesson);
+        $ok = $this->service->delete($unit->id, $lesson->id);
 
         return $this->success([], 'Lesson berhasil dihapus.');
     }
 
-    public function publish(int $course, int $unit, int $lesson)
+    public function publish(Course $course, Unit $unit, Lesson $lesson)
     {
-        $found = $this->service->show($unit, $lesson);
+        $found = $this->service->show($unit->id, $lesson->id);
         if (! $found) {
             return $this->error('Lesson tidak ditemukan.', 404);
         }
@@ -193,14 +185,14 @@ class LessonController extends Controller
             return $this->error('Anda tidak memiliki akses untuk mempublish lesson ini.', 403);
         }
 
-        $updated = $this->service->publish($unit, $lesson);
+        $updated = $this->service->publish($unit->id, $lesson->id);
 
         return $this->success(['lesson' => $updated], 'Lesson berhasil dipublish.');
     }
 
-    public function unpublish(int $course, int $unit, int $lesson)
+    public function unpublish(Course $course, Unit $unit, Lesson $lesson)
     {
-        $found = $this->service->show($unit, $lesson);
+        $found = $this->service->show($unit->id, $lesson->id);
         if (! $found) {
             return $this->error('Lesson tidak ditemukan.', 404);
         }
@@ -211,7 +203,7 @@ class LessonController extends Controller
             return $this->error('Anda tidak memiliki akses untuk unpublish lesson ini.', 403);
         }
 
-        $updated = $this->service->unpublish($unit, $lesson);
+        $updated = $this->service->unpublish($unit->id, $lesson->id);
 
         return $this->success(['lesson' => $updated], 'Lesson berhasil diunpublish.');
     }

@@ -6,6 +6,7 @@ use App\Support\ApiResponse;
 use Illuminate\Http\Request;
 use Illuminate\Routing\Controller;
 use Modules\Schemes\Http\Requests\CourseRequest;
+use Modules\Schemes\Models\Course;
 use Modules\Schemes\Repositories\CourseRepository;
 use Modules\Schemes\Services\CourseService;
 
@@ -45,20 +46,15 @@ class CourseController extends Controller
         $actor = auth('api')->user();
         $course = $this->service->create($data, $actor);
 
-        return $this->created(['course' => $course], 'Course created');
+        return $this->created(['course' => $course], 'Course berhasil dibuat.');
     }
 
-    public function show(int $course)
+    public function show(Course $course)
     {
-        $found = $this->repository->findById($course);
-        if (! $found) {
-            return $this->error('Course not found', 404);
-        }
-
-        return $this->success(['course' => $found]);
+        return $this->success(['course' => $course]);
     }
 
-    public function update(CourseRequest $request, int $course)
+    public function update(CourseRequest $request, Course $course)
     {
         $data = $request->validated();
         if ($request->hasFile('thumbnail')) {
@@ -67,56 +63,40 @@ class CourseController extends Controller
         if ($request->hasFile('banner')) {
             $data['banner_path'] = app(\App\Services\UploadService::class)->storePublic($request->file('banner'), 'courses/banners');
         }
-        $updated = $this->service->update($course, $data);
-        if (! $updated) {
-            return $this->error('Course not found', 404);
-        }
+        $updated = $this->service->update($course->id, $data);
 
-        return $this->success(['course' => $updated], 'Course updated');
+        return $this->success(['course' => $updated], 'Course berhasil diperbarui.');
     }
 
-    public function destroy(int $course)
+    public function destroy(Course $course)
     {
-        $ok = $this->service->delete($course);
-        if (! $ok) {
-            return $this->error('Course not found', 404);
-        }
+        $ok = $this->service->delete($course->id);
 
-        return $this->success([], 'Course deleted');
+        return $this->success([], 'Course berhasil dihapus.');
     }
 
-    public function publish(int $course)
+    public function publish(Course $course)
     {
-        $found = $this->repository->findById($course);
-        if (! $found) {
-            return $this->error('Course tidak ditemukan.', 404);
-        }
-
         /** @var \Modules\Auth\Models\User $user */
         $user = auth('api')->user();
-        if (! \Illuminate\Support\Facades\Gate::forUser($user)->allows('update', $found)) {
+        if (! \Illuminate\Support\Facades\Gate::forUser($user)->allows('update', $course)) {
             return $this->error('Anda tidak memiliki akses untuk mempublish course ini.', 403);
         }
 
-        $updated = $this->service->publish($course);
+        $updated = $this->service->publish($course->id);
 
         return $this->success(['course' => $updated], 'Course berhasil dipublish.');
     }
 
-    public function unpublish(int $course)
+    public function unpublish(Course $course)
     {
-        $found = $this->repository->findById($course);
-        if (! $found) {
-            return $this->error('Course tidak ditemukan.', 404);
-        }
-
         /** @var \Modules\Auth\Models\User $user */
         $user = auth('api')->user();
-        if (! \Illuminate\Support\Facades\Gate::forUser($user)->allows('update', $found)) {
+        if (! \Illuminate\Support\Facades\Gate::forUser($user)->allows('update', $course)) {
             return $this->error('Anda tidak memiliki akses untuk unpublish course ini.', 403);
         }
 
-        $updated = $this->service->unpublish($course);
+        $updated = $this->service->unpublish($course->id);
 
         return $this->success(['course' => $updated], 'Course berhasil diunpublish.');
     }

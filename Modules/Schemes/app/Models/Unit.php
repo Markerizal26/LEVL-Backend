@@ -25,4 +25,9 @@ class Unit extends Model
     {
         return $this->hasMany(\Modules\Schemes\Models\Lesson::class);
     }
+
+    public function getRouteKeyName(): string
+    {
+        return 'slug';
+    }
 }

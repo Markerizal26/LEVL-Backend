@@ -1,24 +1,22 @@
 <?php
 
+use App\Http\Middleware\EnsurePermission;
+use App\Http\Middleware\EnsureRole;
+use Illuminate\Auth\Access\AuthorizationException;
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
 use Illuminate\Foundation\Configuration\Middleware;
-use App\Http\Middleware\EnsureRole;
-use App\Http\Middleware\EnsurePermission;
-use Illuminate\Auth\Access\AuthorizationException;
 use Illuminate\Validation\ValidationException;
-use Tymon\JWTAuth\Exceptions\{
-    TokenExpiredException,
-    TokenInvalidException,
-    TokenBlacklistedException,
-    JWTException,
-    UserNotDefinedException
-};
+use Tymon\JWTAuth\Exceptions\JWTException;
+use Tymon\JWTAuth\Exceptions\TokenBlacklistedException;
+use Tymon\JWTAuth\Exceptions\TokenExpiredException;
+use Tymon\JWTAuth\Exceptions\TokenInvalidException;
+use Tymon\JWTAuth\Exceptions\UserNotDefinedException;
 
 return Application::configure(basePath: dirname(__DIR__))
     ->withRouting(
-        web: __DIR__ . '/../routes/web.php',
-        commands: __DIR__ . '/../routes/console.php',
+        web: __DIR__.'/../routes/web.php',
+        commands: __DIR__.'/../routes/console.php',
         health: '/up',
     )
     ->withMiddleware(function (Middleware $middleware): void {
@@ -85,6 +83,32 @@ return Application::configure(basePath: dirname(__DIR__))
                 'message' => 'Data yang Anda kirim tidak valid. Periksa kembali isian Anda.',
                 'errors' => $e->errors(),
             ], 422);
+        });
+
+        $exceptions->render(function (\Illuminate\Database\Eloquent\ModelNotFoundException $e, \Illuminate\Http\Request $request) {
+            if ($request->is('api/*')) {
+                return response()->json([
+                    'status' => 'error',
+                    'message' => 'Data tidak ditemukan.',
+                ], 404);
+            }
+        });
+
+        $exceptions->render(function (\Symfony\Component\HttpKernel\Exception\NotFoundHttpException $e, \Illuminate\Http\Request $request) {
+            if ($request->is('api/*')) {
+                $prev = $e->getPrevious();
+                if ($prev instanceof \Illuminate\Database\Eloquent\ModelNotFoundException) {
+                    return response()->json([
+                        'status' => 'error',
+                        'message' => 'Data tidak ditemukan.',
+                    ], 404);
+                }
+
+                return response()->json([
+                    'status' => 'error',
+                    'message' => 'Endpoint tidak ditemukan.',
+                ], 404);
+            }
         });
     })
     ->create();

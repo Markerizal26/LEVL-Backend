@@ -101,4 +101,9 @@ class Course extends Model
     {
         return $this->instructor_id === (is_object($user) ? $user->id : $user);
     }
+
+    public function getRouteKeyName(): string
+    {
+        return 'slug';
+    }
 }

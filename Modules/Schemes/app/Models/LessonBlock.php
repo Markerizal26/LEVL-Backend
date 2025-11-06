@@ -7,7 +7,7 @@ use Illuminate\Database\Eloquent\Model;
 class LessonBlock extends Model
 {
     protected $fillable = [
-        'lesson_id', 'block_type', 'content', 'media_url', 'media_thumbnail_url', 'media_meta_json', 'order',
+        'lesson_id', 'slug', 'block_type', 'content', 'media_url', 'media_thumbnail_url', 'media_meta_json', 'order',
     ];
 
     protected $casts = [
@@ -34,5 +34,10 @@ class LessonBlock extends Model
     public function lesson()
     {
         return $this->belongsTo(Lesson::class);
+    }
+
+    public function getRouteKeyName(): string
+    {
+        return 'slug';
     }
 }

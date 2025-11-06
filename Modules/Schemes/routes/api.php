@@ -6,51 +6,51 @@ use Modules\Schemes\Http\Controllers\LessonBlockController;
 use Modules\Schemes\Http\Controllers\LessonController;
 use Modules\Schemes\Http\Controllers\UnitController;
 
-Route::prefix('v1')->group(function () {
+Route::prefix('v1')->scopeBindings()->group(function () {
 
     Route::get('courses', [CourseController::class, 'index']);
-    Route::get('courses/{course}', [CourseController::class, 'show']);
+    Route::get('courses/{course:slug}', [CourseController::class, 'show']);
 
     Route::middleware(['auth:api', 'role:super-admin|admin'])->group(function () {
         Route::post('courses', [CourseController::class, 'store'])->middleware('can:create,Modules\\Schemes\\Models\\Course');
-        Route::put('courses/{course}', [CourseController::class, 'update'])->middleware('can:update,course');
-        Route::delete('courses/{course}', [CourseController::class, 'destroy'])->middleware('can:delete,course');
-        Route::put('courses/{course}/publish', [CourseController::class, 'publish']);
-        Route::put('courses/{course}/unpublish', [CourseController::class, 'unpublish']);
+        Route::put('courses/{course:slug}', [CourseController::class, 'update'])->middleware('can:update,course');
+        Route::delete('courses/{course:slug}', [CourseController::class, 'destroy'])->middleware('can:delete,course');
+        Route::put('courses/{course:slug}/publish', [CourseController::class, 'publish']);
+        Route::put('courses/{course:slug}/unpublish', [CourseController::class, 'unpublish']);
     });
 
-    Route::get('courses/{course}/units', [UnitController::class, 'index']);
-    Route::get('courses/{course}/units/{unit}', [UnitController::class, 'show']);
+    Route::get('courses/{course:slug}/units', [UnitController::class, 'index']);
+    Route::get('courses/{course:slug}/units/{unit:slug}', [UnitController::class, 'show']);
 
     Route::middleware(['auth:api', 'role:super-admin|admin'])->group(function () {
-        Route::post('courses/{course}/units', [UnitController::class, 'store']);
-        Route::put('courses/{course}/units/reorder', [UnitController::class, 'reorder']);
-        Route::put('courses/{course}/units/{unit}', [UnitController::class, 'update']);
-        Route::delete('courses/{course}/units/{unit}', [UnitController::class, 'destroy']);
-        Route::put('courses/{course}/units/{unit}/publish', [UnitController::class, 'publish']);
-        Route::put('courses/{course}/units/{unit}/unpublish', [UnitController::class, 'unpublish']);
+        Route::post('courses/{course:slug}/units', [UnitController::class, 'store']);
+        Route::put('courses/{course:slug}/units/reorder', [UnitController::class, 'reorder']);
+        Route::put('courses/{course:slug}/units/{unit:slug}', [UnitController::class, 'update']);
+        Route::delete('courses/{course:slug}/units/{unit:slug}', [UnitController::class, 'destroy']);
+        Route::put('courses/{course:slug}/units/{unit:slug}/publish', [UnitController::class, 'publish']);
+        Route::put('courses/{course:slug}/units/{unit:slug}/unpublish', [UnitController::class, 'unpublish']);
     });
 
     Route::middleware(['auth:api'])->group(function () {
-        Route::get('courses/{course}/units/{unit}/lessons', [LessonController::class, 'index']);
-        Route::get('courses/{course}/units/{unit}/lessons/{lesson}', [LessonController::class, 'show']);
+        Route::get('courses/{course:slug}/units/{unit:slug}/lessons', [LessonController::class, 'index']);
+        Route::get('courses/{course:slug}/units/{unit:slug}/lessons/{lesson:slug}', [LessonController::class, 'show']);
     });
 
     Route::middleware(['auth:api', 'role:super-admin|admin'])->group(function () {
-        Route::post('courses/{course}/units/{unit}/lessons', [LessonController::class, 'store']);
-        Route::put('courses/{course}/units/{unit}/lessons/{lesson}', [LessonController::class, 'update']);
-        Route::delete('courses/{course}/units/{unit}/lessons/{lesson}', [LessonController::class, 'destroy']);
-        Route::put('courses/{course}/units/{unit}/lessons/{lesson}/publish', [LessonController::class, 'publish']);
-        Route::put('courses/{course}/units/{unit}/lessons/{lesson}/unpublish', [LessonController::class, 'unpublish']);
+        Route::post('courses/{course:slug}/units/{unit:slug}/lessons', [LessonController::class, 'store']);
+        Route::put('courses/{course:slug}/units/{unit:slug}/lessons/{lesson:slug}', [LessonController::class, 'update']);
+        Route::delete('courses/{course:slug}/units/{unit:slug}/lessons/{lesson:slug}', [LessonController::class, 'destroy']);
+        Route::put('courses/{course:slug}/units/{unit:slug}/lessons/{lesson:slug}/publish', [LessonController::class, 'publish']);
+        Route::put('courses/{course:slug}/units/{unit:slug}/lessons/{lesson:slug}/unpublish', [LessonController::class, 'unpublish']);
     });
 
     Route::middleware(['auth:api'])->group(function () {
-        Route::get('courses/{course}/units/{unit}/lessons/{lesson}/blocks', [LessonBlockController::class, 'index']);
-        Route::get('courses/{course}/units/{unit}/lessons/{lesson}/blocks/{block}', [LessonBlockController::class, 'show']);
+        Route::get('courses/{course:slug}/units/{unit:slug}/lessons/{lesson:slug}/blocks', [LessonBlockController::class, 'index']);
+        Route::get('courses/{course:slug}/units/{unit:slug}/lessons/{lesson:slug}/blocks/{block:slug}', [LessonBlockController::class, 'show']);
     });
     Route::middleware(['auth:api', 'role:super-admin|admin'])->group(function () {
-        Route::post('courses/{course}/units/{unit}/lessons/{lesson}/blocks', [LessonBlockController::class, 'store']);
-        Route::put('courses/{course}/units/{unit}/lessons/{lesson}/blocks/{block}', [LessonBlockController::class, 'update']);
-        Route::delete('courses/{course}/units/{unit}/lessons/{lesson}/blocks/{block}', [LessonBlockController::class, 'destroy']);
+        Route::post('courses/{course:slug}/units/{unit:slug}/lessons/{lesson:slug}/blocks', [LessonBlockController::class, 'store']);
+        Route::put('courses/{course:slug}/units/{unit:slug}/lessons/{lesson:slug}/blocks/{block:slug}', [LessonBlockController::class, 'update']);
+        Route::delete('courses/{course:slug}/units/{unit:slug}/lessons/{lesson:slug}/blocks/{block:slug}', [LessonBlockController::class, 'destroy']);
     });
 });

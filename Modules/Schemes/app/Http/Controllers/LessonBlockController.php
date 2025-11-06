@@ -6,8 +6,10 @@ use App\Support\ApiResponse;
 use Illuminate\Routing\Controller;
 use Illuminate\Support\Facades\Gate;
 use Modules\Schemes\Http\Requests\LessonBlockRequest;
+use Modules\Schemes\Models\Course;
 use Modules\Schemes\Models\Lesson;
 use Modules\Schemes\Models\LessonBlock;
+use Modules\Schemes\Models\Unit;
 use Modules\Schemes\Services\LessonBlockService;
 
 class LessonBlockController extends Controller
@@ -16,13 +18,10 @@ class LessonBlockController extends Controller
 
     public function __construct(private LessonBlockService $service) {}
 
-    public function index(int $course, int $unit, int $lesson)
+    public function index(Course $course, Unit $unit, Lesson $lesson)
     {
-        $lessonModel = Lesson::with(['unit.course'])->find($lesson);
-        if (! $lessonModel) {
-            return $this->error('Lesson tidak ditemukan.', 404);
-        }
-        if ((int) ($lessonModel->unit?->course_id) !== $course || (int) ($lessonModel->unit_id) !== $unit) {
+        $lessonModel = $lesson->load(['unit.course']);
+        if ((int) ($lessonModel->unit?->course_id) !== (int) $course->id || (int) ($lessonModel->unit_id) !== (int) $unit->id) {
             return $this->error('Lesson tidak ditemukan di course ini.', 404);
         }
 
@@ -57,18 +56,15 @@ class LessonBlockController extends Controller
             return $this->error('Anda tidak memiliki akses untuk melihat blok lesson ini.', 403);
         }
 
-        $blocks = $this->service->list($lesson);
+        $blocks = $this->service->list($lesson->id);
 
         return $this->success(['blocks' => $blocks]);
     }
 
-    public function store(LessonBlockRequest $request, int $course, int $unit, int $lesson)
+    public function store(LessonBlockRequest $request, Course $course, Unit $unit, Lesson $lesson)
     {
-        $lessonModel = Lesson::with(['unit.course'])->find($lesson);
-        if (! $lessonModel) {
-            return $this->error('Lesson tidak ditemukan.', 404);
-        }
-        if ((int) ($lessonModel->unit?->course_id) !== $course || (int) ($lessonModel->unit_id) !== $unit) {
+        $lessonModel = $lesson->load(['unit.course']);
+        if ((int) ($lessonModel->unit?->course_id) !== (int) $course->id || (int) ($lessonModel->unit_id) !== (int) $unit->id) {
             return $this->error('Lesson tidak ditemukan di course ini.', 404);
         }
 
@@ -96,23 +92,20 @@ class LessonBlockController extends Controller
 
         $data = $request->validated();
         $mediaFile = $request->file('media');
-        $block = $this->service->create($lesson, $data, $mediaFile);
+        $block = $this->service->create($lesson->id, $data, $mediaFile);
 
         return $this->created(['block' => $block], 'Blok lesson berhasil dibuat.');
     }
 
-    public function show(int $course, int $unit, int $lesson, int $block)
+    public function show(Course $course, Unit $unit, Lesson $lesson, LessonBlock $block)
     {
-        $lessonModel = Lesson::with(['unit.course'])->find($lesson);
-        if (! $lessonModel) {
-            return $this->error('Lesson tidak ditemukan.', 404);
-        }
-        if ((int) ($lessonModel->unit?->course_id) !== $course || (int) ($lessonModel->unit_id) !== $unit) {
+        $lessonModel = $lesson->load(['unit.course']);
+        if ((int) ($lessonModel->unit?->course_id) !== (int) $course->id || (int) ($lessonModel->unit_id) !== (int) $unit->id) {
             return $this->error('Lesson tidak ditemukan di course ini.', 404);
         }
 
-        $found = LessonBlock::where('lesson_id', $lesson)->find($block);
-        if (! $found) {
+        $found = $block;
+        if ((int) $found->lesson_id !== (int) $lesson->id) {
             return $this->error('Blok lesson tidak ditemukan.', 404);
         }
 
@@ -146,18 +139,15 @@ class LessonBlockController extends Controller
         return $this->success(['block' => $found]);
     }
 
-    public function update(LessonBlockRequest $request, int $course, int $unit, int $lesson, int $block)
+    public function update(LessonBlockRequest $request, Course $course, Unit $unit, Lesson $lesson, LessonBlock $block)
     {
-        $lessonModel = Lesson::with(['unit.course'])->find($lesson);
-        if (! $lessonModel) {
-            return $this->error('Lesson tidak ditemukan.', 404);
-        }
-        if ((int) ($lessonModel->unit?->course_id) !== $course || (int) ($lessonModel->unit_id) !== $unit) {
+        $lessonModel = $lesson->load(['unit.course']);
+        if ((int) ($lessonModel->unit?->course_id) !== (int) $course->id || (int) ($lessonModel->unit_id) !== (int) $unit->id) {
             return $this->error('Lesson tidak ditemukan di course ini.', 404);
         }
 
-        $found = LessonBlock::where('lesson_id', $lesson)->find($block);
-        if (! $found) {
+        $found = $block;
+        if ((int) $found->lesson_id !== (int) $lesson->id) {
             return $this->error('Blok lesson tidak ditemukan.', 404);
         }
 
@@ -169,23 +159,20 @@ class LessonBlockController extends Controller
 
         $data = $request->validated();
         $mediaFile = $request->file('media');
-        $updated = $this->service->update($lesson, $block, $data, $mediaFile);
+        $updated = $this->service->update($lesson->id, $found->id, $data, $mediaFile);
 
         return $this->success(['block' => $updated], 'Blok lesson berhasil diperbarui.');
     }
 
-    public function destroy(int $course, int $unit, int $lesson, int $block)
+    public function destroy(Course $course, Unit $unit, Lesson $lesson, LessonBlock $block)
     {
-        $lessonModel = Lesson::with(['unit.course'])->find($lesson);
-        if (! $lessonModel) {
-            return $this->error('Lesson tidak ditemukan.', 404);
-        }
-        if ((int) ($lessonModel->unit?->course_id) !== $course || (int) ($lessonModel->unit_id) !== $unit) {
+        $lessonModel = $lesson->load(['unit.course']);
+        if ((int) ($lessonModel->unit?->course_id) !== (int) $course->id || (int) ($lessonModel->unit_id) !== (int) $unit->id) {
             return $this->error('Lesson tidak ditemukan di course ini.', 404);
         }
 
-        $found = LessonBlock::where('lesson_id', $lesson)->find($block);
-        if (! $found) {
+        $found = $block;
+        if ((int) $found->lesson_id !== (int) $lesson->id) {
             return $this->error('Blok lesson tidak ditemukan.', 404);
         }
 
@@ -195,7 +182,7 @@ class LessonBlockController extends Controller
             return $this->error('Anda tidak memiliki akses untuk menghapus blok ini.', 403);
         }
 
-        $this->service->delete($lesson, $block);
+        $this->service->delete($lesson->id, $found->id);
 
         return $this->success([], 'Blok lesson berhasil dihapus.');
     }

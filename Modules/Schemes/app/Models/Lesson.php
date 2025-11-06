@@ -27,4 +27,9 @@ class Lesson extends Model
     {
         return $this->hasMany(LessonBlock::class);
     }
+
+    public function getRouteKeyName(): string
+    {
+        return 'slug';
+    }
 }

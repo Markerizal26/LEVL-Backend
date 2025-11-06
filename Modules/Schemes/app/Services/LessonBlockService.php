@@ -7,6 +7,7 @@ use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\DB;
 use Modules\Schemes\Jobs\ProcessLessonBlockMedia;
 use Modules\Schemes\Models\LessonBlock;
+use Illuminate\Support\Str;
 
 class LessonBlockService
 {
@@ -33,6 +34,7 @@ class LessonBlockService
 
             $block = LessonBlock::create([
                 'lesson_id' => $lessonId,
+                'slug' => (string) Str::uuid(),
                 'block_type' => $data['type'],
                 'content' => $data['content'] ?? null,
                 'media_url' => $path,
