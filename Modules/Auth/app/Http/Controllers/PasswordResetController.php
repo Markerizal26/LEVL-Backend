@@ -23,9 +23,11 @@ class PasswordResetController extends Controller
         $validated = $request->validated();
 
         /** @var User|null $user */
-        $user = User::query()->where('email', $validated['email'])->first();
+        $user = User::query()
+            ->where(fn ($q) => $q->where('email', $validated['login'])->orWhere('username', $validated['login']))
+            ->first();
         if (! $user) {
-            return $this->success([], 'Jika email terdaftar, kami telah mengirimkan instruksi reset kata sandi.');
+            return $this->success([], 'Jika email atau username terdaftar, kami telah mengirimkan instruksi reset kata sandi.');
         }
 
         PasswordResetToken::query()->where('email', $user->email)->delete();
@@ -41,12 +43,12 @@ class PasswordResetController extends Controller
         ]);
 
         $ttlMinutes = (int) (config('auth.passwords.users.expire', 60) ?? 60);
-        $baseUrl = rtrim(config('app.url'), '/');
-        $resetUrl = $baseUrl.'/reset-password?token='.$plainToken;
+        $frontendUrl = rtrim(env('FRONTEND_URL', config('app.url')), '/');
+        $resetUrl = $frontendUrl.'/reset-password?token='.$plainToken;
 
         Mail::to($user)->send(new ResetPasswordMail($user, $resetUrl, $ttlMinutes, $plainToken));
 
-        return $this->success([], 'Jika email terdaftar, kami telah mengirimkan instruksi reset kata sandi.');
+        return $this->success([], 'Jika email atau username terdaftar, kami telah mengirimkan instruksi reset kata sandi.');
     }
 
     public function confirmForgot(ResetPasswordRequest $request): JsonResponse

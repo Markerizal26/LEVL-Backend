@@ -159,15 +159,15 @@ trait HasAuthRequestRules
     protected function rulesForgotPassword(): array
     {
         return [
-            'email' => ['required', 'email:rfc'],
+            'login' => ['required', 'string'],
         ];
     }
 
     protected function messagesForgotPassword(): array
     {
         return [
-            'email.required' => 'Email wajib diisi.',
-            'email.email' => 'Format email tidak valid.',
+            'login.required' => 'Email atau username wajib diisi.',
+            'login.string' => 'Email atau username harus berupa teks.',
         ];
     }
 
