@@ -29,6 +29,15 @@ return Application::configure(basePath: dirname(__DIR__))
     ->withExceptions(function (Exceptions $exceptions): void {
 
         $exceptions->render(function (\Illuminate\Auth\AuthenticationException $e, \Illuminate\Http\Request $request) {
+            $isAuthRoute = $request->is('api/v1/auth/login') ||
+                          $request->is('api/v1/auth/register') ||
+                          $request->routeIs('auth.login') ||
+                          $request->routeIs('auth.register');
+
+            if ($isAuthRoute) {
+                return null;
+            }
+
             return response()->json([
                 'status' => 'error',
                 'message' => 'Anda belum login atau sesi Anda telah berakhir. Silakan login kembali.',
@@ -36,6 +45,15 @@ return Application::configure(basePath: dirname(__DIR__))
         });
 
         $exceptions->render(function (TokenExpiredException $e, \Illuminate\Http\Request $request) {
+            $isAuthRoute = $request->is('api/v1/auth/login') ||
+                          $request->is('api/v1/auth/register') ||
+                          $request->routeIs('auth.login') ||
+                          $request->routeIs('auth.register');
+
+            if ($isAuthRoute) {
+                return null;
+            }
+
             return response()->json([
                 'status' => 'error',
                 'message' => 'Sesi Anda telah berakhir. Silakan login kembali untuk melanjutkan.',
@@ -43,6 +61,15 @@ return Application::configure(basePath: dirname(__DIR__))
         });
 
         $exceptions->render(function (TokenInvalidException $e, \Illuminate\Http\Request $request) {
+            $isAuthRoute = $request->is('api/v1/auth/login') ||
+                          $request->is('api/v1/auth/register') ||
+                          $request->routeIs('auth.login') ||
+                          $request->routeIs('auth.register');
+
+            if ($isAuthRoute) {
+                return null;
+            }
+
             return response()->json([
                 'status' => 'error',
                 'message' => 'Sesi tidak valid. Silakan login ulang untuk mendapatkan akses.',
@@ -50,6 +77,16 @@ return Application::configure(basePath: dirname(__DIR__))
         });
 
         $exceptions->render(function (TokenBlacklistedException $e, \Illuminate\Http\Request $request) {
+            // Jangan tangani untuk route login/register
+            $isAuthRoute = $request->is('api/v1/auth/login') ||
+                          $request->is('api/v1/auth/register') ||
+                          $request->routeIs('auth.login') ||
+                          $request->routeIs('auth.register');
+
+            if ($isAuthRoute) {
+                return null;
+            }
+
             return response()->json([
                 'status' => 'error',
                 'message' => 'Sesi Anda tidak lagi berlaku. Silakan login kembali.',
@@ -57,6 +94,18 @@ return Application::configure(basePath: dirname(__DIR__))
         });
 
         $exceptions->render(function (JWTException $e, \Illuminate\Http\Request $request) {
+            // Jangan tangani JWTException untuk route login/register karena mereka tidak memerlukan autentikasi
+            $isAuthRoute = $request->is('api/v1/auth/login') ||
+                          $request->is('api/v1/auth/register') ||
+                          $request->routeIs('auth.login') ||
+                          $request->routeIs('auth.register') ||
+                          str_contains($request->path(), 'auth/login') ||
+                          str_contains($request->path(), 'auth/register');
+
+            if ($isAuthRoute) {
+                return null; // Biarkan exception ditangani oleh handler default atau dilempar kembali
+            }
+
             return response()->json([
                 'status' => 'error',
                 'message' => 'Sesi login tidak ditemukan. Silakan login terlebih dahulu.',
@@ -64,6 +113,16 @@ return Application::configure(basePath: dirname(__DIR__))
         });
 
         $exceptions->render(function (UserNotDefinedException $e, \Illuminate\Http\Request $request) {
+            // Jangan tangani untuk route login/register
+            $isAuthRoute = $request->is('api/v1/auth/login') ||
+                          $request->is('api/v1/auth/register') ||
+                          $request->routeIs('auth.login') ||
+                          $request->routeIs('auth.register');
+
+            if ($isAuthRoute) {
+                return null;
+            }
+
             return response()->json([
                 'status' => 'error',
                 'message' => 'Data pengguna tidak ditemukan. Silakan login ulang.',
@@ -79,12 +138,11 @@ return Application::configure(basePath: dirname(__DIR__))
 
         $exceptions->render(function (ValidationException $e, \Illuminate\Http\Request $request) {
             $errors = $e->errors();
-            
-            
-            $isLoginRoute = $request->is('api/v1/auth/login') || 
+
+            $isLoginRoute = $request->is('api/v1/auth/login') ||
                            $request->routeIs('auth.login') ||
                            str_contains($request->path(), 'auth/login');
-            
+
             if ($isLoginRoute && isset($errors['login'])) {
                 $loginErrors = $errors['login'];
                 $isCredentialError = collect($loginErrors)->first(function ($error) {
@@ -95,7 +153,7 @@ return Application::configure(basePath: dirname(__DIR__))
                            stripos($error, 'kredensial') !== false ||
                            stripos($error, 'credential') !== false;
                 });
-                
+
                 if ($isCredentialError) {
                     return response()->json([
                         'status' => 'error',
@@ -104,7 +162,7 @@ return Application::configure(basePath: dirname(__DIR__))
                     ], 422);
                 }
             }
-            
+
             return response()->json([
                 'status' => 'error',
                 'message' => 'Data yang Anda kirim tidak valid. Periksa kembali isian Anda.',
