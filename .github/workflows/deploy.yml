@@ -74,9 +74,9 @@ jobs:
       - name: Print deployment context
         run: |
           echo "::group::Deployment context"
-          echo "Repository : ${{ github.repository }}"
-          echo "Branch     : ${{ github.ref }}"
-          echo "Commit SHA : ${{ github.sha }}"
+          echo "Repository  : ${{ github.repository }}"
+          echo "Branch      : ${{ github.ref }}"
+          echo "Commit SHA  : ${{ github.sha }}"
           echo "Initiated by: ${{ github.actor }}"
           echo "::endgroup::"
 
@@ -131,17 +131,21 @@ jobs:
             echo "::endgroup::"
 
             echo "::group::Checking runtime dependencies"
-            if ! command -v php >/dev/null 2>&1; then
-              echo "::error::PHP is not installed or not found in PATH."
-              exit 76
-            fi
-            php -v | head -n 2 || true
+            set +e
+            echo "PATH: $PATH"
+            which php || true
+            php -v | head -n 2
+            php_ec=$?
+            echo "php -v exit code: ${php_ec}"
 
-            if ! command -v composer >/dev/null 2>&1; then
-              echo "::warning::Composer is not installed. The deploy script must handle dependency installation."
-            else
-              composer --version || true
+            which composer || true
+            composer --version
+            comp_ec=$?
+            echo "composer --version exit code: ${comp_ec}"
+            if [ ${comp_ec} -ne 0 ]; then
+              echo "::warning::Composer not available or returned a non-zero exit code. The deploy script must handle dependency installation."
             fi
+            set -e
             echo "::endgroup::"
 
             echo "::group::Executing deploy.sh"
