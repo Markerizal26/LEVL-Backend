@@ -5,21 +5,39 @@ on:
     branches: ["main"]
   workflow_dispatch:
 
+# Hindari deploy overlap saat ada push bertubi-tubi
+concurrency:
+  group: deploy-vps-laravel-${{ github.ref }}
+  cancel-in-progress: true
+
+# Least-privilege for GHA token
+permissions:
+  contents: read
+
+defaults:
+  run:
+    shell: bash
+
 jobs:
   deploy:
     runs-on: ubuntu-latest
+    timeout-minutes: 20
+    environment: production  # pakai ini kalau secrets disimpan di Environment "production"
 
     steps:
-      - name: Checkout (for metadata only)
+      - name: Checkout (metadata only)
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
 
+      # Validasi secrets via env + indirect expansion (tanpa ekspresi array GHA)
       - name: Validate required secrets
         env:
-          SSH_HOST: ${{ secrets.SSH_HOST }}
-          SSH_USER: ${{ secrets.SSH_USER }}
-          SSH_KEY:  ${{ secrets.SSH_KEY }}
-          SSH_PORT: ${{ secrets.SSH_PORT }} # optional
-          APP_DIR:  ${{ secrets.APP_DIR }}
+          SSH_HOST:   ${{ secrets.SSH_HOST }}
+          SSH_USER:   ${{ secrets.SSH_USER }}
+          SSH_KEY:    ${{ secrets.SSH_KEY }}
+          APP_DIR:    ${{ secrets.APP_DIR }}
+          SSH_PORT:   ${{ secrets.SSH_PORT }}  # optional
         run: |
           set -euo pipefail
           missing=0
@@ -29,19 +47,41 @@ jobs:
               missing=1
             fi
           done
+          # Info: SSH_PORT opsional; jika kosong, kita fallback 22 di step berikutnya
           exit $missing
+
+      # (Opsional) echo ringkas info commit yang di-deploy
+      - name: Deployment context
+        run: |
+          echo "Repo: ${{ github.repository }}"
+          echo "Ref : ${{ github.ref }}"
+          echo "SHA : ${{ github.sha }}"
+          echo "Actor: ${{ github.actor }}"
 
       - name: SSH Deploy
         uses: appleboy/ssh-action@v1.2.0
         with:
-          host: ${{ secrets.SSH_HOST }}
+          host:     ${{ secrets.SSH_HOST }}
           username: ${{ secrets.SSH_USER }}
-          key: ${{ secrets.SSH_KEY }}
-          # remove this line entirely if you don't set SSH_PORT
-          port: ${{ secrets.SSH_PORT }}
+          key:      ${{ secrets.SSH_KEY }}
+          port:     ${{ secrets.SSH_PORT && secrets.SSH_PORT || '22' }}
           script_stop: true
+          # Biar step ini juga punya timeout internal (detik)
+          command_timeout: 1200
+          # NOTE: Kalau kamu mau pin host fingerprint:
+          # host_fingerprint: ${{ secrets.SSH_FINGERPRINT }}
           script: |
             set -euo pipefail
+            echo ">>> Host check"
+            uname -a || true
+            whoami || true
+            date || true
+
+            echo ">>> Go to app dir"
             cd "${{ secrets.APP_DIR }}"
+
+            echo ">>> Ensure deploy.sh executable"
             chmod +x deploy.sh
+
+            echo ">>> Run deploy.sh"
             ./deploy.sh
