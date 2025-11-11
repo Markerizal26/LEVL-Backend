@@ -36,17 +36,28 @@ class AuthRepository implements AuthRepositoryInterface
         ]);
     }
 
-    public function createRefreshToken(int $userId, ?string $ip, ?string $userAgent, ?int $ttlMinutes = null): JwtRefreshToken
+    public function createRefreshToken(int $userId, ?string $ip, ?string $userAgent, ?string $deviceId = null, ?int $idleTtlDays = null, ?int $absoluteTtlDays = null): JwtRefreshToken
     {
         $token = Str::random(64);
-        $expiresAt = $ttlMinutes ? now()->addMinutes($ttlMinutes) : null;
+        $idleTtlDays = $idleTtlDays ?? 14;
+        $absoluteTtlDays = $absoluteTtlDays ?? 90;
+        
+        $idleExpiresAt = now()->addDays($idleTtlDays);
+        $absoluteExpiresAt = now()->addDays($absoluteTtlDays);
+        
+        if (!$deviceId) {
+            $deviceId = hash('sha256', ($ip ?? '') . ($userAgent ?? '') . $userId);
+        }
 
         return JwtRefreshToken::create([
             'user_id' => $userId,
+            'device_id' => $deviceId,
             'token' => hash('sha256', $token),
             'ip' => $ip,
             'user_agent' => $userAgent,
-            'expires_at' => $expiresAt,
+            'last_used_at' => now(),
+            'idle_expires_at' => $idleExpiresAt,
+            'absolute_expires_at' => $absoluteExpiresAt,
         ])->setAttribute('plain_token', $token);
     }
 
@@ -73,5 +84,36 @@ class AuthRepository implements AuthRepositoryInterface
             ->where('token', $hashed)
             ->valid()
             ->first();
+    }
+
+    public function revokeAllUserRefreshTokensByDevice(int $userId, string $deviceId): void
+    {
+        JwtRefreshToken::where('user_id', $userId)
+            ->where('device_id', $deviceId)
+            ->valid()
+            ->update(['revoked_at' => now()]);
+    }
+
+    public function markTokenAsReplaced(int $oldTokenId, int $newTokenId): void
+    {
+        JwtRefreshToken::where('id', $oldTokenId)->update(['replaced_by' => $newTokenId]);
+    }
+
+    public function findReplacedTokenChain(int $tokenId): array
+    {
+        $chain = [];
+        $currentId = $tokenId;
+        
+        while ($currentId) {
+            $token = JwtRefreshToken::find($currentId);
+            if (!$token) {
+                break;
+            }
+            
+            $chain[] = $token;
+            $currentId = $token->replaced_by;
+        }
+        
+        return $chain;
     }
 }

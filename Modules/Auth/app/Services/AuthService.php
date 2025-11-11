@@ -29,11 +29,12 @@ class AuthService implements AuthServiceInterface
 
         $token = $this->jwt->fromUser($user);
 
+        $deviceId = hash('sha256', ($ip ?? '') . ($userAgent ?? '') . $user->id);
         $refresh = $this->authRepository->createRefreshToken(
             userId: $user->id,
             ip: $ip,
             userAgent: $userAgent,
-            ttlMinutes: (int) config('jwt.refresh_ttl')
+            deviceId: $deviceId
         );
 
         $pair = new TokenPairDTO(
@@ -94,11 +95,12 @@ class AuthService implements AuthServiceInterface
 
         $token = $this->jwt->fromUser($user);
 
+        $deviceId = hash('sha256', ($ip ?? '') . ($userAgent ?? '') . $user->id);
         $refresh = $this->authRepository->createRefreshToken(
             userId: $user->id,
             ip: $ip,
             userAgent: $userAgent,
-            ttlMinutes: (int) config('jwt.refresh_ttl')
+            deviceId: $deviceId
         );
 
         $pair = new TokenPairDTO(
@@ -137,7 +139,7 @@ class AuthService implements AuthServiceInterface
         return $response;
     }
 
-    public function refresh(User $currentUser, string $refreshToken): array
+    public function refresh(User $currentUser, string $refreshToken, string $ip, ?string $userAgent): array
     {
         $record = $this->authRepository->findValidRefreshRecordByUser($refreshToken, $currentUser->id);
         if (! $record) {
@@ -146,11 +148,41 @@ class AuthService implements AuthServiceInterface
             ]);
         }
 
+        if ($record->isReplaced()) {
+            $chain = $this->authRepository->findReplacedTokenChain($record->id);
+            $deviceIds = collect($chain)->pluck('device_id')->unique()->filter()->toArray();
+            
+            foreach ($deviceIds as $deviceId) {
+                $this->authRepository->revokeAllUserRefreshTokensByDevice($currentUser->id, $deviceId);
+            }
+            
+            throw ValidationException::withMessages([
+                'refresh_token' => 'Refresh token telah digunakan sebelumnya. Semua sesi perangkat telah dicabut karena potensi keamanan.',
+            ]);
+        }
+
+        $deviceId = $record->device_id ?? hash('sha256', ($ip ?? '') . ($userAgent ?? '') . $currentUser->id);
+        
+        $newRefresh = $this->authRepository->createRefreshToken(
+            userId: $currentUser->id,
+            ip: $ip,
+            userAgent: $userAgent,
+            deviceId: $deviceId
+        );
+
+        $this->authRepository->markTokenAsReplaced($record->id, $newRefresh->id);
+
+        $record->update([
+            'last_used_at' => now(),
+            'idle_expires_at' => now()->addDays(14),
+        ]);
+
         $accessToken = $this->jwt->fromUser($currentUser);
 
         return [
             'access_token' => $accessToken,
             'expires_in' => $this->jwt->factory()->getTTL() * 60,
+            'refresh_token' => $newRefresh->getAttribute('plain_token'),
         ];
     }
 

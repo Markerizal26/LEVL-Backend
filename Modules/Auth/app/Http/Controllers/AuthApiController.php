@@ -90,7 +90,12 @@ class AuthApiController extends Controller
         try {
             /** @var \Modules\Auth\Models\User $authUser */
             $authUser = auth('api')->user();
-            $data = $this->auth->refresh($authUser, $request->string('refresh_token'));
+            $data = $this->auth->refresh(
+                $authUser,
+                $request->string('refresh_token'),
+                $request->ip(),
+                $request->userAgent()
+            );
         } catch (ValidationException $e) {
             return $this->error('Refresh token tidak valid atau tidak cocok dengan akun saat ini.', 401);
         }
@@ -251,11 +256,12 @@ class AuthApiController extends Controller
 
         /** @var AuthRepositoryInterface $authRepo */
         $authRepo = app(AuthRepositoryInterface::class);
+        $deviceId = hash('sha256', ($request->ip() ?? '') . ($request->userAgent() ?? '') . $user->id);
         $refresh = $authRepo->createRefreshToken(
             userId: $user->id,
             ip: $request->ip(),
             userAgent: $request->userAgent(),
-            ttlMinutes: (int) config('jwt.refresh_ttl')
+            deviceId: $deviceId
         );
 
         // Redirect to frontend with tokens in hash fragment (more secure, not sent to server)

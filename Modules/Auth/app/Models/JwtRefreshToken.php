@@ -20,11 +20,16 @@ class JwtRefreshToken extends Model
      */
     protected $fillable = [
         'user_id',
+        'device_id',
         'token',
+        'replaced_by',
         'ip',
         'user_agent',
         'revoked_at',
+        'last_used_at',
         'expires_at',
+        'idle_expires_at',
+        'absolute_expires_at',
     ];
 
     /**
@@ -39,8 +44,12 @@ class JwtRefreshToken extends Model
      */
     protected $casts = [
         'user_id' => 'integer',
+        'replaced_by' => 'integer',
         'revoked_at' => 'datetime',
+        'last_used_at' => 'datetime',
         'expires_at' => 'datetime',
+        'idle_expires_at' => 'datetime',
+        'absolute_expires_at' => 'datetime',
     ];
 
     /**
@@ -52,6 +61,22 @@ class JwtRefreshToken extends Model
     }
 
     /**
+     * Get the token that replaced this one.
+     */
+    public function replacedBy(): BelongsTo
+    {
+        return $this->belongsTo(JwtRefreshToken::class, 'replaced_by');
+    }
+
+    /**
+     * Get the token that this one replaced.
+     */
+    public function replacedToken(): BelongsTo
+    {
+        return $this->belongsTo(JwtRefreshToken::class, 'replaced_by', 'id');
+    }
+
+    /**
      * Check if the token is revoked.
      */
     public function isRevoked(): bool
@@ -60,19 +85,35 @@ class JwtRefreshToken extends Model
     }
 
     /**
-     * Check if the token is expired.
+     * Check if the token is expired (idle or absolute).
      */
     public function isExpired(): bool
     {
+        if ($this->absolute_expires_at && $this->absolute_expires_at->isPast()) {
+            return true;
+        }
+        
+        if ($this->idle_expires_at && $this->idle_expires_at->isPast()) {
+            return true;
+        }
+        
         return $this->expires_at && $this->expires_at->isPast();
     }
 
     /**
-     * Check if the token is valid (not revoked and not expired).
+     * Check if the token is replaced.
+     */
+    public function isReplaced(): bool
+    {
+        return $this->replaced_by !== null;
+    }
+
+    /**
+     * Check if the token is valid (not revoked, not expired, and not replaced).
      */
     public function isValid(): bool
     {
-        return !$this->isRevoked() && !$this->isExpired();
+        return !$this->isRevoked() && !$this->isExpired() && !$this->isReplaced();
     }
 
     /**
@@ -89,6 +130,15 @@ class JwtRefreshToken extends Model
     public function scopeValid($query)
     {
         return $query->whereNull('revoked_at')
+            ->whereNull('replaced_by')
+            ->where(function ($q) {
+                $q->whereNull('absolute_expires_at')
+                    ->orWhere('absolute_expires_at', '>', now());
+            })
+            ->where(function ($q) {
+                $q->whereNull('idle_expires_at')
+                    ->orWhere('idle_expires_at', '>', now());
+            })
             ->where(function ($q) {
                 $q->whereNull('expires_at')
                     ->orWhere('expires_at', '>', now());
