@@ -1,0 +1,56 @@
+name: 🚀 Deploy Laravel to VPS
+
+on:
+  push:
+    branches: [ "main" ]  # jalankan hanya saat push ke main
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup SSH to VPS
+        run: |
+          mkdir -p ~/.ssh
+          echo "${{ secrets.SSH_PRIVATE_KEY }}" > ~/.ssh/id_deploy_github
+          chmod 600 ~/.ssh/id_deploy_github
+          ssh-keyscan -H ${{ secrets.VPS_HOST }} >> ~/.ssh/known_hosts
+
+      - name: Deploy to VPS
+        env:
+          VPS_HOST: ${{ secrets.VPS_HOST }}
+          VPS_USER: ${{ secrets.VPS_USER }}
+          VPS_PATH: ${{ secrets.VPS_PATH }}
+        run: |
+          ssh -i ~/.ssh/id_deploy_github ${VPS_USER}@${VPS_HOST} << 'EOF'
+            set -e
+
+            cd ${VPS_PATH}
+
+            echo "🔁 Pulling latest code..."
+            git fetch --all
+            git checkout main
+            git pull origin main
+
+            echo "📦 Installing dependencies..."
+            php8.3 /usr/local/bin/composer install --no-dev --optimize-autoloader --no-interaction
+
+            echo "🧹 Optimizing Laravel..."
+            php artisan down || true
+            php artisan module:migrate --force
+            # php artisan module:seed --force   # aktifkan jika perlu
+            php artisan optimize:clear
+            php artisan config:cache
+            php artisan route:cache
+            php artisan view:cache
+            php artisan up || true
+
+            echo "🔄 Restarting services..."
+            systemctl reload php8.3-fpm
+            systemctl reload nginx
+
+            echo "✅ Deploy completed successfully!"
+          EOF
