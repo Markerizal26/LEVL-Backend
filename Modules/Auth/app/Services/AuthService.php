@@ -285,4 +285,15 @@ class AuthService implements AuthServiceInterface
      
         }
     }
+
+    public function setUsername(User $user, string $username): array
+    {
+        $user->update(['username' => $username]);
+        $user->refresh();
+
+        $userArray = $user->toArray();
+        $userArray['roles'] = $user->getRoleNames()->values();
+
+        return ['user' => $userArray];
+    }
 }
