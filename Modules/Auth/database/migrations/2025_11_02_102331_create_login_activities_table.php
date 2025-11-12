@@ -11,6 +11,7 @@ return new class extends Migration
      */
     public function up(): void
     {
+        if (!Schema::hasTable('login_activities')) {
         Schema::create('login_activities', function (Blueprint $table) {
             $table->id();
             $table->foreignId('user_id')->constrained('users')->onDelete('cascade');
@@ -21,6 +22,7 @@ return new class extends Migration
             $table->timestamp('logged_out_at')->nullable();
             $table->timestamps();
         });        
+        }
     }
 
     /**

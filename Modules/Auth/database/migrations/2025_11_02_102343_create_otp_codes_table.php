@@ -7,6 +7,7 @@ use Illuminate\Support\Facades\Schema;
 return new class extends Migration {
     public function up(): void
     {
+        if (!Schema::hasTable('otp_codes')) {
         Schema::create('otp_codes', function (Blueprint $table) {
             $table->id();
             $table->foreignId('user_id')->constrained('users')->onDelete('cascade');
@@ -27,6 +28,7 @@ return new class extends Migration {
 
             $table->index(['user_id', 'purpose', 'expires_at']);
         });
+        }
     }
 
     public function down(): void

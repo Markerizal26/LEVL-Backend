@@ -17,6 +17,7 @@ use Modules\Auth\Http\Requests\RefreshTokenRequest;
 use Modules\Auth\Http\Requests\RegisterRequest;
 use Modules\Auth\Http\Requests\RequestEmailChangeRequest;
 use Modules\Auth\Http\Requests\ResendCredentialsRequest;
+use Modules\Auth\Http\Requests\SetUsernameRequest;
 use Modules\Auth\Http\Requests\UpdateProfileRequest;
 use Modules\Auth\Http\Requests\UpdateUserStatusRequest;
 use Modules\Auth\Http\Requests\VerifyEmailByTokenRequest;
@@ -219,19 +220,11 @@ class AuthApiController extends Controller
 
         // Find existing user by email or create a new one
         $user = User::query()->where('email', $email)->first();
-        if (! $user) {
-            // Generate unique username from email local part
-            $baseUsername = preg_replace('/[^a-z0-9_\.\-]/i', '', explode('@', (string) $email)[0] ?: 'google');
-            $username = $baseUsername;
-            $suffix = 1;
-            while (User::query()->where('username', $username)->exists()) {
-                $username = $baseUsername.$suffix;
-                $suffix++;
-            }
-
+        $isNewUser = ! $user;
+        if ($isNewUser) {
             $user = User::query()->create([
                 'name' => $name,
-                'username' => $username,
+                'username' => null,
                 'email' => $email,
                 // random password; not used for social login
                 'password' => \Illuminate\Support\Str::random(32),
@@ -240,7 +233,7 @@ class AuthApiController extends Controller
             ]);
         }
 
-        // Upsert social account and store tokens
+
         $account = SocialAccount::query()->firstOrNew([
             'provider_name' => $provider,
             'provider_id' => $providerId,
@@ -271,6 +264,7 @@ class AuthApiController extends Controller
                 'refresh_token' => $refresh->getAttribute('plain_token'),
                 'expires_in' => $jwt->factory()->getTTL() * 60,
                 'provider' => $provider,
+                'needs_username' => $isNewUser && ! $user->username ? '1' : '0',
             ]);
 
         return redirect($successUrl);
@@ -523,5 +517,21 @@ class AuthApiController extends Controller
         ];
 
         return $this->success(['user' => $data]);
+    }
+
+    public function setUsername(SetUsernameRequest $request): JsonResponse
+    {
+        $user = auth('api')->user();
+        if (! $user) {
+            return $this->error('Tidak terotorisasi.', 401);
+        }
+
+        if ($user->username) {
+            return $this->error('Username sudah diatur untuk akun Anda.', 422);
+        }
+
+        $data = $this->auth->setUsername($user, $request->validated('username'));
+
+        return $this->success($data, 'Username berhasil diatur.');
     }
 }

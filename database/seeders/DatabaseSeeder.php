@@ -15,7 +15,12 @@ class DatabaseSeeder extends Seeder
     public function run(): void
     {
         $this->call([
+
             RoleSeeder::class,
+            SuperAdminSeeder::class,
+            ActiveUsersSeeder::class,
+            \Modules\Common\Database\Seeders\SystemSettingSeeder::class,
+            \Modules\Common\Database\Seeders\CategorySeeder::class,
         ]);
     }
 }

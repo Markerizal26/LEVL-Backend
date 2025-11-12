@@ -31,7 +31,14 @@ trait HasAuthRequestRules
     {
         return [
             'name' => ['required', 'string', 'max:255'],
-            'username' => ['required', 'string', 'max:50', 'unique:users,username'],
+            'username' => [
+                'required',
+                'string',
+                'min:3',
+                'max:50',
+                'regex:/^[a-z0-9_\.\-]+$/i',
+                'unique:users,username',
+            ],
             'email' => ['required', 'email', 'max:255', 'unique:users,email'],
             'password' => $this->passwordRulesRegistration(),
         ];
@@ -45,7 +52,9 @@ trait HasAuthRequestRules
             'name.max' => 'Nama maksimal 255 karakter.',
             'username.required' => 'Username wajib diisi.',
             'username.string' => 'Username harus berupa teks.',
+            'username.min' => 'Username minimal 3 karakter.',
             'username.max' => 'Username maksimal 50 karakter.',
+            'username.regex' => 'Username hanya boleh mengandung huruf, angka, titik, garis bawah, dan garis sambung. Tidak boleh mengandung spasi.',
             'username.unique' => 'Username sudah digunakan.',
             'email.required' => 'Email wajib diisi.',
             'email.email' => 'Format email tidak valid.',
@@ -58,7 +67,14 @@ trait HasAuthRequestRules
     {
         return [
             'name' => ['required', 'string', 'max:255'],
-            'username' => ['required', 'string', 'max:255', 'unique:users,username'],
+            'username' => [
+                'required',
+                'string',
+                'min:3',
+                'max:255',
+                'regex:/^[a-z0-9_\.\-]+$/i',
+                'unique:users,username',
+            ],
             'email' => ['required', 'email', 'max:255', 'unique:users,email'],
         ];
     }
@@ -71,7 +87,9 @@ trait HasAuthRequestRules
             'name.max' => 'Nama maksimal 255 karakter.',
             'username.required' => 'Username wajib diisi.',
             'username.string' => 'Username harus berupa teks.',
+            'username.min' => 'Username minimal 3 karakter.',
             'username.max' => 'Username maksimal 255 karakter.',
+            'username.regex' => 'Username hanya boleh mengandung huruf, angka, titik, garis bawah, dan garis sambung. Tidak boleh mengandung spasi.',
             'username.unique' => 'Username sudah digunakan.',
             'email.required' => 'Email wajib diisi.',
             'email.email' => 'Format email tidak valid.',
@@ -178,7 +196,11 @@ trait HasAuthRequestRules
         return [
             'name' => ['required', 'string', 'max:100'],
             'username' => [
-                'required', 'string', 'max:50',
+                'required',
+                'string',
+                'min:3',
+                'max:50',
+                'regex:/^[a-z0-9_\.\-]+$/i',
                 \Illuminate\Validation\Rule::unique('users', 'username')->ignore($userId),
             ],
             'avatar' => ['nullable', 'image', 'mimes:jpg,jpeg,png,webp', 'max:2048'],
@@ -190,6 +212,10 @@ trait HasAuthRequestRules
         return [
             'name.required' => 'Nama wajib diisi.',
             'username.required' => 'Username wajib diisi.',
+            'username.string' => 'Username harus berupa teks.',
+            'username.min' => 'Username minimal 3 karakter.',
+            'username.max' => 'Username maksimal 50 karakter.',
+            'username.regex' => 'Username hanya boleh mengandung huruf, angka, titik, garis bawah, dan garis sambung. Tidak boleh mengandung spasi.',
             'username.unique' => 'Username sudah digunakan.',
             'avatar.image' => 'Avatar harus berupa gambar.',
             'avatar.mimes' => 'Avatar harus berformat jpg, jpeg, png, atau webp.',

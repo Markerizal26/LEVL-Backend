@@ -18,6 +18,7 @@ Route::prefix('v1')->as('auth.')->group(function () {
         Route::post('/auth/logout', [AuthApiController::class, 'logout'])->name('logout');
         Route::get('/profile', [AuthApiController::class, 'profile'])->name('profile');
         Route::put('/profile', [AuthApiController::class, 'updateProfile'])->name('profile.update');
+        Route::post('/auth/set-username', [AuthApiController::class, 'setUsername'])->name('set.username');
         Route::post('/auth/email/verify/send', [AuthApiController::class, 'sendEmailVerification'])->name('email.verify.send');
         Route::post('/profile/email/verify', [AuthApiController::class, 'verifyEmailChange'])->name('email.change.verify');
         Route::post('/profile/email/request', [AuthApiController::class, 'requestEmailChange'])->name('email.change.request');
