@@ -429,7 +429,8 @@ Tidak ada query param tambahan. Body untuk `complete` kosong.
 
 | Request Name | Method | Path | Description | Role |
 | --- | --- | --- | --- | --- |
-| `List Course Enrollments` | GET | `/courses/{course}/enrollments` | Daftar enrolment course | admin / instructor / super-admin |
+| `List Managed Enrollments` | GET | `/courses/enrollments` | Daftar enrolment dari semua course yang dikelola | admin / instructor / super-admin |
+| `List Course Enrollments` | GET | `/courses/{course}/enrollments` | Daftar enrolment course tertentu | admin / instructor / super-admin |
 | `Approve Enrollment` | POST | `/enrollments/{enrollment}/approve` | Setujui pending | admin / instructor / super-admin |
 | `Decline Enrollment` | POST | `/enrollments/{enrollment}/decline` | Tolak pending | admin / instructor / super-admin |
 | `Remove Enrollment` | POST | `/enrollments/{enrollment}/remove` | Keluarkan peserta | admin / instructor / super-admin |
@@ -439,6 +440,7 @@ Tidak ada query param tambahan. Body untuk `complete` kosong.
 | Key | Type | Description | Example |
 | --- | --- | --- | --- |
 | `status` | string | Filter `pending`, `active`, `cancelled`, `completed` | `pending` |
+| `course_slug` | string | Filter enrolment pada course tertentu (harus course yang dikelola) | `intro-to-computer-science` |
 | `per_page` | integer | Default 15 | `20` |
 | `page` | integer | Halaman | `2` |
 

@@ -78,6 +78,62 @@ class EnrollmentsController extends Controller
     }
 
     /**
+     * Admin/instructor view of all enrollments across their managed courses.
+     */
+    public function indexManaged(Request $request)
+    {
+        /** @var \Modules\Auth\Models\User $user */
+        $user = auth('api')->user();
+
+        if ($user->hasRole('super-admin')) {
+            return $this->index($request);
+        }
+
+        if (! $user->hasRole('admin') && ! $user->hasRole('instructor')) {
+            return $this->error('Anda tidak memiliki akses untuk melihat enrolment ini.', 403);
+        }
+
+        $courses = Course::query()
+            ->select(['id', 'slug', 'title'])
+            ->where(function ($query) use ($user) {
+                $query->where('instructor_id', $user->id)
+                    ->orWhereHas('admins', function ($adminQuery) use ($user) {
+                        $adminQuery->where('user_id', $user->id);
+                    });
+            })
+            ->get();
+
+        $courseIds = $courses->pluck('id')->all();
+
+        $query = Enrollment::query()
+            ->with(['user:id,name,email', 'course:id,slug,title,enrollment_type'])
+            ->orderByDesc('created_at');
+
+        if (! empty($courseIds)) {
+            $query->whereIn('course_id', $courseIds);
+        } else {
+            $query->whereRaw('1 = 0');
+        }
+
+        if ($status = $request->query('status')) {
+            $query->where('status', $status);
+        }
+
+        if ($courseSlug = $request->query('course_slug')) {
+            $course = $courses->firstWhere('slug', $courseSlug);
+            if (! $course) {
+                return $this->error('Course tidak ditemukan atau tidak berada di bawah pengelolaan Anda.', 404);
+            }
+            $query->where('course_id', $course->id);
+        }
+
+        $perPage = (int) $request->query('per_page', 15);
+        $paginator = $query->paginate(max(1, $perPage))->appends($request->query());
+
+        return $this->paginateResponse($paginator, 'Daftar enrolment berhasil diambil.');
+    }
+
+    /**
      * Student enrols to a course.
      */
     public function enroll(Request $request, Course $course)
