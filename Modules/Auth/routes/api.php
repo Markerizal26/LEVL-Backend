@@ -13,8 +13,11 @@ Route::prefix('v1')->as('auth.')->group(function () {
     Route::post('/auth/email/verify', [AuthApiController::class, 'verifyEmail'])->name('email.verify');
     Route::post('/auth/email/verify/by-token', [AuthApiController::class, 'verifyEmailByToken'])->name('email.verify.by-token');
 
+    Route::post('/auth/refresh', [AuthApiController::class, 'refresh'])
+        ->middleware([\Modules\Auth\Http\Middleware\AllowExpiredToken::class])
+        ->name('refresh');
+
     Route::middleware(['auth:api'])->group(function () {
-        Route::post('/auth/refresh', [AuthApiController::class, 'refresh'])->name('refresh');
         Route::post('/auth/logout', [AuthApiController::class, 'logout'])->name('logout');
         Route::get('/profile', [AuthApiController::class, 'profile'])->name('profile');
         Route::put('/profile', [AuthApiController::class, 'updateProfile'])->name('profile.update');
