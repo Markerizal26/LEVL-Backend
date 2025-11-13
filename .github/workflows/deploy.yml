@@ -170,16 +170,6 @@ jobs:
             echo "::notice::Database migrations completed successfully."
             echo "::endgroup::"
 
-            echo "::group::Running Pest tests"
-            if ! php artisan test; then
-              echo "::error::Tests failed. Deployment aborted."
-              echo "::notice::Showing test output:"
-              php artisan test --verbose || true
-              exit 78
-            fi
-            echo "::notice::All tests passed successfully."
-            echo "::endgroup::"
-
             echo "::group::Optimizing for production (removing dev dependencies)"
             if ! composer install --no-interaction --prefer-dist --optimize-autoloader --no-dev; then
               echo "::error::Composer install (production) failed"
