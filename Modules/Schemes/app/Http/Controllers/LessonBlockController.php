@@ -34,7 +34,7 @@ class LessonBlockController extends Controller
         }
 
         $authorized = false;
-        if ($user->hasRole('super-admin')) {
+        if ($user->hasRole('superadmin')) {
             $authorized = true;
         } elseif ($user->hasRole('admin')) {
             if ((int) $course->instructor_id === (int) $user->id) {
@@ -76,7 +76,7 @@ class LessonBlockController extends Controller
         }
 
         $authorized = false;
-        if ($user->hasRole('super-admin')) {
+        if ($user->hasRole('superadmin')) {
             $authorized = true;
         } elseif ($user->hasRole('admin')) {
             if ((int) $course->instructor_id === (int) $user->id) {
@@ -114,7 +114,7 @@ class LessonBlockController extends Controller
         $course = $lessonModel->unit?->course;
 
         $authorized = false;
-        if ($user->hasRole('super-admin')) {
+        if ($user->hasRole('superadmin')) {
             $authorized = true;
         } elseif ($user->hasRole('admin')) {
             if ((int) $course->instructor_id === (int) $user->id) {

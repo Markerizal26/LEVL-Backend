@@ -62,7 +62,7 @@ class CourseService
         if (! empty($data['course_admins']) && is_array($data['course_admins'])) {
             $adminIds = array_map('intval', $data['course_admins']);
         }
-        if ($actor && ($actor->hasRole('admin') || $actor->hasRole('super-admin'))) {
+        if ($actor && ($actor->hasRole('admin') || $actor->hasRole('superadmin'))) {
             $adminIds[] = (int) $actor->id;
         }
         if (! empty($adminIds) && method_exists($course, 'admins')) {

@@ -81,9 +81,9 @@ class AuthService implements AuthServiceInterface
         }
 
         $roles = $user->getRoleNames();
-        $isPrivileged = $roles->contains(fn ($r) => in_array($r, ['super-admin', 'admin', 'instructor']));
+        $isPrivileged = $roles->contains(fn ($r) => in_array($r, ['superadmin', 'admin', 'instructor']));
 
-        // Auto-verify privileged users (admin, super-admin, instructor) on first login
+        // Auto-verify privileged users (admin, superadmin, instructor) on first login
         $wasAutoVerified = false;
         if ($isPrivileged && ($user->status === 'pending' || $user->email_verified_at === null)) {
             $user->email_verified_at = now();
@@ -234,7 +234,7 @@ class AuthService implements AuthServiceInterface
         $passwordPlain = $this->generatePasswordFromNameEmail($validated['name'] ?? '', $validated['email'] ?? '');
         $validated['password'] = Hash::make($passwordPlain);
         $user = $this->authRepository->createUser($validated);
-        $user->assignRole('super-admin');
+        $user->assignRole('superadmin');
 
         $this->sendGeneratedPasswordEmail($user, $passwordPlain);
 

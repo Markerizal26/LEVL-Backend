@@ -26,9 +26,9 @@ Route::prefix('v1')->as('auth.')->group(function () {
         Route::post('/profile/email/verify', [AuthApiController::class, 'verifyEmailChange'])->name('email.change.verify');
         Route::post('/profile/email/request', [AuthApiController::class, 'requestEmailChange'])->name('email.change.request');
 
-        Route::middleware(['role:admin|super-admin'])->post('/auth/instructor', [AuthApiController::class, 'createInstructor'])->name('instructor.create');
+        Route::middleware(['role:admin|superadmin'])->post('/auth/instructor', [AuthApiController::class, 'createInstructor'])->name('instructor.create');
 
-        Route::middleware(['role:super-admin'])->group(function () {
+        Route::middleware(['role:superadmin'])->group(function () {
             Route::post('/auth/admin', [AuthApiController::class, 'createAdmin'])->name('admin.create');
             Route::post('/auth/super-admin', [AuthApiController::class, 'createSuperAdmin'])->name('super.create');
             Route::post('/auth/credentials/resend', [AuthApiController::class, 'resendCredentials'])->name('credentials.resend');

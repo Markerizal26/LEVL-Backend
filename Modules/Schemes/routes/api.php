@@ -13,7 +13,7 @@ Route::prefix('v1')->scopeBindings()->group(function () {
     Route::get('courses', [CourseController::class, 'index']);
     Route::get('courses/{course:slug}', [CourseController::class, 'show']);
 
-    Route::middleware(['auth:api', 'role:super-admin|admin'])->group(function () {
+    Route::middleware(['auth:api', 'role:superadmin|admin'])->group(function () {
         Route::post('courses', [CourseController::class, 'store'])->middleware('can:create,Modules\\Schemes\\Models\\Course');
         Route::put('courses/{course:slug}', [CourseController::class, 'update'])->middleware('can:update,course');
         Route::delete('courses/{course:slug}', [CourseController::class, 'destroy'])->middleware('can:delete,course');
@@ -24,7 +24,7 @@ Route::prefix('v1')->scopeBindings()->group(function () {
     Route::get('courses/{course:slug}/units', [UnitController::class, 'index']);
     Route::get('courses/{course:slug}/units/{unit:slug}', [UnitController::class, 'show']);
 
-    Route::middleware(['auth:api', 'role:super-admin|admin'])->group(function () {
+    Route::middleware(['auth:api', 'role:superadmin|admin'])->group(function () {
         Route::post('courses/{course:slug}/units', [UnitController::class, 'store']);
         Route::put('courses/{course:slug}/units/reorder', [UnitController::class, 'reorder']);
         Route::put('courses/{course:slug}/units/{unit:slug}', [UnitController::class, 'update']);
@@ -43,7 +43,7 @@ Route::prefix('v1')->scopeBindings()->group(function () {
         Route::post('courses/{course:slug}/units/{unit:slug}/lessons/{lesson:slug}/complete', [ProgressController::class, 'completeLesson']);
     });
 
-    Route::middleware(['auth:api', 'role:super-admin|admin'])->group(function () {
+    Route::middleware(['auth:api', 'role:superadmin|admin'])->group(function () {
         Route::post('courses/{course:slug}/units/{unit:slug}/lessons', [LessonController::class, 'store']);
         Route::put('courses/{course:slug}/units/{unit:slug}/lessons/{lesson:slug}', [LessonController::class, 'update']);
         Route::delete('courses/{course:slug}/units/{unit:slug}/lessons/{lesson:slug}', [LessonController::class, 'destroy']);
@@ -58,7 +58,7 @@ Route::prefix('v1')->scopeBindings()->group(function () {
         Route::get('courses/{course:slug}/units/{unit:slug}/lessons/{lesson:slug}/blocks', [LessonBlockController::class, 'index']);
         Route::get('courses/{course:slug}/units/{unit:slug}/lessons/{lesson:slug}/blocks/{block:slug}', [LessonBlockController::class, 'show']);
     });
-    Route::middleware(['auth:api', 'role:super-admin|admin'])->group(function () {
+    Route::middleware(['auth:api', 'role:superadmin|admin'])->group(function () {
         Route::post('courses/{course:slug}/units/{unit:slug}/lessons/{lesson:slug}/blocks', [LessonBlockController::class, 'store']);
         Route::put('courses/{course:slug}/units/{unit:slug}/lessons/{lesson:slug}/blocks/{block:slug}', [LessonBlockController::class, 'update']);
         Route::delete('courses/{course:slug}/units/{unit:slug}/lessons/{lesson:slug}/blocks/{block:slug}', [LessonBlockController::class, 'destroy']);

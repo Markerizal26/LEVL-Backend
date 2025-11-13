@@ -93,7 +93,7 @@ class SubmissionController extends Controller
         $user = auth('api')->user();
 
         // Only admin/instructor can grade
-        if (! $user->hasRole('admin') && ! $user->hasRole('instructor') && ! $user->hasRole('super-admin')) {
+        if (! $user->hasRole('admin') && ! $user->hasRole('instructor') && ! $user->hasRole('superadmin')) {
             return $this->error('Anda tidak memiliki akses untuk menilai submission ini.', 403);
         }
 

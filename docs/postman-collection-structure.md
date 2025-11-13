@@ -71,7 +71,7 @@ Kolom **Request Name** dalam tabel di bawah bisa langsung dipakai sebagai nama r
 | --- | --- | --- | --- | --- |
 | `refresh_token` | string | yes | Refresh token aktif (14d idle / 90d absolute) | `<refresh_token>` |
 
-### 1.2 Profile & Account (Auth: Bearer, Role: `student`/`instructor`/`admin`/`super-admin`)
+### 1.2 Profile & Account (Auth: Bearer, Role: `student`/`instructor`/`admin`/`superadmin`)
 
 | Request Name | Method | Path | Description |
 | --- | --- | --- | --- |
@@ -128,21 +128,21 @@ Kolom **Request Name** dalam tabel di bawah bisa langsung dipakai sebagai nama r
 
 > `uuid` atau `token` salah satu wajib (`required_without`).
 
-### 1.3 Managed Users (Role: `admin` atau `super-admin`)
+### 1.3 Managed Users (Role: `admin` atau `superadmin`)
 
 | Request Name | Method | Path | Role | Description |
 | --- | --- | --- | --- | --- |
-| `Create Instructor` | POST | `/auth/instructor` | admin / super-admin | Buat instructor |
-| `Create Admin` | POST | `/auth/admin` | super-admin | Buat admin |
-| `Create Super Admin` | POST | `/auth/super-admin` | super-admin | Buat super-admin |
-| `Update User Status` | PUT | `/auth/users/{user}/status` | super-admin | Update status user |
-| `List Users` | GET | `/auth/users` | super-admin | Daftar user dengan filter |
-| `Show User` | GET | `/auth/users/{user}` | super-admin | Detail user |
-| `Resend Credentials` | POST | `/auth/credentials/resend` | super-admin | Kirim ulang kredensial |
+| `Create Instructor` | POST | `/auth/instructor` | admin / superadmin | Buat instructor |
+| `Create Admin` | POST | `/auth/admin` | superadmin | Buat admin |
+| `Create Super Admin` | POST | `/auth/super-admin` | superadmin | Buat superadmin |
+| `Update User Status` | PUT | `/auth/users/{user}/status` | superadmin | Update status user |
+| `List Users` | GET | `/auth/users` | superadmin | Daftar user dengan filter |
+| `Show User` | GET | `/auth/users/{user}` | superadmin | Detail user |
+| `Resend Credentials` | POST | `/auth/credentials/resend` | superadmin | Kirim ulang kredensial |
 
 #### Body (form-data)
 
-**Create Managed User (instruktur/admin/super-admin)**
+**Create Managed User (instruktur/admin/superadmin)**
 
 | Key | Type | Required | Description | Example |
 | --- | --- | --- | --- | --- |
@@ -219,9 +219,9 @@ Kolom **Request Name** dalam tabel di bawah bisa langsung dipakai sebagai nama r
 | --- | --- | --- | --- | --- | --- |
 | `List Courses` | GET | `/courses` | List course dengan filter | Opsional | - |
 | `Get Course Detail` | GET | `/courses/{slug}` | Detail course publik | Opsional | - |
-| `Create Course` | POST | `/courses` | Buat course baru | Bearer | admin / super-admin |
-| `Update Course` | PUT | `/courses/{slug}` | Update course | Bearer | admin / super-admin |
-| `Delete Course` | DELETE | `/courses/{slug}` | Hapus permanen | Bearer | admin / super-admin |
+| `Create Course` | POST | `/courses` | Buat course baru | Bearer | admin / superadmin |
+| `Update Course` | PUT | `/courses/{slug}` | Update course | Bearer | admin / superadmin |
+| `Delete Course` | DELETE | `/courses/{slug}` | Hapus permanen | Bearer | admin / superadmin |
 
 #### Query Params (GET `/courses`)
 
@@ -265,7 +265,7 @@ Kolom **Request Name** dalam tabel di bawah bisa langsung dipakai sebagai nama r
 
 > Gunakan tab `Bulk Edit` di Postman jika ingin mengirim array dalam bentuk JSON string (`["tag"]`). Backend sudah melakukan decoding otomatis untuk field `tags`, `outcomes`, `prereq`, `course_admins`.
 
-### 2.2 Course Publication (Role: admin / super-admin)
+### 2.2 Course Publication (Role: admin / superadmin)
 
 | Request Name | Method | Path | Description |
 | --- | --- | --- | --- |
@@ -280,12 +280,12 @@ Tidak ada body; gunakan Bearer token.
 | --- | --- | --- | --- | --- |
 | `List Units` | GET | `/courses/{course}/units` | Daftar unit | Publik |
 | `Get Unit Detail` | GET | `/courses/{course}/units/{unit}` | Detail unit | Publik |
-| `Create Unit` | POST | `/courses/{course}/units` | Tambah unit | admin / super-admin |
-| `Update Unit` | PUT | `/courses/{course}/units/{unit}` | Update unit | admin / super-admin |
-| `Delete Unit` | DELETE | `/courses/{course}/units/{unit}` | Hapus unit | admin / super-admin |
-| `Reorder Units` | PUT | `/courses/{course}/units/reorder` | Reorder unit | admin / super-admin |
-| `Publish Unit` | PUT | `/courses/{course}/units/{unit}/publish` | Publish unit | admin / super-admin |
-| `Unpublish Unit` | PUT | `/courses/{course}/units/{unit}/unpublish` | Unpublish unit | admin / super-admin |
+| `Create Unit` | POST | `/courses/{course}/units` | Tambah unit | admin / superadmin |
+| `Update Unit` | PUT | `/courses/{course}/units/{unit}` | Update unit | admin / superadmin |
+| `Delete Unit` | DELETE | `/courses/{course}/units/{unit}` | Hapus unit | admin / superadmin |
+| `Reorder Units` | PUT | `/courses/{course}/units/reorder` | Reorder unit | admin / superadmin |
+| `Publish Unit` | PUT | `/courses/{course}/units/{unit}/publish` | Publish unit | admin / superadmin |
+| `Unpublish Unit` | PUT | `/courses/{course}/units/{unit}/unpublish` | Unpublish unit | admin / superadmin |
 
 #### Body (form-data)
 
@@ -312,11 +312,11 @@ Tidak ada body; gunakan Bearer token.
 | --- | --- | --- | --- | --- |
 | `List Lessons` | GET | `/courses/{course}/units/{unit}/lessons` | Daftar lesson | Authenticated |
 | `Get Lesson Detail` | GET | `/courses/{course}/units/{unit}/lessons/{lesson}` | Detail lesson | Authenticated |
-| `Create Lesson` | POST | `/courses/{course}/units/{unit}/lessons` | Tambah lesson | admin / super-admin |
-| `Update Lesson` | PUT | `/courses/{course}/units/{unit}/lessons/{lesson}` | Update lesson | admin / super-admin |
-| `Delete Lesson` | DELETE | `/courses/{course}/units/{unit}/lessons/{lesson}` | Hapus lesson | admin / super-admin |
-| `Publish Lesson` | PUT | `/courses/{course}/units/{unit}/lessons/{lesson}/publish` | Publish lesson | admin / super-admin |
-| `Unpublish Lesson` | PUT | `/courses/{course}/units/{unit}/lessons/{lesson}/unpublish` | Unpublish lesson | admin / super-admin |
+| `Create Lesson` | POST | `/courses/{course}/units/{unit}/lessons` | Tambah lesson | admin / superadmin |
+| `Update Lesson` | PUT | `/courses/{course}/units/{unit}/lessons/{lesson}` | Update lesson | admin / superadmin |
+| `Delete Lesson` | DELETE | `/courses/{course}/units/{unit}/lessons/{lesson}` | Hapus lesson | admin / superadmin |
+| `Publish Lesson` | PUT | `/courses/{course}/units/{unit}/lessons/{lesson}/publish` | Publish lesson | admin / superadmin |
+| `Unpublish Lesson` | PUT | `/courses/{course}/units/{unit}/lessons/{lesson}/unpublish` | Unpublish lesson | admin / superadmin |
 | `Complete Lesson` | POST | `/courses/{course}/units/{unit}/lessons/{lesson}/complete` | Tandai lesson selesai (student) | Authenticated |
 
 #### Body (form-data) Create / Update Lesson
@@ -337,9 +337,9 @@ Tidak ada body; gunakan Bearer token.
 | --- | --- | --- | --- | --- |
 | `List Lesson Blocks` | GET | `/courses/{course}/units/{unit}/lessons/{lesson}/blocks` | Daftar block | Authenticated |
 | `Get Lesson Block Detail` | GET | `/courses/{course}/units/{unit}/lessons/{lesson}/blocks/{block}` | Detail block | Authenticated |
-| `Create Lesson Block` | POST | `/courses/{course}/units/{unit}/lessons/{lesson}/blocks` | Tambah block | admin / super-admin |
-| `Update Lesson Block` | PUT | `/courses/{course}/units/{unit}/lessons/{lesson}/blocks/{block}` | Update block | admin / super-admin |
-| `Delete Lesson Block` | DELETE | `/courses/{course}/units/{unit}/lessons/{lesson}/blocks/{block}` | Hapus block | admin / super-admin |
+| `Create Lesson Block` | POST | `/courses/{course}/units/{unit}/lessons/{lesson}/blocks` | Tambah block | admin / superadmin |
+| `Update Lesson Block` | PUT | `/courses/{course}/units/{unit}/lessons/{lesson}/blocks/{block}` | Update block | admin / superadmin |
+| `Delete Lesson Block` | DELETE | `/courses/{course}/units/{unit}/lessons/{lesson}/blocks/{block}` | Hapus block | admin / superadmin |
 
 > Sesuaikan field body berdasarkan tipe block (cek request class khusus jika tersedia).
 
@@ -349,9 +349,9 @@ Tidak ada body; gunakan Bearer token.
 | --- | --- | --- | --- | --- | --- |
 | `List Course Tags` | GET | `/course-tags` | List tag (publik) | Tidak | - |
 | `Get Course Tag Detail` | GET | `/course-tags/{slug}` | Detail tag | Tidak | - |
-| `Create Course Tag` | POST | `/course-tags` | Buat tag | Bearer | admin / super-admin |
-| `Update Course Tag` | PUT | `/course-tags/{slug}` | Update tag | Bearer | admin / super-admin |
-| `Delete Course Tag` | DELETE | `/course-tags/{slug}` | Hapus tag | Bearer | admin / super-admin |
+| `Create Course Tag` | POST | `/course-tags` | Buat tag | Bearer | admin / superadmin |
+| `Update Course Tag` | PUT | `/course-tags/{slug}` | Update tag | Bearer | admin / superadmin |
+| `Delete Course Tag` | DELETE | `/course-tags/{slug}` | Hapus tag | Bearer | admin / superadmin |
 
 #### Query Params (GET `/course-tags`)
 
@@ -387,7 +387,7 @@ Tidak ada body; gunakan Bearer token.
 
 | Request Name | Method | Path | Description | Auth | Role |
 | --- | --- | --- | --- | --- | --- |
-| `Get Course Progress` | GET | `/courses/{course}/progress` | Ambil progres course | Bearer | student / instructor / admin / super-admin |
+| `Get Course Progress` | GET | `/courses/{course}/progress` | Ambil progres course | Bearer | student / instructor / admin / superadmin |
 | `Complete Lesson (Progress)` | POST | `/courses/{course}/units/{unit}/lessons/{lesson}/complete` | Tandai lesson selesai | Bearer | student |
 
 Tidak ada query param tambahan. Body untuk `complete` kosong.
@@ -396,7 +396,7 @@ Tidak ada query param tambahan. Body untuk `complete` kosong.
 
 ## 3. Enrollments Module (`/api/v1`)
 
-### 3.1 Student Actions (Role: `student`, kecuali `user_id` override oleh `super-admin`)
+### 3.1 Student Actions (Role: `student`, kecuali `user_id` override oleh `superadmin`)
 
 | Request Name | Method | Path | Description |
 | --- | --- | --- | --- |
@@ -417,23 +417,23 @@ Tidak ada query param tambahan. Body untuk `complete` kosong.
 
 | Key | Type | Required | Description | Example |
 | --- | --- | --- | --- | --- |
-| `user_id` | integer | no | Hanya untuk super-admin membatalkan/mengundurkan user lain | `21` |
+| `user_id` | integer | no | Hanya untuk superadmin membatalkan/mengundurkan user lain | `21` |
 
 #### Query Params (GET `/enrollment-status`)
 
 | Key | Type | Description | Example |
 | --- | --- | --- | --- |
-| `user_id` | integer | Opsional, hanya untuk super-admin melihat status user lain | `21` |
+| `user_id` | integer | Opsional, hanya untuk superadmin melihat status user lain | `21` |
 
 ### 3.2 Course Admin & Instructor
 
 | Request Name | Method | Path | Description | Role |
 | --- | --- | --- | --- | --- |
-| `List Managed Enrollments` | GET | `/courses/enrollments` | Daftar enrolment dari semua course yang dikelola | admin / instructor / super-admin |
-| `List Course Enrollments` | GET | `/courses/{course}/enrollments` | Daftar enrolment course tertentu | admin / instructor / super-admin |
-| `Approve Enrollment` | POST | `/enrollments/{enrollment}/approve` | Setujui pending | admin / instructor / super-admin |
-| `Decline Enrollment` | POST | `/enrollments/{enrollment}/decline` | Tolak pending | admin / instructor / super-admin |
-| `Remove Enrollment` | POST | `/enrollments/{enrollment}/remove` | Keluarkan peserta | admin / instructor / super-admin |
+| `List Managed Enrollments` | GET | `/courses/enrollments` | Daftar enrolment dari semua course yang dikelola | admin / instructor / superadmin |
+| `List Course Enrollments` | GET | `/courses/{course}/enrollments` | Daftar enrolment course tertentu | admin / instructor / superadmin |
+| `Approve Enrollment` | POST | `/enrollments/{enrollment}/approve` | Setujui pending | admin / instructor / superadmin |
+| `Decline Enrollment` | POST | `/enrollments/{enrollment}/decline` | Tolak pending | admin / instructor / superadmin |
+| `Remove Enrollment` | POST | `/enrollments/{enrollment}/remove` | Keluarkan peserta | admin / instructor / superadmin |
 
 #### Query Params (GET `/courses/{course}/enrollments`)
 
@@ -450,7 +450,7 @@ Tidak ada body tambahan untuk approve/decline/remove.
 
 | Request Name | Method | Path | Description |
 | --- | --- | --- | --- |
-| `List All Enrollments` | GET | `/enrollments` | Daftar seluruh enrolment (super-admin saja) |
+| `List All Enrollments` | GET | `/enrollments` | Daftar seluruh enrolment (superadmin saja) |
 
 #### Query Params
 

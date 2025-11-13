@@ -404,7 +404,7 @@ class AuthApiController extends Controller
             return $this->error('User tidak ditemukan', 404);
         }
 
-        $isAllowedRole = $target->hasRole('admin') || $target->hasRole('super-admin') || $target->hasRole('instructor');
+        $isAllowedRole = $target->hasRole('admin') || $target->hasRole('superadmin') || $target->hasRole('instructor');
         $isPending = ($target->status ?? null) === 'pending';
         if (! ($isAllowedRole && $isPending)) {
             return $this->error('Hanya untuk akun admin, superadmin, atau instruktur yang berstatus pending.', 422);
