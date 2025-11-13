@@ -11,7 +11,20 @@ class EventServiceProvider extends ServiceProvider
      *
      * @var array<string, array<int, string>>
      */
-    protected $listen = [];
+    protected $listen = [
+        \Modules\Schemes\Events\LessonCompleted::class => [
+            \Modules\Gamification\Listeners\AwardXpForLessonCompleted::class,
+        ],
+        \Modules\Learning\Events\SubmissionCreated::class => [
+            \Modules\Gamification\Listeners\AwardXpForAssignmentSubmission::class,
+        ],
+        \Modules\Assessments\Events\AttemptCompleted::class => [
+            \Modules\Gamification\Listeners\AwardXpForAttemptCompleted::class,
+        ],
+        \Modules\Schemes\Events\CourseCompleted::class => [
+            \Modules\Gamification\Listeners\AwardBadgeForCourseCompleted::class,
+        ],
+    ];
 
     /**
      * Indicates if events should be discovered.

@@ -22,14 +22,16 @@ return new class extends Migration {
             // $table->integer('duration_estimate')->nullable(); (Notes BE:Ganti di Response menampilkan by logic)
             $table->string('thumbnail_path', 255)->nullable();
             $table->string('banner_path', 255)->nullable();
-            $table->enum('visibility', ['public', 'private'])->default('public');
+            $table->enum('enrollment_type', ['auto_accept', 'key_based', 'approval'])->default('auto_accept');
+            $table->string('enrollment_key', 100)->nullable();
             $table->enum('progression_mode', ['sequential', 'free'])->default('sequential');
             $table->enum('status', ['draft', 'published', 'archived'])->default('draft');
             $table->timestamp('published_at')->nullable();
             $table->timestamps();
             $table->softDeletes();
 
-            $table->index(['type', 'status', 'visibility']);
+            $table->index(['type', 'status']);
+            $table->index(['enrollment_type']);
         });
     }
 

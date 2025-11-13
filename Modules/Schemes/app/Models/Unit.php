@@ -2,18 +2,19 @@
 
 namespace Modules\Schemes\Models;
 
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
 class Unit extends Model
 {
+    use HasFactory;
     protected $fillable = [
         'course_id', 'code', 'slug', 'title', 'description',
-        'order', 'estimated_duration', 'status',
+        'order', 'status',
     ];
 
     protected $casts = [
         'order' => 'integer',
-        'estimated_duration' => 'integer',
     ];
 
     public function course()
@@ -29,5 +30,13 @@ class Unit extends Model
     public function getRouteKeyName(): string
     {
         return 'slug';
+    }
+
+    /**
+     * Create a new factory instance for the model.
+     */
+    protected static function newFactory()
+    {
+        return \Database\Factories\UnitFactory::new();
     }
 }

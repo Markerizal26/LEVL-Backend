@@ -2,6 +2,7 @@
 
 namespace Modules\Schemes\Models;
 
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
@@ -10,24 +11,36 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 
 class Course extends Model
 {
-    use SoftDeletes;
+    use HasFactory, SoftDeletes;
+
+    /**
+     * Fields that support full-text search via QueryFilter.
+     *
+     * @var array<int, string>
+     */
+    protected array $searchable = ['title', 'short_desc'];
 
     protected $fillable = [
         'code', 'slug', 'title', 'short_desc', 'type',
-        'level_tag', 'category_id', 'tags_json', 'outcomes_json',
-        'prereq_json', 'duration_estimate', 'thumbnail_path',
-        'banner_path', 'visibility', 'progression_mode',
+        'level_tag', 'category_id', 'tags_json',
+        'duration_estimate', 'thumbnail_path',
+        'banner_path', 'progression_mode', 'enrollment_type', 'enrollment_key',
         'status', 'published_at', 'instructor_id',
     ];
 
     protected $casts = [
         'tags_json' => 'array',
-        'outcomes_json' => 'array',
-        'prereq_json' => 'array',
         'published_at' => 'datetime',
     ];
 
     protected $appends = ['thumbnail_url', 'banner_url', 'tag_list'];
+
+    protected $hidden = [
+        'thumbnail_path',
+        'banner_path',
+        'enrollment_key',
+        'deleted_at',
+    ];
 
     public function getThumbnailUrlAttribute(): ?string
     {
@@ -128,5 +141,50 @@ class Course extends Model
         }
 
         return [];
+    }
+
+    /**
+     * Get the outcomes for this course.
+     */
+    public function outcomes(): HasMany
+    {
+        return $this->hasMany(CourseOutcome::class)->orderBy('order');
+    }
+
+    /**
+     * Get the prerequisites for this course.
+     */
+    public function prerequisites(): HasMany
+    {
+        return $this->hasMany(CoursePrerequisite::class, 'course_id');
+    }
+
+    /**
+     * Get courses that require this course as prerequisite.
+     */
+    public function requiredBy(): HasMany
+    {
+        return $this->hasMany(CoursePrerequisite::class, 'prerequisite_course_id');
+    }
+
+    /**
+     * Get prerequisite courses.
+     */
+    public function prerequisiteCourses(): BelongsToMany
+    {
+        return $this->belongsToMany(
+            Course::class,
+            'course_prerequisites',
+            'course_id',
+            'prerequisite_course_id'
+        )->withPivot('is_required')->withTimestamps();
+    }
+
+    /**
+     * Create a new factory instance for the model.
+     */
+    protected static function newFactory()
+    {
+        return \Database\Factories\CourseFactory::new();
     }
 }

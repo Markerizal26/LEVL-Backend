@@ -11,7 +11,11 @@ class EventServiceProvider extends ServiceProvider
      *
      * @var array<string, array<int, string>>
      */
-    protected $listen = [];
+    protected $listen = [
+        \Modules\Enrollments\Events\EnrollmentCreated::class => [
+            \Modules\Enrollments\Listeners\InitializeProgressForEnrollment::class,
+        ],
+    ];
 
     /**
      * Indicates if events should be discovered.

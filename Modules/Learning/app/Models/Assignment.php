@@ -10,11 +10,14 @@ class Assignment extends Model
         'lesson_id', 'created_by', 'title', 'description',
         'type', 'submission_type', 'max_score',
         'available_from', 'deadline_at', 'status',
+        'allow_resubmit', 'late_penalty_percent',
     ];
 
     protected $casts = [
         'available_from' => 'datetime',
         'deadline_at' => 'datetime',
+        'allow_resubmit' => 'boolean',
+        'late_penalty_percent' => 'integer',
     ];
 
     public function lesson()
@@ -30,5 +33,28 @@ class Assignment extends Model
     public function submissions()
     {
         return $this->hasMany(Submission::class);
+    }
+
+    public function isAvailable(): bool
+    {
+        if ($this->status !== 'published') {
+            return false;
+        }
+
+        $now = now();
+        if ($this->available_from && $now->lt($this->available_from)) {
+            return false;
+        }
+
+        return true;
+    }
+
+    public function isPastDeadline(): bool
+    {
+        if (! $this->deadline_at) {
+            return false;
+        }
+
+        return now()->gt($this->deadline_at);
     }
 }

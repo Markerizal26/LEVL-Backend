@@ -3,6 +3,8 @@
 namespace Modules\Schemes\Http\Controllers;
 
 use App\Support\ApiResponse;
+use Illuminate\Database\QueryException;
+use Illuminate\Database\UniqueConstraintViolationException;
 use Illuminate\Http\Request;
 use Illuminate\Routing\Controller;
 use Modules\Schemes\Http\Requests\CourseRequest;
@@ -23,7 +25,7 @@ class CourseController extends Controller
     {
         $params = $request->all();
 
-        $isPublicListing = ($params['visibility'] ?? null) === 'public' && (($params['status'] ?? 'published') === 'published');
+        $isPublicListing = ($params['status'] ?? null) === 'published';
 
         $paginator = $isPublicListing
             ? $this->service->listPublic($params)
@@ -44,14 +46,19 @@ class CourseController extends Controller
         }
         /** @var \Modules\Auth\Models\User|null $actor */
         $actor = auth('api')->user();
-        $course = $this->service->create($data, $actor);
+
+        try {
+            $course = $this->service->create($data, $actor);
+        } catch (UniqueConstraintViolationException|QueryException $e) {
+            return $this->handleCourseUniqueConstraint($e);
+        }
 
         return $this->created(['course' => $course], 'Course berhasil dibuat.');
     }
 
     public function show(Course $course)
     {
-        return $this->success(['course' => $course->load('tags')]);
+        return $this->success(['course' => $course->load(['tags', 'outcomes', 'prerequisiteCourses'])]);
     }
 
     public function update(CourseRequest $request, Course $course)
@@ -63,7 +70,11 @@ class CourseController extends Controller
         if ($request->hasFile('banner')) {
             $data['banner_path'] = app(\App\Services\UploadService::class)->storePublic($request->file('banner'), 'courses/banners');
         }
-        $updated = $this->service->update($course->id, $data);
+        try {
+            $updated = $this->service->update($course->id, $data);
+        } catch (UniqueConstraintViolationException|QueryException $e) {
+            return $this->handleCourseUniqueConstraint($e);
+        }
 
         return $this->success(['course' => $updated], 'Course berhasil diperbarui.');
     }
@@ -99,5 +110,26 @@ class CourseController extends Controller
         $updated = $this->service->unpublish($course->id);
 
         return $this->success(['course' => $updated], 'Course berhasil diunpublish.');
+    }
+
+    private function handleCourseUniqueConstraint(QueryException $e)
+    {
+        $message = $e->getMessage();
+
+        $errors = [];
+        if (str_contains($message, 'courses_code_unique')) {
+            $errors['code'][] = 'Kode sudah digunakan.';
+        }
+        if (str_contains($message, 'courses_slug_unique')) {
+            $errors['slug'][] = 'Slug sudah digunakan.';
+        }
+
+        if (! empty($errors)) {
+            return $this->validationError($errors);
+        }
+
+        return $this->validationError([
+            'general' => ['Data duplikat. Periksa kembali isian Anda.'],
+        ]);
     }
 }

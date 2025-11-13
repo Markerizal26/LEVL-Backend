@@ -2,6 +2,7 @@
 
 namespace Modules\Schemes\Repositories;
 
+use App\Support\FilterableRepository;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Collection;
@@ -10,7 +11,21 @@ use Modules\Schemes\Models\Course;
 
 class CourseRepository
 {
-    private array $allowedSortFields = ['id', 'code', 'title', 'created_at', 'updated_at', 'published_at'];
+    use FilterableRepository;
+
+    /**
+     * Allowed filter keys mapped to database columns.
+     *
+     * @var array<int, string>
+     */
+    private array $allowedFilters = ['status', 'level_tag', 'type', 'category_id'];
+
+    /**
+     * Allowed sort fields.
+     *
+     * @var array<int, string>
+     */
+    private array $allowedSorts = ['id', 'code', 'title', 'created_at', 'updated_at', 'published_at'];
 
     public function query(): Builder
     {
@@ -42,7 +57,79 @@ class CourseRepository
 
     public function delete(Course $course): void
     {
-        $course->delete();
+        $course->forceDelete();
+    }
+
+    public function paginate(array $params, int $perPage = 15): LengthAwarePaginator
+    {
+        $params = $this->normalizeParams($params);
+        $query = $this->query();
+
+        $this->applyTagFilters($query, $params['filter']['tag'] ?? null, $params['tags'] ?? null);
+
+        return $this->filteredPaginate(
+            $query,
+            $params,
+            $this->allowedFilters,
+            $this->allowedSorts,
+            'title',
+            $perPage
+        );
+    }
+
+    public function list(array $params): Collection
+    {
+        $params = $this->normalizeParams($params);
+        $query = $this->query();
+
+        $filter = $this->filter($query, $params)
+            ->allowFilters($this->allowedFilters)
+            ->allowSorts($this->allowedSorts)
+            ->setDefaultSort('title');
+
+        $filter->applyFiltersAndSorting($query);
+        $this->applyTagFilters($query, $params['filter']['tag'] ?? null, $params['tags'] ?? null);
+
+        return $query->get();
+    }
+
+    private function normalizeParams(array $params): array
+    {
+        $filters = $params['filter'] ?? [];
+        if (!is_array($filters)) {
+            $filters = [];
+        }
+
+        if (isset($filters['level'])) {
+            $filters['level_tag'] = $filters['level'];
+            unset($filters['level']);
+        }
+
+        if (isset($filters['category'])) {
+            $filters['category_id'] = $this->parseCategoryFilter($filters['category']);
+            unset($filters['category']);
+        }
+
+        if (isset($params['category_id'])) {
+            $legacy = is_array($params['category_id']) ? $params['category_id'] : [$params['category_id']];
+            $filters['category_id'] = array_merge($filters['category_id'] ?? [], $legacy);
+            unset($params['category_id']);
+        }
+
+        if (isset($filters['category_id'])) {
+            $filters['category_id'] = array_values(array_filter(
+                array_map(fn ($value) => (int) $value, (array) $filters['category_id']),
+                fn ($value) => $value > 0
+            ));
+
+            if (empty($filters['category_id'])) {
+                unset($filters['category_id']);
+            }
+        }
+
+        $params['filter'] = $filters;
+
+        return $params;
     }
 
     private function parseCategoryFilter($value): array
@@ -50,14 +137,20 @@ class CourseRepository
         if (is_array($value)) {
             return $value;
         }
+
         if (is_string($value)) {
             $trim = trim($value);
-            if ($trim !== '' && ($trim[0] === '[' || str_starts_with($trim, '%5B'))) {
 
+            if ($trim === '') {
+                return [];
+            }
+
+            if ($trim[0] === '[' || str_starts_with($trim, '%5B')) {
                 $decoded = json_decode($trim, true);
                 if (json_last_error() === JSON_ERROR_NONE && is_array($decoded)) {
                     return $decoded;
                 }
+
                 $urldec = urldecode($trim);
                 $decoded = json_decode($urldec, true);
                 if (json_last_error() === JSON_ERROR_NONE && is_array($decoded)) {
@@ -65,7 +158,7 @@ class CourseRepository
                 }
             }
 
-            return [$value];
+            return [$trim];
         }
 
         return [];
@@ -73,17 +166,23 @@ class CourseRepository
 
     private function parseArrayFilter($value): array
     {
-
         if (is_array($value)) {
             return $value;
         }
+
         if (is_string($value)) {
             $trim = trim($value);
-            if ($trim !== '' && ($trim[0] === '[' || str_starts_with($trim, '%5B'))) {
+
+            if ($trim === '') {
+                return [];
+            }
+
+            if ($trim[0] === '[' || str_starts_with($trim, '%5B')) {
                 $decoded = json_decode($trim, true);
                 if (json_last_error() === JSON_ERROR_NONE && is_array($decoded)) {
                     return $decoded;
                 }
+
                 $urldec = urldecode($trim);
                 $decoded = json_decode($urldec, true);
                 if (json_last_error() === JSON_ERROR_NONE && is_array($decoded)) {
@@ -91,118 +190,19 @@ class CourseRepository
                 }
             }
 
-            return [$value];
+            return [$trim];
         }
 
         return [];
-    }
-
-    private function applySorting(Builder $query, ?string $sort): void
-    {
-        if ($sort === null || $sort === '') {
-            $query->orderBy('title', 'asc');
-
-            return;
-        }
-        $direction = str_starts_with($sort, '-') ? 'desc' : 'asc';
-        $field = ltrim($sort, '-');
-        if (! in_array($field, $this->allowedSortFields, true)) {
-            $query->orderBy('title', 'asc');
-
-            return;
-        }
-        $query->orderBy($field, $direction);
-    }
-
-    public function paginate(array $params, int $perPage = 15): LengthAwarePaginator
-    {
-        $query = Course::query()->with('tags');
-
-        $filters = $params['filter'] ?? [];
-
-        if (! empty($filters['visibility'])) {
-            $query->where('visibility', $filters['visibility']);
-        }
-        if (! empty($filters['status'])) {
-            $query->where('status', $filters['status']);
-        }
-        if (! empty($filters['level'])) {
-            $query->where('level_tag', $filters['level']);
-        }
-        if (! empty($filters['type'])) {
-            $query->where('type', $filters['type']); // okupasi | kluster
-        }
-
-        if (! empty($filters['category'])) {
-            $cat = $filters['category'];
-            $catIds = $this->parseCategoryFilter($cat);
-            $query->whereIn('category_id', array_filter($catIds, fn ($v) => (int) $v > 0));
-        }
-
-        // Legacy support
-        if (! empty($params['category_id'])) {
-            $catIds = is_array($params['category_id']) ? $params['category_id'] : [$params['category_id']];
-            $query->whereIn('category_id', array_filter($catIds, fn ($v) => (int) $v > 0));
-        }
-
-        $this->applyTagFilters($query, $filters['tag'] ?? null, $params['tags'] ?? null);
-
-        if (! empty($params['search'])) {
-            $keyword = trim((string) $params['search']);
-            $query->where(function (Builder $sub) use ($keyword) {
-                $sub->where('title', 'like', "%{$keyword}%")
-                    ->orWhere('short_desc', 'like', "%{$keyword}%");
-            });
-        }
-
-        $this->applySorting($query, $params['sort'] ?? null);
-
-        return $query->paginate($perPage)->appends($params);
-    }
-
-    public function list(array $params): Collection
-    {
-        $query = Course::query()->with('tags');
-
-        $filters = $params['filter'] ?? [];
-        if (! empty($filters['visibility'])) {
-            $query->where('visibility', $filters['visibility']);
-        }
-        if (! empty($filters['status'])) {
-            $query->where('status', $filters['status']);
-        }
-        if (! empty($filters['level'])) {
-            $query->where('level_tag', $filters['level']);
-        }
-        if (! empty($filters['type'])) {
-            $query->where('type', $filters['type']);
-        }
-        if (! empty($filters['category'])) {
-            $cat = $filters['category'];
-            $catIds = $this->parseCategoryFilter($cat);
-            $query->whereIn('category_id', array_filter($catIds, fn ($v) => (int) $v > 0));
-        }
-        $this->applyTagFilters($query, $filters['tag'] ?? null, $params['tags'] ?? null);
-        if (! empty($params['search'])) {
-            $keyword = trim((string) $params['search']);
-            $query->where(function (Builder $sub) use ($keyword) {
-                $sub->where('title', 'like', "%{$keyword}%")
-                    ->orWhere('short_desc', 'like', "%{$keyword}%");
-            });
-        }
-
-        $this->applySorting($query, $params['sort'] ?? null);
-
-        return $query->get();
     }
 
     private function applyTagFilters(Builder $query, $filterTag, $legacyTags): void
     {
         $tags = [];
 
-        if (! empty($filterTag)) {
+        if (!empty($filterTag)) {
             $tags = $this->parseArrayFilter($filterTag);
-        } elseif (! empty($legacyTags) && is_array($legacyTags)) {
+        } elseif (!empty($legacyTags) && is_array($legacyTags)) {
             $tags = $legacyTags;
         }
 
@@ -228,3 +228,4 @@ class CourseRepository
         }
     }
 }
+

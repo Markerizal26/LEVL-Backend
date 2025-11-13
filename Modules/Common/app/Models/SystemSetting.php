@@ -111,10 +111,15 @@ class SystemSetting extends Model
      */
     public static function set(string $key, $value): void
     {
-        static::updateOrCreate(
+        $setting = static::updateOrCreate(
             ['key' => $key],
             ['value' => null, 'type' => 'string']
-        )->setValue($value)->save();
+        );
+        
+        if ($setting) {
+            $setting->setValue($value);
+            $setting->save();
+        }
     }
 }
 

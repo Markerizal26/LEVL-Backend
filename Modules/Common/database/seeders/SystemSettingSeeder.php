@@ -41,11 +41,14 @@ class SystemSettingSeeder extends Seeder
             ['key' => 'learning.auto_complete_lesson', 'value' => 'true', 'type' => 'boolean'],
             ['key' => 'learning.default_unit_order', 'value' => 'asc', 'type' => 'string'],
             ['key' => 'learning.enable_discussion_forum', 'value' => 'false', 'type' => 'boolean'],
+            ['key' => 'learning.allow_resubmit', 'value' => 'true', 'type' => 'boolean'],
+            ['key' => 'learning.late_penalty_percent', 'value' => '10', 'type' => 'number'],
 
             ['key' => 'gamification.enable', 'value' => 'true', 'type' => 'boolean'],
             ['key' => 'gamification.points.lesson_complete', 'value' => '10', 'type' => 'number'],
             ['key' => 'gamification.points.assignment_submit', 'value' => '20', 'type' => 'number'],
             ['key' => 'gamification.points.quiz_complete', 'value' => '30', 'type' => 'number'],
+            ['key' => 'gamification.points.course_complete', 'value' => '50', 'type' => 'number'],
             ['key' => 'gamification.challenge_bonus_multiplier', 'value' => '1.5', 'type' => 'number'],
             ['key' => 'gamification.level_thresholds', 'value' => json_encode([100, 300, 700, 1500]), 'type' => 'json'],
 

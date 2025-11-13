@@ -13,13 +13,17 @@ class CoursePolicy
 
     public function create(User $user)
     {
-        return $user->hasRole('admin')
-            ? Response::allow()
-            : $this->deny('Hanya admin atau superadmin yang dapat membuat course.');
+        if ($user->hasRole('superadmin') || $user->hasRole('admin')) {
+            return Response::allow();
+        }
+        return $this->deny('Hanya admin atau superadmin yang dapat membuat course.');
     }
 
     public function update(User $user, Course $course)
     {
+        if ($user->hasRole('superadmin')) {
+            return Response::allow();
+        }
         if (! $user->hasRole('admin')) {
             return $this->deny('Hanya admin atau superadmin yang dapat mengubah course.');
         }
@@ -35,6 +39,9 @@ class CoursePolicy
 
     public function delete(User $user, Course $course)
     {
+        if ($user->hasRole('superadmin')) {
+            return Response::allow();
+        }
         if (! $user->hasRole('admin')) {
             return $this->deny('Hanya admin atau superadmin yang dapat menghapus course.');
         }

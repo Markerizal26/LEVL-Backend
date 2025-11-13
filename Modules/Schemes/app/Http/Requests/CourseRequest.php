@@ -17,7 +17,8 @@ class CourseRequest extends FormRequest
 
     public function rules(): array
     {
-        $courseId = $this->route('course') ? (int) $this->route('course') : 0;
+        $course = $this->route('course');
+        $courseId = $course ? (is_object($course) ? $course->id : (int) $course) : 0;
 
         return $this->rulesCourse($courseId);
     }
@@ -78,12 +79,8 @@ class CourseRequest extends FormRequest
             $data['tags_list'] = $data['tags'];
             unset($data['tags']);
         }
-        if (array_key_exists('outcomes', $data)) {
-            $data['outcomes_json'] = $data['outcomes'];
-            unset($data['outcomes']);
-        }
         if (array_key_exists('prereq', $data)) {
-            $data['prereq_json'] = $data['prereq'];
+            $data['prerequisites'] = $data['prereq'];
             unset($data['prereq']);
         }
 

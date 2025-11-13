@@ -10,7 +10,6 @@ class CourseProgress extends Model
 
     protected $fillable = [
         'enrollment_id',
-        'course_id',
         'status',
         'progress_percent',
         'started_at',
@@ -28,9 +27,27 @@ class CourseProgress extends Model
         return $this->belongsTo(Enrollment::class);
     }
 
+    /**
+     * Get the course through enrollment.
+     */
     public function course()
     {
-        return $this->belongsTo(\Modules\Schemes\Models\Course::class);
+        return $this->hasOneThrough(
+            \Modules\Schemes\Models\Course::class,
+            Enrollment::class,
+            'id', // Foreign key on enrollments table
+            'id', // Foreign key on courses table
+            'enrollment_id', // Local key on course_progress table
+            'course_id' // Local key on enrollments table
+        );
+    }
+
+    /**
+     * Get course_id via enrollment relationship.
+     */
+    public function getCourseIdAttribute()
+    {
+        return $this->enrollment?->course_id;
     }
 }
 

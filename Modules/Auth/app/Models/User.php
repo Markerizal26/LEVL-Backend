@@ -2,6 +2,7 @@
 
 namespace Modules\Auth\Models;
 
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Spatie\Permission\Traits\HasRoles;
@@ -9,7 +10,7 @@ use Tymon\JWTAuth\Contracts\JWTSubject;
 
 class User extends Authenticatable implements JWTSubject
 {
-    use HasRoles, Notifiable;
+    use HasFactory, HasRoles, Notifiable;
 
     protected $guard_name = 'api';
 
@@ -45,6 +46,16 @@ class User extends Authenticatable implements JWTSubject
         return asset('storage/'.$this->avatar_path);
     }
 
+    public function gamificationStats()
+    {
+        return $this->hasOne(\Modules\Gamification\Models\UserGamificationStat::class);
+    }
+
+    public function badges()
+    {
+        return $this->hasMany(\Modules\Gamification\Models\UserBadge::class);
+    }
+
     public function getJWTIdentifier()
     {
         return $this->getKey();
@@ -56,5 +67,13 @@ class User extends Authenticatable implements JWTSubject
             'status' => $this->status,
             'roles' => $this->getRoleNames()->values()->toArray(),
         ];
+    }
+
+    /**
+     * Create a new factory instance for the model.
+     */
+    protected static function newFactory()
+    {
+        return \Database\Factories\UserFactory::new();
     }
 }

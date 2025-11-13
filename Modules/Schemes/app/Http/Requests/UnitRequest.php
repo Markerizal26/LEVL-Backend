@@ -17,8 +17,11 @@ class UnitRequest extends FormRequest
 
     public function rules(): array
     {
-        $courseId = (int) $this->route('course');
-        $unitId = $this->route('unit') ? (int) $this->route('unit') : 0;
+        $course = $this->route('course');
+        $courseId = $course ? (is_object($course) ? $course->id : (int) $course) : 0;
+        
+        $unit = $this->route('unit');
+        $unitId = $unit ? (is_object($unit) ? $unit->id : (int) $unit) : 0;
 
         return $this->rulesUnit($courseId, $unitId);
     }

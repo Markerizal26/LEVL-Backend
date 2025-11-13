@@ -13,7 +13,9 @@ class UnitPolicy
 
     public function create(User $user, int $courseId)
     {
-
+        if ($user->hasRole('superadmin')) {
+            return Response::allow();
+        }
         if (! $user->hasRole('admin')) {
             return $this->deny('Hanya admin atau superadmin yang dapat membuat unit.');
         }
@@ -36,7 +38,9 @@ class UnitPolicy
 
     public function update(User $user, Unit $unit)
     {
-
+        if ($user->hasRole('superadmin')) {
+            return Response::allow();
+        }
         if (! $user->hasRole('admin')) {
             return $this->deny('Hanya admin atau superadmin yang dapat mengubah unit.');
         }
@@ -59,7 +63,9 @@ class UnitPolicy
 
     public function delete(User $user, Unit $unit)
     {
-
+        if ($user->hasRole('superadmin')) {
+            return Response::allow();
+        }
         if (! $user->hasRole('admin')) {
             return $this->deny('Hanya admin atau superadmin yang dapat menghapus unit.');
         }

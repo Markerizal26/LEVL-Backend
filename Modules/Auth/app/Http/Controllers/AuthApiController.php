@@ -29,6 +29,7 @@ use Modules\Auth\Models\User;
 use Modules\Auth\Services\AuthService;
 use Modules\Auth\Services\EmailVerificationService;
 use Tymon\JWTAuth\JWTAuth;
+use Modules\Common\Models\Audit;
 
 class AuthApiController extends Controller
 {
@@ -166,7 +167,7 @@ class AuthApiController extends Controller
 
         $user->save();
 
-        \Modules\Operations\Models\SystemAudit::create([
+        Audit::create([
             'action' => 'update',
             'user_id' => $user->id,
             'module' => 'Auth',
@@ -302,7 +303,7 @@ class AuthApiController extends Controller
 
         $uuid = $this->emailVerification->sendChangeEmailLink($user, $validated['new_email']);
 
-        \Modules\Operations\Models\SystemAudit::create([
+        Audit::create([
             'action' => 'update',
             'user_id' => $user->id,
             'module' => 'Auth',
@@ -404,7 +405,7 @@ class AuthApiController extends Controller
             return $this->error('User tidak ditemukan', 404);
         }
 
-        $isAllowedRole = $target->hasRole('admin') || $target->hasRole('super-admin') || $target->hasRole('instructor');
+        $isAllowedRole = $target->hasRole('admin') || $target->hasRole('superadmin') || $target->hasRole('instructor');
         $isPending = ($target->status ?? null) === 'pending';
         if (! ($isAllowedRole && $isPending)) {
             return $this->error('Hanya untuk akun admin, superadmin, atau instruktur yang berstatus pending.', 422);

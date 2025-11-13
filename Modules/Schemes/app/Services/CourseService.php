@@ -3,7 +3,6 @@
 namespace Modules\Schemes\Services;
 
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
-use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Str;
 use Modules\Schemes\Events\CourseCreated;
 use Modules\Schemes\Events\CourseDeleted;
@@ -20,15 +19,11 @@ class CourseService
 
     public function listPublic(array $params): LengthAwarePaginator
     {
-        $params['visibility'] = 'public';
         $params['status'] = $params['status'] ?? 'published';
 
-        return Cache::remember('courses_public', now()->addMinutes(10), function () use ($params) {
+        $perPage = isset($params['per_page']) ? max(1, (int) $params['per_page']) : 15;
 
-            $perPage = isset($params['per_page']) ? max(1, (int) $params['per_page']) : 15;
-
-            return $this->repository->paginate($params, $perPage);
-        });
+        return $this->repository->paginate($params, $perPage);
     }
 
     public function list(array $params): LengthAwarePaginator
@@ -41,7 +36,9 @@ class CourseService
     public function create(array $data, ?\Modules\Auth\Models\User $actor = null): Course
     {
         $tags = $data['tags_list'] ?? [];
-        unset($data['tags_list']);
+        $outcomes = $data['outcomes'] ?? [];
+        $prerequisites = $data['prerequisites'] ?? [];
+        unset($data['tags_list'], $data['outcomes'], $data['prerequisites']);
 
         if (! isset($data['tags_json'])) {
             $data['tags_json'] = [];
@@ -56,13 +53,18 @@ class CourseService
             $data['status'] = 'draft';
         }
 
+        $enrollmentType = $data['enrollment_type'] ?? 'auto_accept';
+        if ($enrollmentType !== 'key_based') {
+            $data['enrollment_key'] = null;
+        }
+
         $course = $this->repository->create($data);
 
         $adminIds = [];
         if (! empty($data['course_admins']) && is_array($data['course_admins'])) {
             $adminIds = array_map('intval', $data['course_admins']);
         }
-        if ($actor && ($actor->hasRole('admin') || $actor->hasRole('super-admin'))) {
+        if ($actor && ($actor->hasRole('admin') || $actor->hasRole('superadmin'))) {
             $adminIds[] = (int) $actor->id;
         }
         if (! empty($adminIds) && method_exists($course, 'admins')) {
@@ -72,10 +74,10 @@ class CourseService
         $course->load('tags');
 
         $this->tagService->syncCourseTags($course, $tags);
+        $this->syncCourseOutcomes($course, $outcomes);
+        $this->syncCoursePrerequisites($course, $prerequisites);
 
-        $freshCourse = $course->fresh(['tags', 'admins', 'instructor']);
-
-        Cache::forget('courses_public');
+        $freshCourse = $course->fresh(['tags', 'admins', 'instructor', 'outcomes', 'prerequisiteCourses']);
 
         CourseCreated::dispatch($freshCourse);
 
@@ -100,10 +102,30 @@ class CourseService
             $data['slug'] = $this->generateUniqueSlug($data['slug'], $course->id);
         }
 
+        $enrollmentType = $data['enrollment_type'] ?? $course->enrollment_type;
+        if ($enrollmentType !== 'key_based') {
+            $data['enrollment_key'] = null;
+        } elseif (! array_key_exists('enrollment_key', $data)) {
+            // keep existing key
+            unset($data['enrollment_key']);
+        }
+
+        $outcomes = $data['outcomes'] ?? null;
+        $prerequisites = $data['prerequisites'] ?? null;
+        unset($data['outcomes'], $data['prerequisites']);
+
         $course = $this->repository->update($course, $data);
 
         if ($tags !== null) {
             $this->tagService->syncCourseTags($course, $tags);
+        }
+
+        if ($outcomes !== null) {
+            $this->syncCourseOutcomes($course, $outcomes);
+        }
+
+        if ($prerequisites !== null) {
+            $this->syncCoursePrerequisites($course, $prerequisites);
         }
 
         $course->load('tags');
@@ -112,9 +134,7 @@ class CourseService
             CoursePublished::dispatch($course);
         }
 
-        Cache::forget('courses_public');
-
-        return $course->fresh(['tags', 'admins', 'instructor']);
+        return $course->fresh(['tags', 'admins', 'instructor', 'outcomes', 'prerequisiteCourses']);
     }
 
     public function delete(int $id): bool
@@ -125,8 +145,6 @@ class CourseService
         }
 
         $this->repository->delete($course);
-
-        Cache::forget('courses_public');
 
         CourseDeleted::dispatch($course);
 
@@ -145,7 +163,6 @@ class CourseService
             'published_at' => now(),
         ]);
 
-        Cache::forget('courses_public');
         CoursePublished::dispatch($course->fresh());
 
         return $course->fresh();
@@ -162,8 +179,6 @@ class CourseService
             'status' => 'draft',
             'published_at' => null,
         ]);
-
-        Cache::forget('courses_public');
 
         return $course->fresh();
     }
@@ -185,5 +200,42 @@ class CourseService
             }
             $suffix++;
         } while (true);
+    }
+
+    private function syncCourseOutcomes(Course $course, array $outcomes): void
+    {
+        $course->outcomes()->delete();
+
+        foreach ($outcomes as $index => $outcome) {
+            if (empty($outcome)) {
+                continue;
+            }
+
+            $course->outcomes()->create([
+                'outcome_text' => is_string($outcome) ? $outcome : (is_array($outcome) ? ($outcome['text'] ?? $outcome['outcome_text'] ?? json_encode($outcome)) : (string) $outcome),
+                'order' => is_array($outcome) ? ($outcome['order'] ?? $index) : $index,
+            ]);
+        }
+    }
+
+    private function syncCoursePrerequisites(Course $course, array $prerequisites): void
+    {
+        $course->prerequisites()->delete();
+
+        foreach ($prerequisites as $prereq) {
+            if (empty($prereq)) {
+                continue;
+            }
+
+            $prerequisiteCourseId = is_array($prereq) ? ($prereq['course_id'] ?? $prereq['id'] ?? null) : $prereq;
+            $isRequired = is_array($prereq) ? ($prereq['is_required'] ?? true) : true;
+
+            if ($prerequisiteCourseId && $prerequisiteCourseId != $course->id) {
+                $course->prerequisites()->create([
+                    'prerequisite_course_id' => $prerequisiteCourseId,
+                    'is_required' => $isRequired,
+                ]);
+            }
+        }
     }
 }

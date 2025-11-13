@@ -2,10 +2,12 @@
 
 namespace Modules\Schemes\Models;
 
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
 class Lesson extends Model
 {
+    use HasFactory;
     protected $fillable = [
         'unit_id', 'slug', 'title', 'description',
         'markdown_content', 'content_type', 'content_url',
@@ -31,5 +33,13 @@ class Lesson extends Model
     public function getRouteKeyName(): string
     {
         return 'slug';
+    }
+
+    /**
+     * Create a new factory instance for the model.
+     */
+    protected static function newFactory()
+    {
+        return \Database\Factories\LessonFactory::new();
     }
 }

@@ -25,6 +25,8 @@ return Application::configure(basePath: dirname(__DIR__))
             'role' => EnsureRole::class,
             'permission' => EnsurePermission::class,
         ]);
+
+        $middleware->append(\App\Http\Middleware\LogApiAction::class);
     })
     ->withExceptions(function (Exceptions $exceptions): void {
 

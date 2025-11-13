@@ -34,7 +34,7 @@ class UnitController extends Controller
         $courseModel = $course;
 
         $authorized = false;
-        if ($user->hasRole('super-admin')) {
+        if ($user->hasRole('superadmin')) {
             $authorized = true;
         } elseif ($user->hasRole('admin')) {
             if ((int) $courseModel->instructor_id === (int) $user->id) {
@@ -109,7 +109,7 @@ class UnitController extends Controller
         $courseModel = $course;
 
         $authorized = false;
-        if ($user->hasRole('super-admin')) {
+        if ($user->hasRole('superadmin')) {
             $authorized = true;
         } elseif ($user->hasRole('admin')) {
             if ((int) $courseModel->instructor_id === (int) $user->id) {

@@ -22,7 +22,25 @@ trait HasSchemesRequestRules
             'short_desc' => ['nullable', 'string'],
             'level_tag' => ['required', Rule::in(['dasar', 'menengah', 'mahir'])],
             'type' => ['required', Rule::in(['okupasi', 'kluster'])],
-            'visibility' => ['required', Rule::in(['public', 'private'])],
+            'enrollment_type' => ['required', Rule::in(['auto_accept', 'key_based', 'approval'])],
+            'enrollment_key' => [
+                Rule::requiredIf(function () use ($courseId) {
+                    $value = $this->input('enrollment_type');
+
+                    if ($value !== 'key_based') {
+                        return false;
+                    }
+
+                    if ($courseId > 0) {
+                        return false;
+                    }
+
+                    return true;
+                }),
+                'nullable',
+                'string',
+                'max:100',
+            ],
             'progression_mode' => ['required', Rule::in(['sequential', 'free'])],
             'category_id' => ['nullable', 'integer', 'exists:categories,id'],
             'tags' => ['sometimes', 'array'],
@@ -30,7 +48,7 @@ trait HasSchemesRequestRules
             'outcomes' => ['sometimes', 'array'],
             'outcomes.*' => ['string'],
             'prereq' => ['sometimes', 'array'],
-            'prereq.*' => ['string'],
+            'prereq.*' => ['integer', 'exists:courses,id'],
             'thumbnail' => ['sometimes', 'file', 'image', 'mimes:jpg,jpeg,png,webp', 'max:4096'],
             'banner' => ['sometimes', 'file', 'image', 'mimes:jpg,jpeg,png,webp', 'max:6144'],
             'status' => ['sometimes', Rule::in(['draft', 'published', 'archived'])],
@@ -47,8 +65,11 @@ trait HasSchemesRequestRules
             'code.unique' => 'Kode sudah digunakan.',
             'title.required' => 'Judul wajib diisi.',
             'level_tag.required' => 'Level wajib diisi.',
-            'visibility.required' => 'Visibility wajib diisi.',
             'type.required' => 'Tipe wajib diisi.',
+            'enrollment_type.required' => 'Jenis enrolment wajib dipilih.',
+            'enrollment_type.in' => 'Jenis enrolment tidak valid.',
+            'enrollment_key.required_if' => 'Kode enrolment wajib diisi untuk mode key-based.',
+            'enrollment_key.max' => 'Kode enrolment maksimal 100 karakter.',
             'progression_mode.required' => 'Mode progres wajib diisi.',
             'category_id.exists' => 'Kategori tidak ditemukan.',
             'status.in' => 'Status tidak valid.',
@@ -59,7 +80,8 @@ trait HasSchemesRequestRules
             'course_admins.*.exists' => 'Admin course tidak ditemukan.',
             'course_admins.*.integer' => 'Setiap item course_admins harus berupa angka (ID pengguna).',
             'outcomes.*.string' => 'Setiap item outcomes harus berupa teks.',
-            'prereq.*.string' => 'Setiap item prereq harus berupa teks.',
+            'prereq.*.integer' => 'Setiap item prereq harus berupa ID course (angka).',
+            'prereq.*.exists' => 'Course prerequisite tidak ditemukan.',
             'tags.*.string' => 'Setiap item tags harus berupa teks.',
             'tags.array' => 'Field tags harus berupa array.',
             'outcomes.array' => 'Field outcomes harus berupa array.',

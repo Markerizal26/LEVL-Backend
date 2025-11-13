@@ -19,6 +19,11 @@ class EnsureRole
             ], 401);
         }
 
+        // Superadmin bypasses all role checks
+        if ($user->hasRole('superadmin')) {
+            return $next($request);
+        }
+
         if (!$user->hasAnyRole($roles)) {
             return response()->json([
                 'status' => 'error',

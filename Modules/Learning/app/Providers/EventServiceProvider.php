@@ -11,7 +11,16 @@ class EventServiceProvider extends ServiceProvider
      *
      * @var array<string, array<int, string>>
      */
-    protected $listen = [];
+    protected $listen = [
+        \Modules\Learning\Events\SubmissionCreated::class => [
+            // Grading module listener will be registered here when available
+            // Gamification module listener will be registered here when available
+            // Notifications module listener will be registered here when available
+        ],
+        \Modules\Learning\Events\AssignmentPublished::class => [
+            \Modules\Learning\Listeners\NotifyEnrolledUsersOnAssignmentPublished::class,
+        ],
+    ];
 
     /**
      * Indicates if events should be discovered.

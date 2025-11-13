@@ -27,7 +27,7 @@ class ProgressController extends Controller
         $targetUserId = (int) ($request->query('user_id') ?? $user->id);
 
         $isStudent = $user->hasRole('student');
-        $isAdmin = $user->hasRole('admin') || $user->hasRole('super-admin');
+        $isAdmin = $user->hasRole('admin') || $user->hasRole('superadmin');
         $isInstructor = $user->hasRole('instructor');
 
         $authorized = false;
