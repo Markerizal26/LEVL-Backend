@@ -17,17 +17,29 @@ class EnrollmentsController extends Controller
     public function __construct(private EnrollmentService $service) {}
 
     /**
-     * Super-admin can list all enrollments (optional filters).
+     * Superadmin can list all enrollments. Admin can list enrollments for courses they manage.
      */
     public function index(Request $request)
     {
         /** @var \Modules\Auth\Models\User $user */
         $user = auth('api')->user();
 
-        if (! $user->hasRole('Superadmin')) {
-            return $this->error('Anda tidak memiliki akses untuk melihat seluruh enrolment.', 403);
+        if ($user->hasRole('Superadmin')) {
+            return $this->indexForSuperadmin($request);
         }
 
+        if ($user->hasRole('Admin')) {
+            return $this->indexManaged($request);
+        }
+
+        return $this->error('Anda tidak memiliki akses untuk melihat enrollment.', 403);
+    }
+
+    /**
+     * Superadmin can view all enrollments with optional filters.
+     */
+    private function indexForSuperadmin(Request $request)
+    {
         $query = Enrollment::query()
             ->with(['user:id,name,email', 'course:id,slug,title,enrollment_type'])
             ->orderByDesc('created_at');
@@ -47,7 +59,7 @@ class EnrollmentsController extends Controller
         $perPage = (int) $request->query('per_page', 15);
         $paginator = $query->paginate(max(1, $perPage))->appends($request->query());
 
-        return $this->paginateResponse($paginator, 'Daftar enrolment berhasil diambil.');
+        return $this->paginateResponse($paginator, 'Daftar enrollment berhasil diambil.');
     }
 
     /**
@@ -59,7 +71,7 @@ class EnrollmentsController extends Controller
         $user = auth('api')->user();
 
         if (! $this->userCanManageCourse($user, $course)) {
-            return $this->error('Anda tidak memiliki akses untuk melihat enrolment course ini.', 403);
+            return $this->error('Anda tidak memiliki akses untuk melihat enrollment course ini.', 403);
         }
 
         $query = Enrollment::query()
@@ -74,7 +86,7 @@ class EnrollmentsController extends Controller
         $perPage = (int) $request->query('per_page', 15);
         $paginator = $query->paginate(max(1, $perPage))->appends($request->query());
 
-        return $this->paginateResponse($paginator, 'Daftar enrolment course berhasil diambil.');
+        return $this->paginateResponse($paginator, 'Daftar enrollment course berhasil diambil.');
     }
 
     /**
@@ -90,7 +102,7 @@ class EnrollmentsController extends Controller
         }
 
         if (! $user->hasRole('Admin') && ! $user->hasRole('Instructor')) {
-            return $this->error('Anda tidak memiliki akses untuk melihat enrolment ini.', 403);
+            return $this->error('Anda tidak memiliki akses untuk melihat enrollment ini.', 403);
         }
 
         $courses = Course::query()
@@ -130,7 +142,7 @@ class EnrollmentsController extends Controller
         $perPage = (int) $request->query('per_page', 15);
         $paginator = $query->paginate(max(1, $perPage))->appends($request->query());
 
-        return $this->paginateResponse($paginator, 'Daftar enrolment berhasil diambil.');
+        return $this->paginateResponse($paginator, 'Daftar enrollment berhasil diambil.');
     }
 
     /**
@@ -142,7 +154,7 @@ class EnrollmentsController extends Controller
         $user = auth('api')->user();
 
         if (! $user->hasRole('Student')) {
-            return $this->error('Hanya peserta yang dapat melakukan enrolment.', 403);
+            return $this->error('Hanya peserta yang dapat melakukan enrollment.', 403);
         }
 
         $request->validate([
@@ -161,7 +173,7 @@ class EnrollmentsController extends Controller
     }
 
     /**
-     * Student cancels a pending enrolment request.
+     * Student cancels a pending enrollment request.
      */
     public function cancel(Request $request, Course $course)
     {
@@ -183,16 +195,16 @@ class EnrollmentsController extends Controller
             ->first();
 
         if (! $enrollment) {
-            return $this->error('Permintaan enrolment tidak ditemukan untuk course ini.', 404);
+            return $this->error('Permintaan enrollment tidak ditemukan untuk course ini.', 404);
         }
 
         if (! $this->canModifyEnrollment($user, $enrollment)) {
-            return $this->error('Anda tidak memiliki akses untuk membatalkan enrolment ini.', 403);
+            return $this->error('Anda tidak memiliki akses untuk membatalkan enrollment ini.', 403);
         }
 
         $updated = $this->service->cancel($enrollment);
 
-        return $this->success(['enrollment' => $updated], 'Permintaan enrolment berhasil dibatalkan.');
+        return $this->success(['enrollment' => $updated], 'Permintaan enrollment berhasil dibatalkan.');
     }
 
     /**
@@ -219,11 +231,11 @@ class EnrollmentsController extends Controller
             ->first();
 
         if (! $enrollment) {
-            return $this->error('Enrolment tidak ditemukan untuk course ini.', 404);
+            return $this->error('enrollment tidak ditemukan untuk course ini.', 404);
         }
 
         if (! $this->canModifyEnrollment($user, $enrollment)) {
-            return $this->error('Anda tidak memiliki akses untuk mengundurkan diri dari enrolment ini.', 403);
+            return $this->error('Anda tidak memiliki akses untuk mengundurkan diri dari enrollment ini.', 403);
         }
 
         $updated = $this->service->withdraw($enrollment);
@@ -258,7 +270,7 @@ class EnrollmentsController extends Controller
         }
 
         if (! $this->canModifyEnrollment($user, $enrollment) && ! $this->userCanManageCourse($user, $course)) {
-            return $this->error('Anda tidak memiliki akses untuk melihat status enrolment ini.', 403);
+            return $this->error('Anda tidak memiliki akses untuk melihat status enrollment ini.', 403);
         }
 
         $enrollmentData = $enrollment->fresh(['course:id,title,slug', 'user:id,name,email']);
@@ -266,7 +278,7 @@ class EnrollmentsController extends Controller
         return $this->success([
             'status' => $enrollmentData->status,
             'enrollment' => $enrollmentData,
-        ], 'Status enrolment berhasil diambil.');
+        ], 'Status enrollment berhasil diambil.');
     }
 
     /**
@@ -280,12 +292,12 @@ class EnrollmentsController extends Controller
         $enrollment->loadMissing('course');
 
         if (! $enrollment->course || ! $this->userCanManageCourse($user, $enrollment->course)) {
-            return $this->error('Anda tidak memiliki akses untuk menyetujui enrolment ini.', 403);
+            return $this->error('Anda tidak memiliki akses untuk menyetujui enrollment ini.', 403);
         }
 
         $updated = $this->service->approve($enrollment);
 
-        return $this->success(['enrollment' => $updated], 'Permintaan enrolment disetujui.');
+        return $this->success(['enrollment' => $updated], 'Permintaan enrollment disetujui.');
     }
 
     /**
@@ -299,12 +311,12 @@ class EnrollmentsController extends Controller
         $enrollment->loadMissing('course');
 
         if (! $enrollment->course || ! $this->userCanManageCourse($user, $enrollment->course)) {
-            return $this->error('Anda tidak memiliki akses untuk menolak enrolment ini.', 403);
+            return $this->error('Anda tidak memiliki akses untuk menolak enrollment ini.', 403);
         }
 
         $updated = $this->service->decline($enrollment);
 
-        return $this->success(['enrollment' => $updated], 'Permintaan enrolment ditolak.');
+        return $this->success(['enrollment' => $updated], 'Permintaan enrollment ditolak.');
     }
 
     /**

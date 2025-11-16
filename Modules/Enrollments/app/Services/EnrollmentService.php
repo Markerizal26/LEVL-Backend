@@ -80,7 +80,7 @@ class EnrollmentService
     {
         if ($enrollment->status !== 'pending') {
             throw ValidationException::withMessages([
-                'enrollment' => 'Hanya enrolment dengan status pending yang dapat dibatalkan.',
+                'enrollment' => 'Hanya enrollment dengan status pending yang dapat dibatalkan.',
             ]);
         }
 
@@ -101,7 +101,7 @@ class EnrollmentService
     {
         if ($enrollment->status !== 'active') {
             throw ValidationException::withMessages([
-                'enrollment' => 'Hanya enrolment aktif yang dapat mengundurkan diri.',
+                'enrollment' => 'Hanya enrollment aktif yang dapat mengundurkan diri.',
             ]);
         }
 
@@ -121,7 +121,7 @@ class EnrollmentService
     {
         if ($enrollment->status !== 'pending') {
             throw ValidationException::withMessages([
-                'enrollment' => 'Hanya permintaan enrolment pending yang dapat disetujui.',
+                'enrollment' => 'Hanya permintaan enrollment pending yang dapat disetujui.',
             ]);
         }
 
@@ -152,7 +152,7 @@ class EnrollmentService
     {
         if ($enrollment->status !== 'pending') {
             throw ValidationException::withMessages([
-                'enrollment' => 'Hanya permintaan enrolment pending yang dapat ditolak.',
+                'enrollment' => 'Hanya permintaan enrollment pending yang dapat ditolak.',
             ]);
         }
 
@@ -182,7 +182,7 @@ class EnrollmentService
     {
         if (! in_array($enrollment->status, ['active', 'pending'], true)) {
             throw ValidationException::withMessages([
-                'enrollment' => 'Hanya enrolment aktif atau pending yang dapat dikeluarkan.',
+                'enrollment' => 'Hanya enrollment aktif atau pending yang dapat dikeluarkan.',
             ]);
         }
 
@@ -204,7 +204,7 @@ class EnrollmentService
         return match ($type) {
             'auto_accept' => ['active', 'Enrol berhasil. Anda sekarang terdaftar pada course ini.'],
             'key_based' => $this->handleKeyBasedEnrollment($course, $payload),
-            'approval' => ['pending', 'Permintaan enrolment berhasil dikirim. Menunggu persetujuan.'],
+            'approval' => ['pending', 'Permintaan enrollment berhasil dikirim. Menunggu persetujuan.'],
             default => ['active', 'Enrol berhasil.'],
         };
     }
@@ -220,13 +220,13 @@ class EnrollmentService
 
         if ($providedKey === '') {
             throw ValidationException::withMessages([
-                'enrollment_key' => 'Kode enrolment wajib diisi.',
+                'enrollment_key' => 'Kode enrollment wajib diisi.',
             ]);
         }
 
         if (! hash_equals((string) $course->enrollment_key, $providedKey)) {
             throw ValidationException::withMessages([
-                'enrollment_key' => 'Kode enrolment tidak valid.',
+                'enrollment_key' => 'Kode enrollment tidak valid.',
             ]);
         }
 
