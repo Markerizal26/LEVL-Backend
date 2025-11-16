@@ -67,22 +67,22 @@ class RolePermissionSeeder extends Seeder
 
         // Create roles
         $superadmin = Role::firstOrCreate([
-            'name' => 'superadmin',
+            'name' => 'Superadmin',
             'guard_name' => 'api',
         ]);
 
         $admin = Role::firstOrCreate([
-            'name' => 'admin',
+            'name' => 'Admin',
             'guard_name' => 'api',
         ]);
 
         $instructor = Role::firstOrCreate([
-            'name' => 'instructor',
+            'name' => 'Instructor',
             'guard_name' => 'api',
         ]);
 
         $student = Role::firstOrCreate([
-            'name' => 'student',
+            'name' => 'Student',
             'guard_name' => 'api',
         ]);
 

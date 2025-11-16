@@ -11,10 +11,10 @@ class SuperAdminSeeder extends Seeder
 {
     public function run(): void
     {
-        Role::findOrCreate('superadmin', 'api');
-        Role::findOrCreate('admin', 'api');
-        Role::findOrCreate('instructor', 'api');
-        Role::findOrCreate('student', 'api');
+        Role::findOrCreate('Superadmin', 'api');
+        Role::findOrCreate('Admin', 'api');
+        Role::findOrCreate('Instructor', 'api');
+        Role::findOrCreate('Student', 'api');
 
         $email = env('SUPERADMIN_EMAIL', 'superadmin@example.com');
         $name = env('SUPERADMIN_NAME', 'Super Admin');
@@ -36,8 +36,8 @@ class SuperAdminSeeder extends Seeder
             $user->removeRole('super-admin');
         }
 
-        if (! $user->hasRole('superadmin')) {
-            $user->assignRole('superadmin');
+        if (! $user->hasRole('Superadmin')) {
+            $user->assignRole('Superadmin');
         }
     }
 }

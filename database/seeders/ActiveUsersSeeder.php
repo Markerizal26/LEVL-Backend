@@ -12,10 +12,10 @@ class ActiveUsersSeeder extends Seeder
     public function run(): void
     {
         // Ensure roles exist
-        $superadminRole = Role::firstOrCreate(['name' => 'superadmin', 'guard_name' => 'api']);
-        $adminRole = Role::firstOrCreate(['name' => 'admin', 'guard_name' => 'api']);
-        $instructorRole = Role::firstOrCreate(['name' => 'instructor', 'guard_name' => 'api']);
-        $studentRole = Role::firstOrCreate(['name' => 'student', 'guard_name' => 'api']);
+        $superadminRole = Role::firstOrCreate(['name' => 'Superadmin', 'guard_name' => 'api']);
+        $adminRole = Role::firstOrCreate(['name' => 'Admin', 'guard_name' => 'api']);
+        $instructorRole = Role::firstOrCreate(['name' => 'Instructor', 'guard_name' => 'api']);
+        $studentRole = Role::firstOrCreate(['name' => 'Student', 'guard_name' => 'api']);
 
         // Create Superadmin user
         $superadmin = User::query()->firstOrCreate(
@@ -28,8 +28,8 @@ class ActiveUsersSeeder extends Seeder
                 'email_verified_at' => now(),
             ]
         );
-        if (! $superadmin->hasRole('superadmin')) {
-            $superadmin->assignRole('superadmin');
+        if (! $superadmin->hasRole('Superadmin')) {
+            $superadmin->assignRole('Superadmin');
         }
 
         // Create Admin user
@@ -43,8 +43,8 @@ class ActiveUsersSeeder extends Seeder
                 'email_verified_at' => now(),
             ]
         );
-        if (! $admin->hasRole('admin')) {
-            $admin->assignRole('admin');
+        if (! $admin->hasRole('Admin')) {
+            $admin->assignRole('Admin');
         }
 
         // Create Instructor user
@@ -58,8 +58,8 @@ class ActiveUsersSeeder extends Seeder
                 'email_verified_at' => now(),
             ]
         );
-        if (! $instructor->hasRole('instructor')) {
-            $instructor->assignRole('instructor');
+        if (! $instructor->hasRole('Instructor')) {
+            $instructor->assignRole('Instructor');
         }
 
         // Create Student user
@@ -73,8 +73,8 @@ class ActiveUsersSeeder extends Seeder
                 'email_verified_at' => now(),
             ]
         );
-        if (! $student->hasRole('student')) {
-            $student->assignRole('student');
+        if (! $student->hasRole('Student')) {
+            $student->assignRole('Student');
         }
     }
 }

@@ -27,9 +27,12 @@ class RolePermissionService
             }
         }
 
+        $superadmin = Role::query()->firstOrCreate(['name' => 'Superadmin', 'guard_name' => self::GUARD]);
         $admin = Role::query()->firstOrCreate(['name' => 'Admin', 'guard_name' => self::GUARD]);
         $instructor = Role::query()->firstOrCreate(['name' => 'Instructor', 'guard_name' => self::GUARD]);
         $student = Role::query()->firstOrCreate(['name' => 'Student', 'guard_name' => self::GUARD]);
+
+        $superadmin->syncPermissions($allPermissions);
 
         $admin->syncPermissions($allPermissions);
 

@@ -204,7 +204,7 @@ class AuthService implements AuthServiceInterface
         $passwordPlain = $this->generatePasswordFromNameEmail($validated['name'] ?? '', $validated['email'] ?? '');
         $validated['password'] = Hash::make($passwordPlain);
         $user = $this->authRepository->createUser($validated);
-        $user->assignRole('instructor');
+        $user->assignRole('Instructor');
 
         $this->sendGeneratedPasswordEmail($user, $passwordPlain);
 
@@ -219,7 +219,7 @@ class AuthService implements AuthServiceInterface
         $passwordPlain = $this->generatePasswordFromNameEmail($validated['name'] ?? '', $validated['email'] ?? '');
         $validated['password'] = Hash::make($passwordPlain);
         $user = $this->authRepository->createUser($validated);
-        $user->assignRole('admin');
+        $user->assignRole('Admin');
 
         $this->sendGeneratedPasswordEmail($user, $passwordPlain);
 
@@ -234,7 +234,7 @@ class AuthService implements AuthServiceInterface
         $passwordPlain = $this->generatePasswordFromNameEmail($validated['name'] ?? '', $validated['email'] ?? '');
         $validated['password'] = Hash::make($passwordPlain);
         $user = $this->authRepository->createUser($validated);
-        $user->assignRole('superadmin');
+        $user->assignRole('Superadmin');
 
         $this->sendGeneratedPasswordEmail($user, $passwordPlain);
 
