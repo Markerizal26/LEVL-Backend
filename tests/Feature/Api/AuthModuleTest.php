@@ -568,8 +568,15 @@ it('lists users for superadmin', function () {
         ->assertJsonStructure(['data' => ['items', 'meta']]);
 });
 
-it('prevents non superadmin listing users', function () {
+it('allows admin to list users', function () {
     $response = $this->actingAs($this->admin, 'api')->getJson(api('/auth/users'));
+
+    $response->assertStatus(200)
+        ->assertJsonStructure(['data' => ['items', 'meta']]);
+});
+
+it('prevents student listing users', function () {
+    $response = $this->actingAs($this->student, 'api')->getJson(api('/auth/users'));
 
     $response->assertStatus(403);
 });
