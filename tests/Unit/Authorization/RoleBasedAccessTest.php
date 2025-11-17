@@ -15,7 +15,7 @@ test('superadmin has access to all resources', function () {
     $user->assignRole('Superadmin');
 
     expect($user->hasRole('Superadmin'))->toBeTrue();
-    expect($user->hasAnyRole(['admin', 'instructor', 'superadmin']))->toBeTrue();
+    expect($user->hasAnyRole(['Admin', 'Instructor', 'Superadmin']))->toBeTrue();
 });
 
 test('admin can manage courses', function () {
@@ -58,7 +58,7 @@ test('user can have multiple roles', function () {
 
     expect($user->hasRole('Admin'))->toBeTrue();
     expect($user->hasRole('Instructor'))->toBeTrue();
-    expect($user->hasAnyRole(['admin', 'instructor']))->toBeTrue();
+    expect($user->hasAnyRole(['Admin', 'Instructor']))->toBeTrue();
 });
 
 test('user can check permissions', function () {

@@ -66,9 +66,9 @@ function createTestRoles(): void
 {
     $guard = 'api';
     \Spatie\Permission\Models\Role::firstOrCreate(['name' => 'Superadmin', 'guard_name' => $guard]);
-    \Spatie\Permission\Models\Role::firstOrCreate(['name' => 'admin', 'guard_name' => $guard]);
-    \Spatie\Permission\Models\Role::firstOrCreate(['name' => 'instructor', 'guard_name' => $guard]);
-    \Spatie\Permission\Models\Role::firstOrCreate(['name' => 'student', 'guard_name' => $guard]);
+    \Spatie\Permission\Models\Role::firstOrCreate(['name' => 'Admin', 'guard_name' => $guard]);
+    \Spatie\Permission\Models\Role::firstOrCreate(['name' => 'Instructor', 'guard_name' => $guard]);
+    \Spatie\Permission\Models\Role::firstOrCreate(['name' => 'Student', 'guard_name' => $guard]);
 }
 
 /**

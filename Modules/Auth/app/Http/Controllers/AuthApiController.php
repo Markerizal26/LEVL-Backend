@@ -4,9 +4,11 @@ namespace Modules\Auth\Http\Controllers;
 
 use App\Http\Controllers\Controller;
 use App\Support\ApiResponse;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Collection;
 use Illuminate\Validation\ValidationException;
 use Laravel\Socialite\Contracts\Factory as SocialiteFactory;
 use Laravel\Socialite\Two\AbstractProvider as SocialiteAbstractProvider;
@@ -28,8 +30,10 @@ use Modules\Auth\Models\SocialAccount;
 use Modules\Auth\Models\User;
 use Modules\Auth\Services\AuthService;
 use Modules\Auth\Services\EmailVerificationService;
-use Tymon\JWTAuth\JWTAuth;
 use Modules\Common\Models\Audit;
+use Modules\Enrollments\Models\Enrollment;
+use Modules\Schemes\Models\CourseAdmin;
+use Tymon\JWTAuth\JWTAuth;
 
 class AuthApiController extends Controller
 {
@@ -435,6 +439,18 @@ class AuthApiController extends Controller
 
     public function listUsers(Request $request): JsonResponse
     {
+        /** @var \Modules\Auth\Models\User|null $authUser */
+        $authUser = auth('api')->user();
+        if (! $authUser) {
+            return $this->error('Tidak terotorisasi.', 401);
+        }
+
+        $isSuperadmin = $authUser->hasRole('Superadmin');
+        $isAdmin = $authUser->hasRole('Admin');
+        if (! $isSuperadmin && ! $isAdmin) {
+            return $this->error('Tidak terotorisasi.', 403);
+        }
+
         $perPage = max(1, (int) ($request->query('per_page', 15)));
         $q = trim((string) $request->query('search', ''));
         $status = $request->input('filter.status');
@@ -472,6 +488,10 @@ class AuthApiController extends Controller
             $query->whereDate('created_at', '<=', $createdTo);
         }
 
+        if ($isAdmin && ! $isSuperadmin) {
+            $this->applyAdminUserScope($query, $authUser);
+        }
+
         $direction = 'asc';
         $field = $sort;
         if (str_starts_with($sort, '-')) {
@@ -505,6 +525,22 @@ class AuthApiController extends Controller
 
     public function showUser(User $user): JsonResponse
     {
+        /** @var \Modules\Auth\Models\User|null $authUser */
+        $authUser = auth('api')->user();
+        if (! $authUser) {
+            return $this->error('Tidak terotorisasi.', 401);
+        }
+
+        $isSuperadmin = $authUser->hasRole('Superadmin');
+        $isAdmin = $authUser->hasRole('Admin');
+        if (! $isSuperadmin && ! $isAdmin) {
+            return $this->error('Tidak terotorisasi.', 403);
+        }
+
+        if ($isAdmin && ! $isSuperadmin && ! $this->adminCanSeeUser($authUser, $user)) {
+            return $this->error('Anda tidak memiliki akses untuk melihat pengguna ini.', 403);
+        }
+
         $data = [
             'id' => $user->id,
             'name' => $user->name,
@@ -534,5 +570,69 @@ class AuthApiController extends Controller
         $data = $this->auth->setUsername($user, $request->validated('username'));
 
         return $this->success($data, 'Username berhasil diatur.');
+    }
+
+    /**
+     * Limit user visibility for Admin role.
+     */
+    private function applyAdminUserScope(Builder $query, User $admin): void
+    {
+        $managedCourseIds = $this->managedCourseIds($admin);
+
+        $query->where(function (Builder $visibility) use ($managedCourseIds) {
+            $visibility->where(function (Builder $studentScope) use ($managedCourseIds) {
+                if ($managedCourseIds->isEmpty()) {
+                    $studentScope->whereRaw('0 = 1');
+
+                    return;
+                }
+
+                $studentScope->whereHas('roles', function ($roleQuery) {
+                    $roleQuery->where('name', 'Student');
+                })->whereHas('enrollments', function ($enrollmentQuery) use ($managedCourseIds) {
+                    $enrollmentQuery->whereIn('course_id', $managedCourseIds);
+                });
+            })->orWhere(function (Builder $adminScope) {
+                $adminScope->whereHas('roles', function ($roleQuery) {
+                    $roleQuery->where('name', 'Admin');
+                })->whereDoesntHave('roles', function ($roleQuery) {
+                    $roleQuery->where('name', 'Superadmin');
+                });
+            });
+        });
+    }
+
+    private function adminCanSeeUser(User $admin, User $target): bool
+    {
+        if ($target->hasRole('Superadmin')) {
+            return false;
+        }
+
+        if ($target->hasRole('Admin')) {
+            return true;
+        }
+
+        if (! $target->hasRole('Student')) {
+            return false;
+        }
+
+        $managedCourseIds = $this->managedCourseIds($admin);
+        if ($managedCourseIds->isEmpty()) {
+            return false;
+        }
+
+        return Enrollment::query()
+            ->where('user_id', $target->id)
+            ->whereIn('course_id', $managedCourseIds)
+            ->exists();
+    }
+
+    private function managedCourseIds(User $admin): Collection
+    {
+        return CourseAdmin::query()
+            ->where('user_id', $admin->id)
+            ->pluck('course_id')
+            ->unique()
+            ->values();
     }
 }

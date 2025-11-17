@@ -47,7 +47,7 @@ test('middleware allows access when user has required role', function () {
     $request->setUserResolver(fn () => $user);
     $next = fn ($req) => response()->json(['status' => 'success']);
 
-    $response = $this->middleware->handle($request, $next, 'admin');
+    $response = $this->middleware->handle($request, $next, 'Admin');
 
     expect($response->getStatusCode())->toEqual(200);
     $responseData = json_decode($response->getContent(), true);
@@ -62,7 +62,7 @@ test('middleware allows access when user has any of multiple roles', function ()
     $request->setUserResolver(fn () => $user);
     $next = fn ($req) => response()->json(['status' => 'success']);
 
-    $response = $this->middleware->handle($request, $next, 'admin', 'instructor');
+    $response = $this->middleware->handle($request, $next, 'Admin', 'Instructor');
 
     expect($response->getStatusCode())->toEqual(200);
 });
@@ -75,7 +75,7 @@ test('middleware allows superadmin access to any role', function () {
     $request->setUserResolver(fn () => $user);
     $next = fn ($req) => response()->json(['status' => 'success']);
 
-    $response = $this->middleware->handle($request, $next, 'admin', 'instructor');
+    $response = $this->middleware->handle($request, $next, 'Admin', 'Instructor');
 
     expect($response->getStatusCode())->toEqual(200);
 });

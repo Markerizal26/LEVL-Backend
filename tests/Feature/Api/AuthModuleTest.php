@@ -54,7 +54,7 @@ it('registers a new user with verification link', function () {
 
     $response->assertStatus(201)
         ->assertJsonPath('data.user.email', 'newstudent@example.com')
-        ->assertJsonPath('data.user.roles.0', 'student')
+        ->assertJsonPath('data.user.roles.0', 'Student')
         ->assertJsonStructure(['data' => ['access_token', 'refresh_token', 'expires_in', 'user']]);
 
     expect(User::whereEmail('newstudent@example.com')->exists())->toBeTrue();
@@ -433,15 +433,25 @@ it('rejects expired email change verification', function () {
         ->assertJsonPath('message', 'Kode verifikasi telah kedaluwarsa.');
 });
 
-it('allows admin to create instructor accounts', function () {
+it('denies instructor creation for admin role', function () {
     $response = $this->actingAs($this->admin, 'api')->postJson(api('/auth/instructor'), [
         'name' => 'Instructor Created',
         'username' => 'createdinstructor',
         'email' => 'createdinstructor@example.com',
     ]);
 
+    $response->assertStatus(403);
+});
+
+it('allows superadmin to create instructor accounts', function () {
+    $response = $this->actingAs($this->superadmin, 'api')->postJson(api('/auth/instructor'), [
+        'name' => 'Instructor Created',
+        'username' => 'createdinstructor',
+        'email' => 'createdinstructor@example.com',
+    ]);
+
     $response->assertStatus(201)
-        ->assertJsonPath('data.user.roles.0', 'instructor');
+        ->assertJsonPath('data.user.roles.0', 'Instructor');
 });
 
 it('denies instructor creation for student role', function () {
@@ -462,7 +472,7 @@ it('allows superadmin to create admin accounts', function () {
     ]);
 
     $response->assertStatus(201)
-        ->assertJsonPath('data.user.roles.0', 'admin');
+        ->assertJsonPath('data.user.roles.0', 'Admin');
 });
 
 it('blocks admin creation for admin role', function () {

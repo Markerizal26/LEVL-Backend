@@ -69,6 +69,11 @@ class User extends Authenticatable implements JWTSubject
         ];
     }
 
+    public function enrollments()
+    {
+        return $this->hasMany(\Modules\Enrollments\Models\Enrollment::class);
+    }
+
     /**
      * Create a new factory instance for the model.
      */
