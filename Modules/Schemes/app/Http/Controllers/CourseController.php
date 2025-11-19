@@ -39,10 +39,10 @@ class CourseController extends Controller
         $data = $request->validated();
         // Handle file uploads
         if ($request->hasFile('thumbnail')) {
-            $data['thumbnail_path'] = app(\App\Services\UploadService::class)->storePublic($request->file('thumbnail'), 'courses/thumbnails');
+            $data['thumbnail_path'] = upload_file($request->file('thumbnail'), 'courses/thumbnails');
         }
         if ($request->hasFile('banner')) {
-            $data['banner_path'] = app(\App\Services\UploadService::class)->storePublic($request->file('banner'), 'courses/banners');
+            $data['banner_path'] = upload_file($request->file('banner'), 'courses/banners');
         }
         /** @var \Modules\Auth\Models\User|null $actor */
         $actor = auth('api')->user();
@@ -65,10 +65,10 @@ class CourseController extends Controller
     {
         $data = $request->validated();
         if ($request->hasFile('thumbnail')) {
-            $data['thumbnail_path'] = app(\App\Services\UploadService::class)->storePublic($request->file('thumbnail'), 'courses/thumbnails');
+            $data['thumbnail_path'] = upload_file($request->file('thumbnail'), 'courses/thumbnails');
         }
         if ($request->hasFile('banner')) {
-            $data['banner_path'] = app(\App\Services\UploadService::class)->storePublic($request->file('banner'), 'courses/banners');
+            $data['banner_path'] = upload_file($request->file('banner'), 'courses/banners');
         }
         try {
             $updated = $this->service->update($course->id, $data);

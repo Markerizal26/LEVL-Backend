@@ -14,9 +14,6 @@ class FileTestController extends Controller
         protected UploadService $uploadService
     ) {}
 
-    /**
-     * Get storage configuration info
-     */
     public function config(): JsonResponse
     {
         $diskName = config('filesystems.default');
@@ -60,13 +57,10 @@ class FileTestController extends Controller
         ]);
     }
 
-    /**
-     * Test file upload
-     */
     public function upload(Request $request): JsonResponse
     {
         $request->validate([
-            'file' => 'required|file|max:10240', // 10MB
+            'file' => 'required|file|max:10240',
             'directory' => 'string|nullable',
         ]);
 
@@ -81,13 +75,9 @@ class FileTestController extends Controller
                 'directory' => $directory,
             ]);
 
-            // Upload file
             $path = $this->uploadService->storePublic($file, $directory);
-            
-            // Get URL
             $url = $this->uploadService->getPublicUrl($path);
             
-            // Check if file exists and get metadata using AWS SDK for DO Spaces
             $exists = false;
             $fileSize = null;
             $lastModified = null;
@@ -152,9 +142,6 @@ class FileTestController extends Controller
         }
     }
 
-    /**
-     * List files in a directory
-     */
     public function list(Request $request): JsonResponse
     {
         $directory = $request->input('directory', 'test/uploads');
@@ -188,9 +175,6 @@ class FileTestController extends Controller
         }
     }
 
-    /**
-     * Check if file exists and is accessible
-     */
     public function check(Request $request): JsonResponse
     {
         $request->validate([
@@ -217,7 +201,6 @@ class FileTestController extends Controller
                 $response['data']['size'] = $disk->size($path);
                 $response['data']['last_modified'] = date('Y-m-d H:i:s', $disk->lastModified($path));
                 
-                // Try to check if URL is accessible
                 $response['data']['url_check'] = $this->checkUrlAccessibility($url);
             }
 
@@ -230,9 +213,6 @@ class FileTestController extends Controller
         }
     }
 
-    /**
-     * Delete a file
-     */
     public function delete(Request $request): JsonResponse
     {
         $request->validate([
@@ -263,9 +243,6 @@ class FileTestController extends Controller
         }
     }
 
-    /**
-     * Test direct S3 operations
-     */
     public function testS3Operations(): JsonResponse
     {
         $put1 = false;
@@ -305,15 +282,12 @@ class FileTestController extends Controller
                 ]);
             }
             
-            // Test 2: Check if exists
             $exists = $disk->exists($testPath);
             Log::info('Exists check', ['exists' => $exists, 'path' => $testPath]);
             
-            // Test 3: Get URL
             $url = $disk->url($testPath);
             Log::info('URL generated', ['url' => $url]);
             
-            // Test 4: Get file info
             if ($exists) {
                 try {
                     $size = $disk->size($testPath);
@@ -323,12 +297,10 @@ class FileTestController extends Controller
                 }
             }
             
-            // Test 5: Check URL accessibility
             $urlCheck = $this->checkUrlAccessibility($url);
             Log::info('URL accessibility check', $urlCheck);
             
-            // Cleanup
-            try {
+            try{
                 $disk->delete($testPath);
                 $cleanedUp = !$disk->exists($testPath);
             } catch (\Exception $e) {
@@ -376,15 +348,11 @@ class FileTestController extends Controller
         }
     }
 
-    /**
-     * Test AWS SDK S3 client directly
-     */
     public function testAwsSdk(): JsonResponse
     {
         try {
             $config = config('filesystems.disks.do');
             
-            // Create S3 client
             $s3Client = new \Aws\S3\S3Client([
                 'version' => 'latest',
                 'region' => $config['region'],
@@ -404,7 +372,6 @@ class FileTestController extends Controller
                 'path' => $testPath,
             ]);
 
-            // Test 1: PutObject
             $putResult = null;
             $putError = null;
             try {
@@ -429,7 +396,6 @@ class FileTestController extends Controller
                 Log::error('PutObject failed', $putError);
             }
 
-            // Test 2: HeadObject (check if exists)
             $headResult = null;
             try {
                 $result = $s3Client->headObject([
@@ -449,13 +415,9 @@ class FileTestController extends Controller
                 ];
             }
 
-            // Test 3: Generate URL
             $url = rtrim($config['url'], '/') . '/' . $testPath;
-            
-            // Test 4: Check URL accessibility
             $urlCheck = $this->checkUrlAccessibility($url);
 
-            // Cleanup
             $cleanedUp = false;
             try {
                 $s3Client->deleteObject([
@@ -498,9 +460,6 @@ class FileTestController extends Controller
         }
     }
 
-    /**
-     * Check if URL is accessible via HTTP
-     */
     protected function checkUrlAccessibility(?string $url): array
     {
         if (!$url) {

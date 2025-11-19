@@ -23,10 +23,8 @@ class UploadService
         $path = trim($directory, '/').'/'.$name;
         $mime = $file->getMimeType();
 
-        // Check if this is S3-compatible storage (DO Spaces)
         $isS3 = isset($diskConfig['driver']) && $diskConfig['driver'] === 's3';
 
-        // Prepare file content
         $content = null;
         $contentType = $mime ?? 'application/octet-stream';
 
@@ -46,7 +44,6 @@ class UploadService
             $content = file_get_contents($file->getRealPath());
         }
 
-        // For S3-compatible storage (DO Spaces), use AWS SDK directly
         if ($isS3) {
             try {
                 $s3Client = new \Aws\S3\S3Client([
@@ -87,7 +84,6 @@ class UploadService
             }
         }
 
-        // For non-S3 storage (local, etc), use Laravel Storage
         $storage = Storage::disk($diskName);
         $options = ['visibility' => 'public'];
         
@@ -139,7 +135,6 @@ class UploadService
             return;
         }
 
-        // For non-S3 storage, use Laravel Storage
         $storage = Storage::disk($diskName);
         if ($storage->exists($path)) {
             $storage->delete($path);
@@ -226,7 +221,6 @@ class UploadService
             }
         }
 
-        // For non-S3 storage, use Laravel Storage
         return Storage::disk($diskName)->exists($path);
     }
 

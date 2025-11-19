@@ -157,11 +157,11 @@ class AuthApiController extends Controller
         if ($request->hasFile('avatar')) {
             $old = $user->avatar_path;
             $file = $request->file('avatar');
-            $path = app(\App\Services\UploadService::class)->storePublic($file, 'avatars');
+            $path = upload_file($file, 'avatars');
             $user->avatar_path = $path;
             $changes['avatar_path'] = [$old, $path];
             if ($old) {
-                app(\App\Services\UploadService::class)->deletePublic($old);
+                delete_file($old);
             }
         }
 
