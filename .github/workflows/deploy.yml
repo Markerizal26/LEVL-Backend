@@ -170,16 +170,6 @@ jobs:
             echo "::notice::Database migrations completed successfully."
             echo "::endgroup::"
 
-            echo "::group::Generating OpenAPI specification"
-            mkdir -p storage/api-docs
-            chmod -R 775 storage/api-docs
-            if ! php artisan openapi:generate; then
-              echo "::warning::OpenAPI generation failed, but continuing deployment"
-            else
-              echo "::notice::OpenAPI specification generated successfully."
-            fi
-            echo "::endgroup::"
-
             echo "::group::Optimizing for production (removing dev dependencies)"
             if ! composer install --no-interaction --prefer-dist --optimize-autoloader --no-dev; then
               echo "::error::Composer install (production) failed"
