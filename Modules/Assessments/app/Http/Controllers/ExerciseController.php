@@ -46,8 +46,8 @@ class ExerciseController extends Controller
       "type" => "required|in:quiz,exam,homework",
       "time_limit_minutes" => "nullable|integer|min:1",
       "max_score" => "required|numeric|min:0",
-      "available_from" => "nullable|date_time",
-      "available_until" => "nullable|date_time",
+      "available_from" => "nullable|date",
+      "available_until" => "nullable|date|after:available_from",
     ]);
 
     $exercise = $this->service->create($validated, $user->id);
@@ -76,8 +76,8 @@ class ExerciseController extends Controller
       "type" => "sometimes|in:quiz,exam,homework",
       "time_limit_minutes" => "nullable|integer|min:1",
       "max_score" => "sometimes|numeric|min:0",
-      "available_from" => "nullable|date_time",
-      "available_until" => "nullable|date_time",
+      "available_from" => "nullable|date",
+      "available_until" => "nullable|date|after:available_from",
     ]);
 
     $updated = $this->service->update($exercise, $validated);

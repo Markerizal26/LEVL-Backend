@@ -371,6 +371,11 @@ class AuthService implements AuthServiceInterface
       }
     }
 
+    $email = $params["filter"]["email"] ?? null;
+    if (is_string($email) && $email !== "") {
+      $query->where("email", "like", "%" . $email . "%");
+    }
+
     $role = $params["filter"]["role"] ?? null;
     if (is_string($role) && $role !== "") {
       $roles = array_values(array_filter(array_map("trim", explode(",", $role))));

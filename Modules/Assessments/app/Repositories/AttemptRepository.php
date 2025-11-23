@@ -15,11 +15,32 @@ class AttemptRepository
     public function paginateForUser(User $user, array $params, int $perPage): LengthAwarePaginator
     {
         $perPage = max(1, $perPage);
+        $query = $user->attempts()->with('exercise');
 
-        return $user->attempts()
-            ->with('exercise')
-            ->paginate($perPage)
-            ->appends($params);
+        // Apply status filter
+        $status = $params['status'] ?? ($params['filter']['status'] ?? null);
+        if ($status) {
+            $query->where('status', $status);
+        }
+
+        // Apply sorting
+        $sort = $params['sort'] ?? '-started_at';
+        $direction = 'desc';
+        $field = $sort;
+        if (str_starts_with($sort, '-')) {
+            $direction = 'desc';
+            $field = substr($sort, 1);
+        } else {
+            $direction = 'asc';
+        }
+        $allowedSorts = ['started_at', 'finished_at', 'status', 'score', 'created_at'];
+        if (in_array($field, $allowedSorts, true)) {
+            $query->orderBy($field, $direction);
+        } else {
+            $query->orderBy('started_at', 'desc');
+        }
+
+        return $query->paginate($perPage)->appends($params);
     }
 
     public function create(array $attributes): Attempt

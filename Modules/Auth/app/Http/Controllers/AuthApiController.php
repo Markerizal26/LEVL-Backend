@@ -382,6 +382,19 @@ class AuthApiController extends Controller
     return $this->error("Verifikasi perubahan email gagal.", 422);
   }
 
+  /**
+   * @summary Verifikasi Email dengan OTP Code
+   * @description Verifikasi email menggunakan kode OTP (6 digit) yang dikirim ke email pengguna. Endpoint ini dapat menerima UUID atau token sebagai identifier, kemudian dikombinasikan dengan kode OTP untuk verifikasi.
+   *
+   * **Cara Kerja:**
+   * 1. Setelah registrasi, pengguna akan menerima email berisi kode OTP 6 digit dan link verifikasi
+   * 2. Pengguna dapat menggunakan endpoint ini dengan mengirim UUID/token dan kode OTP
+   * 3. Jika kode valid dan belum expired, email akan terverifikasi dan status user menjadi aktif
+   *
+   * **Parameter:**
+   * - `uuid` atau `token`: UUID atau token verifikasi (dari email atau response registrasi)
+   * - `code`: Kode OTP 6 digit yang diterima via email
+   */
   public function verifyEmail(VerifyEmailRequest $request): JsonResponse
   {
     $request->validated();
@@ -410,6 +423,22 @@ class AuthApiController extends Controller
     return $this->error("Verifikasi gagal.", 422);
   }
 
+  /**
+   * @summary Verifikasi Email dengan Magic Link Token
+   * @description Verifikasi email menggunakan magic link token (16 karakter) yang dikirim melalui link di email. Endpoint ini digunakan untuk verifikasi otomatis ketika pengguna mengklik link verifikasi di email tanpa perlu memasukkan kode OTP.
+   *
+   * **Cara Kerja:**
+   * 1. Setelah registrasi, pengguna akan menerima email berisi link verifikasi dengan token
+   * 2. Ketika pengguna mengklik link, frontend akan otomatis memanggil endpoint ini dengan token dari URL
+   * 3. Jika token valid dan belum expired, email akan terverifikasi dan status user menjadi aktif
+   *
+   * **Perbedaan dengan OTP:**
+   * - Magic Link: Hanya perlu token (16 karakter), lebih mudah untuk user (one-click verification)
+   * - OTP: Perlu UUID/token + kode 6 digit, lebih aman karena memerlukan akses ke email
+   *
+   * **Parameter:**
+   * - `token`: Token verifikasi 16 karakter dari link email
+   */
   public function verifyEmailByToken(VerifyEmailByTokenRequest $request): JsonResponse
   {
     $request->validated();

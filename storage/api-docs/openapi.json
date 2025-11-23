@@ -41,7 +41,7 @@
         },
         {
             "name": "Verifikasi Email",
-            "description": "Verifikasi alamat email pengguna baru.",
+            "description": "Verifikasi alamat email pengguna baru. Sistem mendukung 2 metode verifikasi: (1) OTP Code - menggunakan UUID/token + kode 6 digit, (2) Magic Link - menggunakan token 16 karakter dari link email.",
             "x-tagGroup": "02 - Autentikasi & Registrasi",
             "x-tagPath": "02-auth/verifikasi-email"
         },
@@ -1202,8 +1202,8 @@
                 "tags": [
                     "Verifikasi Email"
                 ],
-                "summary": "Melakukan Verifikasi",
-                "description": "Memverifikasi Verifikasi.",
+                "summary": "Verifikasi Email dengan OTP Code",
+                "description": "Verifikasi email menggunakan kode OTP (6 digit) yang dikirim ke email pengguna. Endpoint ini dapat menerima UUID atau token sebagai identifier, kemudian dikombinasikan dengan kode OTP untuk verifikasi.\n **Cara Kerja:**\n   * 1. Setelah registrasi, pengguna akan menerima email berisi kode OTP 6 digit dan link verifikasi\n   * 2. Pengguna dapat menggunakan endpoint ini dengan mengirim UUID/token dan kode OTP\n   * 3. Jika kode valid dan belum expired, email akan terverifikasi dan status user menjadi aktif\n **Parameter:**\n   * - `uuid` atau `token`: UUID atau token verifikasi (dari email atau response registrasi)\n   * - `code`: Kode OTP 6 digit yang diterima via email\n   */",
                 "operationId": "api.auth.email.verify",
                 "requestBody": {
                     "required": true,
@@ -1395,8 +1395,8 @@
                 "tags": [
                     "Manajemen Token Akses"
                 ],
-                "summary": "Membuat By Token",
-                "description": "Memverifikasi By Token.",
+                "summary": "Verifikasi Email dengan Magic Link Token",
+                "description": "Verifikasi email menggunakan magic link token (16 karakter) yang dikirim melalui link di email. Endpoint ini digunakan untuk verifikasi otomatis ketika pengguna mengklik link verifikasi di email tanpa perlu memasukkan kode OTP.\n **Cara Kerja:**\n   * 1. Setelah registrasi, pengguna akan menerima email berisi link verifikasi dengan token\n   * 2. Ketika pengguna mengklik link, frontend akan otomatis memanggil endpoint ini dengan token dari URL\n   * 3. Jika token valid dan belum expired, email akan terverifikasi dan status user menjadi aktif\n **Perbedaan dengan OTP:**\n   * - Magic Link: Hanya perlu token (16 karakter), lebih mudah untuk user (one-click verification)\n   * - OTP: Perlu UUID/token + kode 6 digit, lebih aman karena memerlukan akses ke email\n **Parameter:**\n   * - `token`: Token verifikasi 16 karakter dari link email\n   */",
                 "operationId": "api.auth.email.verify.by-token",
                 "requestBody": {
                     "required": true,

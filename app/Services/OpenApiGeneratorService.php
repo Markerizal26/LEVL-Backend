@@ -46,9 +46,10 @@ class OpenApiGeneratorService
       "features" => [
         "verifikasi-email" => [
           "label" => "Verifikasi Email",
-          "description" => "Verifikasi alamat email pengguna baru.",
+          "description" =>
+            "Verifikasi alamat email pengguna baru. Sistem mendukung 2 metode verifikasi: (1) OTP Code - menggunakan UUID/token + kode 6 digit, (2) Magic Link - menggunakan token 16 karakter dari link email.",
           "modules" => ["Auth"],
-          "keywords" => ["email/verify", "email/resend"],
+          "keywords" => ["email/verify", "email/verify/by-token", "email/resend"],
         ],
         "reset-password" => [
           "label" => "Reset & Ubah Password",

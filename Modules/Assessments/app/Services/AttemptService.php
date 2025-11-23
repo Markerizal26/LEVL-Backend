@@ -139,8 +139,6 @@ class AttemptService
 
     private function validationError(array $messages): void
     {
-        $exception = ValidationException::withMessages($messages);
-        $exception->message = trans('messages.validation_failed');
-        throw $exception;
+        throw ValidationException::withMessages($messages);
     }
 }
