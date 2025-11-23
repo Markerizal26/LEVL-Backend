@@ -1194,7 +1194,8 @@ class OpenApiGeneratorService
 
     // Try to get validation rules from FormRequest
     if (method_exists($requestParam, "rules")) {
-      $rules = new $requestParam()->rules();
+      $requestInstance = new $requestParam();
+      $rules = $requestInstance->rules();
       $schemaResult = $this->rulesToSchema($rules);
       $schema = $schemaResult["schema"];
       $hasFile = $schemaResult["hasFile"];
