@@ -2,53 +2,60 @@
 
 namespace Modules\Enrollments\Models;
 
+use Database\Factories\CourseProgressFactory;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
 class CourseProgress extends Model
 {
-    protected $table = 'course_progress';
+  use HasFactory;
 
-    protected $fillable = [
-        'enrollment_id',
-        'status',
-        'progress_percent',
-        'started_at',
-        'completed_at',
-    ];
+  protected $table = "course_progress";
 
-    protected $casts = [
-        'started_at' => 'datetime',
-        'completed_at' => 'datetime',
-        'progress_percent' => 'float',
-    ];
+  protected $fillable = [
+    "enrollment_id",
+    "status",
+    "progress_percent",
+    "started_at",
+    "completed_at",
+  ];
 
-    public function enrollment()
-    {
-        return $this->belongsTo(Enrollment::class);
-    }
+  protected $casts = [
+    "started_at" => "datetime",
+    "completed_at" => "datetime",
+    "progress_percent" => "float",
+  ];
 
-    /**
-     * Get the course through enrollment.
-     */
-    public function course()
-    {
-        return $this->hasOneThrough(
-            \Modules\Schemes\Models\Course::class,
-            Enrollment::class,
-            'id', // Foreign key on enrollments table
-            'id', // Foreign key on courses table
-            'enrollment_id', // Local key on course_progress table
-            'course_id' // Local key on enrollments table
-        );
-    }
+  protected static function newFactory()
+  {
+    return CourseProgressFactory::new();
+  }
 
-    /**
-     * Get course_id via enrollment relationship.
-     */
-    public function getCourseIdAttribute()
-    {
-        return $this->enrollment?->course_id;
-    }
+  public function enrollment()
+  {
+    return $this->belongsTo(Enrollment::class);
+  }
+
+  /**
+   * Get the course through enrollment.
+   */
+  public function course()
+  {
+    return $this->hasOneThrough(
+      \Modules\Schemes\Models\Course::class,
+      Enrollment::class,
+      "id", // Foreign key on enrollments table
+      "id", // Foreign key on courses table
+      "enrollment_id", // Local key on course_progress table
+      "course_id", // Local key on enrollments table
+    );
+  }
+
+  /**
+   * Get course_id via enrollment relationship.
+   */
+  public function getCourseIdAttribute()
+  {
+    return $this->enrollment?->course_id;
+  }
 }
-
-

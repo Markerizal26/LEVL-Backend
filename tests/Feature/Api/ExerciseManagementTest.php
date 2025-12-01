@@ -87,7 +87,7 @@ describe("Exercise Management", function () {
       api("/assessments/exercises") . "?scope_type=course&scope_id=" . $this->course->id,
     );
 
-    $response->assertStatus(200)->assertJsonPath("data.items.0.id", $exercise->id);
+    $response->assertStatus(200)->assertJsonPath("data.0.id", $exercise->id);
   });
 
   it("can view exercise details", function () {

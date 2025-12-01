@@ -69,13 +69,13 @@ describe("Users List Pagination & Filtering", function () {
     $response
       ->assertStatus(200)
       ->assertJsonStructure([
-        "data" => [
-          "items" => [],
-          "meta" => ["current_page", "per_page", "total", "last_page", "from", "to"],
+        "data",
+        "meta" => [
+          "pagination" => ["current_page", "per_page", "total", "last_page", "from", "to"],
         ],
       ])
-      ->assertJsonCount(5, "data.items")
-      ->assertJsonPath("data.meta.per_page", 5);
+      ->assertJsonCount(5, "data")
+      ->assertJsonPath("meta.pagination.per_page", 5);
   });
 
   it("filters users by status", function () {
@@ -84,7 +84,7 @@ describe("Users List Pagination & Filtering", function () {
     );
 
     $response->assertStatus(200);
-    $items = $response->json("data.items");
+    $items = $response->json("data");
     foreach ($items as $item) {
       expect($item["status"])->toBe("active");
     }
@@ -99,7 +99,7 @@ describe("Users List Pagination & Filtering", function () {
     );
 
     $response->assertStatus(200);
-    $items = $response->json("data.items");
+    $items = $response->json("data");
     expect($items)->not()->toBeEmpty();
     expect($items[0]["email"])->toContain("filtertest");
   });
@@ -108,7 +108,7 @@ describe("Users List Pagination & Filtering", function () {
     $response = $this->actingAs($this->superadmin, "api")->getJson(api("/auth/users?sort=name"));
 
     $response->assertStatus(200);
-    $items = $response->json("data.items");
+    $items = $response->json("data");
     $names = array_column($items, "name");
     expect($names)->toEqual(array_values($names));
   });
@@ -119,7 +119,7 @@ describe("Users List Pagination & Filtering", function () {
     );
 
     $response->assertStatus(200);
-    $items = $response->json("data.items");
+    $items = $response->json("data");
     $timestamps = array_column($items, "created_at");
     $sortedDesc = $timestamps;
     rsort($sortedDesc);
@@ -133,9 +133,9 @@ describe("Users List Pagination & Filtering", function () {
 
     $response
       ->assertStatus(200)
-      ->assertJsonCount(3, "data.items")
-      ->assertJsonPath("data.meta.per_page", 3)
-      ->assertJsonPath("data.meta.current_page", 1);
+      ->assertJsonCount(3, "data")
+      ->assertJsonPath("meta.pagination.per_page", 3)
+      ->assertJsonPath("meta.pagination.current_page", 1);
   });
 });
 
@@ -177,12 +177,12 @@ describe("Exercises List Pagination & Filtering", function () {
     $response
       ->assertStatus(200)
       ->assertJsonStructure([
-        "data" => [
-          "items" => [],
-          "meta" => ["current_page", "per_page", "total", "last_page"],
+        "data",
+        "meta" => [
+          "pagination" => ["current_page", "per_page", "total", "last_page"],
         ],
       ])
-      ->assertJsonCount(5, "data.items");
+      ->assertJsonCount(5, "data");
   });
 
   it("filters exercises by status", function () {
@@ -191,7 +191,7 @@ describe("Exercises List Pagination & Filtering", function () {
     );
 
     $response->assertStatus(200);
-    $items = $response->json("data.items");
+    $items = $response->json("data");
     foreach ($items as $item) {
       expect($item["status"])->toBe("published");
     }
@@ -211,7 +211,7 @@ describe("Exercises List Pagination & Filtering", function () {
     );
 
     $response->assertStatus(200);
-    $items = $response->json("data.items");
+    $items = $response->json("data");
     foreach ($items as $item) {
       expect($item["type"])->toBe("exam");
     }
@@ -223,7 +223,7 @@ describe("Exercises List Pagination & Filtering", function () {
     );
 
     $response->assertStatus(200);
-    $items = $response->json("data.items");
+    $items = $response->json("data");
     $titles = array_column($items, "title");
     expect($titles)->toEqual(array_values($titles));
   });
@@ -237,8 +237,8 @@ describe("Exercises List Pagination & Filtering", function () {
 
     $response
       ->assertStatus(200)
-      ->assertJsonCount(3, "data.items")
-      ->assertJsonPath("data.meta.per_page", 3);
+      ->assertJsonCount(3, "data")
+      ->assertJsonPath("meta.pagination.per_page", 3);
   });
 });
 
@@ -290,12 +290,12 @@ describe("Attempts List Pagination & Filtering", function () {
     $response
       ->assertStatus(200)
       ->assertJsonStructure([
-        "data" => [
-          "items" => [],
-          "meta" => ["current_page", "per_page", "total", "last_page"],
+        "data",
+        "meta" => [
+          "pagination" => ["current_page", "per_page", "total", "last_page"],
         ],
       ])
-      ->assertJsonCount(5, "data.items");
+      ->assertJsonCount(5, "data");
   });
 
   it("filters attempts by status", function () {
@@ -304,7 +304,7 @@ describe("Attempts List Pagination & Filtering", function () {
     );
 
     $response->assertStatus(200);
-    $items = $response->json("data.items");
+    $items = $response->json("data");
     foreach ($items as $item) {
       expect($item["status"])->toBe("completed");
     }
@@ -316,7 +316,7 @@ describe("Attempts List Pagination & Filtering", function () {
     );
 
     $response->assertStatus(200);
-    $items = $response->json("data.items");
+    $items = $response->json("data");
     $timestamps = array_column($items, "started_at");
     $sortedDesc = $timestamps;
     rsort($sortedDesc);
@@ -352,19 +352,19 @@ describe("Courses List Pagination & Filtering", function () {
     $response
       ->assertStatus(200)
       ->assertJsonStructure([
-        "data" => [
-          "items" => [],
-          "meta" => ["current_page", "per_page", "total", "last_page"],
+        "data",
+        "meta" => [
+          "pagination" => ["current_page", "per_page", "total", "last_page"],
         ],
       ])
-      ->assertJsonCount(5, "data.items");
+      ->assertJsonCount(5, "data");
   });
 
   it("filters courses by status", function () {
     $response = $this->getJson(api("/courses?filter[status]=published"));
 
     $response->assertStatus(200);
-    $items = $response->json("data.items");
+    $items = $response->json("data");
     foreach ($items as $item) {
       expect($item["status"])->toBe("published");
     }
@@ -379,7 +379,7 @@ describe("Courses List Pagination & Filtering", function () {
     $response = $this->getJson(api("/courses?filter[level_tag]=mahir"));
 
     $response->assertStatus(200);
-    $items = $response->json("data.items");
+    $items = $response->json("data");
     foreach ($items as $item) {
       expect($item["level_tag"])->toBe("mahir");
     }
@@ -389,7 +389,7 @@ describe("Courses List Pagination & Filtering", function () {
     $response = $this->getJson(api("/courses?sort=title"));
 
     $response->assertStatus(200);
-    $items = $response->json("data.items");
+    $items = $response->json("data");
     $titles = array_column($items, "title");
     expect($titles)->toEqual(array_values($titles));
   });
@@ -401,9 +401,9 @@ describe("Courses List Pagination & Filtering", function () {
 
     $response
       ->assertStatus(200)
-      ->assertJsonCount(3, "data.items")
-      ->assertJsonPath("data.meta.per_page", 3)
-      ->assertJsonPath("data.meta.current_page", 1);
+      ->assertJsonCount(3, "data")
+      ->assertJsonPath("meta.pagination.per_page", 3)
+      ->assertJsonPath("meta.pagination.current_page", 1);
   });
 });
 
@@ -430,19 +430,17 @@ describe("Categories List Pagination & Filtering", function () {
   });
 
   it("paginates categories list", function () {
-    $response = $this->actingAs($this->superadmin, "api")->getJson(
-      api("/categories?per_page=5"),
-    );
+    $response = $this->actingAs($this->superadmin, "api")->getJson(api("/categories?per_page=5"));
 
     $response
       ->assertStatus(200)
       ->assertJsonStructure([
-        "data" => [
-          "items" => [],
-          "meta" => ["current_page", "per_page", "total", "last_page"],
+        "data",
+        "meta" => [
+          "pagination" => ["current_page", "per_page", "total", "last_page"],
         ],
       ])
-      ->assertJsonCount(5, "data.items");
+      ->assertJsonCount(5, "data");
   });
 
   it("filters categories by status", function () {
@@ -451,7 +449,7 @@ describe("Categories List Pagination & Filtering", function () {
     );
 
     $response->assertStatus(200);
-    $items = $response->json("data.items");
+    $items = $response->json("data");
     foreach ($items as $item) {
       expect($item["status"])->toBe("active");
     }
@@ -461,7 +459,7 @@ describe("Categories List Pagination & Filtering", function () {
     $response = $this->actingAs($this->superadmin, "api")->getJson(api("/categories?sort=name"));
 
     $response->assertStatus(200);
-    $items = $response->json("data.items");
+    $items = $response->json("data");
     $names = array_column($items, "name");
     expect($names)->toEqual(array_values($names));
   });
@@ -474,8 +472,8 @@ describe("Tags List Pagination & Filtering", function () {
     for ($i = 0; $i < 15; $i++) {
       $uniqueName = "Test Tag {$i} " . uniqid();
       Tag::create([
-        'name' => $uniqueName,
-        'slug' => \Illuminate\Support\Str::slug($uniqueName),
+        "name" => $uniqueName,
+        "slug" => \Illuminate\Support\Str::slug($uniqueName),
       ]);
     }
   });
@@ -486,21 +484,20 @@ describe("Tags List Pagination & Filtering", function () {
     $response
       ->assertStatus(200)
       ->assertJsonStructure([
-        "data" => [
-          "items" => [],
-          "meta" => ["current_page", "per_page", "total", "last_page"],
+        "data",
+        "meta" => [
+          "pagination" => ["current_page", "per_page", "total", "last_page"],
         ],
       ])
-      ->assertJsonCount(10, "data.items");
+      ->assertJsonCount(10, "data");
   });
 
   it("sorts tags by name", function () {
     $response = $this->actingAs($this->admin, "api")->getJson(api("/course-tags?sort=name"));
 
     $response->assertStatus(200);
-    $items = $response->json("data.items");
+    $items = $response->json("data");
     $names = array_column($items, "name");
     expect($names)->toEqual(array_values($names));
   });
 });
-

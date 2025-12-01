@@ -593,13 +593,13 @@ it("prevents updating user status back to pending", function () {
 it("lists users for superadmin", function () {
   $response = $this->actingAs($this->superadmin, "api")->getJson(api("/auth/users"));
 
-  $response->assertStatus(200)->assertJsonStructure(["data" => ["items", "meta"]]);
+  $response->assertStatus(200)->assertJsonStructure(["data", "meta" => ["pagination"]]);
 });
 
 it("allows admin to list users", function () {
   $response = $this->actingAs($this->admin, "api")->getJson(api("/auth/users"));
 
-  $response->assertStatus(200)->assertJsonStructure(["data" => ["items", "meta"]]);
+  $response->assertStatus(200)->assertJsonStructure(["data", "meta" => ["pagination"]]);
 });
 
 it("prevents student listing users", function () {

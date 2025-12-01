@@ -15,117 +15,122 @@ use Tests\TestCase;
 
 class EnrollmentRateLimitTest extends TestCase
 {
-    use RefreshDatabase;
+  use RefreshDatabase;
 
-    private User $student;
+  private User $student;
 
-    private Course $course;
+  private Course $course;
 
-    protected function setUp(): void
-    {
-        parent::setUp();
+  protected function setUp(): void
+  {
+    parent::setUp();
 
-        $this->student = User::factory()->create();
-        $this->student->assignRole('Student');
+    $this->student = User::factory()->create();
+    $this->student->assignRole("Student");
 
-        $this->course = Course::factory()->create([
-            'enrollment_type' => 'auto_accept',
-        ]);
+    $this->course = Course::factory()->create([
+      "enrollment_type" => "auto_accept",
+    ]);
+  }
+
+  /** @test */
+  public function enrollment_endpoint_is_rate_limited()
+  {
+    // Make 6 requests quickly (limit is 5 per minute)
+    $responses = [];
+    for ($i = 0; $i < 6; $i++) {
+      $responses[] = $this->actingAs($this->student, "api")->postJson(
+        "/api/v1/courses/{$this->course->slug}/enrollments",
+      );
     }
 
-    /** @test */
-    public function enrollment_endpoint_is_rate_limited()
-    {
-        // Make 6 requests quickly (limit is 5 per minute)
-        $responses = [];
-        for ($i = 0; $i < 6; $i++) {
-            $responses[] = $this->actingAs($this->student, 'api')
-                ->postJson("/api/v1/courses/{$this->course->slug}/enrollments");
-        }
-
-        // First 5 should succeed or fail with validation
-        // 6th should be rate limited
-        $lastResponse = end($responses);
-        $this->assertEquals(429, $lastResponse->status());
-    }
+    // First 5 should succeed or fail with validation
+    // 6th should be rate limited
+    $lastResponse = end($responses);
+    $this->assertEquals(429, $lastResponse->status());
+  }
 }
 
 class GamificationIntegrationTest extends TestCase
 {
-    use RefreshDatabase;
+  use RefreshDatabase;
 
-    private User $student;
+  private User $student;
 
-    private Course $course;
+  private Course $course;
 
-    private Unit $unit;
+  private Unit $unit;
 
-    private Lesson $lesson;
+  private Lesson $lesson;
 
-    private Enrollment $enrollment;
+  private Enrollment $enrollment;
 
-    protected function setUp(): void
-    {
-        parent::setUp();
+  protected function setUp(): void
+  {
+    parent::setUp();
 
-        Event::fake([
-            LessonCompleted::class,
-            CourseCompleted::class,
-        ]);
+    // Create roles first
+    $guard = "api";
+    \Spatie\Permission\Models\Role::firstOrCreate(["name" => "Superadmin", "guard_name" => $guard]);
+    \Spatie\Permission\Models\Role::firstOrCreate(["name" => "Admin", "guard_name" => $guard]);
+    \Spatie\Permission\Models\Role::firstOrCreate(["name" => "Instructor", "guard_name" => $guard]);
+    \Spatie\Permission\Models\Role::firstOrCreate(["name" => "Student", "guard_name" => $guard]);
 
-        $this->student = User::factory()->create();
-        $this->student->assignRole('Student');
+    Event::fake([LessonCompleted::class, CourseCompleted::class]);
 
-        $this->course = Course::factory()->create([
-            'progression_mode' => 'free',
-        ]);
+    $this->student = User::factory()->create();
+    $this->student->assignRole("Student");
 
-        $this->unit = Unit::factory()->create([
-            'course_id' => $this->course->id,
-            'status' => 'published',
-        ]);
+    $this->course = Course::factory()->create([
+      "progression_mode" => "free",
+    ]);
 
-        $this->lesson = Lesson::factory()->create([
-            'unit_id' => $this->unit->id,
-            'status' => 'published',
-        ]);
+    $this->unit = Unit::factory()->create([
+      "course_id" => $this->course->id,
+      "status" => "published",
+    ]);
 
-        $this->enrollment = Enrollment::factory()->create([
-            'user_id' => $this->student->id,
-            'course_id' => $this->course->id,
-            'status' => 'active',
-        ]);
-    }
+    $this->lesson = Lesson::factory()->create([
+      "unit_id" => $this->unit->id,
+      "status" => "published",
+    ]);
 
-    /** @test */
-    public function lesson_completed_event_is_dispatched()
-    {
-        $response = $this->actingAs($this->student, 'api')
-            ->postJson("/api/v1/courses/{$this->course->slug}/units/{$this->unit->slug}/lessons/{$this->lesson->slug}/complete");
+    $this->enrollment = Enrollment::factory()->create([
+      "user_id" => $this->student->id,
+      "course_id" => $this->course->id,
+      "status" => "active",
+    ]);
+  }
 
-        $response->assertStatus(200);
+  /** @test */
+  public function lesson_completed_event_is_dispatched()
+  {
+    $response = $this->actingAs($this->student, "api")->postJson(
+      "/api/v1/courses/{$this->course->slug}/units/{$this->unit->slug}/lessons/{$this->lesson->slug}/complete",
+    );
 
-        Event::assertDispatched(LessonCompleted::class, function ($event) {
-            return $event->lesson->id === $this->lesson->id
-                && $event->userId === $this->student->id;
-        });
-    }
+    $response->assertStatus(200);
 
-    /** @test */
-    public function course_completed_event_is_dispatched_when_all_lessons_done()
-    {
-        // This is an integration test - would need to complete all lessons in course
-        // Simplified version:
-        Event::fake([CourseCompleted::class]);
+    Event::assertDispatched(LessonCompleted::class, function ($event) {
+      return $event->lesson->id === $this->lesson->id && $event->userId === $this->student->id;
+    });
+  }
 
-        // Manually trigger course completion via service
-        $progressionService = app(\Modules\Schemes\Services\ProgressionService::class);
+  /** @test */
+  public function course_completed_event_is_dispatched_when_all_lessons_done()
+  {
+    // This is an integration test - would need to complete all lessons in course
+    // Simplified version:
+    Event::fake([CourseCompleted::class]);
 
-        // Complete the lesson
-        $progressionService->markLessonCompleted($this->lesson, $this->enrollment);
+    // Manually trigger course completion via service
+    $progressionService = app(\Modules\Schemes\Services\ProgressionService::class);
 
-        // In a real scenario with only one lesson, this would trigger CourseCompleted
-        // This test validates the integration exists
-        $this->assertTrue(true);
-    }
+    // Complete the lesson
+    $progressionService->markLessonCompleted($this->lesson, $this->enrollment);
+
+    // In a real scenario with only one lesson, this would trigger CourseCompleted
+    // This test validates the integration exists
+    $this->assertTrue(true);
+  }
 }
