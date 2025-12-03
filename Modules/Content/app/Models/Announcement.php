@@ -9,6 +9,9 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\MorphMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Modules\Auth\Models\User;
+use Modules\Content\Enums\ContentStatus;
+use Modules\Content\Enums\Priority;
+use Modules\Content\Enums\TargetType;
 use Modules\Schemes\Models\Course;
 
 class Announcement extends Model
@@ -36,6 +39,9 @@ class Announcement extends Model
     ];
 
     protected $casts = [
+        'status' => ContentStatus::class,
+        'target_type' => TargetType::class,
+        'priority' => Priority::class,
         'published_at' => 'datetime',
         'scheduled_at' => 'datetime',
         'views_count' => 'integer',
@@ -72,7 +78,7 @@ class Announcement extends Model
 
     public function scopePublished($query)
     {
-        return $query->where('status', 'published')
+        return $query->where('status', ContentStatus::Published)
             ->whereNotNull('published_at')
             ->where('published_at', '<=', now());
     }
@@ -80,13 +86,13 @@ class Announcement extends Model
     public function scopeForUser($query, User $user)
     {
         return $query->where(function ($q) use ($user) {
-            $q->where('target_type', 'all')
+            $q->where('target_type', TargetType::All)
                 ->orWhere(function ($q2) use ($user) {
-                    $q2->where('target_type', 'role')
+                    $q2->where('target_type', TargetType::Role)
                         ->where('target_value', $user->roles->pluck('name')->first());
                 })
                 ->orWhere(function ($q3) use ($user) {
-                    $q3->where('target_type', 'course')
+                    $q3->where('target_type', TargetType::Course)
                         ->whereIn('course_id', $user->enrollments->pluck('course_id'));
                 });
         });
@@ -99,14 +105,14 @@ class Announcement extends Model
 
     public function isPublished(): bool
     {
-        return $this->status === 'published' &&
+        return $this->status === ContentStatus::Published &&
                $this->published_at !== null &&
                $this->published_at->isPast();
     }
 
     public function isScheduled(): bool
     {
-        return $this->status === 'scheduled' &&
+        return $this->status === ContentStatus::Scheduled &&
                $this->scheduled_at !== null &&
                $this->scheduled_at->isFuture();
     }

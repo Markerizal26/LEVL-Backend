@@ -3,6 +3,8 @@
 namespace Modules\Grading\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use Modules\Grading\Enums\GradeStatus;
+use Modules\Grading\Enums\SourceType;
 
 class Grade extends Model
 {
@@ -12,6 +14,8 @@ class Grade extends Model
     ];
 
     protected $casts = [
+        'source_type' => SourceType::class,
+        'status' => GradeStatus::class,
         'graded_at' => 'datetime',
     ];
 
@@ -22,8 +26,8 @@ class Grade extends Model
     public function source()
     {
         return match ($this->source_type) {
-            'assignment' => $this->belongsTo(\Modules\Learning\Models\Assignment::class, 'source_id'),
-            'attempt' => $this->belongsTo(\Modules\Assessments\Models\Attempt::class, 'source_id'),
+            SourceType::Assignment => $this->belongsTo(\Modules\Learning\Models\Assignment::class, 'source_id'),
+            SourceType::Attempt => $this->belongsTo(\Modules\Assessments\Models\Attempt::class, 'source_id'),
             default => null,
         };
     }
@@ -33,7 +37,7 @@ class Grade extends Model
      */
     public function submission()
     {
-        if ($this->source_type !== 'assignment') {
+        if ($this->source_type !== SourceType::Assignment) {
             return null;
         }
 

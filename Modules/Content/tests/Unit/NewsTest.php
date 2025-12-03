@@ -4,6 +4,7 @@ namespace Modules\Content\Tests\Unit;
 
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Modules\Auth\Models\User;
+use Modules\Content\Enums\ContentStatus;
 use Modules\Content\Models\ContentCategory;
 use Modules\Content\Models\ContentRead;
 use Modules\Content\Models\News;
@@ -61,7 +62,7 @@ class NewsTest extends TestCase
         $published = News::published()->get();
 
         $this->assertCount(3, $published);
-        $this->assertTrue($published->every(fn ($n) => $n->status === 'published'));
+        $this->assertTrue($published->every(fn ($n) => $n->status === ContentStatus::Published));
     }
 
     #[Test]

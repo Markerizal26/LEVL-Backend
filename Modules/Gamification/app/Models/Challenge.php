@@ -5,6 +5,7 @@ namespace Modules\Gamification\Models;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Modules\Gamification\Enums\ChallengeType;
 
 class Challenge extends Model
 {
@@ -25,6 +26,7 @@ class Challenge extends Model
         'points_reward' => 'integer',
         'start_at' => 'datetime',
         'end_at' => 'datetime',
+        'type' => ChallengeType::class,
     ];
 
     public function badge(): BelongsTo
@@ -60,6 +62,7 @@ class Challenge extends Model
     public function scopeActive($query)
     {
         $now = now();
+
         return $query->where(function ($q) use ($now) {
             $q->whereNull('start_at')
                 ->orWhere('start_at', '<=', $now);
@@ -74,8 +77,7 @@ class Challenge extends Model
         $now = now();
         $started = $this->start_at === null || $this->start_at->lte($now);
         $notEnded = $this->end_at === null || $this->end_at->gte($now);
-        
+
         return $started && $notEnded;
     }
 }
-

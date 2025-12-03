@@ -5,6 +5,7 @@ namespace Modules\Common\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use Modules\Common\Enums\CategoryStatus;
 
 class Category extends Model
 {
@@ -15,6 +16,13 @@ class Category extends Model
         'value',
         'description',
         'status',
+    ];
+
+    /**
+     * The attributes that should be cast.
+     */
+    protected $casts = [
+        'status' => CategoryStatus::class,
     ];
 
     protected static function newFactory()

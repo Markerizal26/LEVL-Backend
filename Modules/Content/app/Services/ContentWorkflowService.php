@@ -6,6 +6,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\DB;
 use Modules\Auth\Models\User;
 use Modules\Content\Contracts\ContentWorkflowServiceInterface;
+use Modules\Content\Enums\ContentStatus;
 use Modules\Content\Events\ContentApproved;
 use Modules\Content\Events\ContentPublished;
 use Modules\Content\Events\ContentRejected;
@@ -52,18 +53,23 @@ class ContentWorkflowService implements ContentWorkflowServiceInterface
      */
     public function transition(Model $content, string $newState, User $user, ?string $note = null): bool
     {
-        if (! $this->canTransition($content->status, $newState)) {
+        // Get the current status as string for comparison
+        $currentStatus = $content->status instanceof ContentStatus
+            ? $content->status->value
+            : $content->status;
+
+        if (! $this->canTransition($currentStatus, $newState)) {
             throw new InvalidTransitionException(
-                "Cannot transition from {$content->status} to {$newState}"
+                "Cannot transition from {$currentStatus} to {$newState}"
             );
         }
 
-        return DB::transaction(function () use ($content, $newState, $user, $note) {
+        return DB::transaction(function () use ($content, $newState, $user, $note, $currentStatus) {
             // Save workflow history
             ContentWorkflowHistory::create([
                 'content_type' => get_class($content),
                 'content_id' => $content->id,
-                'from_state' => $content->status,
+                'from_state' => $currentStatus,
                 'to_state' => $newState,
                 'user_id' => $user->id,
                 'note' => $note,
@@ -82,9 +88,14 @@ class ContentWorkflowService implements ContentWorkflowServiceInterface
     /**
      * Check if transition is valid.
      */
-    public function canTransition(string $currentState, string $newState): bool
+    public function canTransition(string|ContentStatus $currentState, string $newState): bool
     {
-        return in_array($newState, $this->transitions[$currentState] ?? []);
+        // Handle enum values by extracting the string value
+        $currentStateString = $currentState instanceof ContentStatus
+            ? $currentState->value
+            : $currentState;
+
+        return in_array($newState, $this->transitions[$currentStateString] ?? []);
     }
 
     /**

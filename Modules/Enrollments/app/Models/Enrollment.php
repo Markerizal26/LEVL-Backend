@@ -4,16 +4,19 @@ namespace Modules\Enrollments\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Modules\Enrollments\Enums\EnrollmentStatus;
 
 class Enrollment extends Model
 {
     use HasFactory;
+
     protected $fillable = [
         'user_id', 'course_id', 'status',
         'enrolled_at', 'completed_at',
     ];
 
     protected $casts = [
+        'status' => EnrollmentStatus::class,
         'enrolled_at' => 'datetime',
         'completed_at' => 'datetime',
     ];

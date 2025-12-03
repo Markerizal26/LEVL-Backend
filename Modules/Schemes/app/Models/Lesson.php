@@ -4,10 +4,12 @@ namespace Modules\Schemes\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Modules\Schemes\Enums\ContentType;
 
 class Lesson extends Model
 {
     use HasFactory;
+
     protected $fillable = [
         'unit_id', 'slug', 'title', 'description',
         'markdown_content', 'content_type', 'content_url',
@@ -18,6 +20,7 @@ class Lesson extends Model
         'order' => 'integer',
         'duration_minutes' => 'integer',
         'published_at' => 'datetime',
+        'content_type' => ContentType::class,
     ];
 
     public function unit()

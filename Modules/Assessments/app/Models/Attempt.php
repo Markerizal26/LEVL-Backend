@@ -3,6 +3,7 @@
 namespace Modules\Assessments\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use Modules\Assessments\Enums\AttemptStatus;
 
 class Attempt extends Model
 {
@@ -13,6 +14,7 @@ class Attempt extends Model
     ];
 
     protected $casts = [
+        'status' => AttemptStatus::class,
         'started_at' => 'datetime',
         'finished_at' => 'datetime',
     ];

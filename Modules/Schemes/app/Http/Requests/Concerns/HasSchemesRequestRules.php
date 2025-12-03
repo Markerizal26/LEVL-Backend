@@ -4,10 +4,16 @@ namespace Modules\Schemes\Http\Requests\Concerns;
 
 use Illuminate\Validation\Rule;
 use Modules\Common\Http\Requests\Concerns\HasCommonValidationMessages;
+use Modules\Schemes\Enums\CourseStatus;
+use Modules\Schemes\Enums\CourseType;
+use Modules\Schemes\Enums\EnrollmentType;
+use Modules\Schemes\Enums\LevelTag;
+use Modules\Schemes\Enums\ProgressionMode;
 
 trait HasSchemesRequestRules
 {
     use HasCommonValidationMessages;
+
     protected function rulesCourse(int $courseId = 0): array
     {
         $uniqueCode = Rule::unique('courses', 'code')->whereNull('deleted_at');
@@ -22,9 +28,9 @@ trait HasSchemesRequestRules
             'slug' => ['nullable', 'string', 'max:100', $uniqueSlug],
             'title' => ['required', 'string', 'max:255'],
             'short_desc' => ['nullable', 'string'],
-            'level_tag' => ['required', Rule::in(['dasar', 'menengah', 'mahir'])],
-            'type' => ['required', Rule::in(['okupasi', 'kluster'])],
-            'enrollment_type' => ['required', Rule::in(['auto_accept', 'key_based', 'approval'])],
+            'level_tag' => ['required', Rule::enum(LevelTag::class)],
+            'type' => ['required', Rule::enum(CourseType::class)],
+            'enrollment_type' => ['required', Rule::enum(EnrollmentType::class)],
             'enrollment_key' => [
                 Rule::requiredIf(function () use ($courseId) {
                     $value = $this->input('enrollment_type');
@@ -43,7 +49,7 @@ trait HasSchemesRequestRules
                 'string',
                 'max:100',
             ],
-            'progression_mode' => ['required', Rule::in(['sequential', 'free'])],
+            'progression_mode' => ['required', Rule::enum(ProgressionMode::class)],
             'category_id' => [Rule::requiredIf(fn () => $courseId === 0), 'integer', 'exists:categories,id'],
             'tags' => ['sometimes', 'array'],
             'tags.*' => ['string'],
@@ -52,7 +58,7 @@ trait HasSchemesRequestRules
             'prereq' => ['sometimes', 'nullable', 'string'],
             'thumbnail' => ['sometimes', 'file', 'image', 'mimes:jpg,jpeg,png,webp', 'max:4096'],
             'banner' => ['sometimes', 'file', 'image', 'mimes:jpg,jpeg,png,webp', 'max:6144'],
-            'status' => ['sometimes', Rule::in(['draft', 'published', 'archived'])],
+            'status' => ['sometimes', Rule::enum(CourseStatus::class)],
             'instructor_id' => ['sometimes', 'integer', 'exists:users,id'],
             'course_admins' => ['sometimes', 'array'],
             'course_admins.*' => ['integer', 'exists:users,id'],
@@ -109,7 +115,7 @@ trait HasSchemesRequestRules
             'title' => ['required', 'string', 'max:255'],
             'description' => ['nullable', 'string'],
             'order' => ['sometimes', 'integer', 'min:1'],
-            'status' => ['sometimes', Rule::in(['draft', 'published'])],
+            'status' => ['sometimes', Rule::enum(CourseStatus::class)->only([CourseStatus::Draft, CourseStatus::Published])],
         ];
     }
 
@@ -161,7 +167,7 @@ trait HasSchemesRequestRules
             'markdown_content' => ['nullable', 'string'],
             'order' => ['sometimes', 'integer', 'min:1'],
             'duration_minutes' => ['sometimes', 'integer', 'min:0'],
-            'status' => ['sometimes', Rule::in(['draft', 'published'])],
+            'status' => ['sometimes', Rule::enum(CourseStatus::class)->only([CourseStatus::Draft, CourseStatus::Published])],
         ];
     }
 

@@ -5,6 +5,9 @@ namespace Modules\Notifications\Models;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Modules\Auth\Models\User;
+use Modules\Notifications\Enums\NotificationChannel;
+use Modules\Notifications\Enums\NotificationFrequency;
+use Modules\Notifications\Enums\NotificationType;
 
 class NotificationPreference extends Model
 {
@@ -17,10 +20,13 @@ class NotificationPreference extends Model
     ];
 
     protected $casts = [
+        'category' => NotificationType::class,
+        'channel' => NotificationChannel::class,
+        'frequency' => NotificationFrequency::class,
         'enabled' => 'boolean',
     ];
 
-    // Categories
+    // Categories (kept for backward compatibility)
     const CATEGORY_COURSE_UPDATES = 'course_updates';
 
     const CATEGORY_ASSIGNMENTS = 'assignments';
@@ -33,14 +39,14 @@ class NotificationPreference extends Model
 
     const CATEGORY_SYSTEM = 'system';
 
-    // Channels
+    // Channels (kept for backward compatibility)
     const CHANNEL_EMAIL = 'email';
 
     const CHANNEL_IN_APP = 'in_app';
 
     const CHANNEL_PUSH = 'push';
 
-    // Frequency
+    // Frequency (kept for backward compatibility)
     const FREQUENCY_IMMEDIATE = 'immediate';
 
     const FREQUENCY_DAILY = 'daily';
@@ -52,14 +58,7 @@ class NotificationPreference extends Model
      */
     public static function getCategories(): array
     {
-        return [
-            self::CATEGORY_COURSE_UPDATES,
-            self::CATEGORY_ASSIGNMENTS,
-            self::CATEGORY_ASSESSMENTS,
-            self::CATEGORY_FORUM,
-            self::CATEGORY_ACHIEVEMENTS,
-            self::CATEGORY_SYSTEM,
-        ];
+        return NotificationType::values();
     }
 
     /**
@@ -67,11 +66,7 @@ class NotificationPreference extends Model
      */
     public static function getChannels(): array
     {
-        return [
-            self::CHANNEL_EMAIL,
-            self::CHANNEL_IN_APP,
-            self::CHANNEL_PUSH,
-        ];
+        return NotificationChannel::values();
     }
 
     /**
@@ -79,11 +74,7 @@ class NotificationPreference extends Model
      */
     public static function getFrequencies(): array
     {
-        return [
-            self::FREQUENCY_IMMEDIATE,
-            self::FREQUENCY_DAILY,
-            self::FREQUENCY_WEEKLY,
-        ];
+        return NotificationFrequency::values();
     }
 
     /**

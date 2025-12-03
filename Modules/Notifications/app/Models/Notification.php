@@ -4,6 +4,9 @@ namespace Modules\Notifications\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Modules\Content\Enums\Priority;
+use Modules\Notifications\Enums\NotificationChannel;
+use Modules\Notifications\Enums\NotificationType;
 
 class Notification extends Model
 {
@@ -15,6 +18,9 @@ class Notification extends Model
     ];
 
     protected $casts = [
+        'type' => NotificationType::class,
+        'channel' => NotificationChannel::class,
+        'priority' => Priority::class,
         'data' => 'array',
         'scheduled_at' => 'datetime',
         'sent_at' => 'datetime',

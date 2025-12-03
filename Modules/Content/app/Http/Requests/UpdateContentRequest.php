@@ -3,6 +3,9 @@
 namespace Modules\Content\Http\Requests;
 
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Validation\Rule;
+use Modules\Content\Enums\Priority;
+use Modules\Content\Enums\TargetType;
 
 class UpdateContentRequest extends FormRequest
 {
@@ -31,9 +34,9 @@ class UpdateContentRequest extends FormRequest
 
         // Add announcement-specific rules
         if ($this->route('announcement')) {
-            $rules['target_type'] = 'sometimes|required|in:all,role,course';
+            $rules['target_type'] = ['sometimes', 'required', Rule::enum(TargetType::class)];
             $rules['target_value'] = 'nullable|string|max:255';
-            $rules['priority'] = 'nullable|in:low,normal,high';
+            $rules['priority'] = ['nullable', Rule::enum(Priority::class)];
         }
 
         return $rules;

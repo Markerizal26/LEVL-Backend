@@ -5,6 +5,7 @@ namespace Modules\Content\Tests\Unit;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Event;
 use Modules\Auth\Models\User;
+use Modules\Content\Enums\ContentStatus;
 use Modules\Content\Events\ContentApproved;
 use Modules\Content\Events\ContentPublished;
 use Modules\Content\Events\ContentRejected;
@@ -44,7 +45,7 @@ class ContentWorkflowServiceTest extends TestCase
         );
 
         $this->assertTrue($result);
-        $this->assertEquals('submitted', $news->fresh()->status);
+        $this->assertEquals(ContentStatus::Submitted, $news->fresh()->status);
     }
 
     #[Test]
@@ -113,7 +114,7 @@ class ContentWorkflowServiceTest extends TestCase
         $result = $this->workflowService->submitForReview($news, $this->user);
 
         $this->assertTrue($result);
-        $this->assertEquals('submitted', $news->fresh()->status);
+        $this->assertEquals(ContentStatus::Submitted, $news->fresh()->status);
         Event::assertDispatched(ContentSubmitted::class);
     }
 
@@ -126,7 +127,7 @@ class ContentWorkflowServiceTest extends TestCase
         $result = $this->workflowService->approve($news, $this->user, 'Looks good');
 
         $this->assertTrue($result);
-        $this->assertEquals('approved', $news->fresh()->status);
+        $this->assertEquals(ContentStatus::Approved, $news->fresh()->status);
         Event::assertDispatched(ContentApproved::class);
     }
 
@@ -139,7 +140,7 @@ class ContentWorkflowServiceTest extends TestCase
         $result = $this->workflowService->reject($news, $this->user, 'Needs more work');
 
         $this->assertTrue($result);
-        $this->assertEquals('rejected', $news->fresh()->status);
+        $this->assertEquals(ContentStatus::Rejected, $news->fresh()->status);
 
         $history = ContentWorkflowHistory::where('content_id', $news->id)->latest()->first();
         $this->assertEquals('Needs more work', $history->note);
@@ -157,7 +158,7 @@ class ContentWorkflowServiceTest extends TestCase
         $result = $this->workflowService->schedule($news, $this->user, $publishDate);
 
         $this->assertTrue($result);
-        $this->assertEquals('scheduled', $news->fresh()->status);
+        $this->assertEquals(ContentStatus::Scheduled, $news->fresh()->status);
         $this->assertNotNull($news->fresh()->scheduled_at);
         Event::assertDispatched(ContentScheduled::class);
     }
@@ -171,7 +172,7 @@ class ContentWorkflowServiceTest extends TestCase
         $result = $this->workflowService->publish($news, $this->user);
 
         $this->assertTrue($result);
-        $this->assertEquals('published', $news->fresh()->status);
+        $this->assertEquals(ContentStatus::Published, $news->fresh()->status);
         $this->assertNotNull($news->fresh()->published_at);
         Event::assertDispatched(ContentPublished::class);
     }
@@ -183,19 +184,19 @@ class ContentWorkflowServiceTest extends TestCase
 
         // Draft -> Submitted
         $this->workflowService->submitForReview($news, $this->user);
-        $this->assertEquals('submitted', $news->fresh()->status);
+        $this->assertEquals(ContentStatus::Submitted, $news->fresh()->status);
 
         // Submitted -> In Review
         $this->workflowService->transition($news, ContentWorkflowService::STATE_IN_REVIEW, $this->user);
-        $this->assertEquals('in_review', $news->fresh()->status);
+        $this->assertEquals(ContentStatus::InReview, $news->fresh()->status);
 
         // In Review -> Approved
         $this->workflowService->approve($news, $this->user);
-        $this->assertEquals('approved', $news->fresh()->status);
+        $this->assertEquals(ContentStatus::Approved, $news->fresh()->status);
 
         // Approved -> Published
         $this->workflowService->publish($news, $this->user);
-        $this->assertEquals('published', $news->fresh()->status);
+        $this->assertEquals(ContentStatus::Published, $news->fresh()->status);
 
         // Verify all history entries
         $historyCount = ContentWorkflowHistory::where('content_id', $news->id)->count();
@@ -214,7 +215,7 @@ class ContentWorkflowServiceTest extends TestCase
         );
 
         $this->assertTrue($result);
-        $this->assertEquals('draft', $news->fresh()->status);
+        $this->assertEquals(ContentStatus::Draft, $news->fresh()->status);
     }
 
     #[Test]
@@ -229,6 +230,6 @@ class ContentWorkflowServiceTest extends TestCase
         );
 
         $this->assertTrue($result);
-        $this->assertEquals('archived', $news->fresh()->status);
+        $this->assertEquals(ContentStatus::Archived, $news->fresh()->status);
     }
 }

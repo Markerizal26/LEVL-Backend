@@ -2,6 +2,9 @@
 
 namespace Modules\Common\Http\Requests\Concerns;
 
+use Illuminate\Validation\Rule;
+use Modules\Common\Enums\CategoryStatus;
+
 trait HasCommonRequestRules
 {
     protected function rulesCategoryStore(): array
@@ -10,7 +13,7 @@ trait HasCommonRequestRules
             'name' => ['required', 'string', 'max:100'],
             'value' => ['required', 'string', 'max:100', 'unique:categories,value'],
             'description' => ['nullable', 'string', 'max:255'],
-            'status' => ['required', 'in:active,inactive'],
+            'status' => ['required', Rule::enum(CategoryStatus::class)],
         ];
     }
 
@@ -31,7 +34,7 @@ trait HasCommonRequestRules
             'name' => ['sometimes', 'required', 'string', 'max:100'],
             'value' => ['sometimes', 'required', 'string', 'max:100', 'unique:categories,value,'.$categoryId],
             'description' => ['nullable', 'string', 'max:255'],
-            'status' => ['sometimes', 'required', 'in:active,inactive'],
+            'status' => ['sometimes', 'required', Rule::enum(CategoryStatus::class)],
         ];
     }
 

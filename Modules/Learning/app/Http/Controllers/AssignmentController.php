@@ -5,6 +5,9 @@ namespace Modules\Learning\Http\Controllers;
 use App\Support\ApiResponse;
 use Illuminate\Http\Request;
 use Illuminate\Routing\Controller;
+use Illuminate\Validation\Rule;
+use Modules\Learning\Enums\AssignmentStatus;
+use Modules\Learning\Enums\SubmissionType;
 use Modules\Learning\Models\Assignment;
 use Modules\Learning\Services\AssignmentService;
 
@@ -34,11 +37,11 @@ class AssignmentController extends Controller
         $validated = $request->validate([
             'title' => ['required', 'string', 'max:255'],
             'description' => ['nullable', 'string'],
-            'submission_type' => ['required', 'in:text,file,mixed'],
+            'submission_type' => ['required', Rule::enum(SubmissionType::class)],
             'max_score' => ['nullable', 'integer', 'min:1', 'max:1000'],
             'available_from' => ['nullable', 'date'],
             'deadline_at' => ['nullable', 'date', 'after_or_equal:available_from'],
-            'status' => ['nullable', 'in:draft,published,archived'],
+            'status' => ['nullable', Rule::enum(AssignmentStatus::class)],
             'allow_resubmit' => ['nullable', 'boolean'],
             'late_penalty_percent' => ['nullable', 'integer', 'min:0', 'max:100'],
         ]);
@@ -73,11 +76,11 @@ class AssignmentController extends Controller
         $validated = $request->validate([
             'title' => ['sometimes', 'string', 'max:255'],
             'description' => ['nullable', 'string'],
-            'submission_type' => ['sometimes', 'in:text,file,mixed'],
+            'submission_type' => ['sometimes', Rule::enum(SubmissionType::class)],
             'max_score' => ['nullable', 'integer', 'min:1', 'max:1000'],
             'available_from' => ['nullable', 'date'],
             'deadline_at' => ['nullable', 'date', 'after_or_equal:available_from'],
-            'status' => ['sometimes', 'in:draft,published,archived'],
+            'status' => ['sometimes', Rule::enum(AssignmentStatus::class)],
             'allow_resubmit' => ['nullable', 'boolean'],
             'late_penalty_percent' => ['nullable', 'integer', 'min:0', 'max:100'],
         ]);

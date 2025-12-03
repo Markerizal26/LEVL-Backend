@@ -3,11 +3,11 @@
 namespace Modules\Auth\Http\Requests;
 
 use Illuminate\Foundation\Http\FormRequest;
-use Modules\Common\Http\Requests\Concerns\HasApiValidation;
+use Illuminate\Validation\Rule;
+use Modules\Auth\Enums\UserStatus;
 
 class UpdateUserStatusRequest extends FormRequest
 {
-
     public function authorize(): bool
     {
         return true;
@@ -16,7 +16,7 @@ class UpdateUserStatusRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'status' => ['required', 'in:active,inactive,banned'],
+            'status' => ['required', Rule::enum(UserStatus::class)->only([UserStatus::Active, UserStatus::Inactive, UserStatus::Banned])],
         ];
     }
 

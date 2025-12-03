@@ -3,6 +3,10 @@
 namespace Modules\Content\Http\Requests;
 
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Validation\Rule;
+use Modules\Content\Enums\ContentStatus;
+use Modules\Content\Enums\Priority;
+use Modules\Content\Enums\TargetType;
 
 class CreateAnnouncementRequest extends FormRequest
 {
@@ -17,10 +21,10 @@ class CreateAnnouncementRequest extends FormRequest
             'title' => 'required|string|max:255',
             'content' => 'required|string',
             'course_id' => 'nullable|exists:courses,id',
-            'target_type' => 'required|in:all,role,course',
+            'target_type' => ['required', Rule::enum(TargetType::class)],
             'target_value' => 'nullable|string|max:255',
-            'priority' => 'nullable|in:low,normal,high',
-            'status' => 'nullable|in:draft,published,scheduled',
+            'priority' => ['nullable', Rule::enum(Priority::class)],
+            'status' => ['nullable', Rule::enum(ContentStatus::class)->only([ContentStatus::Draft, ContentStatus::Published, ContentStatus::Scheduled])],
             'scheduled_at' => 'nullable|date|after:now',
         ];
     }

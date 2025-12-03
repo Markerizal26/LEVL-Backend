@@ -6,6 +6,8 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use Modules\Assessments\Enums\PaymentStatus;
+use Modules\Assessments\Enums\RegistrationStatus;
 use Modules\Auth\Models\User;
 use Modules\Enrollments\Models\Enrollment;
 
@@ -34,6 +36,10 @@ class AssessmentRegistration extends Model
     ];
 
     protected $casts = [
+        'status' => RegistrationStatus::class,
+        'payment_status' => PaymentStatus::class,
+        'payment_method' => PaymentMethod::class,
+        'result' => RegistrationResult::class,
         'scheduled_at' => 'datetime',
         'prerequisites_met' => 'boolean',
         'prerequisites_checked_at' => 'datetime',
@@ -43,30 +49,6 @@ class AssessmentRegistration extends Model
         'payment_amount' => 'decimal:2',
         'score' => 'decimal:2',
     ];
-
-    // Status constants
-    const STATUS_PENDING = 'pending';
-
-    const STATUS_CONFIRMED = 'confirmed';
-
-    const STATUS_SCHEDULED = 'scheduled';
-
-    const STATUS_IN_PROGRESS = 'in_progress';
-
-    const STATUS_COMPLETED = 'completed';
-
-    const STATUS_CANCELLED = 'cancelled';
-
-    const STATUS_NO_SHOW = 'no_show';
-
-    // Payment status constants
-    const PAYMENT_PENDING = 'pending';
-
-    const PAYMENT_PAID = 'paid';
-
-    const PAYMENT_FAILED = 'failed';
-
-    const PAYMENT_REFUNDED = 'refunded';
 
     /**
      * Get the user who registered for the assessment.

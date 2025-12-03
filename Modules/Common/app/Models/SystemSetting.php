@@ -2,8 +2,9 @@
 
 namespace Modules\Common\Models;
 
-use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Model;
+use Modules\Common\Enums\SettingType;
 
 class SystemSetting extends Model
 {
@@ -43,6 +44,7 @@ class SystemSetting extends Model
      */
     protected $casts = [
         'value' => 'string',
+        'type' => SettingType::class,
     ];
 
     /**
@@ -50,7 +52,9 @@ class SystemSetting extends Model
      */
     public function getTypedValueAttribute()
     {
-        return match ($this->type) {
+        $type = $this->type instanceof SettingType ? $this->type->value : $this->type;
+
+        return match ($type) {
             'number' => is_numeric($this->value) ? (str_contains($this->value, '.') ? (float) $this->value : (int) $this->value) : 0,
             'boolean' => filter_var($this->value, FILTER_VALIDATE_BOOLEAN),
             'json' => json_decode($this->value, true) ?? [],
@@ -61,15 +65,20 @@ class SystemSetting extends Model
     /**
      * Set the value and automatically determine type if not specified.
      */
-    public function setValue($value, $type = null): void
+    public function setValue($value, SettingType|string|null $type = null): void
     {
         if ($type === null) {
             $type = $this->determineType($value);
         }
 
+        // Convert string to enum if needed
+        if (is_string($type)) {
+            $type = SettingType::from($type);
+        }
+
         $this->value = match ($type) {
-            'json' => json_encode($value),
-            'boolean' => $value ? '1' : '0',
+            SettingType::Json => json_encode($value),
+            SettingType::Boolean => $value ? '1' : '0',
             default => (string) $value,
         };
 
@@ -79,21 +88,21 @@ class SystemSetting extends Model
     /**
      * Determine the type of value.
      */
-    protected function determineType($value): string
+    protected function determineType($value): SettingType
     {
         if (is_array($value) || is_object($value)) {
-            return 'json';
+            return SettingType::Json;
         }
 
         if (is_bool($value)) {
-            return 'boolean';
+            return SettingType::Boolean;
         }
 
         if (is_numeric($value)) {
-            return 'number';
+            return SettingType::Number;
         }
 
-        return 'string';
+        return SettingType::String;
     }
 
     /**
@@ -102,7 +111,7 @@ class SystemSetting extends Model
     public static function get(string $key, $default = null): mixed
     {
         $setting = static::find($key);
-        
+
         return $setting ? $setting->typed_value : $default;
     }
 
@@ -113,13 +122,12 @@ class SystemSetting extends Model
     {
         $setting = static::updateOrCreate(
             ['key' => $key],
-            ['value' => null, 'type' => 'string']
+            ['value' => null, 'type' => SettingType::String]
         );
-        
+
         if ($setting) {
             $setting->setValue($value);
             $setting->save();
         }
     }
 }
-

@@ -14,7 +14,7 @@ class AdminProfileController extends Controller
     public function __construct(
         private ProfileServiceInterface $profileService
     ) {
-        $this->middleware('role:admin');
+        $this->middleware('role:Admin');
     }
 
     public function show(Request $request, int $userId): JsonResponse

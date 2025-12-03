@@ -4,6 +4,9 @@ namespace Modules\Assessments\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Modules\Assessments\Enums\ExerciseStatus;
+use Modules\Assessments\Enums\ExerciseType;
+use Modules\Assessments\Enums\ScopeType;
 
 class Exercise extends Model
 {
@@ -27,6 +30,9 @@ class Exercise extends Model
     ];
 
     protected $casts = [
+        'type' => ExerciseType::class,
+        'status' => ExerciseStatus::class,
+        'scope_type' => ScopeType::class,
         'available_from' => 'datetime',
         'available_until' => 'datetime',
         'allow_retake' => 'boolean',
@@ -44,9 +50,10 @@ class Exercise extends Model
     public function scope()
     {
         return match ($this->scope_type) {
-            'course' => $this->belongsTo(\Modules\Schemes\Models\Course::class, 'scope_id'),
-            'unit' => $this->belongsTo(\Modules\Schemes\Models\Unit::class, 'scope_id'),
-            'lesson' => $this->belongsTo(\Modules\Schemes\Models\Lesson::class, 'scope_id'),
+            ScopeType::Course => $this->belongsTo(\Modules\Schemes\Models\Course::class, 'scope_id'),
+            ScopeType::Unit => $this->belongsTo(\Modules\Schemes\Models\Unit::class, 'scope_id'),
+            ScopeType::Lesson => $this->belongsTo(\Modules\Schemes\Models\Lesson::class, 'scope_id'),
+            default => null,
         };
     }
 

@@ -3,6 +3,8 @@
 namespace Modules\Learning\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use Modules\Learning\Enums\AssignmentStatus;
+use Modules\Learning\Enums\SubmissionType;
 
 class Assignment extends Model
 {
@@ -14,6 +16,8 @@ class Assignment extends Model
     ];
 
     protected $casts = [
+        'submission_type' => SubmissionType::class,
+        'status' => AssignmentStatus::class,
         'available_from' => 'datetime',
         'deadline_at' => 'datetime',
         'allow_resubmit' => 'boolean',
@@ -37,7 +41,7 @@ class Assignment extends Model
 
     public function isAvailable(): bool
     {
-        if ($this->status !== 'published') {
+        if ($this->status !== AssignmentStatus::Published) {
             return false;
         }
 

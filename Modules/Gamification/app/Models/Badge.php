@@ -4,6 +4,7 @@ namespace Modules\Gamification\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Modules\Gamification\Enums\BadgeType;
 
 class Badge extends Model
 {
@@ -20,6 +21,7 @@ class Badge extends Model
 
     protected $casts = [
         'threshold' => 'integer',
+        'type' => BadgeType::class,
     ];
 
     public function users(): HasMany
@@ -42,4 +44,3 @@ class Badge extends Model
         return $query->where('type', 'completion');
     }
 }
-

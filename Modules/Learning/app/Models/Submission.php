@@ -3,6 +3,7 @@
 namespace Modules\Learning\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use Modules\Learning\Enums\SubmissionStatus;
 
 class Submission extends Model
 {
@@ -14,6 +15,7 @@ class Submission extends Model
     ];
 
     protected $casts = [
+        'status' => SubmissionStatus::class,
         'submitted_at' => 'datetime',
         'attempt_number' => 'integer',
         'is_late' => 'boolean',
@@ -75,13 +77,13 @@ class Submission extends Model
         if ($this->relationLoaded('grade')) {
             return $this->getRelation('grade')?->score;
         }
-        
+
         $grade = \Modules\Grading\Models\Grade::query()
             ->where('source_type', 'assignment')
             ->where('source_id', $this->assignment_id)
             ->where('user_id', $this->user_id)
             ->first();
-        
+
         return $grade?->score;
     }
 
@@ -93,13 +95,13 @@ class Submission extends Model
         if ($this->relationLoaded('grade')) {
             return $this->getRelation('grade')?->feedback;
         }
-        
+
         $grade = \Modules\Grading\Models\Grade::query()
             ->where('source_type', 'assignment')
             ->where('source_id', $this->assignment_id)
             ->where('user_id', $this->user_id)
             ->first();
-        
+
         return $grade?->feedback;
     }
 
@@ -111,13 +113,13 @@ class Submission extends Model
         if ($this->relationLoaded('grade')) {
             return $this->getRelation('grade')?->graded_at;
         }
-        
+
         $grade = \Modules\Grading\Models\Grade::query()
             ->where('source_type', 'assignment')
             ->where('source_id', $this->assignment_id)
             ->where('user_id', $this->user_id)
             ->first();
-        
+
         return $grade?->graded_at;
     }
 }

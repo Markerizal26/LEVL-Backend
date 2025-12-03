@@ -5,6 +5,7 @@ namespace Modules\Auth\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
+use Modules\Auth\Enums\UserStatus;
 use Modules\Auth\Traits\HasProfilePrivacy;
 use Modules\Auth\Traits\TracksUserActivity;
 use Spatie\Permission\Traits\HasRoles;
@@ -40,6 +41,7 @@ class User extends Authenticatable implements JWTSubject
         'email_verified_at' => 'datetime',
         'password' => 'hashed',
         'last_profile_update' => 'datetime',
+        'status' => UserStatus::class,
     ];
 
     protected $appends = ['avatar_url'];

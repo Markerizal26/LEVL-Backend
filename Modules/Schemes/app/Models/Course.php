@@ -9,6 +9,11 @@ use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Laravel\Scout\Searchable;
+use Modules\Schemes\Enums\CourseStatus;
+use Modules\Schemes\Enums\CourseType;
+use Modules\Schemes\Enums\EnrollmentType;
+use Modules\Schemes\Enums\LevelTag;
+use Modules\Schemes\Enums\ProgressionMode;
 
 class Course extends Model
 {
@@ -26,12 +31,17 @@ class Course extends Model
         'level_tag', 'category_id', 'tags_json', 'prereq_text',
         'duration_estimate', 'thumbnail_path',
         'banner_path', 'progression_mode', 'enrollment_type', 'enrollment_key',
-        'status', 'published_at', 'instructor_id',
+        'status', 'published_at', 'instructor_id', 'deleted_by',
     ];
 
     protected $casts = [
         'tags_json' => 'array',
         'published_at' => 'datetime',
+        'status' => CourseStatus::class,
+        'type' => CourseType::class,
+        'level_tag' => LevelTag::class,
+        'enrollment_type' => EnrollmentType::class,
+        'progression_mode' => ProgressionMode::class,
     ];
 
     protected $appends = ['thumbnail_url', 'banner_url', 'tag_list'];
@@ -91,6 +101,14 @@ class Course extends Model
     public function instructor(): BelongsTo
     {
         return $this->belongsTo(\Modules\Auth\Models\User::class, 'instructor_id');
+    }
+
+    /**
+     * Get the user who deleted the course.
+     */
+    public function deletedBy(): BelongsTo
+    {
+        return $this->belongsTo(\Modules\Auth\Models\User::class, 'deleted_by');
     }
 
     /**
@@ -200,7 +218,7 @@ class Course extends Model
      */
     public function shouldBeSearchable(): bool
     {
-        return $this->status === 'published';
+        return $this->status === CourseStatus::Published;
     }
 
     /**

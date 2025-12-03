@@ -1,0 +1,254 @@
+# Implementation Plan - Database Consistency Review
+
+- [x] 1. Create PHP Enum classes for Auth module
+  - [x] 1.1 Create UserStatus enum
+    - Create `Modules/Auth/app/Enums/UserStatus.php` with values: pending, active, inactive, banned
+    - Add `values()`, `rule()`, and `label()` methods
+    - _Requirements: 7.1, 7.2_
+  - [x] 1.2 Update User model to cast status to UserStatus enum
+    - Update `$casts` array in User model
+    - _Requirements: 1.3, 7.3_
+  - [ ]* 1.3 Write property test for UserStatus enum
+    - **Property 1: Enum Column PHP Class Correspondence**
+    - **Validates: Requirements 1.2, 7.1**
+
+- [x] 2. Create PHP Enum classes for Schemes module
+  - [x] 2.1 Create CourseStatus enum
+    - Create `Modules/Schemes/app/Enums/CourseStatus.php` with values: draft, published, archived
+    - _Requirements: 7.1, 7.2_
+  - [x] 2.2 Create CourseType enum
+    - Create `Modules/Schemes/app/Enums/CourseType.php` with values: okupasi, kluster
+    - _Requirements: 7.1, 7.2_
+  - [x] 2.3 Create LevelTag enum
+    - Create `Modules/Schemes/app/Enums/LevelTag.php` with values: dasar, menengah, mahir
+    - _Requirements: 7.1, 7.2_
+  - [x] 2.4 Create EnrollmentType enum
+    - Create `Modules/Schemes/app/Enums/EnrollmentType.php` with values: auto_accept, key_based, approval
+    - _Requirements: 7.1, 7.2_
+  - [x] 2.5 Create ProgressionMode enum
+    - Create `Modules/Schemes/app/Enums/ProgressionMode.php` with values: sequential, free
+    - _Requirements: 7.1, 7.2_
+  - [x] 2.6 Create ContentType enum for Lesson
+    - Create `Modules/Schemes/app/Enums/ContentType.php` with values: markdown, video, link
+    - _Requirements: 7.1, 7.2_
+  - [x] 2.7 Update Course model to cast enums
+    - Update `$casts` array with CourseStatus, CourseType, LevelTag, EnrollmentType, ProgressionMode
+    - _Requirements: 1.3, 7.3_
+  - [x] 2.8 Update Lesson model to cast content_type enum
+    - Update `$casts` array with ContentType
+    - _Requirements: 1.3, 7.3_
+  - [ ]* 2.9 Write property tests for Schemes enums
+    - **Property 2: Model Enum Casting Completeness**
+    - **Validates: Requirements 1.3, 7.3**
+
+- [x] 3. Create PHP Enum classes for Enrollments module
+  - [x] 3.1 Create EnrollmentStatus enum
+    - Create `Modules/Enrollments/app/Enums/EnrollmentStatus.php` with values: pending, active, completed, cancelled
+    - _Requirements: 7.1, 7.2_
+  - [x] 3.2 Update Enrollment model to cast status enum
+    - Update `$casts` array with EnrollmentStatus
+    - _Requirements: 1.3, 7.3_
+  - [ ]* 3.3 Write property test for EnrollmentStatus enum
+    - **Property 6: Status Value Consistency**
+    - **Validates: Requirements 5.2**
+
+- [-] 4. Create PHP Enum classes for Assessments module
+  - [x] 4.1 Create ExerciseType enum
+    - Create `Modules/Assessments/app/Enums/ExerciseType.php` with values: quiz, exam
+    - _Requirements: 7.1, 7.2_
+  - [x] 4.2 Create ExerciseStatus enum
+    - Create `Modules/Assessments/app/Enums/ExerciseStatus.php` with values: draft, published, archived
+    - _Requirements: 7.1, 7.2_
+  - [x] 4.3 Create ScopeType enum
+    - Create `Modules/Assessments/app/Enums/ScopeType.php` with values: course, unit, lesson
+    - _Requirements: 7.1, 7.2_
+  - [x] 4.4 Create QuestionType enum
+    - Create `Modules/Assessments/app/Enums/QuestionType.php` with values: multiple_choice, free_text, file_upload
+    - _Requirements: 7.1, 7.2_
+  - [x] 4.5 Create AttemptStatus enum
+    - Create `Modules/Assessments/app/Enums/AttemptStatus.php` with values: in_progress, completed, expired
+    - _Requirements: 7.1, 7.2_
+  - [x] 4.6 Create RegistrationStatus enum
+    - Create `Modules/Assessments/app/Enums/RegistrationStatus.php` with values: pending, confirmed, completed, cancelled, no_show
+    - _Requirements: 7.1, 7.2_
+  - [x] 4.7 Create PaymentStatus enum
+    - Create `Modules/Assessments/app/Enums/PaymentStatus.php` with values: pending, paid, failed, refunded
+    - _Requirements: 7.1, 7.2_
+  - [x] 4.8 Update Exercise model to cast enums
+    - Update `$casts` array with ExerciseType, ExerciseStatus, ScopeType
+    - _Requirements: 1.3, 7.3_
+  - [x] 4.9 Update Question model to cast type enum
+    - Update `$casts` array with QuestionType
+    - _Requirements: 1.3, 7.3_
+  - [x] 4.10 Update Attempt model to cast status enum
+    - Update `$casts` array with AttemptStatus
+    - _Requirements: 1.3, 7.3_
+  - [x] 4.11 Update AssessmentRegistration model to cast enums
+    - Update `$casts` array with RegistrationStatus, PaymentStatus
+    - _Requirements: 1.3, 7.3_
+  - [ ]* 4.12 Write property tests for Assessments enums
+    - **Property 2: Model Enum Casting Completeness**
+    - **Validates: Requirements 1.3, 7.3**
+
+- [ ] 5. Checkpoint - Ensure all enum tests pass
+  - Ensure all tests pass, ask the user if questions arise.
+
+- [x] 6. Create PHP Enum classes for Learning module
+  - [x] 6.1 Create SubmissionType enum
+    - Create `Modules/Learning/app/Enums/SubmissionType.php` with values: text, file, mixed
+    - _Requirements: 7.1, 7.2_
+  - [x] 6.2 Create SubmissionStatus enum
+    - Create `Modules/Learning/app/Enums/SubmissionStatus.php` with values: draft, submitted, graded, late
+    - _Requirements: 7.1, 7.2_
+  - [x] 6.3 Create AssignmentStatus enum
+    - Create `Modules/Learning/app/Enums/AssignmentStatus.php` with values: draft, published, archived
+    - _Requirements: 7.1, 7.2_
+  - [x] 6.4 Update Assignment model to cast enums
+    - Update `$casts` array with SubmissionType, AssignmentStatus
+    - _Requirements: 1.3, 7.3_
+  - [x] 6.5 Update Submission model to cast status enum
+    - Update `$casts` array with SubmissionStatus
+    - _Requirements: 1.3, 7.3_
+
+- [x] 7. Create PHP Enum classes for Grading module
+  - [x] 7.1 Create SourceType enum
+    - Create `Modules/Grading/app/Enums/SourceType.php` with values: assignment, attempt
+    - _Requirements: 7.1, 7.2_
+  - [x] 7.2 Create GradeStatus enum
+    - Create `Modules/Grading/app/Enums/GradeStatus.php` with values: pending, graded, reviewed
+    - _Requirements: 7.1, 7.2_
+  - [x] 7.3 Update Grade model to cast enums
+    - Update `$casts` array with SourceType, GradeStatus
+    - _Requirements: 1.3, 7.3_
+
+- [x] 8. Create PHP Enum classes for Gamification module
+  - [x] 8.1 Create PointSourceType enum
+    - Create `Modules/Gamification/app/Enums/PointSourceType.php` with values: lesson, assignment, attempt, system
+    - _Requirements: 7.1, 7.2_
+  - [x] 8.2 Create PointReason enum
+    - Create `Modules/Gamification/app/Enums/PointReason.php` with values: completion, score, bonus, penalty
+    - _Requirements: 7.1, 7.2_
+  - [x] 8.3 Create BadgeType enum
+    - Create `Modules/Gamification/app/Enums/BadgeType.php` with values: achievement, milestone, completion
+    - _Requirements: 7.1, 7.2_
+  - [x] 8.4 Create ChallengeType enum
+    - Create `Modules/Gamification/app/Enums/ChallengeType.php` with values: daily, weekly, special
+    - _Requirements: 7.1, 7.2_
+  - [x] 8.5 Update Point, Badge, Challenge models to cast enums
+    - Update `$casts` arrays with corresponding enums
+    - _Requirements: 1.3, 7.3_
+
+- [x] 9. Create PHP Enum classes for Content module
+  - [x] 9.1 Create ContentStatus enum
+    - Create `Modules/Content/app/Enums/ContentStatus.php` with values: draft, published, scheduled
+    - _Requirements: 7.1, 7.2_
+  - [x] 9.2 Create TargetType enum
+    - Create `Modules/Content/app/Enums/TargetType.php` with values: all, role, course
+    - _Requirements: 7.1, 7.2_
+  - [x] 9.3 Create Priority enum
+    - Create `Modules/Content/app/Enums/Priority.php` with values: low, normal, high
+    - _Requirements: 7.1, 7.2_
+  - [x] 9.4 Update Announcement model to cast enums
+    - Update `$casts` array with ContentStatus, TargetType, Priority
+    - _Requirements: 1.3, 7.3_
+  - [x] 9.5 Update News model to cast status enum
+    - Update `$casts` array with ContentStatus
+    - _Requirements: 1.3, 7.3_
+
+- [x] 10. Create PHP Enum classes for Notifications module
+  - [x] 10.1 Create NotificationType enum
+    - Create `Modules/Notifications/app/Enums/NotificationType.php` with all notification types
+    - _Requirements: 7.1, 7.2_
+  - [x] 10.2 Create NotificationChannel enum
+    - Create `Modules/Notifications/app/Enums/NotificationChannel.php` with values: in_app, email, push
+    - _Requirements: 7.1, 7.2_
+  - [x] 10.3 Create NotificationFrequency enum
+    - Create `Modules/Notifications/app/Enums/NotificationFrequency.php` with values: immediate, daily, weekly, never
+    - _Requirements: 7.1, 7.2_
+  - [x] 10.4 Update Notification model to cast enums
+    - Update `$casts` array with NotificationType, NotificationChannel, Priority
+    - _Requirements: 1.3, 7.3_
+
+- [x] 11. Create PHP Enum classes for Common module
+  - [x] 11.1 Create CategoryStatus enum
+    - Create `Modules/Common/app/Enums/CategoryStatus.php` with values: active, inactive
+    - _Requirements: 7.1, 7.2_
+  - [x] 11.2 Create SettingType enum
+    - Create `Modules/Common/app/Enums/SettingType.php` with values: string, number, boolean, json
+    - _Requirements: 7.1, 7.2_
+  - [x] 11.3 Update Category and SystemSetting models to cast enums
+    - Update `$casts` arrays with corresponding enums
+    - _Requirements: 1.3, 7.3_
+
+- [ ] 12. Checkpoint - Ensure all enum implementations pass
+  - Ensure all tests pass, ask the user if questions arise.
+
+- [x] 13. Create database migrations for string to enum conversion
+  - [x] 13.1 Create migration to convert assessment_registrations columns
+    - Convert status, payment_status, payment_method, result from string to enum
+    - _Requirements: 1.1, 1.5_
+  - [x] 13.2 Create migration to convert notification_preferences columns
+    - Convert category, channel, frequency from string to enum
+    - _Requirements: 1.1, 1.5_
+  - [ ]* 13.3 Write property test for database enum columns
+    - **Property 1: Enum Column PHP Class Correspondence**
+    - **Validates: Requirements 1.2, 7.1**
+
+- [x] 14. Fix routing middleware consistency
+  - [x] 14.1 Update Gamification routes to use auth:api
+    - Change `auth:sanctum` to `auth:api` in Gamification routes
+    - _Requirements: 10.3, 12.1_
+  - [x] 14.2 Update Grading routes to use auth:api
+    - Change `auth:sanctum` to `auth:api` in Grading routes
+    - _Requirements: 10.3, 12.1_
+  - [ ]* 14.3 Write property test for auth middleware consistency
+    - **Property 10: Auth Middleware Consistency**
+    - **Validates: Requirements 10.3, 12.1**
+
+- [x] 15. Fix route naming consistency
+  - [x] 15.1 Add explicit route names to Content module routes
+    - Add `->name()` to all announcement and news routes
+    - _Requirements: 11.1, 11.2_
+  - [x] 15.2 Add explicit route names to Schemes module routes
+    - Add `->name()` to all course, unit, lesson routes
+    - _Requirements: 11.1, 11.2_
+  - [x] 15.3 Add explicit route names to Forums module routes
+    - Add `->name()` to all thread and reply routes
+    - Fix missing ForumStatisticsController import
+    - _Requirements: 11.1, 11.2_
+  - [x] 15.4 Add explicit route names to Common module routes
+    - Add `->name()` to all category routes
+    - _Requirements: 11.1, 11.2_
+  - [ ]* 15.5 Write property test for route name existence
+    - **Property 11: Route Name Existence**
+    - **Validates: Requirements 11.1, 11.2, 11.5**
+
+- [x] 16. Fix route binding consistency
+  - [x] 16.1 Update Content module to use consistent route binding
+    - Change `/{id}` to `/{announcement}` for model binding in announcements
+    - _Requirements: 10.4_
+  - [x] 16.2 Fix role middleware casing
+    - Change `role:admin` to `role:Admin` in Auth module routes
+    - _Requirements: 12.2_
+  - [ ]* 16.3 Write property test for role middleware format
+    - **Property 12: Role Middleware Format Consistency**
+    - **Validates: Requirements 12.2**
+
+- [x] 17. Add deleted_by column to tables with soft deletes
+  - [x] 17.1 Create migration to add deleted_by to courses table
+    - Add `deleted_by` foreign key column to courses table
+    - _Requirements: 8.1, 8.3_
+  - [ ]* 17.2 Write property test for soft delete consistency
+    - **Property 7: Soft Delete Pattern Consistency**
+    - **Validates: Requirements 8.1, 8.3**
+
+- [x] 18. Update validation rules to use PHP Enums
+  - [x] 18.1 Update Form Requests to use Enum validation
+    - Replace hardcoded enum arrays with `Rule::enum(EnumClass::class)`
+    - _Requirements: 7.5_
+  - [ ]* 18.2 Write property test for validation rule enum usage
+    - **Property 14: Validation Rule Enum Usage**
+    - **Validates: Requirements 7.5**
+
+- [ ] 19. Final Checkpoint - Ensure all tests pass
+  - Ensure all tests pass, ask the user if questions arise.

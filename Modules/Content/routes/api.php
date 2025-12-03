@@ -2,6 +2,7 @@
 
 use Illuminate\Support\Facades\Route;
 use Modules\Content\Http\Controllers\AnnouncementController;
+use Modules\Content\Http\Controllers\ContentApprovalController;
 use Modules\Content\Http\Controllers\ContentStatisticsController;
 use Modules\Content\Http\Controllers\CourseAnnouncementController;
 use Modules\Content\Http\Controllers\NewsController;
@@ -9,52 +10,52 @@ use Modules\Content\Http\Controllers\SearchController;
 
 Route::middleware(['auth:api'])->prefix('v1')->group(function () {
     // Announcements
-    Route::prefix('announcements')->group(function () {
-        Route::get('/', [AnnouncementController::class, 'index']);
-        Route::post('/', [AnnouncementController::class, 'store']);
-        Route::get('/{id}', [AnnouncementController::class, 'show']);
-        Route::put('/{id}', [AnnouncementController::class, 'update']);
-        Route::delete('/{id}', [AnnouncementController::class, 'destroy']);
-        Route::post('/{id}/publish', [AnnouncementController::class, 'publish']);
-        Route::post('/{id}/schedule', [AnnouncementController::class, 'schedule']);
-        Route::post('/{id}/read', [AnnouncementController::class, 'markAsRead']);
+    Route::prefix('announcements')->as('announcements.')->group(function () {
+        Route::get('/', [AnnouncementController::class, 'index'])->name('index');
+        Route::post('/', [AnnouncementController::class, 'store'])->name('store');
+        Route::get('/{announcement}', [AnnouncementController::class, 'show'])->name('show');
+        Route::put('/{announcement}', [AnnouncementController::class, 'update'])->name('update');
+        Route::delete('/{announcement}', [AnnouncementController::class, 'destroy'])->name('destroy');
+        Route::post('/{announcement}/publish', [AnnouncementController::class, 'publish'])->name('publish');
+        Route::post('/{announcement}/schedule', [AnnouncementController::class, 'schedule'])->name('schedule');
+        Route::post('/{announcement}/read', [AnnouncementController::class, 'markAsRead'])->name('read');
     });
 
     // News
-    Route::prefix('news')->group(function () {
-        Route::get('/', [NewsController::class, 'index']);
-        Route::post('/', [NewsController::class, 'store']);
-        Route::get('/trending', [NewsController::class, 'trending']);
-        Route::get('/{slug}', [NewsController::class, 'show']);
-        Route::put('/{slug}', [NewsController::class, 'update']);
-        Route::delete('/{slug}', [NewsController::class, 'destroy']);
-        Route::post('/{slug}/publish', [NewsController::class, 'publish']);
-        Route::post('/{slug}/schedule', [NewsController::class, 'schedule']);
+    Route::prefix('news')->as('news.')->group(function () {
+        Route::get('/', [NewsController::class, 'index'])->name('index');
+        Route::post('/', [NewsController::class, 'store'])->name('store');
+        Route::get('/trending', [NewsController::class, 'trending'])->name('trending');
+        Route::get('/{news:slug}', [NewsController::class, 'show'])->name('show');
+        Route::put('/{news:slug}', [NewsController::class, 'update'])->name('update');
+        Route::delete('/{news:slug}', [NewsController::class, 'destroy'])->name('destroy');
+        Route::post('/{news:slug}/publish', [NewsController::class, 'publish'])->name('publish');
+        Route::post('/{news:slug}/schedule', [NewsController::class, 'schedule'])->name('schedule');
     });
 
     // Course Announcements
-    Route::prefix('courses/{course}/announcements')->group(function () {
-        Route::get('/', [CourseAnnouncementController::class, 'index']);
-        Route::post('/', [CourseAnnouncementController::class, 'store']);
+    Route::prefix('courses/{course}/announcements')->as('courses.announcements.')->group(function () {
+        Route::get('/', [CourseAnnouncementController::class, 'index'])->name('index');
+        Route::post('/', [CourseAnnouncementController::class, 'store'])->name('store');
     });
 
     // Statistics
-    Route::prefix('content/statistics')->group(function () {
-        Route::get('/', [ContentStatisticsController::class, 'index']);
-        Route::get('/announcements/{id}', [ContentStatisticsController::class, 'showAnnouncement']);
-        Route::get('/news/{slug}', [ContentStatisticsController::class, 'showNews']);
-        Route::get('/trending', [ContentStatisticsController::class, 'trending']);
-        Route::get('/most-viewed', [ContentStatisticsController::class, 'mostViewed']);
+    Route::prefix('content/statistics')->as('content.statistics.')->group(function () {
+        Route::get('/', [ContentStatisticsController::class, 'index'])->name('index');
+        Route::get('/announcements/{announcement}', [ContentStatisticsController::class, 'showAnnouncement'])->name('announcements.show');
+        Route::get('/news/{news:slug}', [ContentStatisticsController::class, 'showNews'])->name('news.show');
+        Route::get('/trending', [ContentStatisticsController::class, 'trending'])->name('trending');
+        Route::get('/most-viewed', [ContentStatisticsController::class, 'mostViewed'])->name('most-viewed');
     });
 
     // Search
-    Route::get('/content/search', [SearchController::class, 'search']);
+    Route::get('/content/search', [SearchController::class, 'search'])->name('content.search');
 
     // Content Approval Workflow
-    Route::prefix('content')->group(function () {
-        Route::post('/{type}/{id}/submit', [\Modules\Content\Http\Controllers\ContentApprovalController::class, 'submit']);
-        Route::post('/{type}/{id}/approve', [\Modules\Content\Http\Controllers\ContentApprovalController::class, 'approve']);
-        Route::post('/{type}/{id}/reject', [\Modules\Content\Http\Controllers\ContentApprovalController::class, 'reject']);
-        Route::get('/pending-review', [\Modules\Content\Http\Controllers\ContentApprovalController::class, 'pendingReview']);
+    Route::prefix('content')->as('content.approval.')->group(function () {
+        Route::post('/{type}/{id}/submit', [ContentApprovalController::class, 'submit'])->name('submit');
+        Route::post('/{type}/{id}/approve', [ContentApprovalController::class, 'approve'])->name('approve');
+        Route::post('/{type}/{id}/reject', [ContentApprovalController::class, 'reject'])->name('reject');
+        Route::get('/pending-review', [ContentApprovalController::class, 'pendingReview'])->name('pending-review');
     });
 });

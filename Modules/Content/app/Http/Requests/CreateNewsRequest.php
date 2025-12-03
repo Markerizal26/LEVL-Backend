@@ -3,6 +3,8 @@
 namespace Modules\Content\Http\Requests;
 
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Validation\Rule;
+use Modules\Content\Enums\ContentStatus;
 
 class CreateNewsRequest extends FormRequest
 {
@@ -20,7 +22,7 @@ class CreateNewsRequest extends FormRequest
             'content' => 'required|string',
             'featured_image_path' => 'nullable|string|max:255',
             'is_featured' => 'nullable|boolean',
-            'status' => 'nullable|in:draft,published,scheduled',
+            'status' => ['nullable', Rule::enum(ContentStatus::class)->only([ContentStatus::Draft, ContentStatus::Published, ContentStatus::Scheduled])],
             'scheduled_at' => 'nullable|date|after:now',
             'category_ids' => 'nullable|array',
             'category_ids.*' => 'exists:content_categories,id',

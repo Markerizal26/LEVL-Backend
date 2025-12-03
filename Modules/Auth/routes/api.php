@@ -69,7 +69,7 @@ Route::prefix('v1')->as('auth.')->group(function () {
         Route::get('/users/{user}/profile', [PublicProfileController::class, 'show'])->name('users.profile.show');
 
         // Admin Profile Management
-        Route::prefix('admin/users/{user}')->as('admin.users.')->middleware('role:admin')->group(function () {
+        Route::prefix('admin/users/{user}')->as('admin.users.')->middleware('role:Admin')->group(function () {
             Route::get('/profile', [AdminProfileController::class, 'show'])->name('profile.show');
             Route::put('/profile', [AdminProfileController::class, 'update'])->name('profile.update');
             Route::post('/suspend', [AdminProfileController::class, 'suspend'])->name('suspend');

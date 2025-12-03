@@ -11,6 +11,7 @@ use Illuminate\Database\Eloquent\Relations\MorphMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Support\Str;
 use Modules\Auth\Models\User;
+use Modules\Content\Enums\ContentStatus;
 use Modules\Schemes\Models\Tag;
 
 class News extends Model
@@ -40,6 +41,7 @@ class News extends Model
     ];
 
     protected $casts = [
+        'status' => ContentStatus::class,
         'is_featured' => 'boolean',
         'published_at' => 'datetime',
         'scheduled_at' => 'datetime',
@@ -94,7 +96,7 @@ class News extends Model
 
     public function scopePublished($query)
     {
-        return $query->where('status', 'published')
+        return $query->where('status', ContentStatus::Published)
             ->whereNotNull('published_at')
             ->where('published_at', '<=', now());
     }
@@ -126,14 +128,14 @@ class News extends Model
 
     public function isPublished(): bool
     {
-        return $this->status === 'published' &&
+        return $this->status === ContentStatus::Published &&
                $this->published_at !== null &&
                $this->published_at->isPast();
     }
 
     public function isScheduled(): bool
     {
-        return $this->status === 'scheduled' &&
+        return $this->status === ContentStatus::Scheduled &&
                $this->scheduled_at !== null &&
                $this->scheduled_at->isFuture();
     }

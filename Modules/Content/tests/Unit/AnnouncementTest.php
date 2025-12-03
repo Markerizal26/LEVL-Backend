@@ -4,6 +4,9 @@ namespace Modules\Content\Tests\Unit;
 
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Modules\Auth\Models\User;
+use Modules\Content\Enums\ContentStatus;
+use Modules\Content\Enums\Priority;
+use Modules\Content\Enums\TargetType;
 use Modules\Content\Models\Announcement;
 use Modules\Content\Models\ContentRead;
 use Modules\Content\Models\ContentRevision;
@@ -84,7 +87,7 @@ class AnnouncementTest extends TestCase
         $published = Announcement::published()->get();
 
         $this->assertCount(3, $published);
-        $this->assertTrue($published->every(fn ($a) => $a->status === 'published'));
+        $this->assertTrue($published->every(fn ($a) => $a->status === ContentStatus::Published));
     }
 
     /** @test */
@@ -209,7 +212,7 @@ class AnnouncementTest extends TestCase
     {
         $announcement = Announcement::factory()->highPriority()->create();
 
-        $this->assertEquals('high', $announcement->priority);
+        $this->assertEquals(Priority::High, $announcement->priority);
     }
 
     /** @test */
@@ -217,7 +220,7 @@ class AnnouncementTest extends TestCase
     {
         $announcement = Announcement::factory()->create();
 
-        $this->assertEquals('all', $announcement->target_type);
+        $this->assertEquals(TargetType::All, $announcement->target_type);
     }
 
     /** @test */
@@ -225,7 +228,7 @@ class AnnouncementTest extends TestCase
     {
         $announcement = Announcement::factory()->forRole('instructor')->create();
 
-        $this->assertEquals('role', $announcement->target_type);
+        $this->assertEquals(TargetType::Role, $announcement->target_type);
         $this->assertEquals('instructor', $announcement->target_value);
     }
 }

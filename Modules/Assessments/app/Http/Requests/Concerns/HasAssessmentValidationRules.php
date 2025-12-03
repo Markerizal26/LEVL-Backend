@@ -2,16 +2,21 @@
 
 namespace Modules\Assessments\Http\Requests\Concerns;
 
+use Illuminate\Validation\Rule;
+use Modules\Assessments\Enums\ExerciseType;
+use Modules\Assessments\Enums\QuestionType;
+use Modules\Assessments\Enums\ScopeType;
+
 trait HasAssessmentValidationRules
 {
     public function rulesExerciseStore(): array
     {
         return [
-            'scope_type' => 'required|in:course,program',
+            'scope_type' => ['required', Rule::enum(ScopeType::class)],
             'scope_id' => 'required|integer',
             'title' => 'required|string|max:255',
             'description' => 'nullable|string',
-            'type' => 'required|in:quiz,exam,assignment,homework',
+            'type' => ['required', Rule::enum(ExerciseType::class)],
             'time_limit_minutes' => 'nullable|integer|min:1',
             'max_score' => 'required|numeric|min:0',
             'available_from' => 'nullable|date',
@@ -35,7 +40,7 @@ trait HasAssessmentValidationRules
     {
         return [
             'question_text' => 'required|string',
-            'type' => 'required|in:multiple_choice,free_text,file_upload,true_false',
+            'type' => ['required', Rule::enum(QuestionType::class)],
             'score_weight' => 'required|numeric|min:0',
             'explanation' => 'nullable|string',
         ];
@@ -45,7 +50,7 @@ trait HasAssessmentValidationRules
     {
         return [
             'question_text' => 'nullable|string',
-            'type' => 'nullable|in:multiple_choice,free_text,file_upload,true_false',
+            'type' => ['nullable', Rule::enum(QuestionType::class)],
             'score_weight' => 'nullable|numeric|min:0',
             'explanation' => 'nullable|string',
         ];
