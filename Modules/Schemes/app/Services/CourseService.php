@@ -6,6 +6,7 @@ use App\Contracts\EnrollmentKeyHasherInterface;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Str;
 use Modules\Schemes\Contracts\Services\CourseServiceInterface;
+use Modules\Schemes\Enums\CourseStatus;
 use Modules\Schemes\Events\CourseCreated;
 use Modules\Schemes\Events\CourseDeleted;
 use Modules\Schemes\Events\CoursePublished;
@@ -22,7 +23,7 @@ class CourseService implements CourseServiceInterface
 
     public function listPublic(array $params): LengthAwarePaginator
     {
-        $params['status'] = $params['status'] ?? 'published';
+        $params['status'] = $params['status'] ?? CourseStatus::Published->value;
 
         $perPage = isset($params['per_page']) ? max(1, (int) $params['per_page']) : 15;
 
@@ -54,7 +55,7 @@ class CourseService implements CourseServiceInterface
         }
 
         if (empty($data['status'])) {
-            $data['status'] = 'draft';
+            $data['status'] = CourseStatus::Draft->value;
         }
 
         $enrollmentType = $data['enrollment_type'] ?? 'auto_accept';
@@ -94,7 +95,7 @@ class CourseService implements CourseServiceInterface
 
         CourseCreated::dispatch($freshCourse);
 
-        if (($freshCourse->status ?? null) === 'published') {
+        if (($freshCourse->status ?? null) === CourseStatus::Published) {
             CoursePublished::dispatch($freshCourse);
         }
 
@@ -152,7 +153,7 @@ class CourseService implements CourseServiceInterface
 
         $course->load('tags');
 
-        if (array_key_exists('status', $data) && $data['status'] === 'published') {
+        if (array_key_exists('status', $data) && $data['status'] === CourseStatus::Published->value) {
             CoursePublished::dispatch($course);
         }
 
@@ -181,7 +182,7 @@ class CourseService implements CourseServiceInterface
         }
 
         $course->update([
-            'status' => 'published',
+            'status' => CourseStatus::Published->value,
             'published_at' => now(),
         ]);
 
@@ -198,7 +199,7 @@ class CourseService implements CourseServiceInterface
         }
 
         $course->update([
-            'status' => 'draft',
+            'status' => CourseStatus::Draft->value,
             'published_at' => null,
         ]);
 

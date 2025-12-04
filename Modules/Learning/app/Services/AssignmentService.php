@@ -2,6 +2,7 @@
 
 namespace Modules\Learning\Services;
 
+use Modules\Learning\Enums\AssignmentStatus;
 use Modules\Learning\Models\Assignment;
 use Modules\Learning\Repositories\AssignmentRepository;
 
@@ -30,7 +31,7 @@ class AssignmentService
             'max_score' => $data['max_score'] ?? 100,
             'available_from' => $data['available_from'] ?? null,
             'deadline_at' => $data['deadline_at'] ?? null,
-            'status' => $data['status'] ?? 'draft',
+            'status' => $data['status'] ?? AssignmentStatus::Draft->value,
             'allow_resubmit' => array_key_exists('allow_resubmit', $data) ? (bool) $data['allow_resubmit'] : null,
             'late_penalty_percent' => $data['late_penalty_percent'] ?? null,
         ]);
@@ -47,7 +48,7 @@ class AssignmentService
             'max_score' => $data['max_score'] ?? $assignment->max_score,
             'available_from' => $data['available_from'] ?? $assignment->available_from,
             'deadline_at' => $data['deadline_at'] ?? $assignment->deadline_at,
-            'status' => $data['status'] ?? $assignment->status ?? 'draft',
+            'status' => $data['status'] ?? ($assignment->status?->value ?? AssignmentStatus::Draft->value),
             'allow_resubmit' => array_key_exists('allow_resubmit', $data) ? (bool) $data['allow_resubmit'] : $assignment->allow_resubmit,
             'late_penalty_percent' => array_key_exists('late_penalty_percent', $data) ? $data['late_penalty_percent'] : $assignment->late_penalty_percent,
         ]);
@@ -57,8 +58,8 @@ class AssignmentService
 
     public function publish(Assignment $assignment): Assignment
     {
-        $wasDraft = $assignment->status === 'draft';
-        $published = $this->repository->update($assignment, ['status' => 'published']);
+        $wasDraft = $assignment->status === AssignmentStatus::Draft;
+        $published = $this->repository->update($assignment, ['status' => AssignmentStatus::Published->value]);
         $freshAssignment = $published->fresh(['lesson', 'creator']);
 
         if ($wasDraft) {
@@ -70,7 +71,7 @@ class AssignmentService
 
     public function unpublish(Assignment $assignment): Assignment
     {
-        $updated = $this->repository->update($assignment, ['status' => 'draft']);
+        $updated = $this->repository->update($assignment, ['status' => AssignmentStatus::Draft->value]);
 
         return $updated->fresh(['lesson', 'creator']);
     }

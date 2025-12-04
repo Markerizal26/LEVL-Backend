@@ -8,6 +8,8 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\ValidationException;
 use Modules\Auth\Models\User;
 use Modules\Common\Models\SystemSetting;
+use Modules\Enrollments\Enums\EnrollmentStatus;
+use Modules\Enrollments\Enums\ProgressStatus;
 use Modules\Enrollments\Models\Enrollment;
 use Modules\Enrollments\Models\LessonProgress;
 use Modules\Learning\Events\SubmissionCreated;
@@ -81,7 +83,9 @@ class SubmissionService
                 'user_id' => $userId,
                 'enrollment_id' => $enrollment->id,
                 'answer_text' => $data['answer_text'] ?? null,
-                'status' => $isLate ? 'late' : 'submitted',
+                'status' => $isLate
+                    ? \Modules\Learning\Enums\SubmissionStatus::Late->value
+                    : \Modules\Learning\Enums\SubmissionStatus::Submitted->value,
                 'attempt_number' => $attemptNumber,
                 'is_late' => $isLate,
                 'is_resubmission' => $isResubmission,
@@ -99,7 +103,7 @@ class SubmissionService
 
     public function update(Submission $submission, array $data): Submission
     {
-        if ($submission->status === 'graded') {
+        if ($submission->status === \Modules\Learning\Enums\SubmissionStatus::Graded) {
             throw ValidationException::withMessages([
                 'submission' => 'Submission yang sudah dinilai tidak dapat diubah.',
             ]);
@@ -146,13 +150,13 @@ class SubmissionService
                 'score' => $finalScore,
                 'max_score' => $maxScore,
                 'feedback' => $feedback,
-                'status' => 'graded',
+                'status' => \Modules\Grading\Enums\GradeStatus::Graded,
                 'graded_at' => Carbon::now(),
             ]
         );
 
         $updated = $this->repository->update($submission, [
-            'status' => 'graded',
+            'status' => \Modules\Learning\Enums\SubmissionStatus::Graded->value,
         ])->fresh(['assignment', 'user', 'enrollment', 'files']);
         $updated->setRelation('grade', $grade);
 
@@ -170,7 +174,7 @@ class SubmissionService
         return Enrollment::query()
             ->where('course_id', $lesson->unit->course->id)
             ->where('user_id', $userId)
-            ->whereIn('status', ['active', 'completed'])
+            ->whereIn('status', [EnrollmentStatus::Active, EnrollmentStatus::Completed])
             ->first();
     }
 
@@ -187,7 +191,7 @@ class SubmissionService
             LessonProgress::create([
                 'enrollment_id' => $enrollmentId,
                 'lesson_id' => $lessonId,
-                'status' => 'not_started',
+                'status' => ProgressStatus::NotStarted,
                 'progress_percent' => 0,
                 'attempt_count' => 1,
             ]);

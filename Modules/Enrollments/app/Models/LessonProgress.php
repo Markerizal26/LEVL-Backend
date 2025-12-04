@@ -3,6 +3,7 @@
 namespace Modules\Enrollments\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use Modules\Enrollments\Enums\ProgressStatus;
 
 class LessonProgress extends Model
 {
@@ -15,6 +16,7 @@ class LessonProgress extends Model
     ];
 
     protected $casts = [
+        'status' => ProgressStatus::class,
         'started_at' => 'datetime',
         'completed_at' => 'datetime',
         'progress_percent' => 'float',

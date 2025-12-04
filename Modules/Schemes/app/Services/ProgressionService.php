@@ -5,6 +5,8 @@ namespace Modules\Schemes\Services;
 use Illuminate\Database\Eloquent\Collection as EloquentCollection;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
+use Modules\Enrollments\Enums\EnrollmentStatus;
+use Modules\Enrollments\Enums\ProgressStatus;
 use Modules\Enrollments\Models\CourseProgress;
 use Modules\Enrollments\Models\Enrollment;
 use Modules\Enrollments\Models\LessonProgress;
@@ -22,7 +24,10 @@ class ProgressionService
         return Enrollment::query()
             ->where('course_id', $courseId)
             ->where('user_id', $userId)
-            ->whereIn('status', ['active', 'completed'])
+            ->whereIn('status', [
+                EnrollmentStatus::Active,
+                EnrollmentStatus::Completed,
+            ])
             ->first();
     }
 
@@ -117,7 +122,7 @@ class ProgressionService
                 ->where('unit_id', $courseUnit->id)
                 ->value('status');
 
-            if ($unitStatus !== 'completed') {
+            if ($unitStatus !== ProgressStatus::Completed) {
                 return false;
             }
         }
@@ -138,7 +143,7 @@ class ProgressionService
                 return true;
             }
 
-            if (($progressMap->get($unitLesson->id)?->status ?? 'not_started') !== 'completed') {
+            if (($progressMap->get($unitLesson->id)?->status ?? ProgressStatus::NotStarted) !== ProgressStatus::Completed) {
                 return false;
             }
         }
@@ -204,10 +209,10 @@ class ProgressionService
 
             foreach ($lessons as $lessonItem) {
                 $lessonProgress = $lessonProgressMap->get($lessonItem->id);
-                $lessonStatus = $lessonProgress->status ?? 'not_started';
+                $lessonStatus = $lessonProgress->status ?? ProgressStatus::NotStarted;
                 $lessonPercent = $lessonProgress->progress_percent ?? 0;
 
-                if ($lessonStatus === 'completed') {
+                if ($lessonStatus === ProgressStatus::Completed) {
                     $completedLessonCount++;
                 }
 
@@ -221,13 +226,13 @@ class ProgressionService
                     'slug' => $lessonItem->slug,
                     'title' => $lessonItem->title,
                     'order' => $lessonItem->order,
-                    'status' => $lessonStatus,
+                    'status' => $lessonStatus instanceof ProgressStatus ? $lessonStatus->value : $lessonStatus,
                     'progress_percent' => round($lessonPercent, 2),
                     'is_locked' => $isLessonLocked,
                     'completed_at' => optional($lessonProgress?->completed_at)->toIso8601String(),
                 ];
 
-                if ($lessonStatus !== 'completed') {
+                if ($lessonStatus !== ProgressStatus::Completed) {
                     $previousLessonsCompleted = false;
                 }
             }
@@ -236,14 +241,14 @@ class ProgressionService
             $derivedUnitPercent = round(($completedLessonCount / $totalLessons) * 100, 2);
 
             $unitStatus = $unitProgress->status ?? (
-                $lessons->isEmpty() ? 'completed' :
-                ($completedLessonCount === $lessons->count() ? 'completed' :
-                    ($completedLessonCount > 0 ? 'in_progress' : 'not_started'))
+                $lessons->isEmpty() ? ProgressStatus::Completed :
+                ($completedLessonCount === $lessons->count() ? ProgressStatus::Completed :
+                    ($completedLessonCount > 0 ? ProgressStatus::InProgress : ProgressStatus::NotStarted))
             );
 
             $unitPercent = $unitProgress->progress_percent ?? $derivedUnitPercent;
 
-            if ($unitStatus === 'completed') {
+            if ($unitStatus === ProgressStatus::Completed) {
                 $completedUnitsCount++;
             }
 
@@ -254,14 +259,14 @@ class ProgressionService
                 'slug' => $unit->slug,
                 'title' => $unit->title,
                 'order' => $unit->order,
-                'status' => $unitStatus,
+                'status' => $unitStatus instanceof ProgressStatus ? $unitStatus->value : $unitStatus,
                 'progress_percent' => round($unitPercent, 2),
                 'is_locked' => $isUnitLocked,
                 'completed_at' => optional($unitProgress?->completed_at)->toIso8601String(),
                 'lessons' => $lessonsData,
             ];
 
-            if ($unitStatus !== 'completed') {
+            if ($unitStatus !== ProgressStatus::Completed) {
                 $previousUnitsCompleted = false;
             }
         }
@@ -270,9 +275,9 @@ class ProgressionService
         $derivedCoursePercent = round(($completedUnitsCount / $totalUnits) * 100, 2);
 
         $courseStatus = $courseProgress->status ?? (
-            $courseModel->units->isEmpty() ? 'completed' :
-            ($completedUnitsCount === $courseModel->units->count() ? 'completed' :
-                ($completedUnitsCount > 0 ? 'in_progress' : 'not_started'))
+            $courseModel->units->isEmpty() ? ProgressStatus::Completed :
+            ($completedUnitsCount === $courseModel->units->count() ? ProgressStatus::Completed :
+                ($completedUnitsCount > 0 ? ProgressStatus::InProgress : ProgressStatus::NotStarted))
         );
 
         $coursePercent = $courseProgress->progress_percent ?? $derivedCoursePercent;
@@ -283,7 +288,7 @@ class ProgressionService
                 'slug' => $courseModel->slug,
                 'title' => $courseModel->title,
                 'progression_mode' => $courseModel->progression_mode,
-                'status' => $courseStatus,
+                'status' => $courseStatus instanceof ProgressStatus ? $courseStatus->value : $courseStatus,
                 'progress_percent' => round($coursePercent, 2),
                 'completed_at' => optional($courseProgress?->completed_at)->toIso8601String(),
             ],
@@ -303,7 +308,7 @@ class ProgressionService
             $progress->started_at = Carbon::now();
         }
 
-        $progress->status = 'completed';
+        $progress->status = ProgressStatus::Completed;
         $progress->progress_percent = 100;
         $progress->completed_at = Carbon::now();
         $progress->save();
@@ -324,29 +329,29 @@ class ProgressionService
         $totalLessons = $lessonIds->count();
 
         if ($totalLessons === 0) {
-            $status = 'completed';
+            $status = ProgressStatus::Completed;
             $progressPercent = 100;
         } else {
             $completedLessons = LessonProgress::query()
                 ->where('enrollment_id', $enrollment->id)
                 ->whereIn('lesson_id', $lessonIds)
-                ->where('status', 'completed')
+                ->where('status', ProgressStatus::Completed->value)
                 ->count();
 
             $hasProgress = LessonProgress::query()
                 ->where('enrollment_id', $enrollment->id)
                 ->whereIn('lesson_id', $lessonIds)
-                ->whereIn('status', ['in_progress', 'completed'])
+                ->whereIn('status', [ProgressStatus::InProgress->value, ProgressStatus::Completed->value])
                 ->exists();
 
             if ($forceComplete || $completedLessons === $totalLessons) {
-                $status = 'completed';
+                $status = ProgressStatus::Completed;
                 $progressPercent = 100;
             } elseif ($hasProgress || $completedLessons > 0) {
-                $status = 'in_progress';
+                $status = ProgressStatus::InProgress;
                 $progressPercent = round(($completedLessons / $totalLessons) * 100, 2);
             } else {
-                $status = 'not_started';
+                $status = ProgressStatus::NotStarted;
                 $progressPercent = 0;
             }
         }
@@ -357,20 +362,20 @@ class ProgressionService
                 'unit_id' => $unit->id,
             ]);
 
-        $previousStatus = $progress->exists ? $progress->status : 'not_started';
+        $previousStatus = $progress->exists ? $progress->status : ProgressStatus::NotStarted;
 
         $progress->status = $status;
         $progress->progress_percent = $progressPercent;
 
-        if ($status !== 'not_started' && ! $progress->started_at) {
+        if ($status !== ProgressStatus::NotStarted && ! $progress->started_at) {
             $progress->started_at = Carbon::now();
         }
 
-        if ($status === 'completed' && ! $progress->completed_at) {
+        if ($status === ProgressStatus::Completed && ! $progress->completed_at) {
             $progress->completed_at = Carbon::now();
         }
 
-        if ($status !== 'completed') {
+        if ($status !== ProgressStatus::Completed) {
             $progress->completed_at = null;
         }
 
@@ -379,7 +384,7 @@ class ProgressionService
         return [
             'status' => $status,
             'progress_percent' => $progressPercent,
-            'just_completed' => $previousStatus !== 'completed' && $status === 'completed',
+            'just_completed' => $previousStatus !== ProgressStatus::Completed && $status === ProgressStatus::Completed,
         ];
     }
 
@@ -393,29 +398,29 @@ class ProgressionService
         $totalUnits = $unitIds->count();
 
         if ($totalUnits === 0) {
-            $status = 'completed';
+            $status = ProgressStatus::Completed;
             $progressPercent = 100;
         } else {
             $completedUnits = UnitProgress::query()
                 ->where('enrollment_id', $enrollment->id)
                 ->whereIn('unit_id', $unitIds)
-                ->where('status', 'completed')
+                ->where('status', ProgressStatus::Completed->value)
                 ->count();
 
             $hasProgress = UnitProgress::query()
                 ->where('enrollment_id', $enrollment->id)
                 ->whereIn('unit_id', $unitIds)
-                ->whereIn('status', ['in_progress', 'completed'])
+                ->whereIn('status', [ProgressStatus::InProgress->value, ProgressStatus::Completed->value])
                 ->exists();
 
             if ($completedUnits === $totalUnits) {
-                $status = 'completed';
+                $status = ProgressStatus::Completed;
                 $progressPercent = 100;
             } elseif ($hasProgress || $completedUnits > 0) {
-                $status = 'in_progress';
+                $status = ProgressStatus::InProgress;
                 $progressPercent = round(($completedUnits / $totalUnits) * 100, 2);
             } else {
-                $status = 'not_started';
+                $status = ProgressStatus::NotStarted;
                 $progressPercent = 0;
             }
         }
@@ -425,34 +430,34 @@ class ProgressionService
                 'enrollment_id' => $enrollment->id,
             ]);
 
-        $previousStatus = $progress->exists ? $progress->status : 'not_started';
+        $previousStatus = $progress->exists ? $progress->status : ProgressStatus::NotStarted;
 
         $progress->status = $status;
         $progress->progress_percent = $progressPercent;
 
-        if ($status !== 'not_started' && ! $progress->started_at) {
+        if ($status !== ProgressStatus::NotStarted && ! $progress->started_at) {
             $progress->started_at = Carbon::now();
         }
 
-        if ($status === 'completed' && ! $progress->completed_at) {
+        if ($status === ProgressStatus::Completed && ! $progress->completed_at) {
             $progress->completed_at = Carbon::now();
         }
 
-        if ($status !== 'completed') {
+        if ($status !== ProgressStatus::Completed) {
             $progress->completed_at = null;
         }
 
         $progress->save();
 
-        $courseJustCompleted = $previousStatus !== 'completed' && $status === 'completed';
+        $courseJustCompleted = $previousStatus !== ProgressStatus::Completed && $status === ProgressStatus::Completed;
 
         // Update enrollment status and completed_at, but not progress_percent
         // Progress is now stored in course_progress table
-        if ($status === 'completed') {
+        if ($status === ProgressStatus::Completed) {
             $enrollment->completed_at = $enrollment->completed_at ?? Carbon::now();
-            $enrollment->status = 'completed';
-        } elseif ($enrollment->status === 'completed' && $status !== 'completed') {
-            $enrollment->status = 'active';
+            $enrollment->status = EnrollmentStatus::Completed;
+        } elseif ($enrollment->status === EnrollmentStatus::Completed && $status !== ProgressStatus::Completed) {
+            $enrollment->status = EnrollmentStatus::Active;
             $enrollment->completed_at = null;
         }
         $enrollment->save();

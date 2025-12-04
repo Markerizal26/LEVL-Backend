@@ -5,6 +5,8 @@ namespace Modules\Enrollments\Listeners;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Support\Facades\DB;
+use Modules\Enrollments\Enums\EnrollmentStatus;
+use Modules\Enrollments\Enums\ProgressStatus;
 use Modules\Enrollments\Events\EnrollmentCreated;
 use Modules\Enrollments\Models\CourseProgress;
 use Modules\Enrollments\Models\LessonProgress;
@@ -43,8 +45,8 @@ class InitializeProgressForEnrollment implements ShouldQueue
             $this->ensureCourseProgressExists($enrollment->id, $course->id);
 
             // Progress is now stored in course_progress table, not in enrollments
-            if ($enrollment->status === 'completed') {
-                $enrollment->status = 'active';
+            if ($enrollment->status === EnrollmentStatus::Completed) {
+                $enrollment->status = EnrollmentStatus::Active;
             }
             $enrollment->completed_at = null;
             $enrollment->save();
@@ -59,7 +61,7 @@ class InitializeProgressForEnrollment implements ShouldQueue
                 'unit_id' => $unitId,
             ],
             [
-                'status' => 'not_started',
+                'status' => ProgressStatus::NotStarted,
                 'progress_percent' => 0,
                 'started_at' => null,
                 'completed_at' => null,
@@ -75,7 +77,7 @@ class InitializeProgressForEnrollment implements ShouldQueue
                 'lesson_id' => $lessonId,
             ],
             [
-                'status' => 'not_started',
+                'status' => ProgressStatus::NotStarted,
                 'progress_percent' => 0,
                 'started_at' => null,
                 'completed_at' => null,
@@ -90,7 +92,7 @@ class InitializeProgressForEnrollment implements ShouldQueue
                 'enrollment_id' => $enrollmentId,
             ],
             [
-                'status' => 'not_started',
+                'status' => ProgressStatus::NotStarted,
                 'progress_percent' => 0,
                 'started_at' => null,
                 'completed_at' => null,
@@ -98,4 +100,3 @@ class InitializeProgressForEnrollment implements ShouldQueue
         );
     }
 }
-

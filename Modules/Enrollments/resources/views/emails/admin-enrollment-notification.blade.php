@@ -130,20 +130,20 @@
                 <div class="info-row">
                     <div class="info-label">Status</div>
                     <div>
-                        <span class="status-box status-{{ $enrollment->status }}">
-                            @if($enrollment->status === 'pending')
+                        <span class="status-box status-{{ $enrollment->status->value }}">
+                            @if($enrollment->status === \Modules\Enrollments\Enums\EnrollmentStatus::Pending)
                                 Menunggu Persetujuan
-                            @elseif($enrollment->status === 'active')
+                            @elseif($enrollment->status === \Modules\Enrollments\Enums\EnrollmentStatus::Active)
                                 Terdaftar Aktif
                             @else
-                                {{ ucfirst($enrollment->status) }}
+                                {{ ucfirst($enrollment->status->value) }}
                             @endif
                         </span>
                     </div>
                 </div>
             </div>
 
-            @if($enrollment->status === 'pending')
+            @if($enrollment->status === \Modules\Enrollments\Enums\EnrollmentStatus::Pending)
                 <p>Silakan tinjau dan setujui atau tolak permintaan enrollment ini melalui dashboard admin.</p>
                 <a href="{{ $enrollmentsUrl }}" class="btn-primary" target="_blank" rel="noopener">Kelola Enrollments</a>
             @else

@@ -6,6 +6,7 @@ use Illuminate\Bus\Queueable;
 use Illuminate\Mail\Mailable;
 use Illuminate\Queue\SerializesModels;
 use Modules\Auth\Models\User;
+use Modules\Enrollments\Enums\EnrollmentStatus;
 use Modules\Enrollments\Models\Enrollment;
 use Modules\Schemes\Models\Course;
 
@@ -23,9 +24,9 @@ class AdminEnrollmentNotificationMail extends Mailable
 
     public function build(): self
     {
-        $subject = $this->enrollment->status === 'pending'
-            ? 'Permintaan Enrollment Baru - ' . $this->course->title
-            : 'Enrollment Baru - ' . $this->course->title;
+        $subject = $this->enrollment->status === EnrollmentStatus::Pending
+            ? 'Permintaan Enrollment Baru - '.$this->course->title
+            : 'Enrollment Baru - '.$this->course->title;
 
         return $this->subject($subject)
             ->view('enrollments::emails.admin-enrollment-notification')
@@ -38,4 +39,3 @@ class AdminEnrollmentNotificationMail extends Mailable
             ]);
     }
 }
-

@@ -4,9 +4,11 @@ namespace Modules\Content\Repositories;
 
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
+use Modules\Auth\Enums\UserStatus;
 use Modules\Auth\Models\User;
 use Modules\Content\Models\Announcement;
 use Modules\Content\Models\News;
+use Modules\Enrollments\Enums\EnrollmentStatus;
 
 class ContentStatisticsRepository
 {
@@ -53,7 +55,7 @@ class ContentStatisticsRepository
     protected function getTargetUsersCount(Announcement $announcement): int
     {
         if ($announcement->target_type === 'all') {
-            return User::where('status', 'active')->count();
+            return User::where('status', UserStatus::Active->value)->count();
         }
 
         if ($announcement->target_type === 'role') {
@@ -65,7 +67,7 @@ class ContentStatisticsRepository
         if ($announcement->target_type === 'course' && $announcement->course_id) {
             return DB::table('enrollments')
                 ->where('course_id', $announcement->course_id)
-                ->where('status', 'active')
+                ->where('status', EnrollmentStatus::Active->value)
                 ->distinct('user_id')
                 ->count('user_id');
         }
@@ -84,7 +86,7 @@ class ContentStatisticsRepository
             ->pluck('user_id');
 
         $query = User::whereNotIn('id', $readUserIds)
-            ->where('status', 'active');
+            ->where('status', UserStatus::Active->value);
 
         if ($announcement->target_type === 'role') {
             $query->whereHas('roles', function ($q) use ($announcement) {
@@ -95,7 +97,7 @@ class ContentStatisticsRepository
         if ($announcement->target_type === 'course' && $announcement->course_id) {
             $query->whereHas('enrollments', function ($q) use ($announcement) {
                 $q->where('course_id', $announcement->course_id)
-                    ->where('status', 'active');
+                    ->where('status', EnrollmentStatus::Active->value);
             });
         }
 

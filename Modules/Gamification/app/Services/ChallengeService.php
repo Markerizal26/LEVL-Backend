@@ -6,6 +6,7 @@ use Carbon\Carbon;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
 use Modules\Auth\Models\User;
+use Modules\Enrollments\Enums\EnrollmentStatus;
 use Modules\Gamification\Enums\ChallengeAssignmentStatus;
 use Modules\Gamification\Models\Challenge;
 use Modules\Gamification\Models\UserChallengeAssignment;
@@ -280,7 +281,10 @@ class ChallengeService
     private function getActiveUserIds(): array
     {
         return \Modules\Enrollments\Models\Enrollment::query()
-            ->whereIn('status', ['active', 'pending'])
+            ->whereIn('status', [
+                EnrollmentStatus::Active->value,
+                EnrollmentStatus::Pending->value,
+            ])
             ->distinct()
             ->pluck('user_id')
             ->toArray();

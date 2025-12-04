@@ -3,6 +3,7 @@
 namespace Modules\Content\Listeners;
 
 use Illuminate\Support\Facades\Log;
+use Modules\Auth\Enums\UserStatus;
 use Modules\Auth\Models\User;
 use Modules\Content\Events\ContentSubmitted;
 
@@ -42,7 +43,7 @@ class NotifyReviewersOnContentSubmitted
         return User::whereHas('roles', function ($query) {
             $query->whereIn('name', ['admin', 'reviewer', 'instructor']);
         })
-            ->where('status', 'active')
+            ->where('status', UserStatus::Active->value)
             ->get();
     }
 }

@@ -3,6 +3,7 @@
 namespace Modules\Learning\Listeners;
 
 use Illuminate\Support\Facades\Mail;
+use Modules\Enrollments\Enums\EnrollmentStatus;
 use Modules\Enrollments\Models\Enrollment;
 use Modules\Learning\Events\AssignmentPublished;
 use Modules\Learning\Mail\AssignmentPublishedMail;
@@ -22,7 +23,7 @@ class NotifyEnrolledUsersOnAssignmentPublished
         // Get all active enrollments for this course
         $enrollments = Enrollment::query()
             ->where('course_id', $course->id)
-            ->where('status', 'active')
+            ->where('status', EnrollmentStatus::Active->value)
             ->with(['user:id,name,email'])
             ->get();
 
@@ -48,14 +49,13 @@ class NotifyEnrolledUsersOnAssignmentPublished
     {
         $frontendUrl = config('app.frontend_url', env('FRONTEND_URL', 'http://localhost:3000'));
 
-        return rtrim($frontendUrl, '/') . '/courses/' . $course->slug;
+        return rtrim($frontendUrl, '/').'/courses/'.$course->slug;
     }
 
     private function getAssignmentUrl($course, $assignment): string
     {
         $frontendUrl = config('app.frontend_url', env('FRONTEND_URL', 'http://localhost:3000'));
 
-        return rtrim($frontendUrl, '/') . '/courses/' . $course->slug . '/assignments/' . $assignment->id;
+        return rtrim($frontendUrl, '/').'/courses/'.$course->slug.'/assignments/'.$assignment->id;
     }
 }
-

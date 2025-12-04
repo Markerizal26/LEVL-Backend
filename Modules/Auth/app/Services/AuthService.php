@@ -92,9 +92,9 @@ class AuthService implements AuthServiceInterface
 
         // Auto-verify privileged users (Admin, Superadmin, Instructor) on first login
         $wasAutoVerified = false;
-        if ($isPrivileged && ($user->status === 'pending' || $user->email_verified_at === null)) {
+        if ($isPrivileged && (($user->status === UserStatus::Pending) || $user->email_verified_at === null)) {
             $user->email_verified_at = now();
-            $user->status = 'active';
+            $user->status = UserStatus::Active;
             $user->save();
             $user->refresh(); // Refresh to get updated attributes
             $wasAutoVerified = true;
@@ -120,21 +120,23 @@ class AuthService implements AuthServiceInterface
 
         $userArray = $user->toArray();
         $userArray['roles'] = $user->getRoleNames()->values();
+        // Pastikan status dikembalikan sebagai string value, bukan instance enum
+        $userArray['status'] = $user->status instanceof UserStatus ? $user->status->value : (string) $user->status;
 
         $response = ['user' => $userArray] + $pair->toArray();
 
-        if ($user->status === 'pending' && $user->email_verified_at === null && ! $isPrivileged) {
+        if ($user->status === UserStatus::Pending && $user->email_verified_at === null && ! $isPrivileged) {
             $verificationUuid = $this->emailVerification->sendVerificationLink($user);
-            $response['status'] = 'pending';
+            $response['status'] = UserStatus::Pending->value;
             $response['message'] = 'Akun Anda belum aktif. Silakan verifikasi email terlebih dahulu.';
             if ($verificationUuid) {
                 $response['verification_uuid'] = $verificationUuid;
             }
-        } elseif ($user->status === 'inactive') {
-            $response['status'] = 'inactive';
+        } elseif ($user->status === UserStatus::Inactive) {
+            $response['status'] = UserStatus::Inactive->value;
             $response['message'] = 'Akun Anda tidak aktif. Hubungi administrator.';
-        } elseif ($user->status === 'banned') {
-            $response['status'] = 'banned';
+        } elseif ($user->status === UserStatus::Banned) {
+            $response['status'] = UserStatus::Banned->value;
             $response['message'] = 'Akun Anda telah dibanned. Hubungi administrator.';
         } elseif ($wasAutoVerified) {
             $response['message'] = 'Login berhasil. Akun Anda telah otomatis diverifikasi.';
@@ -326,13 +328,13 @@ class AuthService implements AuthServiceInterface
      */
     public function updateUserStatus(User $user, string $status): User
     {
-        if ($status === 'pending') {
+        if ($status === UserStatus::Pending->value) {
             throw ValidationException::withMessages([
                 'status' => 'Mengubah status ke pending tidak diperbolehkan.',
             ]);
         }
 
-        $user->status = $status;
+        $user->status = UserStatus::from($status);
         $user->save();
 
         return $user->fresh();

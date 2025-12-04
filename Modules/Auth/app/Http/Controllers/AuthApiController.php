@@ -12,6 +12,7 @@ use Illuminate\Validation\ValidationException;
 use Laravel\Socialite\Contracts\Factory as SocialiteFactory;
 use Laravel\Socialite\Two\AbstractProvider as SocialiteAbstractProvider;
 use Modules\Auth\Contracts\AuthRepositoryInterface;
+use Modules\Auth\Enums\UserStatus;
 use Modules\Auth\Http\Requests\CreateManagedUserRequest;
 use Modules\Auth\Http\Requests\LoginRequest;
 use Modules\Auth\Http\Requests\LogoutRequest;
@@ -258,7 +259,7 @@ class AuthApiController extends Controller
                 'email' => $email,
                 // random password; not used for social login
                 'password' => \Illuminate\Support\Str::random(32),
-                'status' => 'active',
+                'status' => UserStatus::Active->value,
                 'email_verified_at' => now(),
             ]);
         }
@@ -309,7 +310,7 @@ class AuthApiController extends Controller
             return $this->error('Tidak terotorisasi.', 401);
         }
 
-        if ($user->email_verified_at && $user->status === 'active') {
+        if ($user->email_verified_at && $user->status === UserStatus::Active) {
             return $this->success([], 'Email Anda sudah terverifikasi.');
         }
 
@@ -478,7 +479,7 @@ class AuthApiController extends Controller
 
         $isAllowedRole =
           $target->hasRole('Admin') || $target->hasRole('Superadmin') || $target->hasRole('Instructor');
-        $isPending = ($target->status ?? null) === 'pending';
+        $isPending = ($target->status ?? null) === UserStatus::Pending;
         if (! ($isAllowedRole && $isPending)) {
             return $this->error(
                 'Hanya untuk akun Admin, Superadmin, atau Instructor yang berstatus pending.',

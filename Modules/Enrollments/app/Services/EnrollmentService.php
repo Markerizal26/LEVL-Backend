@@ -7,6 +7,7 @@ use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Validation\ValidationException;
 use Modules\Auth\Models\User;
+use Modules\Enrollments\Enums\EnrollmentStatus;
 use Modules\Enrollments\Events\EnrollmentCreated;
 use Modules\Enrollments\Mail\AdminEnrollmentNotificationMail;
 use Modules\Enrollments\Mail\StudentEnrollmentActiveMail;
@@ -35,7 +36,7 @@ class EnrollmentService
             ->where('course_id', $course->id)
             ->first();
 
-        if ($existing && in_array($existing->status, ['active', 'pending'], true)) {
+        if ($existing && in_array($existing->status, [EnrollmentStatus::Active, EnrollmentStatus::Pending], true)) {
             throw ValidationException::withMessages([
                 'course' => 'Anda sudah terdaftar pada course ini.',
             ]);
@@ -48,12 +49,12 @@ class EnrollmentService
 
         [$status, $message] = $this->determineStatusAndMessage($course, $payload);
 
-        $enrollment->status = $status;
+        $enrollment->status = EnrollmentStatus::from($status);
         // Progress is now stored in course_progress table, not in enrollments
         // enrolled_at cannot be null per migration, always set to now
         $enrollment->enrolled_at = $enrollment->enrolled_at ?? Carbon::now();
 
-        if ($status !== 'completed') {
+        if ($status !== EnrollmentStatus::Completed->value) {
             $enrollment->completed_at = null;
         }
 
@@ -81,13 +82,13 @@ class EnrollmentService
      */
     public function cancel(Enrollment $enrollment): Enrollment
     {
-        if ($enrollment->status !== 'pending') {
+        if ($enrollment->status !== EnrollmentStatus::Pending) {
             throw ValidationException::withMessages([
                 'enrollment' => 'Hanya enrollment dengan status pending yang dapat dibatalkan.',
             ]);
         }
 
-        $enrollment->status = 'cancelled';
+        $enrollment->status = EnrollmentStatus::Cancelled;
         // Keep enrolled_at as is (cannot be null per migration)
         $enrollment->completed_at = null;
         $enrollment->save();
@@ -102,13 +103,13 @@ class EnrollmentService
      */
     public function withdraw(Enrollment $enrollment): Enrollment
     {
-        if ($enrollment->status !== 'active') {
+        if ($enrollment->status !== EnrollmentStatus::Active) {
             throw ValidationException::withMessages([
                 'enrollment' => 'Hanya enrollment aktif yang dapat mengundurkan diri.',
             ]);
         }
 
-        $enrollment->status = 'cancelled';
+        $enrollment->status = EnrollmentStatus::Cancelled;
         $enrollment->completed_at = null;
         $enrollment->save();
 
@@ -122,13 +123,13 @@ class EnrollmentService
      */
     public function approve(Enrollment $enrollment): Enrollment
     {
-        if ($enrollment->status !== 'pending') {
+        if ($enrollment->status !== EnrollmentStatus::Pending) {
             throw ValidationException::withMessages([
                 'enrollment' => 'Hanya permintaan enrollment pending yang dapat disetujui.',
             ]);
         }
 
-        $enrollment->status = 'active';
+        $enrollment->status = EnrollmentStatus::Active;
         $enrollment->enrolled_at = Carbon::now();
         $enrollment->completed_at = null;
         $enrollment->save();
@@ -153,13 +154,13 @@ class EnrollmentService
      */
     public function decline(Enrollment $enrollment): Enrollment
     {
-        if ($enrollment->status !== 'pending') {
+        if ($enrollment->status !== EnrollmentStatus::Pending) {
             throw ValidationException::withMessages([
                 'enrollment' => 'Hanya permintaan enrollment pending yang dapat ditolak.',
             ]);
         }
 
-        $enrollment->status = 'cancelled';
+        $enrollment->status = EnrollmentStatus::Cancelled;
         // Keep enrolled_at as is (cannot be null per migration)
         $enrollment->completed_at = null;
         $enrollment->save();
@@ -183,7 +184,7 @@ class EnrollmentService
      */
     public function remove(Enrollment $enrollment): Enrollment
     {
-        if (! in_array($enrollment->status, ['active', 'pending'], true)) {
+        if (! in_array($enrollment->status, [EnrollmentStatus::Active, EnrollmentStatus::Pending], true)) {
             throw ValidationException::withMessages([
                 'enrollment' => 'Hanya enrollment aktif atau pending yang dapat dikeluarkan.',
             ]);
@@ -243,10 +244,10 @@ class EnrollmentService
     private function sendEnrollmentEmails(Enrollment $enrollment, Course $course, User $student, string $status): void
     {
         // Send email to student based on status
-        if ($status === 'active') {
+        if ($status === \Modules\Enrollments\Enums\EnrollmentStatus::Active->value) {
             $courseUrl = $this->getCourseUrl($course);
             Mail::to($student->email)->send(new StudentEnrollmentActiveMail($student, $course, $courseUrl));
-        } elseif ($status === 'pending') {
+        } elseif ($status === \Modules\Enrollments\Enums\EnrollmentStatus::Pending->value) {
             Mail::to($student->email)->send(new StudentEnrollmentPendingMail($student, $course));
         }
 

@@ -4,6 +4,7 @@ namespace Modules\Auth\Repositories;
 
 use Illuminate\Support\Str;
 use Modules\Auth\Contracts\AuthRepositoryInterface;
+use Modules\Auth\Enums\UserStatus;
 use Modules\Auth\Models\JwtRefreshToken;
 use Modules\Auth\Models\User;
 
@@ -11,11 +12,10 @@ class AuthRepository implements AuthRepositoryInterface
 {
     public function findActiveUserByLogin(string $login): ?User
     {
-        $query = User::query()
+        return User::query()
             ->where(fn ($q) => $q->where('email', $login)->orWhere('username', $login))
-            ->where('status', 'active');
-
-        return $query->first();
+            ->where('status', UserStatus::Active)
+            ->first();
     }
 
     public function findByLogin(string $login): ?User
@@ -32,7 +32,7 @@ class AuthRepository implements AuthRepositoryInterface
             'username' => $data['username'],
             'email' => $data['email'],
             'password' => $data['password'],
-            'status' => 'pending',
+            'status' => UserStatus::Pending->value,
         ]);
     }
 
