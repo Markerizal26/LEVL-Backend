@@ -47,6 +47,14 @@ class AuthApiController extends Controller
 
     /**
      * @summary Registrasi Pengguna Baru
+     *
+     * @description Mendaftarkan pengguna baru dengan role Student. Setelah registrasi berhasil, email verifikasi akan dikirim ke alamat email yang didaftarkan.
+     *
+     * @response 201 scenario="Success" {"success": true, "message": "Registrasi berhasil. Silakan periksa email Anda untuk verifikasi.", "data": {"user": {"id": 1, "name": "John Doe", "email": "john@example.com", "status": "pending"}, "verification_uuid": "550e8400-e29b-41d4-a716-446655440000"}}
+     * @response 422 scenario="Validation Error" {"success": false, "message": "Validasi gagal.", "errors": {"email": ["Email sudah terdaftar."]}}
+     * @response 429 scenario="Rate Limited" {"success": false, "message": "Terlalu banyak percobaan. Silakan coba lagi dalam 60 detik."}
+     *
+     * @unauthenticated
      */
     public function register(RegisterRequest $request): JsonResponse
     {
@@ -66,6 +74,16 @@ class AuthApiController extends Controller
 
     /**
      * @summary Login Pengguna
+     *
+     * @description Autentikasi pengguna menggunakan email/username dan password. Mengembalikan access token (JWT) dan refresh token untuk sesi.
+     *
+     * @response 200 scenario="Success" {"success": true, "message": "Login berhasil.", "data": {"user": {"id": 1, "name": "John Doe", "email": "john@example.com", "status": "active"}, "access_token": "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9...", "refresh_token": "abc123def456...", "expires_in": 900}}
+     * @response 401 scenario="Invalid Credentials" {"success": false, "message": "Email atau password salah."}
+     * @response 403 scenario="Account Inactive" {"success": false, "message": "Akun Anda tidak aktif. Silakan hubungi administrator."}
+     * @response 422 scenario="Validation Error" {"success": false, "message": "Validasi gagal.", "errors": {"login": ["Field login wajib diisi."]}}
+     * @response 429 scenario="Rate Limited" {"success": false, "message": "Terlalu banyak percobaan. Silakan coba lagi dalam 60 detik."}
+     *
+     * @unauthenticated
      */
     public function login(LoginRequest $request): JsonResponse
     {
@@ -87,6 +105,13 @@ class AuthApiController extends Controller
 
     /**
      * @summary Buat Akun Instructor
+     *
+     * @description Membuat akun instructor baru. Password akan di-generate otomatis dan dikirim ke email. **Memerlukan role: Superadmin**
+     *
+     * @response 201 scenario="Success" {"success": true, "message": "Instructor berhasil dibuat.", "data": {"user": {"id": 2, "name": "Jane Instructor", "email": "jane@example.com", "status": "pending"}}}
+     * @response 401 scenario="Unauthorized" {"success": false, "message": "Tidak terotorisasi."}
+     * @response 403 scenario="Forbidden" {"success": false, "message": "Anda tidak memiliki akses untuk melakukan aksi ini."}
+     * @response 422 scenario="Validation Error" {"success": false, "message": "Validasi gagal.", "errors": {"email": ["Email sudah terdaftar."]}}
      */
     public function createInstructor(CreateManagedUserRequest $request): JsonResponse
     {
@@ -97,6 +122,13 @@ class AuthApiController extends Controller
 
     /**
      * @summary Buat Akun Admin
+     *
+     * @description Membuat akun admin baru. Password akan di-generate otomatis dan dikirim ke email. **Memerlukan role: Superadmin**
+     *
+     * @response 201 scenario="Success" {"success": true, "message": "Admin berhasil dibuat.", "data": {"user": {"id": 3, "name": "Admin User", "email": "admin@example.com", "status": "pending"}}}
+     * @response 401 scenario="Unauthorized" {"success": false, "message": "Tidak terotorisasi."}
+     * @response 403 scenario="Forbidden" {"success": false, "message": "Anda tidak memiliki akses untuk melakukan aksi ini."}
+     * @response 422 scenario="Validation Error" {"success": false, "message": "Validasi gagal.", "errors": {"email": ["Email sudah terdaftar."]}}
      */
     public function createAdmin(CreateManagedUserRequest $request): JsonResponse
     {
@@ -107,6 +139,13 @@ class AuthApiController extends Controller
 
     /**
      * @summary Buat Akun Super Admin
+     *
+     * @description Membuat akun super admin baru. Password akan di-generate otomatis dan dikirim ke email. **Memerlukan role: Superadmin**
+     *
+     * @response 201 scenario="Success" {"success": true, "message": "Super admin berhasil dibuat.", "data": {"user": {"id": 4, "name": "Super Admin", "email": "superadmin@example.com", "status": "pending"}}}
+     * @response 401 scenario="Unauthorized" {"success": false, "message": "Tidak terotorisasi."}
+     * @response 403 scenario="Forbidden" {"success": false, "message": "Anda tidak memiliki akses untuk melakukan aksi ini."}
+     * @response 422 scenario="Validation Error" {"success": false, "message": "Validasi gagal.", "errors": {"email": ["Email sudah terdaftar."]}}
      */
     public function createSuperAdmin(CreateManagedUserRequest $request): JsonResponse
     {
@@ -143,6 +182,11 @@ class AuthApiController extends Controller
      * **Response:**
      * - Mengembalikan access token baru, refresh token baru (rotating), dan expires_in (dalam detik)
      * - Refresh token lama akan di-revoke dan diganti dengan yang baru (token rotation)
+     *
+     * @response 200 scenario="Success" {"success": true, "message": "Token akses berhasil diperbarui.", "data": {"access_token": "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9...", "refresh_token": "newtoken123...", "expires_in": 900}}
+     * @response 401 scenario="Invalid Token" {"success": false, "message": "Refresh token tidak valid atau kadaluarsa."}
+     *
+     * @unauthenticated
      */
     public function refresh(RefreshTokenRequest $request): JsonResponse
     {
@@ -158,6 +202,11 @@ class AuthApiController extends Controller
 
     /**
      * @summary Logout Pengguna
+     *
+     * @description Logout pengguna dan invalidate access token serta refresh token.
+     *
+     * @response 200 scenario="Success" {"success": true, "message": "Logout berhasil.", "data": []}
+     * @response 401 scenario="Unauthorized" {"success": false, "message": "Tidak terotorisasi."}
      */
     public function logout(LogoutRequest $request): JsonResponse
     {
@@ -179,6 +228,11 @@ class AuthApiController extends Controller
 
     /**
      * @summary Ambil Profil Pengguna
+     *
+     * @description Mengambil data profil pengguna yang sedang login.
+     *
+     * @response 200 scenario="Success" {"success": true, "message": "Profil berhasil diambil.", "data": {"id": 1, "name": "John Doe", "email": "john@example.com", "username": "johndoe", "status": "active", "avatar_url": "https://example.com/avatar.jpg"}}
+     * @response 401 scenario="Unauthorized" {"success": false, "message": "Tidak terotorisasi."}
      */
     public function profile(): JsonResponse
     {
@@ -193,6 +247,12 @@ class AuthApiController extends Controller
 
     /**
      * @summary Perbarui Profil Pengguna
+     *
+     * @description Memperbarui data profil pengguna yang sedang login (nama, username, avatar).
+     *
+     * @response 200 scenario="Success" {"success": true, "message": "Profil berhasil diperbarui.", "data": {"id": 1, "name": "John Updated", "email": "john@example.com", "username": "johnupdated", "status": "active"}}
+     * @response 401 scenario="Unauthorized" {"success": false, "message": "Tidak terotorisasi."}
+     * @response 422 scenario="Validation Error" {"success": false, "message": "Validasi gagal.", "errors": {"username": ["Username sudah digunakan."]}}
      */
     public function updateProfile(UpdateProfileRequest $request): JsonResponse
     {
@@ -241,6 +301,13 @@ class AuthApiController extends Controller
 
     /**
      * @summary Redirect ke Google OAuth
+     *
+     * @description Mengarahkan pengguna ke halaman login Google untuk autentikasi OAuth.
+     *
+     * @response 302 scenario="Redirect" Redirect ke Google OAuth
+     * @response 400 scenario="Error" {"success": false, "message": "Tidak dapat menginisiasi Google OAuth. Silakan login manual."}
+     *
+     * @unauthenticated
      */
     public function googleRedirect(Request $request)
     {
@@ -260,6 +327,13 @@ class AuthApiController extends Controller
 
     /**
      * @summary Callback dari Google OAuth
+     *
+     * @description Endpoint callback yang dipanggil oleh Google setelah autentikasi berhasil. Akan redirect ke frontend dengan token.
+     *
+     * @response 302 scenario="Success" Redirect ke frontend dengan access_token dan refresh_token
+     * @response 302 scenario="Error" Redirect ke frontend dengan error parameter
+     *
+     * @unauthenticated
      */
     public function googleCallback(Request $request): RedirectResponse
     {
@@ -337,6 +411,12 @@ class AuthApiController extends Controller
 
     /**
      * @summary Kirim Tautan Verifikasi Email
+     *
+     * @description Mengirim ulang tautan verifikasi email ke pengguna yang belum terverifikasi.
+     *
+     * @response 200 scenario="Success" {"success": true, "message": "Tautan verifikasi telah dikirim ke email Anda. Berlaku 3 menit dan hanya bisa digunakan sekali.", "data": {"uuid": "550e8400-e29b-41d4-a716-446655440000"}}
+     * @response 200 scenario="Already Verified" {"success": true, "message": "Email Anda sudah terverifikasi.", "data": []}
+     * @response 401 scenario="Unauthorized" {"success": false, "message": "Tidak terotorisasi."}
      */
     public function sendEmailVerification(Request $request): JsonResponse
     {
@@ -363,6 +443,12 @@ class AuthApiController extends Controller
 
     /**
      * @summary Minta Perubahan Email
+     *
+     * @description Meminta perubahan alamat email. Kode verifikasi akan dikirim ke email baru.
+     *
+     * @response 200 scenario="Success" {"success": true, "message": "Tautan verifikasi perubahan email telah dikirim. Berlaku 3 menit.", "data": {"uuid": "550e8400-e29b-41d4-a716-446655440000"}}
+     * @response 401 scenario="Unauthorized" {"success": false, "message": "Tidak terotorisasi."}
+     * @response 422 scenario="Validation Error" {"success": false, "message": "Validasi gagal.", "errors": {"new_email": ["Email sudah digunakan."]}}
      */
     public function requestEmailChange(RequestEmailChangeRequest $request): JsonResponse
     {
@@ -400,6 +486,14 @@ class AuthApiController extends Controller
 
     /**
      * @summary Verifikasi Perubahan Email
+     *
+     * @description Memverifikasi perubahan email menggunakan UUID dan kode OTP.
+     *
+     * @response 200 scenario="Success" {"success": true, "message": "Email berhasil diubah dan terverifikasi.", "data": []}
+     * @response 404 scenario="Not Found" {"success": false, "message": "Tautan verifikasi tidak ditemukan."}
+     * @response 422 scenario="Expired" {"success": false, "message": "Kode verifikasi telah kedaluwarsa."}
+     * @response 422 scenario="Invalid" {"success": false, "message": "Kode verifikasi salah."}
+     * @response 422 scenario="Email Taken" {"success": false, "message": "Email sudah digunakan oleh akun lain."}
      */
     public function verifyEmailChange(VerifyEmailChangeRequest $request): JsonResponse
     {
@@ -439,6 +533,13 @@ class AuthApiController extends Controller
      * **Parameter:**
      * - `uuid` atau `token`: UUID atau token verifikasi (dari email atau response registrasi)
      * - `code`: Kode OTP 6 digit yang diterima via email
+     *
+     * @response 200 scenario="Success" {"success": true, "message": "Email Anda berhasil diverifikasi.", "data": []}
+     * @response 404 scenario="Not Found" {"success": false, "message": "Tautan verifikasi tidak ditemukan."}
+     * @response 422 scenario="Expired" {"success": false, "message": "Kode verifikasi telah kedaluwarsa."}
+     * @response 422 scenario="Invalid" {"success": false, "message": "Kode verifikasi salah atau token tidak valid."}
+     *
+     * @unauthenticated
      */
     public function verifyEmail(VerifyEmailRequest $request): JsonResponse
     {
@@ -484,6 +585,13 @@ class AuthApiController extends Controller
      *
      * **Parameter:**
      * - `token`: Token verifikasi 16 karakter dari link email
+     *
+     * @response 200 scenario="Success" {"success": true, "message": "Email Anda berhasil diverifikasi.", "data": []}
+     * @response 404 scenario="Not Found" {"success": false, "message": "Link verifikasi tidak ditemukan."}
+     * @response 422 scenario="Expired" {"success": false, "message": "Link verifikasi telah kedaluwarsa."}
+     * @response 422 scenario="Invalid" {"success": false, "message": "Link verifikasi tidak valid atau sudah digunakan."}
+     *
+     * @unauthenticated
      */
     public function verifyEmailByToken(VerifyEmailByTokenRequest $request): JsonResponse
     {
@@ -513,6 +621,14 @@ class AuthApiController extends Controller
 
     /**
      * @summary Kirim Ulang Kredensial Akun
+     *
+     * @description Mengirim ulang kredensial (password baru) ke akun Admin/Instructor/Superadmin yang berstatus pending. **Memerlukan role: Superadmin**
+     *
+     * @response 200 scenario="Success" {"success": true, "message": "Kredensial berhasil dikirim ulang.", "data": {"user": {"id": 2, "name": "Jane Instructor", "email": "jane@example.com", "status": "pending"}}}
+     * @response 401 scenario="Unauthorized" {"success": false, "message": "Tidak terotorisasi."}
+     * @response 403 scenario="Forbidden" {"success": false, "message": "Anda tidak memiliki akses untuk melakukan aksi ini."}
+     * @response 404 scenario="Not Found" {"success": false, "message": "User tidak ditemukan"}
+     * @response 422 scenario="Invalid User" {"success": false, "message": "Hanya untuk akun Admin, Superadmin, atau Instructor yang berstatus pending."}
      */
     public function resendCredentials(ResendCredentialsRequest $request): JsonResponse
     {
@@ -548,6 +664,13 @@ class AuthApiController extends Controller
 
     /**
      * @summary Perbarui Status Pengguna
+     *
+     * @description Memperbarui status pengguna (pending, active, inactive, banned). **Memerlukan role: Superadmin**
+     *
+     * @response 200 scenario="Success" {"success": true, "message": "Status pengguna berhasil diperbarui.", "data": {"user": {"id": 1, "name": "John Doe", "email": "john@example.com", "status": "active"}}}
+     * @response 401 scenario="Unauthorized" {"success": false, "message": "Tidak terotorisasi."}
+     * @response 403 scenario="Forbidden" {"success": false, "message": "Anda tidak memiliki akses untuk melakukan aksi ini."}
+     * @response 422 scenario="Validation Error" {"success": false, "message": "Validasi gagal.", "errors": {"status": ["Status tidak valid."]}}
      */
     public function updateUserStatus(UpdateUserStatusRequest $request, User $user): JsonResponse
     {
@@ -563,12 +686,18 @@ class AuthApiController extends Controller
     /**
      * @summary Daftar Semua Pengguna
      *
+     * @description Mengambil daftar semua pengguna dengan pagination dan filter. **Memerlukan role: Admin atau Superadmin**
+     *
      * @allowedFilters filter[search], filter[status], filter[role], filter[created_from], filter[created_to]
      *
      * @allowedSorts name, email, username, status, created_at
      *
      * @filterEnum status pending|active|inactive|banned
      * @filterEnum role Student|Instructor|Admin|Superadmin
+     *
+     * @response 200 scenario="Success" {"success": true, "message": "Success", "data": [{"id": 1, "name": "John Doe", "email": "john@example.com", "status": "active"}], "meta": {"current_page": 1, "last_page": 5, "per_page": 15, "total": 75}, "links": {"first": "...", "last": "...", "prev": null, "next": "..."}}
+     * @response 401 scenario="Unauthorized" {"success": false, "message": "Tidak terotorisasi."}
+     * @response 403 scenario="Forbidden" {"success": false, "message": "Tidak terotorisasi."}
      */
     public function listUsers(Request $request): JsonResponse
     {
@@ -592,6 +721,12 @@ class AuthApiController extends Controller
 
     /**
      * @summary Detail Pengguna
+     *
+     * @description Mengambil detail pengguna berdasarkan ID. **Memerlukan role: Superadmin**
+     *
+     * @response 200 scenario="Success" {"success": true, "message": "Success", "data": {"user": {"id": 1, "name": "John Doe", "email": "john@example.com", "username": "johndoe", "status": "active", "roles": ["Student"]}}}
+     * @response 401 scenario="Unauthorized" {"success": false, "message": "Tidak terotorisasi."}
+     * @response 403 scenario="Forbidden" {"success": false, "message": "Anda tidak memiliki akses untuk melihat user ini."}
      */
     public function showUser(User $user): JsonResponse
     {
@@ -612,6 +747,13 @@ class AuthApiController extends Controller
 
     /**
      * @summary Atur Username Pertama Kali
+     *
+     * @description Mengatur username untuk pertama kali (biasanya setelah login via Google OAuth).
+     *
+     * @response 200 scenario="Success" {"success": true, "message": "Username berhasil diatur.", "data": {"user": {"id": 1, "name": "John Doe", "email": "john@example.com", "username": "johndoe"}}}
+     * @response 401 scenario="Unauthorized" {"success": false, "message": "Tidak terotorisasi."}
+     * @response 422 scenario="Already Set" {"success": false, "message": "Username sudah diatur untuk akun Anda."}
+     * @response 422 scenario="Validation Error" {"success": false, "message": "Validasi gagal.", "errors": {"username": ["Username sudah digunakan."]}}
      */
     public function setUsername(SetUsernameRequest $request): JsonResponse
     {

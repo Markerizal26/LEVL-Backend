@@ -1,0 +1,150 @@
+# Implementation Plan
+
+- [x] 1. Setup dan Konfigurasi Dasar
+  - [x] 1.1 Update AppServiceProvider dengan tag groups configuration
+    - Tambahkan method `configureTagGroups()` dengan x-tagGroups extension
+    - Tambahkan method `configureServers()` untuk multiple server support
+    - Update `getApiDescription()` dengan dokumentasi lengkap
+    - _Requirements: 3.1, 7.1_
+  - [ ]* 1.2 Write property test untuk Tag Groups Structure
+    - **Property 5: Tag Groups Structure**
+    - **Validates: Requirements 3.1**
+  - [ ]* 1.3 Write property test untuk Server Configuration
+    - **Property 9: Server Configuration**
+    - **Validates: Requirements 7.1**
+
+- [x] 2. Update Scramble Configuration
+  - [x] 2.1 Update config/scramble.php untuk enum documentation
+    - Set `enum_cases_names_strategy` ke 'names' untuk menampilkan enum names
+    - Pastikan `enum_cases_description_strategy` tetap 'description'
+    - _Requirements: 4.1, 4.2_
+  - [ ]* 2.2 Write property test untuk Enum Documentation Consistency
+    - **Property 6: Enum Documentation Consistency**
+    - **Validates: Requirements 4.1, 4.2, 4.3**
+
+- [x] 3. Enhance Auth Module Controllers
+  - [x] 3.1 Update AuthApiController dengan PHPDoc lengkap
+    - Tambahkan @response annotations untuk semua error codes (401, 422, 429)
+    - Tambahkan @unauthenticated untuk public endpoints (register, login, verify)
+    - Tambahkan @description untuk endpoints kompleks
+    - _Requirements: 2.1, 2.4, 5.1, 6.1, 6.2_
+  - [x] 3.2 Update PasswordResetController dengan PHPDoc lengkap
+    - Tambahkan @response annotations untuk success dan error scenarios
+    - Tambahkan @unauthenticated untuk forgot password endpoints
+    - _Requirements: 2.1, 2.4, 5.1_
+  - [x] 3.3 Update Profile controllers dengan PHPDoc lengkap
+    - ProfileController, ProfilePrivacyController, ProfilePasswordController
+    - Tambahkan @response annotations dan role requirements di description
+    - _Requirements: 2.1, 2.4, 5.2_
+  - [ ]* 3.4 Write property test untuk PHPDoc Summary Presence di Auth module
+    - **Property 2: PHPDoc Summary Presence**
+    - **Validates: Requirements 2.1**
+  - [ ]* 3.5 Write property test untuk Error Response Documentation di Auth module
+    - **Property 4: Error Response Documentation**
+    - **Validates: Requirements 2.4**
+
+- [ ] 4. Checkpoint - Pastikan semua test pass
+  - Ensure all tests pass, ask the user if questions arise.
+
+- [x] 5. Enhance Schemes Module Controllers
+  - [x] 5.1 Update CourseController dengan PHPDoc lengkap
+    - Tambahkan @response annotations untuk CRUD operations
+    - Dokumentasikan @allowedFilters, @allowedSorts, @allowedIncludes
+    - Dokumentasikan pagination (page, per_page) dan search parameters
+    - _Requirements: 2.1, 2.3, 2.4, 6.1, 8.1, 8.2, 8.3, 8.4, 8.5_
+  - [x] 5.2 Update UnitController dengan PHPDoc lengkap
+    - Tambahkan @response annotations dan nested relationship examples
+    - _Requirements: 2.1, 2.4, 1.3_
+  - [x] 5.3 Update LessonController dan LessonBlockController dengan PHPDoc lengkap
+    - Dokumentasikan response schema untuk lesson content
+    - _Requirements: 2.1, 2.4, 1.1_
+  - [ ]* 5.4 Write property test untuk Query Parameter Documentation
+    - **Property 3: Query Parameter Documentation**
+    - **Validates: Requirements 2.3**
+  - [ ]* 5.5 Write property test untuk Query Builder Documentation
+    - **Property 10: Query Builder Documentation**
+    - **Validates: Requirements 8.1, 8.2, 8.3, 8.4, 8.5, 8.6**
+
+- [x] 6. Enhance Content Module Controllers
+  - [x] 6.1 Update AnnouncementController dengan PHPDoc lengkap
+    - Tambahkan @response annotations dengan contoh realistic
+    - Dokumentasikan @allowedFilters, @allowedSorts dengan @filterEnum untuk enum fields
+    - Dokumentasikan enum values untuk priority dan status
+    - _Requirements: 2.1, 2.4, 4.1, 6.1, 8.1, 8.2, 8.6_
+  - [x] 6.2 Update NewsController dengan PHPDoc lengkap
+    - Tambahkan @response annotations untuk CRUD dan publish operations
+    - _Requirements: 2.1, 2.4_
+
+- [x] 7. Enhance Learning Module Controllers
+  - [x] 7.1 Update AssignmentController dengan PHPDoc lengkap
+    - Dokumentasikan assignment status enum dan transitions
+    - Tambahkan @response untuk submission scenarios
+    - _Requirements: 2.1, 2.4, 4.1_
+  - [x] 7.2 Update SubmissionController dengan PHPDoc lengkap
+    - Dokumentasikan submission status dan grading responses
+    - Tambahkan @description, @response untuk semua endpoints
+    - Dokumentasikan role requirements (Student, Admin, Instructor, Superadmin)
+    - _Requirements: 2.1, 2.4_
+
+- [ ] 8. Checkpoint - Pastikan semua test pass
+  - Ensure all tests pass, ask the user if questions arise.
+
+- [x] 9. Enhance Remaining Module Controllers
+  - [x] 9.1 Update EnrollmentsController dengan PHPDoc lengkap
+    - Dokumentasikan enrollment status enum dan key-based enrollment
+    - Tambahkan @description, @response, @queryParam untuk semua endpoints
+    - Dokumentasikan role requirements
+    - _Requirements: 2.1, 2.4, 4.1_
+  - [x] 9.2 Update GamificationController dengan PHPDoc lengkap
+    - Dokumentasikan badge, points, dan leaderboard responses
+    - Update GamificationController, LeaderboardController, ChallengeController
+    - Tambahkan @description, @response, @queryParam, @allowedFilters, @allowedSorts
+    - _Requirements: 2.1, 2.4_
+  - [x] 9.3 Update ForumsController dengan PHPDoc lengkap
+    - Dokumentasikan thread, reply, dan reaction responses
+    - Update ThreadController, ReplyController, ReactionController, ForumStatisticsController
+    - Tambahkan @description, @response, @queryParam untuk semua endpoints
+    - _Requirements: 2.1, 2.4_
+  - [x] 9.4 Update NotificationsController dengan PHPDoc lengkap
+    - Dokumentasikan notification types dan preferences
+    - Update NotificationPreferenceController dengan @summary, @description, @response
+    - Note: NotificationsController adalah placeholder (returns views, bukan API)
+    - _Requirements: 2.1, 2.4_
+
+- [x] 10. Security Documentation Enhancement
+  - [x] 10.1 Add @unauthenticated annotations ke semua public endpoints
+    - Review semua routes tanpa auth middleware
+    - Tambahkan @unauthenticated annotation
+    - _Requirements: 5.1_
+  - [x] 10.2 Add role requirements ke endpoint descriptions
+    - Review semua routes dengan role middleware
+    - Tambahkan informasi role di @description
+    - _Requirements: 5.2_
+  - [ ]* 10.3 Write property test untuk Security Documentation Accuracy
+    - **Property 7: Security Documentation Accuracy**
+    - **Validates: Requirements 5.1, 5.2, 5.3**
+
+- [x] 11. Response Schema Enhancement
+  - [x] 11.1 Create base API Resource classes
+    - Create `app/Http/Resources/BaseResource.php` dengan standard wrapper
+    - Create `app/Http/Resources/PaginatedResourceCollection.php`
+    - _Requirements: 1.1, 1.2_
+  - [x] 11.2 Create UserResource untuk Auth module
+    - Implement UserResource dengan semua properties
+    - Update AuthApiController untuk menggunakan UserResource
+    - _Requirements: 1.1, 1.3_
+  - [ ]* 11.3 Write property test untuk OpenAPI Schema Completeness
+    - **Property 1: OpenAPI Schema Completeness**
+    - **Validates: Requirements 1.1, 1.2, 1.3, 1.4**
+
+- [x] 12. Error Response Standardization
+  - [x] 12.1 Review dan update ApiResponse trait
+    - Pastikan semua error methods menggunakan format standar
+    - Tambahkan PHPDoc untuk return types
+    - _Requirements: 6.2_
+  - [ ]* 12.2 Write property test untuk Error Response Format Consistency
+    - **Property 8: Error Response Format Consistency**
+    - **Validates: Requirements 6.2**
+
+- [x] 13. Final Checkpoint - Pastikan semua test pass
+  - Ensure all tests pass, ask the user if questions arise.

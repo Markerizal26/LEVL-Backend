@@ -24,7 +24,14 @@ class LeaderboardController extends Controller
      *
      * @summary Mengambil leaderboard global
      *
+     * @description Mengambil daftar peringkat user berdasarkan total XP dengan pagination. Maksimal 100 item per halaman.
+     *
+     * @queryParam per_page integer Jumlah item per halaman (max 100). Default: 10. Example: 10
+     * @queryParam page integer Nomor halaman. Default: 1. Example: 1
+     *
      * @allowedSorts total_xp, global_level
+     *
+     * @response 200 {"success": true, "data": {"leaderboard": [{"rank": 1, "user": {"id": 1, "name": "John Doe", "avatar_url": "https://example.com/avatar.jpg"}, "total_xp": 5000, "level": 15}], "meta": {"current_page": 1, "per_page": 10, "total": 100, "last_page": 10}}}
      */
     public function index(Request $request): JsonResponse
     {
@@ -64,6 +71,10 @@ class LeaderboardController extends Controller
      * Get current user's rank.
      *
      * @summary Mengambil ranking user saat ini
+     *
+     * @description Mengambil peringkat user yang sedang login beserta user di sekitarnya (surrounding).
+     *
+     * @response 200 {"success": true, "data": {"rank": 25, "total_xp": 1500, "level": 5, "surrounding": [{"rank": 24, "user": {"id": 10, "name": "Jane"}, "total_xp": 1550}, {"rank": 25, "user": {"id": 1, "name": "You"}, "total_xp": 1500}, {"rank": 26, "user": {"id": 15, "name": "Bob"}, "total_xp": 1450}]}}
      */
     public function myRank(Request $request): JsonResponse
     {

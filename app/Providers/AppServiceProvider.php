@@ -86,11 +86,123 @@ class AppServiceProvider extends ServiceProvider
         Scramble::configure()
             ->afterOpenApiGenerated(function (OpenApi $openApi) {
                 $openApi->info->title = config('app.name', 'TA Prep LSP').' API';
+                $openApi->info->description = $this->getApiDescription();
 
                 // Add JWT Bearer authentication
                 $openApi->secure(
                     SecurityScheme::http('bearer', 'JWT')
                 );
+
+                // Add servers
+                $this->configureServers($openApi);
+
+                // Add tag groups
+                $this->configureTagGroups($openApi);
             });
+    }
+
+    /**
+     * Configure API servers for OpenAPI documentation.
+     */
+    private function configureServers(OpenApi $openApi): void
+    {
+        $openApi->servers = [
+            new Server(config('app.url').'/api', 'Local Development'),
+        ];
+
+        if ($prodUrl = config('api.production_url')) {
+            $openApi->servers[] = new Server($prodUrl.'/api', 'Production');
+        }
+    }
+
+    /**
+     * Configure tag groups for better navigation in API documentation.
+     */
+    private function configureTagGroups(OpenApi $openApi): void
+    {
+        $openApi->addExtension('x-tagGroups', [
+            [
+                'name' => 'Autentikasi & Pengguna',
+                'tags' => ['Autentikasi', 'Profil Pengguna', 'Manajemen Pengguna'],
+            ],
+            [
+                'name' => 'Pembelajaran',
+                'tags' => ['Skema & Kursus', 'Unit Kompetensi', 'Materi Pembelajaran', 'Progress Belajar'],
+            ],
+            [
+                'name' => 'Tugas & Penilaian',
+                'tags' => ['Tugas & Pengumpulan', 'Penilaian'],
+            ],
+            [
+                'name' => 'Interaksi',
+                'tags' => ['Forum Diskusi', 'Notifikasi', 'Gamifikasi'],
+            ],
+            [
+                'name' => 'Konten & Data',
+                'tags' => ['Konten & Berita', 'Data Master', 'Pencarian'],
+            ],
+            [
+                'name' => 'Administrasi',
+                'tags' => ['Pendaftaran Kursus', 'Laporan & Statistik'],
+            ],
+        ]);
+    }
+
+    /**
+     * Get API description for OpenAPI documentation.
+     */
+    private function getApiDescription(): string
+    {
+        return <<<'MD'
+## TA Prep LSP API
+
+Platform Pembelajaran dan Sertifikasi LSP.
+
+### Authentication
+
+API ini menggunakan JWT Bearer Token untuk autentikasi. Untuk mendapatkan token:
+
+1. Register atau Login melalui endpoint `/v1/auth/register` atau `/v1/auth/login`
+2. Gunakan `access_token` dari response sebagai Bearer Token
+3. Refresh token menggunakan `/v1/auth/refresh` sebelum expired
+
+### Rate Limiting
+
+- Default API: 60 requests per minute
+- Auth endpoints: 10 requests per minute
+- Enrollment endpoints: 5 requests per minute
+
+### Response Format
+
+Semua response menggunakan format standar:
+
+```json
+{
+  "success": true,
+  "message": "Operation successful",
+  "data": { ... }
+}
+```
+
+Error response:
+
+```json
+{
+  "success": false,
+  "message": "Error description",
+  "errors": { ... }
+}
+```
+
+### Query Parameters
+
+Endpoint yang mendukung filtering dan sorting menggunakan format:
+
+- **Filter:** `?filter[field]=value`
+- **Sort:** `?sort=field` (ascending) atau `?sort=-field` (descending)
+- **Pagination:** `?page=1&per_page=15`
+- **Search:** `?search=keyword`
+- **Include:** `?include=relation1,relation2`
+MD;
     }
 }

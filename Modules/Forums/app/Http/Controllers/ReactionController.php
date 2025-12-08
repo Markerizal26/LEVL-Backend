@@ -19,6 +19,15 @@ class ReactionController extends Controller
 
     /**
      * Toggle a reaction on a thread.
+     *
+     * @summary Toggle Reaksi pada Thread
+     *
+     * @description Menambah atau menghapus reaksi pada thread. Jika reaksi sudah ada, akan dihapus. Jika belum ada, akan ditambahkan.
+     *
+     * @response 200 {"success": true, "data": {"added": true}, "message": "Reaksi berhasil ditambahkan."}
+     * @response 200 {"success": true, "data": {"added": false}, "message": "Reaksi berhasil dihapus."}
+     * @response 404 {"success": false, "message": "Thread tidak ditemukan."}
+     * @response 422 {"success": false, "message": "Validation error", "errors": {"type": ["The selected type is invalid."]}}
      */
     public function toggleThreadReaction(Request $request, int $threadId): JsonResponse
     {
@@ -63,6 +72,15 @@ class ReactionController extends Controller
 
     /**
      * Toggle a reaction on a reply.
+     *
+     * @summary Toggle Reaksi pada Balasan
+     *
+     * @description Menambah atau menghapus reaksi pada balasan. Jika reaksi sudah ada, akan dihapus. Jika belum ada, akan ditambahkan.
+     *
+     * @response 200 {"success": true, "data": {"added": true}, "message": "Reaksi berhasil ditambahkan."}
+     * @response 200 {"success": true, "data": {"added": false}, "message": "Reaksi berhasil dihapus."}
+     * @response 404 {"success": false, "message": "Balasan tidak ditemukan."}
+     * @response 422 {"success": false, "message": "Validation error", "errors": {"type": ["The selected type is invalid."]}}
      */
     public function toggleReplyReaction(Request $request, int $replyId): JsonResponse
     {

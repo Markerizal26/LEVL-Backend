@@ -33,6 +33,15 @@ class ThreadController extends Controller
 
     /**
      * @summary Daftar Thread Forum
+     *
+     * @description Mengambil daftar thread forum untuk scheme tertentu dengan filter pinned, resolved, dan closed.
+     *
+     * @queryParam pinned boolean Filter thread yang disematkan. Example: true
+     * @queryParam resolved boolean Filter thread yang sudah resolved. Example: false
+     * @queryParam closed boolean Filter thread yang sudah ditutup. Example: false
+     * @queryParam per_page integer Jumlah item per halaman. Default: 20. Example: 20
+     *
+     * @response 200 {"success": true, "data": [{"id": 1, "title": "Pertanyaan tentang Laravel", "content": "...", "is_pinned": false, "is_resolved": false, "is_closed": false, "replies_count": 5}], "meta": {"current_page": 1, "per_page": 20, "total": 50}}
      */
     public function index(Request $request, int $schemeId): JsonResponse
     {
@@ -50,6 +59,12 @@ class ThreadController extends Controller
 
     /**
      * @summary Buat Thread Baru
+     *
+     * @description Membuat thread diskusi baru pada scheme tertentu.
+     *
+     * @response 201 {"success": true, "data": {"id": 1, "title": "Pertanyaan tentang Laravel", "content": "...", "user_id": 1, "scheme_id": 1}, "message": "Thread berhasil dibuat."}
+     * @response 422 {"success": false, "message": "Validation error", "errors": {"title": ["The title field is required."]}}
+     * @response 500 {"success": false, "message": "Gagal membuat thread."}
      */
     public function store(CreateThreadRequest $request, int $schemeId): JsonResponse
     {
@@ -65,6 +80,11 @@ class ThreadController extends Controller
 
     /**
      * @summary Detail Thread
+     *
+     * @description Mengambil detail thread beserta balasan dan informasi user.
+     *
+     * @response 200 {"success": true, "data": {"id": 1, "title": "Pertanyaan tentang Laravel", "content": "...", "user": {"id": 1, "name": "John"}, "replies": []}}
+     * @response 404 {"success": false, "message": "Thread tidak ditemukan."}
      */
     public function show(int $schemeId, int $threadId): JsonResponse
     {
@@ -79,6 +99,12 @@ class ThreadController extends Controller
 
     /**
      * @summary Perbarui Thread
+     *
+     * @description Memperbarui thread yang sudah ada. Hanya pemilik thread atau moderator yang dapat mengubah.
+     *
+     * @response 200 {"success": true, "data": {"id": 1, "title": "Judul Baru"}, "message": "Thread berhasil diperbarui."}
+     * @response 403 {"success": false, "message": "Anda tidak memiliki akses untuk mengubah thread ini."}
+     * @response 404 {"success": false, "message": "Thread tidak ditemukan."}
      */
     public function update(UpdateThreadRequest $request, int $schemeId, int $threadId): JsonResponse
     {
@@ -101,6 +127,12 @@ class ThreadController extends Controller
 
     /**
      * @summary Hapus Thread
+     *
+     * @description Menghapus thread beserta semua balasannya. Hanya pemilik thread atau moderator yang dapat menghapus.
+     *
+     * @response 200 {"success": true, "data": null, "message": "Thread berhasil dihapus."}
+     * @response 403 {"success": false, "message": "Anda tidak memiliki akses untuk menghapus thread ini."}
+     * @response 404 {"success": false, "message": "Thread tidak ditemukan."}
      */
     public function destroy(Request $request, int $schemeId, int $threadId): JsonResponse
     {
@@ -123,6 +155,14 @@ class ThreadController extends Controller
 
     /**
      * @summary Sematkan Thread
+     *
+     * @description Menyematkan thread agar selalu muncul di atas daftar. Hanya moderator yang dapat menyematkan.
+     *
+     * Requires: Admin, Instructor, Superadmin
+     *
+     * @response 200 {"success": true, "data": {"id": 1, "is_pinned": true}, "message": "Thread berhasil disematkan."}
+     * @response 403 {"success": false, "message": "Anda tidak memiliki akses untuk menyematkan thread ini."}
+     * @response 404 {"success": false, "message": "Thread tidak ditemukan."}
      */
     public function pin(Request $request, int $schemeId, int $threadId): JsonResponse
     {
@@ -145,6 +185,14 @@ class ThreadController extends Controller
 
     /**
      * @summary Tutup Thread
+     *
+     * @description Menutup thread sehingga tidak bisa menerima balasan baru. Hanya moderator yang dapat menutup.
+     *
+     * Requires: Admin, Instructor, Superadmin
+     *
+     * @response 200 {"success": true, "data": {"id": 1, "is_closed": true}, "message": "Thread berhasil ditutup."}
+     * @response 403 {"success": false, "message": "Anda tidak memiliki akses untuk menutup thread ini."}
+     * @response 404 {"success": false, "message": "Thread tidak ditemukan."}
      */
     public function close(Request $request, int $schemeId, int $threadId): JsonResponse
     {
@@ -167,6 +215,13 @@ class ThreadController extends Controller
 
     /**
      * @summary Cari Thread
+     *
+     * @description Mencari thread berdasarkan kata kunci pada judul dan konten.
+     *
+     * @queryParam q string required Kata kunci pencarian. Example: laravel
+     *
+     * @response 200 {"success": true, "data": [{"id": 1, "title": "Pertanyaan tentang Laravel"}], "message": "Hasil pencarian berhasil diambil."}
+     * @response 400 {"success": false, "message": "Query pencarian diperlukan."}
      */
     public function search(Request $request, int $schemeId): JsonResponse
     {

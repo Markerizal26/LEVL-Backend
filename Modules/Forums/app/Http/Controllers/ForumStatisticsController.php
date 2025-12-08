@@ -25,6 +25,18 @@ class ForumStatisticsController extends Controller
 
     /**
      * Get forum statistics for a scheme.
+     *
+     * @summary Statistik Forum per Scheme
+     *
+     * @description Mengambil statistik forum untuk scheme tertentu dalam periode waktu tertentu. Dapat juga mengambil statistik per user.
+     *
+     * Requires: Admin, Instructor, Superadmin
+     *
+     * @queryParam period_start date Tanggal mulai periode. Default: awal bulan ini. Example: 2024-01-01
+     * @queryParam period_end date Tanggal akhir periode. Default: akhir bulan ini. Example: 2024-01-31
+     * @queryParam user_id integer ID user untuk statistik individual. Example: 1
+     *
+     * @response 200 {"success": true, "data": {"total_threads": 50, "total_replies": 200, "active_users": 25, "resolved_threads": 30}, "message": "Statistik berhasil diambil."}
      */
     public function index(Request $request, int $schemeId): JsonResponse
     {
@@ -85,6 +97,15 @@ class ForumStatisticsController extends Controller
 
     /**
      * Get current user's forum statistics.
+     *
+     * @summary Statistik Forum User
+     *
+     * @description Mengambil statistik forum untuk user yang sedang login dalam periode waktu tertentu.
+     *
+     * @queryParam period_start date Tanggal mulai periode. Default: awal bulan ini. Example: 2024-01-01
+     * @queryParam period_end date Tanggal akhir periode. Default: akhir bulan ini. Example: 2024-01-31
+     *
+     * @response 200 {"success": true, "data": {"threads_created": 5, "replies_posted": 20, "reactions_received": 15, "accepted_answers": 3}, "message": "Statistik user berhasil diambil."}
      */
     public function userStats(Request $request, int $schemeId): JsonResponse
     {

@@ -21,6 +21,14 @@ class EnrollmentsController extends Controller
 
     /**
      * @summary Daftar Semua Pendaftaran (Superadmin)
+     *
+     * @description Mengambil daftar semua enrollment di sistem. Hanya Superadmin yang dapat mengakses endpoint ini.
+     *
+     * Requires: Superadmin
+     *
+     * @response 200 {"success": true, "data": {"enrollments": []}}
+     * @response 403 {"success": false, "message": "Anda tidak memiliki akses untuk melihat seluruh enrollment."}
+     * @response 501 {"success": false, "message": "Endpoint tidak tersedia untuk saat ini."}
      */
     public function index(Request $request)
     {
@@ -37,6 +45,15 @@ class EnrollmentsController extends Controller
 
     /**
      * @summary Daftar Pendaftaran per Kursus
+     *
+     * @description Mengambil daftar enrollment untuk kursus tertentu. Hanya instructor atau admin kursus yang dapat mengakses.
+     *
+     * Requires: Admin, Instructor (course owner), Superadmin
+     *
+     * @queryParam per_page integer Jumlah item per halaman. Default: 15. Example: 15
+     *
+     * @response 200 {"success": true, "data": {"enrollments": [{"id": 1, "user_id": 1, "course_id": 1, "status": "active", "user": {"id": 1, "name": "John Doe"}}]}, "meta": {"current_page": 1, "per_page": 15, "total": 50}}
+     * @response 403 {"success": false, "message": "Anda tidak memiliki akses untuk melihat enrollment course ini."}
      */
     public function indexByCourse(Request $request, Course $course)
     {
@@ -55,6 +72,17 @@ class EnrollmentsController extends Controller
 
     /**
      * @summary Daftar Pendaftaran yang Dikelola
+     *
+     * @description Mengambil daftar enrollment dari kursus yang dikelola oleh user. Admin/Instructor melihat enrollment dari kursus mereka, Superadmin melihat semua.
+     *
+     * Requires: Admin, Instructor, Superadmin
+     *
+     * @queryParam per_page integer Jumlah item per halaman. Default: 15. Example: 15
+     * @queryParam filter[course_slug] string Filter berdasarkan slug kursus. Example: belajar-laravel
+     *
+     * @response 200 {"success": true, "data": {"enrollments": [{"id": 1, "user_id": 1, "course_id": 1, "status": "active"}]}, "meta": {"current_page": 1, "per_page": 15, "total": 50}}
+     * @response 403 {"success": false, "message": "Anda tidak memiliki akses untuk melihat enrollment ini."}
+     * @response 404 {"success": false, "message": "Course tidak ditemukan atau tidak berada di bawah pengelolaan Anda."}
      */
     public function indexManaged(Request $request)
     {
@@ -103,6 +131,14 @@ class EnrollmentsController extends Controller
 
     /**
      * @summary Daftar ke Kursus
+     *
+     * @description Mendaftarkan user ke kursus. Jika kursus memerlukan enrollment key, key harus disertakan. Status enrollment bisa langsung active atau pending tergantung konfigurasi kursus.
+     *
+     * Requires: Student
+     *
+     * @response 200 {"success": true, "data": {"enrollment": {"id": 1, "user_id": 1, "course_id": 1, "status": "active", "enrolled_at": "2024-01-15T10:00:00Z"}}, "message": "Berhasil mendaftar ke kursus."}
+     * @response 403 {"success": false, "message": "Hanya peserta yang dapat melakukan enrollment."}
+     * @response 422 {"success": false, "message": "Enrollment key tidak valid."}
      */
     public function enroll(Request $request, Course $course)
     {
@@ -132,6 +168,14 @@ class EnrollmentsController extends Controller
 
     /**
      * @summary Batalkan Permintaan Pendaftaran
+     *
+     * @description Membatalkan permintaan enrollment yang masih pending. Superadmin dapat membatalkan enrollment user lain dengan menyertakan user_id.
+     *
+     * Requires: Student (own), Superadmin (any)
+     *
+     * @response 200 {"success": true, "data": {"enrollment": {"id": 1, "status": "cancelled"}}, "message": "Permintaan enrollment berhasil dibatalkan."}
+     * @response 403 {"success": false, "message": "Anda tidak memiliki akses untuk membatalkan enrollment ini."}
+     * @response 404 {"success": false, "message": "Permintaan enrollment tidak ditemukan untuk course ini."}
      */
     public function cancel(Request $request, Course $course)
     {
@@ -160,6 +204,14 @@ class EnrollmentsController extends Controller
 
     /**
      * @summary Undur Diri dari Kursus
+     *
+     * @description Mengundurkan diri dari kursus yang sudah aktif. Progress pembelajaran akan disimpan jika user mendaftar kembali. Superadmin dapat mengundurkan user lain.
+     *
+     * Requires: Student (own), Superadmin (any)
+     *
+     * @response 200 {"success": true, "data": {"enrollment": {"id": 1, "status": "withdrawn"}}, "message": "Anda berhasil mengundurkan diri dari course."}
+     * @response 403 {"success": false, "message": "Anda tidak memiliki akses untuk mengundurkan diri dari enrollment ini."}
+     * @response 404 {"success": false, "message": "Enrollment tidak ditemukan untuk course ini."}
      */
     public function withdraw(Request $request, Course $course)
     {
@@ -194,6 +246,16 @@ class EnrollmentsController extends Controller
 
     /**
      * @summary Status Pendaftaran
+     *
+     * @description Mengecek status enrollment user pada kursus tertentu. Mengembalikan status "not_enrolled" jika belum terdaftar.
+     *
+     * Requires: Student (own), Admin, Instructor (course owner), Superadmin
+     *
+     * @queryParam user_id integer ID user untuk dicek (Superadmin only). Example: 1
+     *
+     * @response 200 {"success": true, "data": {"status": "active", "enrollment": {"id": 1, "user_id": 1, "course_id": 1, "status": "active", "course": {"id": 1, "title": "Belajar Laravel"}}}, "message": "Status enrollment berhasil diambil."}
+     * @response 200 {"success": true, "data": {"status": "not_enrolled", "enrollment": null}, "message": "Anda belum terdaftar pada course ini."}
+     * @response 403 {"success": false, "message": "Anda tidak memiliki akses untuk melihat status enrollment ini."}
      */
     public function status(Request $request, Course $course)
     {
@@ -237,6 +299,13 @@ class EnrollmentsController extends Controller
 
     /**
      * @summary Setujui Pendaftaran
+     *
+     * @description Menyetujui permintaan enrollment yang masih pending. Hanya instructor atau admin kursus yang dapat menyetujui.
+     *
+     * Requires: Admin, Instructor (course owner), Superadmin
+     *
+     * @response 200 {"success": true, "data": {"enrollment": {"id": 1, "status": "active", "approved_at": "2024-01-15T10:00:00Z"}}, "message": "Permintaan enrollment disetujui."}
+     * @response 403 {"success": false, "message": "Anda tidak memiliki akses untuk menyetujui enrollment ini."}
      */
     public function approve(Enrollment $enrollment)
     {
@@ -256,6 +325,13 @@ class EnrollmentsController extends Controller
 
     /**
      * @summary Tolak Pendaftaran
+     *
+     * @description Menolak permintaan enrollment yang masih pending. Hanya instructor atau admin kursus yang dapat menolak.
+     *
+     * Requires: Admin, Instructor (course owner), Superadmin
+     *
+     * @response 200 {"success": true, "data": {"enrollment": {"id": 1, "status": "declined"}}, "message": "Permintaan enrollment ditolak."}
+     * @response 403 {"success": false, "message": "Anda tidak memiliki akses untuk menolak enrollment ini."}
      */
     public function decline(Enrollment $enrollment)
     {
@@ -275,6 +351,13 @@ class EnrollmentsController extends Controller
 
     /**
      * @summary Hapus Pendaftaran dari Kursus
+     *
+     * @description Mengeluarkan peserta dari kursus. Hanya instructor atau admin kursus yang dapat mengeluarkan peserta.
+     *
+     * Requires: Admin, Instructor (course owner), Superadmin
+     *
+     * @response 200 {"success": true, "data": {"enrollment": {"id": 1, "status": "removed"}}, "message": "Peserta berhasil dikeluarkan dari course."}
+     * @response 403 {"success": false, "message": "Anda tidak memiliki akses untuk mengeluarkan peserta dari course ini."}
      */
     public function remove(Enrollment $enrollment)
     {

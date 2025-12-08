@@ -29,12 +29,20 @@ class AnnouncementController extends Controller
     /**
      * @summary Daftar Pengumuman
      *
+     * @description Mengambil daftar pengumuman dengan pagination dan filter. Dapat difilter berdasarkan course, priority, dan status baca.
+     *
      * @allowedFilters course_id, priority, unread
      *
      * @allowedSorts created_at, published_at
      *
      * @filterEnum priority low|medium|high
      * @filterEnum unread true|false
+     *
+     * @queryParam page integer Nomor halaman. Example: 1
+     * @queryParam per_page integer Jumlah item per halaman (default: 15). Example: 15
+     *
+     * @response 200 scenario="Success" {"success": true, "message": "Success", "data": [{"id": 1, "title": "Pengumuman Penting", "content": "Isi pengumuman...", "priority": "high", "status": "published", "author": {"id": 1, "name": "Admin"}}], "meta": {"current_page": 1, "last_page": 1, "per_page": 15, "total": 5}}
+     * @response 401 scenario="Unauthorized" {"success": false, "message": "Tidak terotorisasi."}
      */
     public function index(Request $request): JsonResponse
     {
@@ -54,6 +62,13 @@ class AnnouncementController extends Controller
 
     /**
      * @summary Buat Pengumuman Baru
+     *
+     * @description Membuat pengumuman baru. Dapat langsung dipublish atau dijadwalkan. **Memerlukan role: Admin atau Instructor**
+     *
+     * @response 201 scenario="Success" {"success": true, "message": "Pengumuman berhasil dibuat.", "data": {"announcement": {"id": 1, "title": "Pengumuman Baru", "status": "draft", "priority": "medium"}}}
+     * @response 401 scenario="Unauthorized" {"success": false, "message": "Tidak terotorisasi."}
+     * @response 403 scenario="Forbidden" {"success": false, "message": "Anda tidak memiliki akses untuk membuat pengumuman."}
+     * @response 422 scenario="Validation Error" {"success": false, "message": "Validasi gagal.", "errors": {"title": ["Judul wajib diisi."]}}
      */
     public function store(CreateAnnouncementRequest $request): JsonResponse
     {
@@ -89,6 +104,12 @@ class AnnouncementController extends Controller
 
     /**
      * @summary Detail Pengumuman
+     *
+     * @description Mengambil detail pengumuman. Otomatis menandai sebagai dibaca dan menambah view count.
+     *
+     * @response 200 scenario="Success" {"success": true, "data": {"announcement": {"id": 1, "title": "Pengumuman Penting", "content": "Isi lengkap...", "priority": "high", "author": {"id": 1, "name": "Admin"}, "course": null, "revisions": []}}}
+     * @response 403 scenario="Forbidden" {"success": false, "message": "Anda tidak memiliki akses untuk melihat pengumuman ini."}
+     * @response 404 scenario="Not Found" {"success": false, "message": "Pengumuman tidak ditemukan."}
      */
     public function show(int $id): JsonResponse
     {
@@ -108,6 +129,13 @@ class AnnouncementController extends Controller
 
     /**
      * @summary Perbarui Pengumuman
+     *
+     * @description Memperbarui pengumuman. **Memerlukan role: Admin atau Instructor (author)**
+     *
+     * @response 200 scenario="Success" {"success": true, "message": "Pengumuman berhasil diperbarui.", "data": {"announcement": {"id": 1, "title": "Pengumuman Updated"}}}
+     * @response 401 scenario="Unauthorized" {"success": false, "message": "Tidak terotorisasi."}
+     * @response 403 scenario="Forbidden" {"success": false, "message": "Anda tidak memiliki akses untuk memperbarui pengumuman ini."}
+     * @response 404 scenario="Not Found" {"success": false, "message": "Pengumuman tidak ditemukan."}
      */
     public function update(UpdateContentRequest $request, int $id): JsonResponse
     {
@@ -133,6 +161,13 @@ class AnnouncementController extends Controller
 
     /**
      * @summary Hapus Pengumuman
+     *
+     * @description Menghapus pengumuman. **Memerlukan role: Admin atau Instructor (author)**
+     *
+     * @response 200 scenario="Success" {"success": true, "message": "Pengumuman berhasil dihapus.", "data": []}
+     * @response 401 scenario="Unauthorized" {"success": false, "message": "Tidak terotorisasi."}
+     * @response 403 scenario="Forbidden" {"success": false, "message": "Anda tidak memiliki akses untuk menghapus pengumuman ini."}
+     * @response 404 scenario="Not Found" {"success": false, "message": "Pengumuman tidak ditemukan."}
      */
     public function destroy(int $id): JsonResponse
     {
@@ -147,6 +182,13 @@ class AnnouncementController extends Controller
 
     /**
      * @summary Publikasikan Pengumuman
+     *
+     * @description Mempublikasikan pengumuman agar dapat dilihat oleh target audience. **Memerlukan role: Admin atau Instructor (author)**
+     *
+     * @response 200 scenario="Success" {"success": true, "message": "Pengumuman berhasil dipublikasikan.", "data": {"announcement": {"id": 1, "status": "published", "published_at": "2024-01-15T10:00:00Z"}}}
+     * @response 401 scenario="Unauthorized" {"success": false, "message": "Tidak terotorisasi."}
+     * @response 403 scenario="Forbidden" {"success": false, "message": "Anda tidak memiliki akses untuk mempublikasikan pengumuman ini."}
+     * @response 404 scenario="Not Found" {"success": false, "message": "Pengumuman tidak ditemukan."}
      */
     public function publish(int $id): JsonResponse
     {
@@ -164,6 +206,14 @@ class AnnouncementController extends Controller
 
     /**
      * @summary Jadwalkan Pengumuman
+     *
+     * @description Menjadwalkan pengumuman untuk dipublikasikan pada waktu tertentu. **Memerlukan role: Admin atau Instructor (author)**
+     *
+     * @response 200 scenario="Success" {"success": true, "message": "Pengumuman berhasil dijadwalkan.", "data": {"announcement": {"id": 1, "status": "scheduled", "scheduled_at": "2024-01-20T10:00:00Z"}}}
+     * @response 401 scenario="Unauthorized" {"success": false, "message": "Tidak terotorisasi."}
+     * @response 403 scenario="Forbidden" {"success": false, "message": "Anda tidak memiliki akses untuk menjadwalkan pengumuman ini."}
+     * @response 404 scenario="Not Found" {"success": false, "message": "Pengumuman tidak ditemukan."}
+     * @response 422 scenario="Invalid Date" {"success": false, "message": "Waktu publikasi harus di masa depan."}
      */
     public function schedule(ScheduleContentRequest $request, int $id): JsonResponse
     {
@@ -188,6 +238,12 @@ class AnnouncementController extends Controller
 
     /**
      * @summary Tandai Pengumuman Dibaca
+     *
+     * @description Menandai pengumuman sebagai sudah dibaca oleh pengguna saat ini.
+     *
+     * @response 200 scenario="Success" {"success": true, "message": "Pengumuman ditandai sudah dibaca.", "data": []}
+     * @response 401 scenario="Unauthorized" {"success": false, "message": "Tidak terotorisasi."}
+     * @response 404 scenario="Not Found" {"success": false, "message": "Pengumuman tidak ditemukan."}
      */
     public function markAsRead(int $id): JsonResponse
     {

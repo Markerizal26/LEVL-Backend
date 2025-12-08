@@ -28,12 +28,20 @@ class LessonController extends Controller
     /**
      * @summary Daftar Lesson
      *
+     * @description Mengambil daftar lesson dalam sebuah unit kompetensi. Student harus enrolled di course untuk mengakses.
+     *
      * @allowedFilters status, content_type
      *
      * @allowedSorts order, title, created_at
      *
+     * @allowedIncludes blocks, unit
+     *
      * @filterEnum status draft|published
      * @filterEnum content_type markdown|video|link
+     *
+     * @response 200 scenario="Success" {"success": true, "message": "Success", "data": [{"id": 1, "title": "Lesson 1: Pengenalan", "content_type": "markdown", "order": 1, "status": "published", "duration_minutes": 15}], "meta": {"current_page": 1, "last_page": 1, "per_page": 15, "total": 5}}
+     * @response 403 scenario="Not Enrolled" {"success": false, "message": "Anda tidak memiliki akses untuk melihat lessons di course ini."}
+     * @response 404 scenario="Unit Not Found" {"success": false, "message": "Unit tidak ditemukan di course ini."}
      */
     public function index(Request $request, Course $course, Unit $unit)
     {
@@ -78,6 +86,13 @@ class LessonController extends Controller
 
     /**
      * @summary Buat Lesson Baru
+     *
+     * @description Membuat lesson baru dalam sebuah unit. **Memerlukan role: Admin atau Superadmin (owner course)**
+     *
+     * @response 201 scenario="Success" {"success": true, "message": "Lesson berhasil dibuat.", "data": {"lesson": {"id": 1, "title": "Lesson 1", "content_type": "markdown", "order": 1, "status": "draft"}}}
+     * @response 401 scenario="Unauthorized" {"success": false, "message": "Tidak terotorisasi."}
+     * @response 403 scenario="Forbidden" {"success": false, "message": "Anda hanya dapat membuat lesson untuk course yang Anda buat atau course yang Anda kelola sebagai admin."}
+     * @response 404 scenario="Unit Not Found" {"success": false, "message": "Unit tidak ditemukan di course ini."}
      */
     public function store(LessonRequest $request, Course $course, Unit $unit)
     {
@@ -114,6 +129,13 @@ class LessonController extends Controller
 
     /**
      * @summary Detail Lesson
+     *
+     * @description Mengambil detail lesson termasuk content blocks. Student harus enrolled dan memenuhi prasyarat untuk mengakses.
+     *
+     * @response 200 scenario="Success" {"success": true, "data": {"lesson": {"id": 1, "title": "Lesson 1", "content_type": "markdown", "content": "# Pengenalan...", "duration_minutes": 15, "blocks": []}}}
+     * @response 403 scenario="Locked" {"success": false, "message": "Lesson masih terkunci karena prasyarat belum selesai."}
+     * @response 403 scenario="Not Enrolled" {"success": false, "message": "Anda belum terdaftar pada course ini."}
+     * @response 404 scenario="Not Found" {"success": false, "message": "Lesson tidak ditemukan."}
      */
     public function show(Course $course, Unit $unit, Lesson $lesson)
     {
@@ -171,6 +193,13 @@ class LessonController extends Controller
 
     /**
      * @summary Perbarui Lesson
+     *
+     * @description Memperbarui data lesson. **Memerlukan role: Admin atau Superadmin (owner course)**
+     *
+     * @response 200 scenario="Success" {"success": true, "message": "Lesson berhasil diperbarui.", "data": {"lesson": {"id": 1, "title": "Lesson 1 Updated"}}}
+     * @response 401 scenario="Unauthorized" {"success": false, "message": "Tidak terotorisasi."}
+     * @response 403 scenario="Forbidden" {"success": false, "message": "Anda tidak memiliki akses untuk mengubah lesson ini."}
+     * @response 404 scenario="Not Found" {"success": false, "message": "Lesson tidak ditemukan."}
      */
     public function update(LessonRequest $request, Course $course, Unit $unit, Lesson $lesson)
     {
@@ -193,6 +222,13 @@ class LessonController extends Controller
 
     /**
      * @summary Hapus Lesson
+     *
+     * @description Menghapus lesson beserta semua blocks di dalamnya. **Memerlukan role: Admin atau Superadmin (owner course)**
+     *
+     * @response 200 scenario="Success" {"success": true, "message": "Lesson berhasil dihapus.", "data": []}
+     * @response 401 scenario="Unauthorized" {"success": false, "message": "Tidak terotorisasi."}
+     * @response 403 scenario="Forbidden" {"success": false, "message": "Anda tidak memiliki akses untuk menghapus lesson ini."}
+     * @response 404 scenario="Not Found" {"success": false, "message": "Lesson tidak ditemukan."}
      */
     public function destroy(Course $course, Unit $unit, Lesson $lesson)
     {
@@ -214,6 +250,13 @@ class LessonController extends Controller
 
     /**
      * @summary Publish Lesson
+     *
+     * @description Mempublish lesson agar dapat diakses oleh student. **Memerlukan role: Admin atau Superadmin (owner course)**
+     *
+     * @response 200 scenario="Success" {"success": true, "message": "Lesson berhasil dipublish.", "data": {"lesson": {"id": 1, "status": "published"}}}
+     * @response 401 scenario="Unauthorized" {"success": false, "message": "Tidak terotorisasi."}
+     * @response 403 scenario="Forbidden" {"success": false, "message": "Anda tidak memiliki akses untuk mempublish lesson ini."}
+     * @response 404 scenario="Not Found" {"success": false, "message": "Lesson tidak ditemukan."}
      */
     public function publish(Course $course, Unit $unit, Lesson $lesson)
     {
@@ -235,6 +278,13 @@ class LessonController extends Controller
 
     /**
      * @summary Unpublish Lesson
+     *
+     * @description Meng-unpublish lesson. **Memerlukan role: Admin atau Superadmin (owner course)**
+     *
+     * @response 200 scenario="Success" {"success": true, "message": "Lesson berhasil diunpublish.", "data": {"lesson": {"id": 1, "status": "draft"}}}
+     * @response 401 scenario="Unauthorized" {"success": false, "message": "Tidak terotorisasi."}
+     * @response 403 scenario="Forbidden" {"success": false, "message": "Anda tidak memiliki akses untuk unpublish lesson ini."}
+     * @response 404 scenario="Not Found" {"success": false, "message": "Lesson tidak ditemukan."}
      */
     public function unpublish(Course $course, Unit $unit, Lesson $lesson)
     {

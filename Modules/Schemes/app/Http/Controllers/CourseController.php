@@ -27,13 +27,24 @@ class CourseController extends Controller
     /**
      * @summary Daftar Kursus
      *
+     * @description Mengambil daftar kursus dengan pagination, filter, dan sorting. Jika filter status=published, hanya menampilkan kursus yang sudah dipublish.
+     *
      * @allowedFilters filter[search], filter[status], filter[level_tag], filter[type], filter[category_id], filter[tag]
      *
      * @allowedSorts id, code, title, created_at, updated_at, published_at
      *
+     * @allowedIncludes tags, outcomes, units, instructor
+     *
      * @filterEnum status draft|published|archived
      * @filterEnum level_tag dasar|menengah|mahir
      * @filterEnum type okupasi|kluster
+     *
+     * @queryParam page integer Nomor halaman. Example: 1
+     * @queryParam per_page integer Jumlah item per halaman (default: 15). Example: 15
+     * @queryParam search string Kata kunci pencarian. Example: pemrograman
+     *
+     * @response 200 scenario="Success" {"success": true, "message": "Success", "data": [{"id": 1, "code": "CS101", "title": "Pemrograman Dasar", "slug": "pemrograman-dasar", "status": "published", "level_tag": "dasar", "type": "okupasi"}], "meta": {"current_page": 1, "last_page": 5, "per_page": 15, "total": 75}, "links": {"first": "...", "last": "...", "prev": null, "next": "..."}}
+     * @response 401 scenario="Unauthorized" {"success": false, "message": "Tidak terotorisasi."}
      */
     public function index(Request $request)
     {
@@ -49,6 +60,13 @@ class CourseController extends Controller
 
     /**
      * @summary Buat Kursus Baru
+     *
+     * @description Membuat kursus baru. Mendukung upload thumbnail dan banner. **Memerlukan role: Admin atau Instructor**
+     *
+     * @response 201 scenario="Success" {"success": true, "message": "Course berhasil dibuat.", "data": {"course": {"id": 1, "code": "CS101", "title": "Pemrograman Dasar", "slug": "pemrograman-dasar", "status": "draft"}}}
+     * @response 401 scenario="Unauthorized" {"success": false, "message": "Tidak terotorisasi."}
+     * @response 403 scenario="Forbidden" {"success": false, "message": "Anda tidak memiliki akses untuk membuat kursus."}
+     * @response 422 scenario="Validation Error" {"success": false, "message": "Validasi gagal.", "errors": {"code": ["Kode sudah digunakan."]}}
      */
     public function store(CourseRequest $request)
     {
@@ -76,6 +94,11 @@ class CourseController extends Controller
 
     /**
      * @summary Detail Kursus
+     *
+     * @description Mengambil detail kursus berdasarkan ID atau slug, termasuk tags dan outcomes.
+     *
+     * @response 200 scenario="Success" {"success": true, "data": {"course": {"id": 1, "code": "CS101", "title": "Pemrograman Dasar", "slug": "pemrograman-dasar", "description": "Kursus dasar pemrograman", "status": "published", "tags": [{"id": 1, "name": "Programming"}], "outcomes": [{"id": 1, "description": "Memahami dasar pemrograman"}]}}}
+     * @response 404 scenario="Not Found" {"success": false, "message": "Course tidak ditemukan."}
      */
     public function show(Course $course)
     {
@@ -84,6 +107,14 @@ class CourseController extends Controller
 
     /**
      * @summary Perbarui Kursus
+     *
+     * @description Memperbarui data kursus. Mendukung upload thumbnail dan banner baru. **Memerlukan role: Admin atau Instructor (owner)**
+     *
+     * @response 200 scenario="Success" {"success": true, "message": "Course berhasil diperbarui.", "data": {"course": {"id": 1, "code": "CS101", "title": "Pemrograman Dasar Updated", "slug": "pemrograman-dasar", "status": "draft"}}}
+     * @response 401 scenario="Unauthorized" {"success": false, "message": "Tidak terotorisasi."}
+     * @response 403 scenario="Forbidden" {"success": false, "message": "Anda tidak memiliki akses untuk memperbarui kursus ini."}
+     * @response 404 scenario="Not Found" {"success": false, "message": "Course tidak ditemukan."}
+     * @response 422 scenario="Validation Error" {"success": false, "message": "Validasi gagal.", "errors": {"code": ["Kode sudah digunakan."]}}
      */
     public function update(CourseRequest $request, Course $course)
     {
@@ -110,6 +141,13 @@ class CourseController extends Controller
 
     /**
      * @summary Hapus Kursus
+     *
+     * @description Menghapus kursus. **Memerlukan role: Admin atau Instructor (owner)**
+     *
+     * @response 200 scenario="Success" {"success": true, "message": "Course berhasil dihapus.", "data": []}
+     * @response 401 scenario="Unauthorized" {"success": false, "message": "Tidak terotorisasi."}
+     * @response 403 scenario="Forbidden" {"success": false, "message": "Anda tidak memiliki akses untuk menghapus kursus ini."}
+     * @response 404 scenario="Not Found" {"success": false, "message": "Course tidak ditemukan."}
      */
     public function destroy(Course $course)
     {
@@ -120,6 +158,13 @@ class CourseController extends Controller
 
     /**
      * @summary Publish Kursus
+     *
+     * @description Mempublish kursus agar dapat diakses oleh student. **Memerlukan role: Admin atau Instructor (owner)**
+     *
+     * @response 200 scenario="Success" {"success": true, "message": "Course berhasil dipublish.", "data": {"course": {"id": 1, "status": "published", "published_at": "2024-01-15T10:00:00Z"}}}
+     * @response 401 scenario="Unauthorized" {"success": false, "message": "Tidak terotorisasi."}
+     * @response 403 scenario="Forbidden" {"success": false, "message": "Anda tidak memiliki akses untuk mempublish course ini."}
+     * @response 404 scenario="Not Found" {"success": false, "message": "Course tidak ditemukan."}
      */
     public function publish(Course $course)
     {
@@ -136,6 +181,13 @@ class CourseController extends Controller
 
     /**
      * @summary Unpublish Kursus
+     *
+     * @description Meng-unpublish kursus sehingga tidak dapat diakses oleh student baru. **Memerlukan role: Admin atau Instructor (owner)**
+     *
+     * @response 200 scenario="Success" {"success": true, "message": "Course berhasil diunpublish.", "data": {"course": {"id": 1, "status": "draft", "published_at": null}}}
+     * @response 401 scenario="Unauthorized" {"success": false, "message": "Tidak terotorisasi."}
+     * @response 403 scenario="Forbidden" {"success": false, "message": "Anda tidak memiliki akses untuk unpublish course ini."}
+     * @response 404 scenario="Not Found" {"success": false, "message": "Course tidak ditemukan."}
      */
     public function unpublish(Course $course)
     {

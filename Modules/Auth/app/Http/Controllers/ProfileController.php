@@ -19,6 +19,11 @@ class ProfileController extends Controller
 
     /**
      * @summary Ambil Data Profil
+     *
+     * @description Mengambil data profil lengkap pengguna yang sedang login termasuk statistik dan achievements.
+     *
+     * @response 200 scenario="Success" {"success": true, "data": {"id": 1, "name": "John Doe", "email": "john@example.com", "username": "johndoe", "avatar_url": "https://example.com/avatar.jpg", "bio": "Student", "statistics": {"courses_enrolled": 5, "courses_completed": 2}}}
+     * @response 401 scenario="Unauthorized" {"success": false, "message": "Tidak terotorisasi."}
      */
     public function index(Request $request): JsonResponse
     {
@@ -33,6 +38,12 @@ class ProfileController extends Controller
 
     /**
      * @summary Perbarui Data Profil
+     *
+     * @description Memperbarui data profil pengguna (nama, username, bio, dll).
+     *
+     * @response 200 scenario="Success" {"success": true, "message": "Profile updated successfully.", "data": {"id": 1, "name": "John Updated", "email": "john@example.com", "username": "johnupdated"}}
+     * @response 401 scenario="Unauthorized" {"success": false, "message": "Tidak terotorisasi."}
+     * @response 422 scenario="Validation Error" {"success": false, "message": "Username sudah digunakan."}
      */
     public function update(UpdateProfileRequest $request): JsonResponse
     {
@@ -55,6 +66,12 @@ class ProfileController extends Controller
 
     /**
      * @summary Unggah Foto Profil
+     *
+     * @description Mengunggah foto profil baru. Format yang didukung: JPEG, PNG, JPG, GIF. Maksimal 2MB.
+     *
+     * @response 200 scenario="Success" {"success": true, "message": "Avatar uploaded successfully.", "data": {"avatar_url": "https://example.com/storage/avatars/user-1.jpg"}}
+     * @response 401 scenario="Unauthorized" {"success": false, "message": "Tidak terotorisasi."}
+     * @response 422 scenario="Validation Error" {"success": false, "message": "The avatar must be an image."}
      */
     public function uploadAvatar(Request $request): JsonResponse
     {
@@ -83,6 +100,12 @@ class ProfileController extends Controller
 
     /**
      * @summary Hapus Foto Profil
+     *
+     * @description Menghapus foto profil pengguna dan mengembalikan ke avatar default.
+     *
+     * @response 200 scenario="Success" {"success": true, "message": "Avatar deleted successfully."}
+     * @response 401 scenario="Unauthorized" {"success": false, "message": "Tidak terotorisasi."}
+     * @response 422 scenario="Error" {"success": false, "message": "Gagal menghapus avatar."}
      */
     public function deleteAvatar(Request $request): JsonResponse
     {
