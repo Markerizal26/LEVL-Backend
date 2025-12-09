@@ -7,6 +7,7 @@ use App\Support\EnrollmentKeyHasher;
 use Dedoc\Scramble\Scramble;
 use Dedoc\Scramble\Support\Generator\OpenApi;
 use Dedoc\Scramble\Support\Generator\SecurityScheme;
+use Dedoc\Scramble\Support\Generator\Server;
 use Illuminate\Cache\RateLimiting\Limit;
 use Illuminate\Http\Request;
 use Illuminate\Routing\Route;
@@ -117,10 +118,16 @@ class AppServiceProvider extends ServiceProvider
 
     /**
      * Configure tag groups for better navigation in API documentation.
+     *
+     * Note: x-tagGroups is a Redoc/Scalar extension for grouping tags in the sidebar.
+     * Since Scramble's OpenApi class may not have addExtension method in all versions,
+     * we set it directly on the extensions property if available.
      */
     private function configureTagGroups(OpenApi $openApi): void
     {
-        $openApi->addExtension('x-tagGroups', [
+        // Tag groups for better organization in Scalar UI
+        // This extension is supported by Scalar and Redoc
+        $tagGroups = [
             [
                 'name' => 'Autentikasi & Pengguna',
                 'tags' => ['Autentikasi', 'Profil Pengguna', 'Manajemen Pengguna'],
@@ -145,7 +152,12 @@ class AppServiceProvider extends ServiceProvider
                 'name' => 'Administrasi',
                 'tags' => ['Pendaftaran Kursus', 'Laporan & Statistik'],
             ],
-        ]);
+        ];
+
+        // Try to set extension if the property exists
+        if (property_exists($openApi, 'extensions')) {
+            $openApi->extensions['x-tagGroups'] = $tagGroups;
+        }
     }
 
     /**

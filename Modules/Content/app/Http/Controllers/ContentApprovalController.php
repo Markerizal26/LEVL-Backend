@@ -24,7 +24,14 @@ class ContentApprovalController extends Controller
     ) {}
 
     /**
-     * Submit content for review.
+     * Ajukan konten untuk review
+     *
+     *
+     * @summary Ajukan konten untuk review
+     *
+     * @response 200 scenario="Success" {"success":true,"message":"Success","data":{"id":1,"name":"Example ContentApproval"}}
+     * @response 401 scenario="Unauthorized" {"success":false,"message":"Tidak terotorisasi."}
+     * @authenticated
      */
     public function submit(Request $request, string $type, int $id): JsonResponse
     {
@@ -46,7 +53,14 @@ class ContentApprovalController extends Controller
     }
 
     /**
-     * Approve content.
+     * Setujui konten
+     *
+     *
+     * @summary Setujui konten
+     *
+     * @response 200 scenario="Success" {"success":true,"message":"Success","data":{"id":1,"name":"Example ContentApproval"}}
+     * @response 401 scenario="Unauthorized" {"success":false,"message":"Tidak terotorisasi."}
+     * @authenticated
      */
     public function approve(Request $request, string $type, int $id): JsonResponse
     {
@@ -76,7 +90,14 @@ class ContentApprovalController extends Controller
     }
 
     /**
-     * Reject content.
+     * Tolak konten
+     *
+     *
+     * @summary Tolak konten
+     *
+     * @response 200 scenario="Success" {"success":true,"message":"Success","data":{"id":1,"name":"Example ContentApproval"}}
+     * @response 401 scenario="Unauthorized" {"success":false,"message":"Tidak terotorisasi."}
+     * @authenticated
      */
     public function reject(Request $request, string $type, int $id): JsonResponse
     {
@@ -106,7 +127,14 @@ class ContentApprovalController extends Controller
     }
 
     /**
-     * Get content pending review.
+     * Mengambil konten yang menunggu review
+     *
+     *
+     * @summary Mengambil konten yang menunggu review
+     *
+     * @response 200 scenario="Success" {"success":true,"message":"Success","data":{"id":1,"name":"Example ContentApproval"}}
+     * @response 401 scenario="Unauthorized" {"success":false,"message":"Tidak terotorisasi."}
+     * @authenticated
      */
     public function pendingReview(Request $request): JsonResponse
     {

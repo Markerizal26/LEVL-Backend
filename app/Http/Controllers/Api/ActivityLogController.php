@@ -18,7 +18,9 @@ class ActivityLogController extends Controller
     ) {}
 
     /**
-     * @summary Daftar Log Aktivitas
+     * Daftar Log Aktivitas
+     *
+     * @authenticated
      */
     public function index(Request $request): JsonResponse
     {
@@ -29,7 +31,9 @@ class ActivityLogController extends Controller
     }
 
     /**
-     * @summary Detail Log Aktivitas
+     * Detail Log Aktivitas
+     *
+     * @authenticated
      */
     public function show(int $id): JsonResponse
     {

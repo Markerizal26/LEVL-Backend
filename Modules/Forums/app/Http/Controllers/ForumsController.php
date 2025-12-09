@@ -11,7 +11,14 @@ use Illuminate\Http\Request;
 class ForumsController extends Controller
 {
     /**
-     * Display a listing of the resource.
+     * Menampilkan daftar data
+     *
+     *
+     * @summary Menampilkan daftar data
+     *
+     * @response 200 scenario="Success" {"success":true,"message":"Success","data":[{"id":1,"name":"Example Forums"}],"meta":{"current_page":1,"last_page":5,"per_page":15,"total":75},"links":{"first":"...","last":"...","prev":null,"next":"..."}}
+     * @response 401 scenario="Unauthorized" {"success":false,"message":"Tidak terotorisasi."}
+     * @authenticated
      */
     public function index()
     {
@@ -19,7 +26,14 @@ class ForumsController extends Controller
     }
 
     /**
-     * Show the form for creating a new resource.
+     * Menampilkan form untuk membuat data baru
+     *
+     *
+     * @summary Menampilkan form untuk membuat data baru
+     *
+     * @response 200 scenario="Success" {"success":true,"message":"Success","data":{"id":1,"name":"Example Forums"}}
+     * @response 401 scenario="Unauthorized" {"success":false,"message":"Tidak terotorisasi."}
+     * @authenticated
      */
     public function create()
     {
@@ -27,12 +41,28 @@ class ForumsController extends Controller
     }
 
     /**
-     * Store a newly created resource in storage.
+     * Menyimpan data baru
+     *
+     *
+     * @summary Menyimpan data baru
+     *
+     * @response 201 scenario="Success" {"success":true,"message":"Forums berhasil dibuat.","data":{"id":1,"name":"New Forums"}}
+     * @response 401 scenario="Unauthorized" {"success":false,"message":"Tidak terotorisasi."}
+     * @response 422 scenario="Validation Error" {"success":false,"message":"Validasi gagal.","errors":{"field":["Field wajib diisi."]}}
+     * @authenticated
      */
     public function store(Request $request) {}
 
     /**
-     * Show the specified resource.
+     * Menampilkan data tertentu
+     *
+     *
+     * @summary Menampilkan data tertentu
+     *
+     * @response 200 scenario="Success" {"success":true,"message":"Success","data":{"id":1,"name":"Example Forums"}}
+     * @response 401 scenario="Unauthorized" {"success":false,"message":"Tidak terotorisasi."}
+     * @response 404 scenario="Not Found" {"success":false,"message":"Forums tidak ditemukan."}
+     * @authenticated
      */
     public function show($id)
     {
@@ -40,7 +70,14 @@ class ForumsController extends Controller
     }
 
     /**
-     * Show the form for editing the specified resource.
+     * Menampilkan form untuk edit data
+     *
+     *
+     * @summary Menampilkan form untuk edit data
+     *
+     * @response 200 scenario="Success" {"success":true,"message":"Success","data":{"id":1,"name":"Example Forums"}}
+     * @response 401 scenario="Unauthorized" {"success":false,"message":"Tidak terotorisasi."}
+     * @authenticated
      */
     public function edit($id)
     {
@@ -48,12 +85,29 @@ class ForumsController extends Controller
     }
 
     /**
-     * Update the specified resource in storage.
+     * Memperbarui data
+     *
+     *
+     * @summary Memperbarui data
+     *
+     * @response 200 scenario="Success" {"success":true,"message":"Forums berhasil diperbarui.","data":{"id":1,"name":"Updated Forums"}}
+     * @response 401 scenario="Unauthorized" {"success":false,"message":"Tidak terotorisasi."}
+     * @response 404 scenario="Not Found" {"success":false,"message":"Forums tidak ditemukan."}
+     * @response 422 scenario="Validation Error" {"success":false,"message":"Validasi gagal.","errors":{"field":["Field wajib diisi."]}}
+     * @authenticated
      */
     public function update(Request $request, $id) {}
 
     /**
-     * Remove the specified resource from storage.
+     * Menghapus data
+     *
+     *
+     * @summary Menghapus data
+     *
+     * @response 200 scenario="Success" {"success":true,"message":"Forums berhasil dihapus.","data":[]}
+     * @response 401 scenario="Unauthorized" {"success":false,"message":"Tidak terotorisasi."}
+     * @response 404 scenario="Not Found" {"success":false,"message":"Forums tidak ditemukan."}
+     * @authenticated
      */
     public function destroy($id) {}
 }

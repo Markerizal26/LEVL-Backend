@@ -21,7 +21,14 @@ class SearchController extends Controller
     }
 
     /**
+     * Cari Kursus
+     *
+     *
      * @summary Cari Kursus
+     *
+     * @response 200 scenario="Success" {"success":true,"message":"Success","data":{"id":1,"name":"Example Search"}}
+     * @response 401 scenario="Unauthorized" {"success":false,"message":"Tidak terotorisasi."}
+     * @authenticated
      */
     public function search(Request $request): JsonResponse
     {
@@ -106,7 +113,14 @@ class SearchController extends Controller
     }
 
     /**
+     * Saran Pencarian
+     *
+     *
      * @summary Saran Pencarian
+     *
+     * @response 200 scenario="Success" {"success":true,"message":"Success","data":{"id":1,"name":"Example Search"}}
+     * @response 401 scenario="Unauthorized" {"success":false,"message":"Tidak terotorisasi."}
+     * @authenticated
      */
     public function autocomplete(Request $request): JsonResponse
     {
@@ -122,7 +136,14 @@ class SearchController extends Controller
     }
 
     /**
+     * Riwayat Pencarian
+     *
+     *
      * @summary Riwayat Pencarian
+     *
+     * @response 200 scenario="Success" {"success":true,"message":"Success","data":{"id":1,"name":"Example Search"}}
+     * @response 401 scenario="Unauthorized" {"success":false,"message":"Tidak terotorisasi."}
+     * @authenticated
      */
     public function getSearchHistory(Request $request): JsonResponse
     {
@@ -140,7 +161,14 @@ class SearchController extends Controller
     }
 
     /**
+     * Hapus Riwayat Pencarian
+     *
+     *
      * @summary Hapus Riwayat Pencarian
+     *
+     * @response 200 scenario="Success" {"success":true,"message":"Success","data":{"id":1,"name":"Example Search"}}
+     * @response 401 scenario="Unauthorized" {"success":false,"message":"Tidak terotorisasi."}
+     * @authenticated
      */
     public function clearSearchHistory(Request $request): JsonResponse
     {

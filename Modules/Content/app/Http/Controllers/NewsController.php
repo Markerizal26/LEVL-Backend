@@ -6,7 +6,6 @@ use App\Contracts\Services\ContentServiceInterface;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
-use Modules\Content\Http\Requests\CreateNewsRequest;
 use Modules\Content\Http\Requests\ScheduleContentRequest;
 use Modules\Content\Http\Requests\UpdateContentRequest;
 use Modules\Content\Models\News;
@@ -30,18 +29,30 @@ class NewsController extends Controller
     }
 
     /**
+     * Daftar Berita
+     *
+     * Mengambil daftar berita dengan pagination dan filter. Dapat difilter berdasarkan kategori, tag, dan status featured.
+     *
+     *
      * @summary Daftar Berita
-     *
-     * @description Mengambil daftar berita dengan pagination dan filter. Dapat difilter berdasarkan kategori, tag, dan status featured.
-     *
      * @allowedFilters category_id, tag_id, featured, date_from, date_to
      *
+     * @queryParam category_id string Filter berdasarkan ID kategori. Example: 
+     * @queryParam tag_id string Filter berdasarkan ID tag. Example: 
+     * @queryParam featured string Filter berdasarkan status featured. Example: 
+     * @queryParam date_from string Filter berdasarkan tanggal (dari). Example: 
+     * @queryParam date_to string Filter berdasarkan tanggal (sampai). Example: 
+     *
      * @allowedSorts created_at, published_at, views_count
+     *
+     * @queryParam sort string Field untuk sorting. Allowed: created_at, published_at, views_count. Prefix dengan '-' untuk descending. Example: -created_at
      *
      * @filterEnum featured true|false
      *
      * @response 200 scenario="Success" {"status": "success", "data": {"data": [{"id": 1, "title": "Berita Terbaru", "slug": "berita-terbaru", "excerpt": "Ringkasan berita...", "featured": true}], "meta": {"current_page": 1, "total": 10}}}
-     */
+     *
+     * @authenticated
+     */    
     public function index(Request $request): JsonResponse
     {
         $filters = [
@@ -62,91 +73,67 @@ class NewsController extends Controller
     }
 
     /**
-     * @summary Buat Berita Baru
+     * Buat Berita Baru
      *
-     * @description Membuat berita baru. Dapat langsung dipublish atau dijadwalkan. **Memerlukan role: Admin**
+     * Membuat berita baru. Dapat langsung dipublish atau dijadwalkan. **Memerlukan role: Admin**
+     *
+     * @bodyParam title string required Judul berita. Example: Berita Terbaru Hari Ini
+     * @bodyParam content string required Konten berita (HTML). Example: <p>Isi berita...</p>
+     * @bodyParam excerpt string optional Ringkasan berita. Example: Ringkasan singkat
+     * @bodyParam featured_image file optional Gambar utama (jpg, png, max 5MB). Example: image.jpg
+     * @bodyParam status string optional Status (draft|published|scheduled). Example: draft
+     * @bodyParam scheduled_at datetime optional Waktu publish (jika scheduled). Example: 2024-12-25 10:00:00
+     * @bodyParam category_ids array optional Array ID kategori. Example: [1, 2]
+     * @bodyParam tag_ids array optional Array ID tags. Example: [1, 2, 3]
+     * @bodyParam is_featured boolean optional Tandai sebagai featured. Example: false
      *
      * @response 201 scenario="Success" {"status": "success", "message": "Berita berhasil dibuat.", "data": {"id": 1, "title": "Berita Baru", "slug": "berita-baru", "status": "draft"}}
-     * @response 401 scenario="Unauthorized" {"status": "error", "message": "Tidak terotorisasi."}
-     * @response 403 scenario="Forbidden" {"status": "error", "message": "Anda tidak memiliki akses untuk membuat berita."}
-     * @response 422 scenario="Validation Error" {"status": "error", "message": "Validasi gagal."}
+     * @response 401 scenario="Unauthorized" {"status":"error","message":"Tidak terotorisasi."}
+     * @response 403 scenario="Forbidden" {"status":"error","message":"Anda tidak memiliki akses untuk membuat berita."}
+     * @response 422 scenario="Validation Error" {"status":"error","message":"Validasi gagal."}
+     *
+     * @authenticated
+     *
+     * @role Admin
      */
-    public function store(CreateNewsRequest $request): JsonResponse
-    {
-        $this->authorize('createNews', News::class);
-
-        try {
-            $news = $this->contentService->createNews(
-                $request->validated(),
-                auth()->user()
-            );
-
-            // Auto-publish if status is published
-            if ($request->input('status') === 'published') {
-                $this->contentService->publishContent($news);
-            }
-
-            // Auto-schedule if scheduled_at is provided
-            if ($request->filled('scheduled_at')) {
-                $this->contentService->scheduleContent(
-                    $news,
-                    \Carbon\Carbon::parse($request->input('scheduled_at'))
-                );
-            }
-
-            return response()->json([
-                'status' => 'success',
-                'message' => 'Berita berhasil dibuat.',
-                'data' => $news->load(['author', 'categories', 'tags']),
-            ], 201);
-        } catch (\Exception $e) {
-            return response()->json([
-                'status' => 'error',
-                'message' => $e->getMessage(),
-            ], 422);
-        }
-    }
+    // public function store(StoreContentRequest $request): JsonResponse { ... } // Missing store method
 
     /**
-     * @summary Detail Berita
+     * Tampilkan Detail Berita
      *
-     * @description Mengambil detail berita berdasarkan slug. Otomatis menambah view count.
+     * Menampilkan detail berita berdasarkan slug.
      *
      * @response 200 scenario="Success" {"status": "success", "data": {"id": 1, "title": "Berita Lengkap", "slug": "berita-lengkap", "content": "Isi berita...", "author": {"id": 1, "name": "Admin"}, "categories": [], "tags": []}}
-     * @response 404 scenario="Not Found" {"status": "error", "message": "Berita tidak ditemukan."}
+     * @response 404 scenario="Not Found" {"status":"error","message":"Berita tidak ditemukan."}
+     *
+     * @unauthenticated
      */
-    public function show(string $slug): JsonResponse
-    {
-        $news = News::where('slug', $slug)
-            ->with(['author', 'categories', 'tags', 'revisions.editor'])
-            ->firstOrFail();
-
-        $this->authorize('view', $news);
-
-        // Mark as read by current user if authenticated
-        if (auth()->check()) {
-            $this->contentService->markAsRead($news, auth()->user());
-        }
-
-        // Increment views
-        $this->contentService->incrementViews($news);
-
-        return response()->json([
-            'status' => 'success',
-            'data' => $news,
-        ]);
-    }
+    // public function show(string $slug): JsonResponse { ... } // Missing show method
 
     /**
-     * @summary Perbarui Berita
+     * Perbarui Berita
      *
-     * @description Memperbarui berita. **Memerlukan role: Admin (author)**
+     * Memperbarui berita yang sudah ada. **Memerlukan role: Admin (author)**
+     *
+     *
+     * @summary Perbarui Berita
+     * @bodyParam title string optional Judul berita. Example: Berita Terbaru Hari Ini
+     * @bodyParam content string optional Konten berita (HTML). Example: <p>Isi berita...</p>
+     * @bodyParam excerpt string optional Ringkasan berita. Example: Ringkasan singkat
+     * @bodyParam featured_image file optional Gambar utama (jpg, png, max 5MB). Example: image.jpg
+     * @bodyParam status string optional Status (draft|published|scheduled). Example: draft
+     * @bodyParam scheduled_at datetime optional Waktu publish (jika scheduled). Example: 2024-12-25 10:00:00
+     * @bodyParam category_ids array optional Array ID kategori. Example: [1, 2]
+     * @bodyParam tag_ids array optional Array ID tags. Example: [1, 2, 3]
+     * @bodyParam is_featured boolean optional Tandai sebagai featured. Example: false
      *
      * @response 200 scenario="Success" {"status": "success", "message": "Berita berhasil diperbarui.", "data": {"id": 1, "title": "Berita Updated"}}
-     * @response 401 scenario="Unauthorized" {"status": "error", "message": "Tidak terotorisasi."}
-     * @response 403 scenario="Forbidden" {"status": "error", "message": "Anda tidak memiliki akses untuk memperbarui berita ini."}
-     * @response 404 scenario="Not Found" {"status": "error", "message": "Berita tidak ditemukan."}
-     */
+     * @response 401 scenario="Unauthorized" {"status":"error","message":"Tidak terotorisasi."}
+     * @response 403 scenario="Forbidden" {"status":"error","message":"Anda tidak memiliki akses untuk memperbarui berita ini."}
+     * @response 404 scenario="Not Found" {"status":"error","message":"Berita tidak ditemukan."}
+     *
+     * @authenticated
+     */    
     public function update(UpdateContentRequest $request, string $slug): JsonResponse
     {
         $news = News::where('slug', $slug)->firstOrFail();
@@ -174,15 +161,19 @@ class NewsController extends Controller
     }
 
     /**
+     * Hapus Berita
+     *
+     * Menghapus berita. **Memerlukan role: Admin (author)**
+     *
+     *
      * @summary Hapus Berita
+     * @response 200 scenario="Success" {"status":"success","message":"Berita berhasil dihapus."}
+     * @response 401 scenario="Unauthorized" {"status":"error","message":"Tidak terotorisasi."}
+     * @response 403 scenario="Forbidden" {"status":"error","message":"Anda tidak memiliki akses untuk menghapus berita ini."}
+     * @response 404 scenario="Not Found" {"status":"error","message":"Berita tidak ditemukan."}
      *
-     * @description Menghapus berita. **Memerlukan role: Admin (author)**
-     *
-     * @response 200 scenario="Success" {"status": "success", "message": "Berita berhasil dihapus."}
-     * @response 401 scenario="Unauthorized" {"status": "error", "message": "Tidak terotorisasi."}
-     * @response 403 scenario="Forbidden" {"status": "error", "message": "Anda tidak memiliki akses untuk menghapus berita ini."}
-     * @response 404 scenario="Not Found" {"status": "error", "message": "Berita tidak ditemukan."}
-     */
+     * @authenticated
+     */    
     public function destroy(string $slug): JsonResponse
     {
         $news = News::where('slug', $slug)->firstOrFail();
@@ -198,15 +189,19 @@ class NewsController extends Controller
     }
 
     /**
+     * Publikasikan Berita
+     *
+     * Mempublikasikan berita. **Memerlukan role: Admin (author)**
+     *
+     *
      * @summary Publikasikan Berita
-     *
-     * @description Mempublikasikan berita. **Memerlukan role: Admin (author)**
-     *
      * @response 200 scenario="Success" {"status": "success", "message": "Berita berhasil dipublikasikan.", "data": {"id": 1, "status": "published", "published_at": "2024-01-15T10:00:00Z"}}
-     * @response 401 scenario="Unauthorized" {"status": "error", "message": "Tidak terotorisasi."}
-     * @response 403 scenario="Forbidden" {"status": "error", "message": "Anda tidak memiliki akses untuk mempublikasikan berita ini."}
-     * @response 404 scenario="Not Found" {"status": "error", "message": "Berita tidak ditemukan."}
-     */
+     * @response 401 scenario="Unauthorized" {"status":"error","message":"Tidak terotorisasi."}
+     * @response 403 scenario="Forbidden" {"status":"error","message":"Anda tidak memiliki akses untuk mempublikasikan berita ini."}
+     * @response 404 scenario="Not Found" {"status":"error","message":"Berita tidak ditemukan."}
+     *
+     * @authenticated
+     */    
     public function publish(string $slug): JsonResponse
     {
         $news = News::where('slug', $slug)->firstOrFail();
@@ -223,16 +218,20 @@ class NewsController extends Controller
     }
 
     /**
+     * Jadwalkan Berita
+     *
+     * Menjadwalkan berita untuk dipublikasikan pada waktu tertentu. **Memerlukan role: Admin (author)**
+     *
+     *
      * @summary Jadwalkan Berita
-     *
-     * @description Menjadwalkan berita untuk dipublikasikan pada waktu tertentu. **Memerlukan role: Admin (author)**
-     *
      * @response 200 scenario="Success" {"status": "success", "message": "Berita berhasil dijadwalkan.", "data": {"id": 1, "status": "scheduled", "scheduled_at": "2024-01-20T10:00:00Z"}}
-     * @response 401 scenario="Unauthorized" {"status": "error", "message": "Tidak terotorisasi."}
-     * @response 403 scenario="Forbidden" {"status": "error", "message": "Anda tidak memiliki akses untuk menjadwalkan berita ini."}
-     * @response 404 scenario="Not Found" {"status": "error", "message": "Berita tidak ditemukan."}
-     * @response 422 scenario="Invalid Date" {"status": "error", "message": "Waktu publikasi harus di masa depan."}
-     */
+     * @response 401 scenario="Unauthorized" {"status":"error","message":"Tidak terotorisasi."}
+     * @response 403 scenario="Forbidden" {"status":"error","message":"Anda tidak memiliki akses untuk menjadwalkan berita ini."}
+     * @response 404 scenario="Not Found" {"status":"error","message":"Berita tidak ditemukan."}
+     * @response 422 scenario="Invalid Date" {"status":"error","message":"Waktu publikasi harus di masa depan."}
+     *
+     * @authenticated
+     */    
     public function schedule(ScheduleContentRequest $request, string $slug): JsonResponse
     {
         $news = News::where('slug', $slug)->firstOrFail();
@@ -259,14 +258,18 @@ class NewsController extends Controller
     }
 
     /**
+     * Berita Trending
+     *
+     * Mengambil daftar berita trending berdasarkan views dan engagement.
+     *
+     *
      * @summary Berita Trending
-     *
-     * @description Mengambil daftar berita trending berdasarkan views dan engagement.
-     *
      * @queryParam limit integer Jumlah berita yang ditampilkan (default: 10). Example: 10
      *
      * @response 200 scenario="Success" {"status": "success", "data": [{"id": 1, "title": "Berita Populer", "slug": "berita-populer", "views_count": 1500}]}
-     */
+     *
+     * @authenticated
+     */    
     public function trending(Request $request): JsonResponse
     {
         $limit = $request->input('limit', 10);

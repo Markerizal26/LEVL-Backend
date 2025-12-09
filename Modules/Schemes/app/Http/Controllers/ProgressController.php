@@ -20,7 +20,15 @@ class ProgressController extends Controller
     public function __construct(private ProgressionService $progression) {}
 
     /**
+     * Lihat Progress Belajar
+     *
+     *
      * @summary Lihat Progress Belajar
+     *
+     * @response 200 scenario="Success" {"success":true,"message":"Success","data":{"id":1,"name":"Example Progress"}}
+     * @response 401 scenario="Unauthorized" {"success":false,"message":"Tidak terotorisasi."}
+     * @response 404 scenario="Not Found" {"success":false,"message":"Progress tidak ditemukan."}
+     * @authenticated
      */
     public function show(Request $request, Course $course)
     {
@@ -76,7 +84,14 @@ class ProgressController extends Controller
     }
 
     /**
+     * Tandai Lesson Selesai
+     *
+     *
      * @summary Tandai Lesson Selesai
+     *
+     * @response 200 scenario="Success" {"success":true,"message":"Success","data":{"id":1,"name":"Example Progress"}}
+     * @response 401 scenario="Unauthorized" {"success":false,"message":"Tidak terotorisasi."}
+     * @authenticated
      */
     public function completeLesson(Request $request, Course $course, Unit $unit, Lesson $lesson)
     {

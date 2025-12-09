@@ -17,11 +17,16 @@ class ReportController extends Controller
     use ApiResponse;
 
     /**
-     * Get completion rate statistics for a course.
+     * Statistik Tingkat Penyelesaian Kursus
+     *
+     * Get completion statistics including total enrolled, active, completed, and completion percentage for a specific course.
+     *
      *
      * @summary Statistik Tingkat Penyelesaian Kursus
      *
-     * @description Get completion statistics including total enrolled, active, completed, and completion percentage for a specific course.
+     * @response 200 scenario="Success" {"success":true,"message":"Success","data":{"id":1,"name":"Example Report"}}
+     * @response 401 scenario="Unauthorized" {"success":false,"message":"Tidak terotorisasi."}
+     * @authenticated
      */
     public function courseCompletionRate(Request $request, Course $course)
     {
@@ -71,11 +76,16 @@ class ReportController extends Controller
     }
 
     /**
-     * Get enrollment funnel statistics.
+     * Statistik Funnel Pendaftaran
+     *
+     * Get funnel statistics showing enrollment journey from request to completion.
+     *
      *
      * @summary Statistik Funnel Pendaftaran
      *
-     * @description Get funnel statistics showing enrollment journey from request to completion.
+     * @response 200 scenario="Success" {"success":true,"message":"Success","data":{"id":1,"name":"Example Report"}}
+     * @response 401 scenario="Unauthorized" {"success":false,"message":"Tidak terotorisasi."}
+     * @authenticated
      */
     public function enrollmentFunnel(Request $request)
     {
@@ -137,11 +147,16 @@ class ReportController extends Controller
     }
 
     /**
-     * Export enrollment data to CSV.
+     * Ekspor Data Pendaftaran CSV
+     *
+     * Export enrollment data for a course to CSV format.
+     *
      *
      * @summary Ekspor Data Pendaftaran CSV
      *
-     * @description Export enrollment data for a course to CSV format.
+     * @response 200 scenario="Success" {"success":true,"message":"Success","data":{"id":1,"name":"Example Report"}}
+     * @response 401 scenario="Unauthorized" {"success":false,"message":"Tidak terotorisasi."}
+     * @authenticated
      */
     public function exportEnrollmentsCsv(Request $request, Course $course)
     {

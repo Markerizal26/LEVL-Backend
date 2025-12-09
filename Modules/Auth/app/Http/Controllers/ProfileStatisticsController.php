@@ -17,7 +17,14 @@ class ProfileStatisticsController extends Controller
     ) {}
 
     /**
+     * Ambil Statistik Profil
+     *
+     *
      * @summary Ambil Statistik Profil
+     *
+     * @response 200 scenario="Success" {"success":true,"message":"Success","data":[{"id":1,"name":"Example ProfileStatistics"}],"meta":{"current_page":1,"last_page":5,"per_page":15,"total":75},"links":{"first":"...","last":"...","prev":null,"next":"..."}}
+     * @response 401 scenario="Unauthorized" {"success":false,"message":"Tidak terotorisasi."}
+     * @authenticated
      */
     public function index(Request $request): JsonResponse
     {

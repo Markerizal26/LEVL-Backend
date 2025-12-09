@@ -33,15 +33,19 @@ class ReplyController extends Controller
     }
 
     /**
+     * Buat Balasan Baru
+     *
+     * Membuat balasan baru pada thread. Dapat juga membuat nested reply dengan menyertakan parent_id.
+     *
+     *
      * @summary Buat Balasan Baru
+     * @response 201 scenario="Created" {"success": true, "data": {"id": 1, "thread_id": 1, "content": "Ini balasan saya...", "user_id": 1, "parent_id": null}, "message": "Balasan berhasil dibuat."}
+     * @response 400 scenario="Bad Request" {"success":false,"message":"Parent reply tidak valid."}
+     * @response 403 scenario="Forbidden" {"success":false,"message":"Anda tidak memiliki akses untuk membalas thread ini."}
+     * @response 404 scenario="Not Found" {"success":false,"message":"Thread tidak ditemukan."}
      *
-     * @description Membuat balasan baru pada thread. Dapat juga membuat nested reply dengan menyertakan parent_id.
-     *
-     * @response 201 {"success": true, "data": {"id": 1, "thread_id": 1, "content": "Ini balasan saya...", "user_id": 1, "parent_id": null}, "message": "Balasan berhasil dibuat."}
-     * @response 400 {"success": false, "message": "Parent reply tidak valid."}
-     * @response 403 {"success": false, "message": "Anda tidak memiliki akses untuk membalas thread ini."}
-     * @response 404 {"success": false, "message": "Thread tidak ditemukan."}
-     */
+     * @authenticated
+     */    
     public function store(CreateReplyRequest $request, int $threadId): JsonResponse
     {
         $thread = Thread::find($threadId);
@@ -75,14 +79,18 @@ class ReplyController extends Controller
     }
 
     /**
+     * Perbarui Balasan
+     *
+     * Memperbarui balasan yang sudah ada. Hanya pemilik balasan yang dapat mengubah.
+     *
+     *
      * @summary Perbarui Balasan
+     * @response 200 scenario="Success" {"success": true, "data": {"id": 1, "content": "Konten yang diperbarui..."}, "message": "Balasan berhasil diperbarui."}
+     * @response 403 scenario="Forbidden" {"success":false,"message":"Anda tidak memiliki akses untuk mengubah balasan ini."}
+     * @response 404 scenario="Not Found" {"success":false,"message":"Balasan tidak ditemukan."}
      *
-     * @description Memperbarui balasan yang sudah ada. Hanya pemilik balasan yang dapat mengubah.
-     *
-     * @response 200 {"success": true, "data": {"id": 1, "content": "Konten yang diperbarui..."}, "message": "Balasan berhasil diperbarui."}
-     * @response 403 {"success": false, "message": "Anda tidak memiliki akses untuk mengubah balasan ini."}
-     * @response 404 {"success": false, "message": "Balasan tidak ditemukan."}
-     */
+     * @authenticated
+     */    
     public function update(UpdateReplyRequest $request, int $replyId): JsonResponse
     {
         $reply = Reply::find($replyId);
@@ -103,14 +111,18 @@ class ReplyController extends Controller
     }
 
     /**
+     * Hapus Balasan
+     *
+     * Menghapus balasan. Hanya pemilik balasan atau moderator yang dapat menghapus.
+     *
+     *
      * @summary Hapus Balasan
+     * @response 200 scenario="Success" {"success":true,"data":null,"message":"Balasan berhasil dihapus."}
+     * @response 403 scenario="Forbidden" {"success":false,"message":"Anda tidak memiliki akses untuk menghapus balasan ini."}
+     * @response 404 scenario="Not Found" {"success":false,"message":"Balasan tidak ditemukan."}
      *
-     * @description Menghapus balasan. Hanya pemilik balasan atau moderator yang dapat menghapus.
-     *
-     * @response 200 {"success": true, "data": null, "message": "Balasan berhasil dihapus."}
-     * @response 403 {"success": false, "message": "Anda tidak memiliki akses untuk menghapus balasan ini."}
-     * @response 404 {"success": false, "message": "Balasan tidak ditemukan."}
-     */
+     * @authenticated
+     */    
     public function destroy(Request $request, int $replyId): JsonResponse
     {
         $reply = Reply::find($replyId);
@@ -131,14 +143,18 @@ class ReplyController extends Controller
     }
 
     /**
+     * Terima Balasan sebagai Jawaban
+     *
+     * Menandai balasan sebagai jawaban yang diterima. Hanya pemilik thread yang dapat menerima jawaban.
+     *
+     *
      * @summary Terima Balasan sebagai Jawaban
+     * @response 200 scenario="Success" {"success": true, "data": {"id": 1, "is_accepted": true}, "message": "Balasan diterima sebagai jawaban."}
+     * @response 403 scenario="Forbidden" {"success":false,"message":"Anda tidak memiliki akses untuk menerima balasan ini."}
+     * @response 404 scenario="Not Found" {"success":false,"message":"Balasan tidak ditemukan."}
      *
-     * @description Menandai balasan sebagai jawaban yang diterima. Hanya pemilik thread yang dapat menerima jawaban.
-     *
-     * @response 200 {"success": true, "data": {"id": 1, "is_accepted": true}, "message": "Balasan diterima sebagai jawaban."}
-     * @response 403 {"success": false, "message": "Anda tidak memiliki akses untuk menerima balasan ini."}
-     * @response 404 {"success": false, "message": "Balasan tidak ditemukan."}
-     */
+     * @authenticated
+     */    
     public function accept(Request $request, int $replyId): JsonResponse
     {
         $reply = Reply::find($replyId);

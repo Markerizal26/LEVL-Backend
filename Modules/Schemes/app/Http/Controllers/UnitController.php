@@ -22,21 +22,29 @@ class UnitController extends Controller
     public function __construct(private UnitService $service) {}
 
     /**
+     * Daftar Unit Kompetensi
+     *
+     * Mengambil daftar unit kompetensi dalam sebuah kursus dengan pagination dan filter.
+     *
+     *
      * @summary Daftar Unit Kompetensi
-     *
-     * @description Mengambil daftar unit kompetensi dalam sebuah kursus dengan pagination dan filter.
-     *
      * @allowedFilters status
      *
+     * @queryParam status string Filter berdasarkan status. Example: 
+     *
      * @allowedSorts order, title, created_at
+     *
+     * @queryParam sort string Field untuk sorting. Allowed: order, title, created_at. Prefix dengan '-' untuk descending. Example: -created_at
      *
      * @allowedIncludes lessons, course
      *
      * @filterEnum status draft|published
      *
      * @response 200 scenario="Success" {"success": true, "message": "Success", "data": [{"id": 1, "title": "Unit 1: Pengenalan", "code": "UK001", "order": 1, "status": "published", "lessons_count": 5}], "meta": {"current_page": 1, "last_page": 1, "per_page": 15, "total": 3}}
-     * @response 404 scenario="Course Not Found" {"success": false, "message": "Course tidak ditemukan."}
-     */
+     * @response 404 scenario="Course Not Found" {"success":false,"message":"Course tidak ditemukan."}
+     *
+     * @authenticated
+     */    
     public function index(Request $request, Course $course)
     {
         $params = $request->all();
@@ -46,15 +54,26 @@ class UnitController extends Controller
     }
 
     /**
-     * @summary Buat Unit Kompetensi Baru
+     * Buat Unit Kompetensi Baru
      *
-     * @description Membuat unit kompetensi baru dalam sebuah kursus. **Memerlukan role: Admin atau Superadmin (owner course)**
+     * Membuat unit kompetensi baru dalam sebuah kursus. **Memerlukan role: Admin atau Superadmin (owner course)**
+     *
+     *
+     * @summary Buat Unit Kompetensi Baru
+     * @bodyParam title string required Judul unit kompetensi. Example: Unit 1: Pengenalan
+     * @bodyParam code string required Kode unit. Example: UK001
+     * @bodyParam description string optional Deskripsi unit. Example: Unit pengenalan dasar
+     * @bodyParam order integer optional Urutan unit. Example: 1
      *
      * @response 201 scenario="Success" {"success": true, "message": "Unit berhasil dibuat.", "data": {"unit": {"id": 1, "title": "Unit 1: Pengenalan", "code": "UK001", "order": 1, "status": "draft"}}}
-     * @response 401 scenario="Unauthorized" {"success": false, "message": "Tidak terotorisasi."}
-     * @response 403 scenario="Forbidden" {"success": false, "message": "Anda hanya dapat membuat unit untuk course yang Anda buat atau course yang Anda kelola sebagai admin."}
+     * @response 401 scenario="Unauthorized" {"success":false,"message":"Tidak terotorisasi."}
+     * @response 403 scenario="Forbidden" {"success":false,"message":"Anda hanya dapat membuat unit untuk course yang Anda buat atau course yang Anda kelola sebagai admin."}
      * @response 422 scenario="Validation Error" {"success": false, "message": "Validasi gagal.", "errors": {"title": ["Judul wajib diisi."]}}
-     */
+     *
+     * @authenticated
+     *
+     * @role Admin|Superadmin
+     */    
     public function store(UnitRequest $request, Course $course)
     {
         /** @var \Modules\Auth\Models\User $user */
@@ -84,13 +103,17 @@ class UnitController extends Controller
     }
 
     /**
+     * Detail Unit Kompetensi
+     *
+     * Mengambil detail unit kompetensi termasuk lessons yang terkait.
+     *
+     *
      * @summary Detail Unit Kompetensi
-     *
-     * @description Mengambil detail unit kompetensi termasuk lessons yang terkait.
-     *
      * @response 200 scenario="Success" {"success": true, "data": {"unit": {"id": 1, "title": "Unit 1: Pengenalan", "code": "UK001", "description": "Pengenalan dasar", "order": 1, "status": "published", "lessons": [{"id": 1, "title": "Lesson 1"}]}}}
-     * @response 404 scenario="Not Found" {"success": false, "message": "Unit tidak ditemukan."}
-     */
+     * @response 404 scenario="Not Found" {"success":false,"message":"Unit tidak ditemukan."}
+     *
+     * @authenticated
+     */    
     public function show(Course $course, Unit $unit)
     {
         $found = $this->service->show($course->id, $unit->id);
@@ -102,15 +125,19 @@ class UnitController extends Controller
     }
 
     /**
+     * Perbarui Unit Kompetensi
+     *
+     * Memperbarui data unit kompetensi. **Memerlukan role: Admin atau Superadmin (owner course)**
+     *
+     *
      * @summary Perbarui Unit Kompetensi
-     *
-     * @description Memperbarui data unit kompetensi. **Memerlukan role: Admin atau Superadmin (owner course)**
-     *
      * @response 200 scenario="Success" {"success": true, "message": "Unit berhasil diperbarui.", "data": {"unit": {"id": 1, "title": "Unit 1: Pengenalan Updated", "code": "UK001"}}}
-     * @response 401 scenario="Unauthorized" {"success": false, "message": "Tidak terotorisasi."}
-     * @response 403 scenario="Forbidden" {"success": false, "message": "Anda tidak memiliki akses untuk mengubah unit ini."}
-     * @response 404 scenario="Not Found" {"success": false, "message": "Unit tidak ditemukan."}
-     */
+     * @response 401 scenario="Unauthorized" {"success":false,"message":"Tidak terotorisasi."}
+     * @response 403 scenario="Forbidden" {"success":false,"message":"Anda tidak memiliki akses untuk mengubah unit ini."}
+     * @response 404 scenario="Not Found" {"success":false,"message":"Unit tidak ditemukan."}
+     *
+     * @authenticated
+     */    
     public function update(UnitRequest $request, Course $course, Unit $unit)
     {
         $found = $this->service->show($course->id, $unit->id);
@@ -131,15 +158,19 @@ class UnitController extends Controller
     }
 
     /**
+     * Hapus Unit Kompetensi
+     *
+     * Menghapus unit kompetensi beserta semua lessons di dalamnya. **Memerlukan role: Admin atau Superadmin (owner course)**
+     *
+     *
      * @summary Hapus Unit Kompetensi
+     * @response 200 scenario="Success" {"success":true,"message":"Unit berhasil dihapus.","data":[]}
+     * @response 401 scenario="Unauthorized" {"success":false,"message":"Tidak terotorisasi."}
+     * @response 403 scenario="Forbidden" {"success":false,"message":"Anda tidak memiliki akses untuk menghapus unit ini."}
+     * @response 404 scenario="Not Found" {"success":false,"message":"Unit tidak ditemukan."}
      *
-     * @description Menghapus unit kompetensi beserta semua lessons di dalamnya. **Memerlukan role: Admin atau Superadmin (owner course)**
-     *
-     * @response 200 scenario="Success" {"success": true, "message": "Unit berhasil dihapus.", "data": []}
-     * @response 401 scenario="Unauthorized" {"success": false, "message": "Tidak terotorisasi."}
-     * @response 403 scenario="Forbidden" {"success": false, "message": "Anda tidak memiliki akses untuk menghapus unit ini."}
-     * @response 404 scenario="Not Found" {"success": false, "message": "Unit tidak ditemukan."}
-     */
+     * @authenticated
+     */    
     public function destroy(Course $course, Unit $unit)
     {
         $found = $this->service->show($course->id, $unit->id);
@@ -159,15 +190,19 @@ class UnitController extends Controller
     }
 
     /**
+     * Ubah Urutan Unit
+     *
+     * Mengubah urutan unit kompetensi dalam sebuah kursus. **Memerlukan role: Admin atau Superadmin (owner course)**
+     *
+     *
      * @summary Ubah Urutan Unit
+     * @response 200 scenario="Success" {"success":true,"message":"Urutan unit berhasil diperbarui.","data":[]}
+     * @response 401 scenario="Unauthorized" {"success":false,"message":"Tidak terotorisasi."}
+     * @response 403 scenario="Forbidden" {"success":false,"message":"Anda hanya dapat mengatur urutan unit untuk course yang Anda buat atau course yang Anda kelola sebagai admin."}
+     * @response 422 scenario="Invalid Units" {"success":false,"message":"Beberapa unit tidak ditemukan di course ini."}
      *
-     * @description Mengubah urutan unit kompetensi dalam sebuah kursus. **Memerlukan role: Admin atau Superadmin (owner course)**
-     *
-     * @response 200 scenario="Success" {"success": true, "message": "Urutan unit berhasil diperbarui.", "data": []}
-     * @response 401 scenario="Unauthorized" {"success": false, "message": "Tidak terotorisasi."}
-     * @response 403 scenario="Forbidden" {"success": false, "message": "Anda hanya dapat mengatur urutan unit untuk course yang Anda buat atau course yang Anda kelola sebagai admin."}
-     * @response 422 scenario="Invalid Units" {"success": false, "message": "Beberapa unit tidak ditemukan di course ini."}
-     */
+     * @authenticated
+     */    
     public function reorder(ReorderUnitsRequest $request, Course $course)
     {
         /** @var \Modules\Auth\Models\User $user */
@@ -211,15 +246,19 @@ class UnitController extends Controller
     }
 
     /**
+     * Publish Unit
+     *
+     * Mempublish unit kompetensi agar dapat diakses oleh student. **Memerlukan role: Admin atau Superadmin (owner course)**
+     *
+     *
      * @summary Publish Unit
-     *
-     * @description Mempublish unit kompetensi agar dapat diakses oleh student. **Memerlukan role: Admin atau Superadmin (owner course)**
-     *
      * @response 200 scenario="Success" {"success": true, "message": "Unit berhasil dipublish.", "data": {"unit": {"id": 1, "status": "published"}}}
-     * @response 401 scenario="Unauthorized" {"success": false, "message": "Tidak terotorisasi."}
-     * @response 403 scenario="Forbidden" {"success": false, "message": "Anda tidak memiliki akses untuk mempublish unit ini."}
-     * @response 404 scenario="Not Found" {"success": false, "message": "Unit tidak ditemukan."}
-     */
+     * @response 401 scenario="Unauthorized" {"success":false,"message":"Tidak terotorisasi."}
+     * @response 403 scenario="Forbidden" {"success":false,"message":"Anda tidak memiliki akses untuk mempublish unit ini."}
+     * @response 404 scenario="Not Found" {"success":false,"message":"Unit tidak ditemukan."}
+     *
+     * @authenticated
+     */    
     public function publish(Course $course, Unit $unit)
     {
         $found = $this->service->show($course->id, $unit->id);
@@ -239,15 +278,19 @@ class UnitController extends Controller
     }
 
     /**
+     * Unpublish Unit
+     *
+     * Meng-unpublish unit kompetensi. **Memerlukan role: Admin atau Superadmin (owner course)**
+     *
+     *
      * @summary Unpublish Unit
-     *
-     * @description Meng-unpublish unit kompetensi. **Memerlukan role: Admin atau Superadmin (owner course)**
-     *
      * @response 200 scenario="Success" {"success": true, "message": "Unit berhasil diunpublish.", "data": {"unit": {"id": 1, "status": "draft"}}}
-     * @response 401 scenario="Unauthorized" {"success": false, "message": "Tidak terotorisasi."}
-     * @response 403 scenario="Forbidden" {"success": false, "message": "Anda tidak memiliki akses untuk unpublish unit ini."}
-     * @response 404 scenario="Not Found" {"success": false, "message": "Unit tidak ditemukan."}
-     */
+     * @response 401 scenario="Unauthorized" {"success":false,"message":"Tidak terotorisasi."}
+     * @response 403 scenario="Forbidden" {"success":false,"message":"Anda tidak memiliki akses untuk unpublish unit ini."}
+     * @response 404 scenario="Not Found" {"success":false,"message":"Unit tidak ditemukan."}
+     *
+     * @authenticated
+     */    
     public function unpublish(Course $course, Unit $unit)
     {
         $found = $this->service->show($course->id, $unit->id);

@@ -19,8 +19,15 @@ class CategoriesController extends Controller
     public function __construct(private readonly CategoryService $service) {}
 
     /**
+     * Daftar Kategori
+     *
+     *
      * @summary Daftar Kategori
-     */
+     * @authenticated
+
+     *
+     * @queryParam page integer Halaman yang ingin ditampilkan. Example: 1
+     * @queryParam per_page integer Jumlah item per halaman (default: 15, max: 100). Example: 15     */
     public function index(Request $request)
     {
         $perPage = max(1, (int) $request->get('per_page', 15));
@@ -30,7 +37,15 @@ class CategoriesController extends Controller
     }
 
     /**
+     * Buat Kategori Baru
+     *
+     *
      * @summary Buat Kategori Baru
+     *
+     * @response 201 scenario="Success" {"success":true,"message":"Categories berhasil dibuat.","data":{"id":1,"name":"New Categories"}}
+     * @response 401 scenario="Unauthorized" {"success":false,"message":"Tidak terotorisasi."}
+     * @response 422 scenario="Validation Error" {"success":false,"message":"Validasi gagal.","errors":{"field":["Field wajib diisi."]}}
+     * @authenticated
      */
     public function store(CategoryStoreRequest $request)
     {
@@ -40,7 +55,15 @@ class CategoriesController extends Controller
     }
 
     /**
+     * Detail Kategori
+     *
+     *
      * @summary Detail Kategori
+     *
+     * @response 200 scenario="Success" {"success":true,"message":"Success","data":{"id":1,"name":"Example Categories"}}
+     * @response 401 scenario="Unauthorized" {"success":false,"message":"Tidak terotorisasi."}
+     * @response 404 scenario="Not Found" {"success":false,"message":"Categories tidak ditemukan."}
+     * @authenticated
      */
     public function show(int $category)
     {
@@ -53,7 +76,16 @@ class CategoriesController extends Controller
     }
 
     /**
+     * Perbarui Kategori
+     *
+     *
      * @summary Perbarui Kategori
+     *
+     * @response 200 scenario="Success" {"success":true,"message":"Categories berhasil diperbarui.","data":{"id":1,"name":"Updated Categories"}}
+     * @response 401 scenario="Unauthorized" {"success":false,"message":"Tidak terotorisasi."}
+     * @response 404 scenario="Not Found" {"success":false,"message":"Categories tidak ditemukan."}
+     * @response 422 scenario="Validation Error" {"success":false,"message":"Validasi gagal.","errors":{"field":["Field wajib diisi."]}}
+     * @authenticated
      */
     public function update(CategoryUpdateRequest $request, int $category)
     {
@@ -66,7 +98,15 @@ class CategoriesController extends Controller
     }
 
     /**
+     * Hapus Kategori
+     *
+     *
      * @summary Hapus Kategori
+     *
+     * @response 200 scenario="Success" {"success":true,"message":"Categories berhasil dihapus.","data":[]}
+     * @response 401 scenario="Unauthorized" {"success":false,"message":"Tidak terotorisasi."}
+     * @response 404 scenario="Not Found" {"success":false,"message":"Categories tidak ditemukan."}
+     * @authenticated
      */
     public function destroy(int $category)
     {

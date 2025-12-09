@@ -19,7 +19,9 @@ class MasterDataCrudController extends Controller
     public function __construct(private readonly MasterDataService $service) {}
 
     /**
-     * @summary Daftar Tipe Master Data
+     * Daftar Tipe Master Data
+     *
+     * @authenticated
      */
     public function types()
     {
@@ -34,7 +36,9 @@ class MasterDataCrudController extends Controller
     }
 
     /**
-     * @summary Daftar Item Master Data
+     * Daftar Item Master Data
+     *
+     * @authenticated
      */
     public function index(Request $request, string $type)
     {
@@ -52,7 +56,9 @@ class MasterDataCrudController extends Controller
     }
 
     /**
-     * @summary Detail Master Data
+     * Detail Master Data
+     *
+     * @authenticated
      */
     public function show(string $type, int $id)
     {
@@ -66,7 +72,9 @@ class MasterDataCrudController extends Controller
     }
 
     /**
-     * @summary Buat Master Data Baru
+     * Buat Master Data Baru
+     *
+     * @authenticated
      */
     public function store(MasterDataStoreRequest $request, string $type)
     {
@@ -83,7 +91,9 @@ class MasterDataCrudController extends Controller
     }
 
     /**
-     * @summary Perbarui Master Data
+     * Perbarui Master Data
+     *
+     * @authenticated
      */
     public function update(MasterDataUpdateRequest $request, string $type, int $id)
     {
@@ -106,7 +116,9 @@ class MasterDataCrudController extends Controller
     }
 
     /**
-     * @summary Hapus Master Data
+     * Hapus Master Data
+     *
+     * @authenticated
      */
     public function destroy(string $type, int $id)
     {

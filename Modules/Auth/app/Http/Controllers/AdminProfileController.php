@@ -21,7 +21,15 @@ class AdminProfileController extends Controller
     }
 
     /**
+     * Lihat Profil Pengguna (Admin)
+     *
+     *
      * @summary Lihat Profil Pengguna (Admin)
+     *
+     * @response 200 scenario="Success" {"success":true,"message":"Success","data":{"id":1,"name":"Example AdminProfile"}}
+     * @response 401 scenario="Unauthorized" {"success":false,"message":"Tidak terotorisasi."}
+     * @response 404 scenario="Not Found" {"success":false,"message":"AdminProfile tidak ditemukan."}
+     * @authenticated
      */
     public function show(Request $request, int $userId): JsonResponse
     {
@@ -42,7 +50,16 @@ class AdminProfileController extends Controller
     }
 
     /**
+     * Perbarui Profil Pengguna (Admin)
+     *
+     *
      * @summary Perbarui Profil Pengguna (Admin)
+     *
+     * @response 200 scenario="Success" {"success":true,"message":"AdminProfile berhasil diperbarui.","data":{"id":1,"name":"Updated AdminProfile"}}
+     * @response 401 scenario="Unauthorized" {"success":false,"message":"Tidak terotorisasi."}
+     * @response 404 scenario="Not Found" {"success":false,"message":"AdminProfile tidak ditemukan."}
+     * @response 422 scenario="Validation Error" {"success":false,"message":"Validasi gagal.","errors":{"field":["Field wajib diisi."]}}
+     * @authenticated
      */
     public function update(Request $request, int $userId): JsonResponse
     {
@@ -89,7 +106,14 @@ class AdminProfileController extends Controller
     }
 
     /**
+     * Tangguhkan Akun Pengguna
+     *
+     *
      * @summary Tangguhkan Akun Pengguna
+     *
+     * @response 200 scenario="Success" {"success":true,"message":"Success","data":{"id":1,"name":"Example AdminProfile"}}
+     * @response 401 scenario="Unauthorized" {"success":false,"message":"Tidak terotorisasi."}
+     * @authenticated
      */
     public function suspend(Request $request, int $userId): JsonResponse
     {
@@ -123,7 +147,14 @@ class AdminProfileController extends Controller
     }
 
     /**
+     * Aktifkan Akun Pengguna
+     *
+     *
      * @summary Aktifkan Akun Pengguna
+     *
+     * @response 200 scenario="Success" {"success":true,"message":"Success","data":{"id":1,"name":"Example AdminProfile"}}
+     * @response 401 scenario="Unauthorized" {"success":false,"message":"Tidak terotorisasi."}
+     * @authenticated
      */
     public function activate(Request $request, int $userId): JsonResponse
     {
@@ -157,8 +188,15 @@ class AdminProfileController extends Controller
     }
 
     /**
+     * Riwayat Audit Pengguna
+     *
+     *
      * @summary Riwayat Audit Pengguna
-     */
+     * @authenticated
+
+     *
+     * @queryParam page integer Halaman yang ingin ditampilkan. Example: 1
+     * @queryParam per_page integer Jumlah item per halaman (default: 15, max: 100). Example: 15     */
     public function auditLogs(Request $request, int $userId): JsonResponse
     {
         try {

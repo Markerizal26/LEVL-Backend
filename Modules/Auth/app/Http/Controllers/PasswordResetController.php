@@ -22,16 +22,18 @@ class PasswordResetController extends Controller
     use ApiResponse;
 
     /**
+     * Minta Reset Kata Sandi
+     *
+     * Mengirim email berisi kode OTP dan link untuk reset kata sandi. Response selalu sukses untuk mencegah enumeration attack.
+     *
+     *
      * @summary Minta Reset Kata Sandi
-     *
-     * @description Mengirim email berisi kode OTP dan link untuk reset kata sandi. Response selalu sukses untuk mencegah enumeration attack.
-     *
-     * @response 200 scenario="Success" {"success": true, "message": "Jika email atau username terdaftar, kami telah mengirimkan instruksi reset kata sandi.", "data": []}
+     * @response 200 scenario="Success" {"success":true,"message":"Jika email atau username terdaftar, kami telah mengirimkan instruksi reset kata sandi.","data":[]}
      * @response 422 scenario="Validation Error" {"success": false, "message": "Validasi gagal.", "errors": {"login": ["Field login wajib diisi."]}}
-     * @response 429 scenario="Rate Limited" {"success": false, "message": "Terlalu banyak percobaan. Silakan coba lagi dalam 60 detik."}
+     * @response 429 scenario="Rate Limited" {"success":false,"message":"Terlalu banyak percobaan. Silakan coba lagi dalam 60 detik."}
      *
      * @unauthenticated
-     */
+     */    
     public function forgot(ForgotPasswordRequest $request): JsonResponse
     {
         $validated = $request->validated();
@@ -66,18 +68,20 @@ class PasswordResetController extends Controller
     }
 
     /**
+     * Konfirmasi Reset Kata Sandi
+     *
+     * Mengkonfirmasi reset kata sandi menggunakan token OTP yang dikirim via email.
+     *
+     *
      * @summary Konfirmasi Reset Kata Sandi
-     *
-     * @description Mengkonfirmasi reset kata sandi menggunakan token OTP yang dikirim via email.
-     *
-     * @response 200 scenario="Success" {"success": true, "message": "Kata sandi berhasil direset.", "data": []}
-     * @response 404 scenario="User Not Found" {"success": false, "message": "Pengguna tidak ditemukan."}
-     * @response 422 scenario="Invalid Token" {"success": false, "message": "Token reset tidak valid atau telah kedaluwarsa."}
-     * @response 422 scenario="Expired Token" {"success": false, "message": "Token reset telah kedaluwarsa."}
-     * @response 429 scenario="Rate Limited" {"success": false, "message": "Terlalu banyak percobaan. Silakan coba lagi dalam 60 detik."}
+     * @response 200 scenario="Success" {"success":true,"message":"Kata sandi berhasil direset.","data":[]}
+     * @response 404 scenario="User Not Found" {"success":false,"message":"Pengguna tidak ditemukan."}
+     * @response 422 scenario="Invalid Token" {"success":false,"message":"Token reset tidak valid atau telah kedaluwarsa."}
+     * @response 422 scenario="Expired Token" {"success":false,"message":"Token reset telah kedaluwarsa."}
+     * @response 429 scenario="Rate Limited" {"success":false,"message":"Terlalu banyak percobaan. Silakan coba lagi dalam 60 detik."}
      *
      * @unauthenticated
-     */
+     */    
     public function confirmForgot(ResetPasswordRequest $request): JsonResponse
     {
         $token = $request->string('token');
@@ -126,15 +130,19 @@ class PasswordResetController extends Controller
     }
 
     /**
+     * Ubah Kata Sandi
+     *
+     * Mengubah kata sandi pengguna yang sedang login. Memerlukan password lama untuk verifikasi.
+     *
+     *
      * @summary Ubah Kata Sandi
-     *
-     * @description Mengubah kata sandi pengguna yang sedang login. Memerlukan password lama untuk verifikasi.
-     *
-     * @response 200 scenario="Success" {"success": true, "message": "Kata sandi berhasil diperbarui.", "data": []}
-     * @response 401 scenario="Unauthorized" {"success": false, "message": "Tidak terotorisasi."}
-     * @response 422 scenario="Wrong Password" {"success": false, "message": "Password lama tidak cocok."}
+     * @response 200 scenario="Success" {"success":true,"message":"Kata sandi berhasil diperbarui.","data":[]}
+     * @response 401 scenario="Unauthorized" {"success":false,"message":"Tidak terotorisasi."}
+     * @response 422 scenario="Wrong Password" {"success":false,"message":"Password lama tidak cocok."}
      * @response 422 scenario="Validation Error" {"success": false, "message": "Validasi gagal.", "errors": {"new_password": ["Password minimal 8 karakter."]}}
-     */
+     *
+     * @authenticated
+     */    
     public function reset(ChangePasswordRequest $request): JsonResponse
     {
         /** @var User|null $user */

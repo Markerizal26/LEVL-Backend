@@ -57,7 +57,14 @@ class MasterDataController extends Controller
     }
 
     /**
+     * Daftar Tipe Master Data
+     *
+     *
      * @summary Daftar Tipe Master Data
+     *
+     * @response 200 scenario="Success" {"success":true,"message":"Success","data":[{"id":1,"name":"Example MasterData"}],"meta":{"current_page":1,"last_page":5,"per_page":15,"total":75},"links":{"first":"...","last":"...","prev":null,"next":"..."}}
+     * @response 401 scenario="Unauthorized" {"success":false,"message":"Tidak terotorisasi."}
+     * @authenticated
      */
     public function index(): JsonResponse
     {
@@ -103,7 +110,14 @@ class MasterDataController extends Controller
     // ==================== AUTH ====================
 
     /**
+     * Daftar Status Pengguna
+     *
+     *
      * @summary Daftar Status Pengguna
+     *
+     * @response 200 scenario="Success" {"success":true,"message":"Success","data":{"id":1,"name":"Example MasterData"}}
+     * @response 401 scenario="Unauthorized" {"success":false,"message":"Tidak terotorisasi."}
+     * @authenticated
      */
     public function userStatuses(): JsonResponse
     {
@@ -114,7 +128,14 @@ class MasterDataController extends Controller
     }
 
     /**
+     * Daftar Peran
+     *
+     *
      * @summary Daftar Peran
+     *
+     * @response 200 scenario="Success" {"success":true,"message":"Success","data":{"id":1,"name":"Example MasterData"}}
+     * @response 401 scenario="Unauthorized" {"success":false,"message":"Tidak terotorisasi."}
+     * @authenticated
      */
     public function roles(): JsonResponse
     {
@@ -129,7 +150,14 @@ class MasterDataController extends Controller
     // ==================== SCHEMES ====================
 
     /**
+     * Daftar Status Kursus
+     *
+     *
      * @summary Daftar Status Kursus
+     *
+     * @response 200 scenario="Success" {"success":true,"message":"Success","data":{"id":1,"name":"Example MasterData"}}
+     * @response 401 scenario="Unauthorized" {"success":false,"message":"Tidak terotorisasi."}
+     * @authenticated
      */
     public function courseStatuses(): JsonResponse
     {
@@ -140,7 +168,14 @@ class MasterDataController extends Controller
     }
 
     /**
+     * Daftar Tipe Kursus
+     *
+     *
      * @summary Daftar Tipe Kursus
+     *
+     * @response 200 scenario="Success" {"success":true,"message":"Success","data":{"id":1,"name":"Example MasterData"}}
+     * @response 401 scenario="Unauthorized" {"success":false,"message":"Tidak terotorisasi."}
+     * @authenticated
      */
     public function courseTypes(): JsonResponse
     {
@@ -151,7 +186,14 @@ class MasterDataController extends Controller
     }
 
     /**
+     * Daftar Tipe Pendaftaran
+     *
+     *
      * @summary Daftar Tipe Pendaftaran
+     *
+     * @response 200 scenario="Success" {"success":true,"message":"Success","data":{"id":1,"name":"Example MasterData"}}
+     * @response 401 scenario="Unauthorized" {"success":false,"message":"Tidak terotorisasi."}
+     * @authenticated
      */
     public function enrollmentTypes(): JsonResponse
     {
@@ -162,7 +204,14 @@ class MasterDataController extends Controller
     }
 
     /**
+     * Daftar Level Kesulitan
+     *
+     *
      * @summary Daftar Level Kesulitan
+     *
+     * @response 200 scenario="Success" {"success":true,"message":"Success","data":{"id":1,"name":"Example MasterData"}}
+     * @response 401 scenario="Unauthorized" {"success":false,"message":"Tidak terotorisasi."}
+     * @authenticated
      */
     public function levelTags(): JsonResponse
     {
@@ -173,7 +222,14 @@ class MasterDataController extends Controller
     }
 
     /**
+     * Daftar Mode Progres
+     *
+     *
      * @summary Daftar Mode Progres
+     *
+     * @response 200 scenario="Success" {"success":true,"message":"Success","data":{"id":1,"name":"Example MasterData"}}
+     * @response 401 scenario="Unauthorized" {"success":false,"message":"Tidak terotorisasi."}
+     * @authenticated
      */
     public function progressionModes(): JsonResponse
     {
@@ -184,7 +240,14 @@ class MasterDataController extends Controller
     }
 
     /**
+     * Daftar Tipe Konten Lesson
+     *
+     *
      * @summary Daftar Tipe Konten Lesson
+     *
+     * @response 200 scenario="Success" {"success":true,"message":"Success","data":{"id":1,"name":"Example MasterData"}}
+     * @response 401 scenario="Unauthorized" {"success":false,"message":"Tidak terotorisasi."}
+     * @authenticated
      */
     public function contentTypes(): JsonResponse
     {
@@ -197,7 +260,14 @@ class MasterDataController extends Controller
     // ==================== ENROLLMENTS ====================
 
     /**
+     * Daftar Status Pendaftaran
+     *
+     *
      * @summary Daftar Status Pendaftaran
+     *
+     * @response 200 scenario="Success" {"success":true,"message":"Success","data":{"id":1,"name":"Example MasterData"}}
+     * @response 401 scenario="Unauthorized" {"success":false,"message":"Tidak terotorisasi."}
+     * @authenticated
      */
     public function enrollmentStatuses(): JsonResponse
     {
@@ -208,7 +278,14 @@ class MasterDataController extends Controller
     }
 
     /**
+     * Daftar Status Progres
+     *
+     *
      * @summary Daftar Status Progres
+     *
+     * @response 200 scenario="Success" {"success":true,"message":"Success","data":{"id":1,"name":"Example MasterData"}}
+     * @response 401 scenario="Unauthorized" {"success":false,"message":"Tidak terotorisasi."}
+     * @authenticated
      */
     public function progressStatuses(): JsonResponse
     {
@@ -221,7 +298,14 @@ class MasterDataController extends Controller
     // ==================== LEARNING ====================
 
     /**
+     * Daftar Status Tugas
+     *
+     *
      * @summary Daftar Status Tugas
+     *
+     * @response 200 scenario="Success" {"success":true,"message":"Success","data":{"id":1,"name":"Example MasterData"}}
+     * @response 401 scenario="Unauthorized" {"success":false,"message":"Tidak terotorisasi."}
+     * @authenticated
      */
     public function assignmentStatuses(): JsonResponse
     {
@@ -232,7 +316,14 @@ class MasterDataController extends Controller
     }
 
     /**
+     * Daftar Status Pengumpulan
+     *
+     *
      * @summary Daftar Status Pengumpulan
+     *
+     * @response 200 scenario="Success" {"success":true,"message":"Success","data":{"id":1,"name":"Example MasterData"}}
+     * @response 401 scenario="Unauthorized" {"success":false,"message":"Tidak terotorisasi."}
+     * @authenticated
      */
     public function submissionStatuses(): JsonResponse
     {
@@ -243,7 +334,14 @@ class MasterDataController extends Controller
     }
 
     /**
+     * Daftar Tipe Pengumpulan
+     *
+     *
      * @summary Daftar Tipe Pengumpulan
+     *
+     * @response 200 scenario="Success" {"success":true,"message":"Success","data":{"id":1,"name":"Example MasterData"}}
+     * @response 401 scenario="Unauthorized" {"success":false,"message":"Tidak terotorisasi."}
+     * @authenticated
      */
     public function submissionTypes(): JsonResponse
     {
@@ -256,7 +354,14 @@ class MasterDataController extends Controller
     // ==================== CONTENT ====================
 
     /**
+     * Daftar Status Konten
+     *
+     *
      * @summary Daftar Status Konten
+     *
+     * @response 200 scenario="Success" {"success":true,"message":"Success","data":{"id":1,"name":"Example MasterData"}}
+     * @response 401 scenario="Unauthorized" {"success":false,"message":"Tidak terotorisasi."}
+     * @authenticated
      */
     public function contentStatuses(): JsonResponse
     {
@@ -267,7 +372,14 @@ class MasterDataController extends Controller
     }
 
     /**
+     * Daftar Prioritas
+     *
+     *
      * @summary Daftar Prioritas
+     *
+     * @response 200 scenario="Success" {"success":true,"message":"Success","data":{"id":1,"name":"Example MasterData"}}
+     * @response 401 scenario="Unauthorized" {"success":false,"message":"Tidak terotorisasi."}
+     * @authenticated
      */
     public function priorities(): JsonResponse
     {
@@ -278,7 +390,14 @@ class MasterDataController extends Controller
     }
 
     /**
+     * Daftar Tipe Target
+     *
+     *
      * @summary Daftar Tipe Target
+     *
+     * @response 200 scenario="Success" {"success":true,"message":"Success","data":{"id":1,"name":"Example MasterData"}}
+     * @response 401 scenario="Unauthorized" {"success":false,"message":"Tidak terotorisasi."}
+     * @authenticated
      */
     public function targetTypes(): JsonResponse
     {
@@ -291,7 +410,14 @@ class MasterDataController extends Controller
     // ==================== GAMIFICATION ====================
 
     /**
+     * Daftar Tipe Tantangan
+     *
+     *
      * @summary Daftar Tipe Tantangan
+     *
+     * @response 200 scenario="Success" {"success":true,"message":"Success","data":{"id":1,"name":"Example MasterData"}}
+     * @response 401 scenario="Unauthorized" {"success":false,"message":"Tidak terotorisasi."}
+     * @authenticated
      */
     public function challengeTypes(): JsonResponse
     {
@@ -302,7 +428,14 @@ class MasterDataController extends Controller
     }
 
     /**
+     * Daftar Status Tantangan User
+     *
+     *
      * @summary Daftar Status Tantangan User
+     *
+     * @response 200 scenario="Success" {"success":true,"message":"Success","data":{"id":1,"name":"Example MasterData"}}
+     * @response 401 scenario="Unauthorized" {"success":false,"message":"Tidak terotorisasi."}
+     * @authenticated
      */
     public function challengeAssignmentStatuses(): JsonResponse
     {
@@ -313,7 +446,14 @@ class MasterDataController extends Controller
     }
 
     /**
+     * Daftar Kriteria Tantangan
+     *
+     *
      * @summary Daftar Kriteria Tantangan
+     *
+     * @response 200 scenario="Success" {"success":true,"message":"Success","data":{"id":1,"name":"Example MasterData"}}
+     * @response 401 scenario="Unauthorized" {"success":false,"message":"Tidak terotorisasi."}
+     * @authenticated
      */
     public function challengeCriteriaTypes(): JsonResponse
     {
@@ -324,7 +464,14 @@ class MasterDataController extends Controller
     }
 
     /**
+     * Daftar Tipe Badge
+     *
+     *
      * @summary Daftar Tipe Badge
+     *
+     * @response 200 scenario="Success" {"success":true,"message":"Success","data":{"id":1,"name":"Example MasterData"}}
+     * @response 401 scenario="Unauthorized" {"success":false,"message":"Tidak terotorisasi."}
+     * @authenticated
      */
     public function badgeTypes(): JsonResponse
     {
@@ -335,7 +482,14 @@ class MasterDataController extends Controller
     }
 
     /**
+     * Daftar Sumber Poin
+     *
+     *
      * @summary Daftar Sumber Poin
+     *
+     * @response 200 scenario="Success" {"success":true,"message":"Success","data":{"id":1,"name":"Example MasterData"}}
+     * @response 401 scenario="Unauthorized" {"success":false,"message":"Tidak terotorisasi."}
+     * @authenticated
      */
     public function pointSourceTypes(): JsonResponse
     {
@@ -346,7 +500,14 @@ class MasterDataController extends Controller
     }
 
     /**
+     * Daftar Alasan Poin
+     *
+     *
      * @summary Daftar Alasan Poin
+     *
+     * @response 200 scenario="Success" {"success":true,"message":"Success","data":{"id":1,"name":"Example MasterData"}}
+     * @response 401 scenario="Unauthorized" {"success":false,"message":"Tidak terotorisasi."}
+     * @authenticated
      */
     public function pointReasons(): JsonResponse
     {
@@ -359,7 +520,14 @@ class MasterDataController extends Controller
     // ==================== NOTIFICATIONS ====================
 
     /**
+     * Daftar Tipe Notifikasi
+     *
+     *
      * @summary Daftar Tipe Notifikasi
+     *
+     * @response 200 scenario="Success" {"success":true,"message":"Success","data":{"id":1,"name":"Example MasterData"}}
+     * @response 401 scenario="Unauthorized" {"success":false,"message":"Tidak terotorisasi."}
+     * @authenticated
      */
     public function notificationTypes(): JsonResponse
     {
@@ -370,7 +538,14 @@ class MasterDataController extends Controller
     }
 
     /**
+     * Daftar Channel Notifikasi
+     *
+     *
      * @summary Daftar Channel Notifikasi
+     *
+     * @response 200 scenario="Success" {"success":true,"message":"Success","data":{"id":1,"name":"Example MasterData"}}
+     * @response 401 scenario="Unauthorized" {"success":false,"message":"Tidak terotorisasi."}
+     * @authenticated
      */
     public function notificationChannels(): JsonResponse
     {
@@ -381,7 +556,14 @@ class MasterDataController extends Controller
     }
 
     /**
+     * Daftar Frekuensi Notifikasi
+     *
+     *
      * @summary Daftar Frekuensi Notifikasi
+     *
+     * @response 200 scenario="Success" {"success":true,"message":"Success","data":{"id":1,"name":"Example MasterData"}}
+     * @response 401 scenario="Unauthorized" {"success":false,"message":"Tidak terotorisasi."}
+     * @authenticated
      */
     public function notificationFrequencies(): JsonResponse
     {
@@ -394,7 +576,14 @@ class MasterDataController extends Controller
     // ==================== GRADING ====================
 
     /**
+     * Daftar Status Nilai
+     *
+     *
      * @summary Daftar Status Nilai
+     *
+     * @response 200 scenario="Success" {"success":true,"message":"Success","data":{"id":1,"name":"Example MasterData"}}
+     * @response 401 scenario="Unauthorized" {"success":false,"message":"Tidak terotorisasi."}
+     * @authenticated
      */
     public function gradeStatuses(): JsonResponse
     {
@@ -405,7 +594,14 @@ class MasterDataController extends Controller
     }
 
     /**
+     * Daftar Sumber Nilai
+     *
+     *
      * @summary Daftar Sumber Nilai
+     *
+     * @response 200 scenario="Success" {"success":true,"message":"Success","data":{"id":1,"name":"Example MasterData"}}
+     * @response 401 scenario="Unauthorized" {"success":false,"message":"Tidak terotorisasi."}
+     * @authenticated
      */
     public function gradeSourceTypes(): JsonResponse
     {
@@ -418,7 +614,14 @@ class MasterDataController extends Controller
     // ==================== COMMON ====================
 
     /**
+     * Daftar Status Kategori
+     *
+     *
      * @summary Daftar Status Kategori
+     *
+     * @response 200 scenario="Success" {"success":true,"message":"Success","data":{"id":1,"name":"Example MasterData"}}
+     * @response 401 scenario="Unauthorized" {"success":false,"message":"Tidak terotorisasi."}
+     * @authenticated
      */
     public function categoryStatuses(): JsonResponse
     {
@@ -429,7 +632,14 @@ class MasterDataController extends Controller
     }
 
     /**
+     * Daftar Tipe Pengaturan
+     *
+     *
      * @summary Daftar Tipe Pengaturan
+     *
+     * @response 200 scenario="Success" {"success":true,"message":"Success","data":{"id":1,"name":"Example MasterData"}}
+     * @response 401 scenario="Unauthorized" {"success":false,"message":"Tidak terotorisasi."}
+     * @authenticated
      */
     public function settingTypes(): JsonResponse
     {

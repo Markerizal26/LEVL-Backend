@@ -22,7 +22,14 @@ class ContentStatisticsController extends Controller
     }
 
     /**
-     * Get overall content statistics.
+     * Mengambil statistik konten keseluruhan
+     *
+     *
+     * @summary Mengambil statistik konten keseluruhan
+     *
+     * @response 200 scenario="Success" {"success":true,"message":"Success","data":[{"id":1,"name":"Example ContentStatistics"}],"meta":{"current_page":1,"last_page":5,"per_page":15,"total":75},"links":{"first":"...","last":"...","prev":null,"next":"..."}}
+     * @response 401 scenario="Unauthorized" {"success":false,"message":"Tidak terotorisasi."}
+     * @authenticated
      */
     public function index(Request $request): JsonResponse
     {
@@ -57,7 +64,14 @@ class ContentStatisticsController extends Controller
     }
 
     /**
-     * Get statistics for a specific announcement.
+     * Mengambil statistik pengumuman tertentu
+     *
+     *
+     * @summary Mengambil statistik pengumuman tertentu
+     *
+     * @response 200 scenario="Success" {"success":true,"message":"Success","data":{"id":1,"name":"Example ContentStatistics"}}
+     * @response 401 scenario="Unauthorized" {"success":false,"message":"Tidak terotorisasi."}
+     * @authenticated
      */
     public function showAnnouncement(int $id): JsonResponse
     {
@@ -73,7 +87,14 @@ class ContentStatisticsController extends Controller
     }
 
     /**
-     * Get statistics for a specific news article.
+     * Mengambil statistik berita tertentu
+     *
+     *
+     * @summary Mengambil statistik berita tertentu
+     *
+     * @response 200 scenario="Success" {"success":true,"message":"Success","data":{"id":1,"name":"Example ContentStatistics"}}
+     * @response 401 scenario="Unauthorized" {"success":false,"message":"Tidak terotorisasi."}
+     * @authenticated
      */
     public function showNews(string $slug): JsonResponse
     {
@@ -89,7 +110,14 @@ class ContentStatisticsController extends Controller
     }
 
     /**
-     * Get trending news.
+     * Mengambil berita trending
+     *
+     *
+     * @summary Mengambil berita trending
+     *
+     * @response 200 scenario="Success" {"success":true,"message":"Success","data":{"id":1,"name":"Example ContentStatistics"}}
+     * @response 401 scenario="Unauthorized" {"success":false,"message":"Tidak terotorisasi."}
+     * @authenticated
      */
     public function trending(Request $request): JsonResponse
     {
@@ -103,7 +131,14 @@ class ContentStatisticsController extends Controller
     }
 
     /**
-     * Get most viewed news.
+     * Mengambil berita paling banyak dilihat
+     *
+     *
+     * @summary Mengambil berita paling banyak dilihat
+     *
+     * @response 200 scenario="Success" {"success":true,"message":"Success","data":{"id":1,"name":"Example ContentStatistics"}}
+     * @response 401 scenario="Unauthorized" {"success":false,"message":"Tidak terotorisasi."}
+     * @authenticated
      */
     public function mostViewed(Request $request): JsonResponse
     {

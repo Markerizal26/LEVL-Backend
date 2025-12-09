@@ -18,7 +18,14 @@ class PublicProfileController extends Controller
     ) {}
 
     /**
+     * Lihat Profil Publik
+     *
+     *
      * @summary Lihat Profil Publik
+     *
+     * @response 200 scenario="Success" {"success":true,"message":"Success","data":{"id":1,"name":"Example PublicProfile"}}
+     * @response 404 scenario="Not Found" {"success":false,"message":"PublicProfile tidak ditemukan."}
+     * @unauthenticated
      */
     public function show(Request $request, int $userId): JsonResponse
     {

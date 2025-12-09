@@ -17,15 +17,19 @@ class ProfilePasswordController extends Controller
     ) {}
 
     /**
+     * Ubah Kata Sandi Profil
+     *
+     * Mengubah kata sandi pengguna. Memerlukan password lama untuk verifikasi.
+     *
+     *
      * @summary Ubah Kata Sandi Profil
+     * @response 200 scenario="Success" {"success":true,"message":"Password changed successfully."}
+     * @response 401 scenario="Unauthorized" {"success":false,"message":"Tidak terotorisasi."}
+     * @response 422 scenario="Wrong Password" {"success":false,"message":"Password lama tidak cocok."}
+     * @response 422 scenario="Validation Error" {"success":false,"message":"Password baru minimal 8 karakter."}
      *
-     * @description Mengubah kata sandi pengguna. Memerlukan password lama untuk verifikasi.
-     *
-     * @response 200 scenario="Success" {"success": true, "message": "Password changed successfully."}
-     * @response 401 scenario="Unauthorized" {"success": false, "message": "Tidak terotorisasi."}
-     * @response 422 scenario="Wrong Password" {"success": false, "message": "Password lama tidak cocok."}
-     * @response 422 scenario="Validation Error" {"success": false, "message": "Password baru minimal 8 karakter."}
-     */
+     * @authenticated
+     */    
     public function update(ChangePasswordRequest $request): JsonResponse
     {
         try {

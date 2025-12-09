@@ -17,7 +17,15 @@ class ProfileAccountController extends Controller
     ) {}
 
     /**
+     * Hapus Akun Sendiri
+     *
+     *
      * @summary Hapus Akun Sendiri
+     *
+     * @response 200 scenario="Success" {"success":true,"message":"ProfileAccount berhasil dihapus.","data":[]}
+     * @response 401 scenario="Unauthorized" {"success":false,"message":"Tidak terotorisasi."}
+     * @response 404 scenario="Not Found" {"success":false,"message":"ProfileAccount tidak ditemukan."}
+     * @authenticated
      */
     public function destroy(DeleteAccountRequest $request): JsonResponse
     {
@@ -39,7 +47,15 @@ class ProfileAccountController extends Controller
     }
 
     /**
+     * Pulihkan Akun yang Dihapus
+     *
+     *
      * @summary Pulihkan Akun yang Dihapus
+     *
+     * @response 201 scenario="Success" {"success":true,"message":"ProfileAccount berhasil dibuat.","data":{"id":1,"name":"New ProfileAccount"}}
+     * @response 401 scenario="Unauthorized" {"success":false,"message":"Tidak terotorisasi."}
+     * @response 422 scenario="Validation Error" {"success":false,"message":"Validasi gagal.","errors":{"field":["Field wajib diisi."]}}
+     * @authenticated
      */
     public function restore(DeleteAccountRequest $request): JsonResponse
     {

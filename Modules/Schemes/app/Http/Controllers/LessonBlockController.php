@@ -22,7 +22,14 @@ class LessonBlockController extends Controller
     public function __construct(private LessonBlockService $service) {}
 
     /**
+     * Daftar Blok Lesson
+     *
+     *
      * @summary Daftar Blok Lesson
+     *
+     * @response 200 scenario="Success" {"success":true,"message":"Success","data":[{"id":1,"name":"Example LessonBlock"}],"meta":{"current_page":1,"last_page":5,"per_page":15,"total":75},"links":{"first":"...","last":"...","prev":null,"next":"..."}}
+     * @response 401 scenario="Unauthorized" {"success":false,"message":"Tidak terotorisasi."}
+     * @authenticated
      */
     public function index(Course $course, Unit $unit, Lesson $lesson)
     {
@@ -68,7 +75,15 @@ class LessonBlockController extends Controller
     }
 
     /**
+     * Buat Blok Lesson Baru
+     *
+     *
      * @summary Buat Blok Lesson Baru
+     *
+     * @response 201 scenario="Success" {"success":true,"message":"LessonBlock berhasil dibuat.","data":{"id":1,"name":"New LessonBlock"}}
+     * @response 401 scenario="Unauthorized" {"success":false,"message":"Tidak terotorisasi."}
+     * @response 422 scenario="Validation Error" {"success":false,"message":"Validasi gagal.","errors":{"field":["Field wajib diisi."]}}
+     * @authenticated
      */
     public function store(LessonBlockRequest $request, Course $course, Unit $unit, Lesson $lesson)
     {
@@ -107,7 +122,15 @@ class LessonBlockController extends Controller
     }
 
     /**
+     * Detail Blok Lesson
+     *
+     *
      * @summary Detail Blok Lesson
+     *
+     * @response 200 scenario="Success" {"success":true,"message":"Success","data":{"id":1,"name":"Example LessonBlock"}}
+     * @response 401 scenario="Unauthorized" {"success":false,"message":"Tidak terotorisasi."}
+     * @response 404 scenario="Not Found" {"success":false,"message":"LessonBlock tidak ditemukan."}
+     * @authenticated
      */
     public function show(Course $course, Unit $unit, Lesson $lesson, LessonBlock $block)
     {
@@ -152,7 +175,16 @@ class LessonBlockController extends Controller
     }
 
     /**
+     * Perbarui Blok Lesson
+     *
+     *
      * @summary Perbarui Blok Lesson
+     *
+     * @response 200 scenario="Success" {"success":true,"message":"LessonBlock berhasil diperbarui.","data":{"id":1,"name":"Updated LessonBlock"}}
+     * @response 401 scenario="Unauthorized" {"success":false,"message":"Tidak terotorisasi."}
+     * @response 404 scenario="Not Found" {"success":false,"message":"LessonBlock tidak ditemukan."}
+     * @response 422 scenario="Validation Error" {"success":false,"message":"Validasi gagal.","errors":{"field":["Field wajib diisi."]}}
+     * @authenticated
      */
     public function update(LessonBlockRequest $request, Course $course, Unit $unit, Lesson $lesson, LessonBlock $block)
     {
@@ -180,7 +212,15 @@ class LessonBlockController extends Controller
     }
 
     /**
+     * Hapus Blok Lesson
+     *
+     *
      * @summary Hapus Blok Lesson
+     *
+     * @response 200 scenario="Success" {"success":true,"message":"LessonBlock berhasil dihapus.","data":[]}
+     * @response 401 scenario="Unauthorized" {"success":false,"message":"Tidak terotorisasi."}
+     * @response 404 scenario="Not Found" {"success":false,"message":"LessonBlock tidak ditemukan."}
+     * @authenticated
      */
     public function destroy(Course $course, Unit $unit, Lesson $lesson, LessonBlock $block)
     {

@@ -27,14 +27,16 @@ class GamificationController extends Controller
     ) {}
 
     /**
-     * Get user's gamification summary.
+     * Mengambil ringkasan gamifikasi user
+     *
+     * Mengambil ringkasan lengkap gamifikasi user termasuk total XP, level, streak, jumlah badge, dan ranking di leaderboard.
+     *
      *
      * @summary Mengambil ringkasan gamifikasi user
+     * @response 200 scenario="Success" {"success": true, "data": {"total_xp": 1500, "level": 5, "xp_to_next_level": 200, "progress_to_next_level": 75, "badges_count": 3, "current_streak": 7, "longest_streak": 14, "rank": 25, "active_challenges": 2}}
      *
-     * @description Mengambil ringkasan lengkap gamifikasi user termasuk total XP, level, streak, jumlah badge, dan ranking di leaderboard.
-     *
-     * @response 200 {"success": true, "data": {"total_xp": 1500, "level": 5, "xp_to_next_level": 200, "progress_to_next_level": 75, "badges_count": 3, "current_streak": 7, "longest_streak": 14, "rank": 25, "active_challenges": 2}}
-     */
+     * @authenticated
+     */    
     public function summary(Request $request): JsonResponse
     {
         $userId = $request->user()->id;
@@ -58,14 +60,16 @@ class GamificationController extends Controller
     }
 
     /**
-     * Get user's badges.
+     * Mengambil daftar badge user
+     *
+     * Mengambil semua badge yang telah diperoleh user, diurutkan berdasarkan waktu perolehan terbaru.
+     *
      *
      * @summary Mengambil daftar badge user
+     * @response 200 scenario="Success" {"success": true, "data": {"badges": [{"id": 1, "code": "first_login", "name": "Pemula", "description": "Login pertama kali", "icon_url": "https://example.com/badges/first_login.png", "type": "achievement", "awarded_at": "2024-01-15T10:00:00Z"}]}}
      *
-     * @description Mengambil semua badge yang telah diperoleh user, diurutkan berdasarkan waktu perolehan terbaru.
-     *
-     * @response 200 {"success": true, "data": {"badges": [{"id": 1, "code": "first_login", "name": "Pemula", "description": "Login pertama kali", "icon_url": "https://example.com/badges/first_login.png", "type": "achievement", "awarded_at": "2024-01-15T10:00:00Z"}]}}
-     */
+     * @authenticated
+     */    
     public function badges(Request $request): JsonResponse
     {
         $userId = $request->user()->id;
@@ -90,16 +94,18 @@ class GamificationController extends Controller
     }
 
     /**
-     * Get user's points history.
+     * Mengambil riwayat XP user
+     *
+     * Mengambil riwayat perolehan XP user dengan pagination. Menampilkan sumber XP, alasan, dan deskripsi.
+     *
      *
      * @summary Mengambil riwayat XP user
-     *
-     * @description Mengambil riwayat perolehan XP user dengan pagination. Menampilkan sumber XP, alasan, dan deskripsi.
-     *
      * @queryParam per_page integer Jumlah item per halaman. Default: 15. Example: 15
      *
-     * @response 200 {"success": true, "data": {"points": [{"id": 1, "points": 50, "source_type": "lesson_complete", "source_type_label": "Menyelesaikan Pelajaran", "reason": "completion", "reason_label": "Penyelesaian", "description": "Menyelesaikan pelajaran Introduction to Laravel", "created_at": "2024-01-15T10:00:00Z"}], "meta": {"current_page": 1, "per_page": 15, "total": 100, "last_page": 7}}}
-     */
+     * @response 200 scenario="Success" {"success": true, "data": {"points": [{"id": 1, "points": 50, "source_type": "lesson_complete", "source_type_label": "Menyelesaikan Pelajaran", "reason": "completion", "reason_label": "Penyelesaian", "description": "Menyelesaikan pelajaran Introduction to Laravel", "created_at": "2024-01-15T10:00:00Z"}], "meta": {"current_page": 1, "per_page": 15, "total": 100, "last_page": 7}}}
+     *
+     * @authenticated
+     */    
     public function pointsHistory(Request $request): JsonResponse
     {
         $userId = $request->user()->id;
@@ -134,14 +140,16 @@ class GamificationController extends Controller
     }
 
     /**
-     * Get user's achievements/milestones.
+     * Mengambil pencapaian user
+     *
+     * Mengambil daftar milestone/pencapaian user beserta progress menuju milestone berikutnya. Milestone berdasarkan total XP yang dikumpulkan.
+     *
      *
      * @summary Mengambil pencapaian user
+     * @response 200 scenario="Success" {"success": true, "data": {"achievements": [{"name": "Pemula", "xp_required": 100, "level_required": 1, "achieved": true, "progress": 100}, {"name": "Pelajar Aktif", "xp_required": 500, "level_required": 5, "achieved": false, "progress": 60}], "next_milestone": {"name": "Pelajar Aktif", "xp_required": 500, "level_required": 5, "achieved": false, "progress": 60}, "current_xp": 300, "current_level": 3}}
      *
-     * @description Mengambil daftar milestone/pencapaian user beserta progress menuju milestone berikutnya. Milestone berdasarkan total XP yang dikumpulkan.
-     *
-     * @response 200 {"success": true, "data": {"achievements": [{"name": "Pemula", "xp_required": 100, "level_required": 1, "achieved": true, "progress": 100}, {"name": "Pelajar Aktif", "xp_required": 500, "level_required": 5, "achieved": false, "progress": 60}], "next_milestone": {"name": "Pelajar Aktif", "xp_required": 500, "level_required": 5, "achieved": false, "progress": 60}, "current_xp": 300, "current_level": 3}}
-     */
+     * @authenticated
+     */    
     public function achievements(Request $request): JsonResponse
     {
         $userId = $request->user()->id;

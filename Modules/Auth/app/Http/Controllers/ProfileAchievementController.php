@@ -13,7 +13,14 @@ use Modules\Auth\Models\PinnedBadge;
 class ProfileAchievementController extends Controller
 {
     /**
+     * Daftar Badge dan Pencapaian
+     *
+     *
      * @summary Daftar Badge dan Pencapaian
+     *
+     * @response 200 scenario="Success" {"success":true,"message":"Success","data":[{"id":1,"name":"Example ProfileAchievement"}],"meta":{"current_page":1,"last_page":5,"per_page":15,"total":75},"links":{"first":"...","last":"...","prev":null,"next":"..."}}
+     * @response 401 scenario="Unauthorized" {"success":false,"message":"Tidak terotorisasi."}
+     * @authenticated
      */
     public function index(Request $request): JsonResponse
     {
@@ -32,7 +39,14 @@ class ProfileAchievementController extends Controller
     }
 
     /**
+     * Sematkan Badge ke Profil
+     *
+     *
      * @summary Sematkan Badge ke Profil
+     *
+     * @response 200 scenario="Success" {"success":true,"message":"Success","data":{"id":1,"name":"Example ProfileAchievement"}}
+     * @response 401 scenario="Unauthorized" {"success":false,"message":"Tidak terotorisasi."}
+     * @authenticated
      */
     public function pinBadge(Request $request, int $badgeId): JsonResponse
     {
@@ -85,7 +99,14 @@ class ProfileAchievementController extends Controller
     }
 
     /**
+     * Lepas Badge dari Profil
+     *
+     *
      * @summary Lepas Badge dari Profil
+     *
+     * @response 200 scenario="Success" {"success":true,"message":"Success","data":{"id":1,"name":"Example ProfileAchievement"}}
+     * @response 401 scenario="Unauthorized" {"success":false,"message":"Tidak terotorisasi."}
+     * @authenticated
      */
     public function unpinBadge(Request $request, int $badgeId): JsonResponse
     {

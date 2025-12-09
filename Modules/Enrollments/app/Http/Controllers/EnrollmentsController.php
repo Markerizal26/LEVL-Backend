@@ -20,16 +20,38 @@ class EnrollmentsController extends Controller
     public function __construct(private EnrollmentService $service) {}
 
     /**
+     * Daftar Semua Pendaftaran (Superadmin)
+     *
+     * Mengambil daftar semua enrollment di sistem. Hanya Superadmin yang dapat mengakses endpoint ini.
+     *
+     *
      * @summary Daftar Semua Pendaftaran (Superadmin)
+     * @queryParam page integer Halaman pagination. Example: 1
+     * @queryParam per_page integer Items per halaman. Example: 15
+     * @queryParam filter[course_id] integer Filter berdasarkan kursus. Example: 1
+     * @queryParam filter[user_id] integer Filter berdasarkan user. Example: 5
+     * @queryParam filter[status] string Filter berdasarkan status (pending|active|completed|cancelled). Example: active
+     * @queryParam sort string Sorting field. Example: -created_at
      *
-     * @description Mengambil daftar semua enrollment di sistem. Hanya Superadmin yang dapat mengakses endpoint ini.
+     * @allowedFilters course_id,user_id,status,enrollment_date
      *
-     * Requires: Superadmin
+     * @queryParam course_id string Filter berdasarkan ID kursus. Example: 
+     * @queryParam user_id string Filter berdasarkan ID pengguna. Example: 
+     * @queryParam status string Filter berdasarkan status. Example: 
+     * @queryParam enrollment_date string Filter berdasarkan tanggal pendaftaran. Example: 
      *
-     * @response 200 {"success": true, "data": {"enrollments": []}}
-     * @response 403 {"success": false, "message": "Anda tidak memiliki akses untuk melihat seluruh enrollment."}
-     * @response 501 {"success": false, "message": "Endpoint tidak tersedia untuk saat ini."}
-     */
+     * @allowedSorts created_at,updated_at,enrollment_date,completion_date
+     *
+     * @queryParam sort string Field untuk sorting. Allowed: created_at, updated_at, enrollment_date, completion_date. Prefix dengan '-' untuk descending. Example: -created_at
+     *
+     * @response 200 scenario="Success" {"success": true, "data": {"enrollments": []}}
+     * @response 403 scenario="Forbidden" {"success":false,"message":"Anda tidak memiliki akses untuk melihat seluruh enrollment."}
+     * @response 501 scenario="Response" {"success":false,"message":"Endpoint tidak tersedia untuk saat ini."}
+     *
+     * @authenticated
+     *
+     * @role Superadmin
+     */    
     public function index(Request $request)
     {
         /** @var \Modules\Auth\Models\User $user */
@@ -44,17 +66,35 @@ class EnrollmentsController extends Controller
     }
 
     /**
+     * Daftar Pendaftaran per Kursus
+     *
+     * Mengambil daftar enrollment untuk kursus tertentu. Hanya instructor atau admin kursus yang dapat mengakses.
+     *
+     *
      * @summary Daftar Pendaftaran per Kursus
-     *
-     * @description Mengambil daftar enrollment untuk kursus tertentu. Hanya instructor atau admin kursus yang dapat mengakses.
-     *
-     * Requires: Admin, Instructor (course owner), Superadmin
-     *
+     * @queryParam page integer Halaman pagination. Example: 1
      * @queryParam per_page integer Jumlah item per halaman. Default: 15. Example: 15
+     * @queryParam filter[status] string Filter berdasarkan status. Example: active
+     * @queryParam filter[user_id] integer Filter berdasarkan user. Example: 5
+     * @queryParam sort string Sorting field. Example: -enrollment_date
      *
-     * @response 200 {"success": true, "data": {"enrollments": [{"id": 1, "user_id": 1, "course_id": 1, "status": "active", "user": {"id": 1, "name": "John Doe"}}]}, "meta": {"current_page": 1, "per_page": 15, "total": 50}}
-     * @response 403 {"success": false, "message": "Anda tidak memiliki akses untuk melihat enrollment course ini."}
-     */
+     * @allowedFilters status,user_id,enrollment_date
+     *
+     * @queryParam status string Filter berdasarkan status. Example: 
+     * @queryParam user_id string Filter berdasarkan ID pengguna. Example: 
+     * @queryParam enrollment_date string Filter berdasarkan tanggal pendaftaran. Example: 
+     *
+     * @allowedSorts created_at,enrollment_date,completion_date
+     *
+     * @queryParam sort string Field untuk sorting. Allowed: created_at, enrollment_date, completion_date. Prefix dengan '-' untuk descending. Example: -created_at
+     *
+     * @response 200 scenario="Success" {"success": true, "data": {"enrollments": [{"id": 1, "user_id": 1, "course_id": 1, "status": "active", "user": {"id": 1, "name": "John Doe"}}]}, "meta": {"current_page": 1, "per_page": 15, "total": 50}}
+     * @response 403 scenario="Forbidden" {"success":false,"message":"Anda tidak memiliki akses untuk melihat enrollment course ini."}
+     *
+     * @authenticated
+     *
+     * @role Admin|Instructor|Superadmin
+     */    
     public function indexByCourse(Request $request, Course $course)
     {
         /** @var \Modules\Auth\Models\User $user */
@@ -71,19 +111,23 @@ class EnrollmentsController extends Controller
     }
 
     /**
-     * @summary Daftar Pendaftaran yang Dikelola
+     * Daftar Pendaftaran yang Dikelola
      *
-     * @description Mengambil daftar enrollment dari kursus yang dikelola oleh user. Admin/Instructor melihat enrollment dari kursus mereka, Superadmin melihat semua.
+     * Mengambil daftar enrollment dari kursus yang dikelola oleh user. Admin/Instructor melihat enrollment dari kursus mereka, Superadmin melihat semua.
      *
      * Requires: Admin, Instructor, Superadmin
      *
+     *
+     * @summary Daftar Pendaftaran yang Dikelola
      * @queryParam per_page integer Jumlah item per halaman. Default: 15. Example: 15
      * @queryParam filter[course_slug] string Filter berdasarkan slug kursus. Example: belajar-laravel
      *
-     * @response 200 {"success": true, "data": {"enrollments": [{"id": 1, "user_id": 1, "course_id": 1, "status": "active"}]}, "meta": {"current_page": 1, "per_page": 15, "total": 50}}
-     * @response 403 {"success": false, "message": "Anda tidak memiliki akses untuk melihat enrollment ini."}
-     * @response 404 {"success": false, "message": "Course tidak ditemukan atau tidak berada di bawah pengelolaan Anda."}
-     */
+     * @response 200 scenario="Success" {"success": true, "data": {"enrollments": [{"id": 1, "user_id": 1, "course_id": 1, "status": "active"}]}, "meta": {"current_page": 1, "per_page": 15, "total": 50}}
+     * @response 403 scenario="Forbidden" {"success":false,"message":"Anda tidak memiliki akses untuk melihat enrollment ini."}
+     * @response 404 scenario="Not Found" {"success":false,"message":"Course tidak ditemukan atau tidak berada di bawah pengelolaan Anda."}
+     *
+     * @authenticated
+     */    
     public function indexManaged(Request $request)
     {
         /** @var \Modules\Auth\Models\User $user */
@@ -130,16 +174,20 @@ class EnrollmentsController extends Controller
     }
 
     /**
-     * @summary Daftar ke Kursus
+     * Daftar ke Kursus
      *
-     * @description Mendaftarkan user ke kursus. Jika kursus memerlukan enrollment key, key harus disertakan. Status enrollment bisa langsung active atau pending tergantung konfigurasi kursus.
+     * Mendaftarkan user ke kursus. Jika kursus memerlukan enrollment key, key harus disertakan. Status enrollment bisa langsung active atau pending tergantung konfigurasi kursus.
      *
      * Requires: Student
      *
-     * @response 200 {"success": true, "data": {"enrollment": {"id": 1, "user_id": 1, "course_id": 1, "status": "active", "enrolled_at": "2024-01-15T10:00:00Z"}}, "message": "Berhasil mendaftar ke kursus."}
-     * @response 403 {"success": false, "message": "Hanya peserta yang dapat melakukan enrollment."}
-     * @response 422 {"success": false, "message": "Enrollment key tidak valid."}
-     */
+     *
+     * @summary Daftar ke Kursus
+     * @response 200 scenario="Success" {"success": true, "data": {"enrollment": {"id": 1, "user_id": 1, "course_id": 1, "status": "active", "enrolled_at": "2024-01-15T10:00:00Z"}}, "message": "Berhasil mendaftar ke kursus."}
+     * @response 403 scenario="Forbidden" {"success":false,"message":"Hanya peserta yang dapat melakukan enrollment."}
+     * @response 422 scenario="Validation Error" {"success":false,"message":"Enrollment key tidak valid."}
+     *
+     * @authenticated
+     */    
     public function enroll(Request $request, Course $course)
     {
         /** @var \Modules\Auth\Models\User $user */
@@ -167,16 +215,20 @@ class EnrollmentsController extends Controller
     }
 
     /**
-     * @summary Batalkan Permintaan Pendaftaran
+     * Batalkan Permintaan Pendaftaran
      *
-     * @description Membatalkan permintaan enrollment yang masih pending. Superadmin dapat membatalkan enrollment user lain dengan menyertakan user_id.
+     * Membatalkan permintaan enrollment yang masih pending. Superadmin dapat membatalkan enrollment user lain dengan menyertakan user_id.
      *
      * Requires: Student (own), Superadmin (any)
      *
-     * @response 200 {"success": true, "data": {"enrollment": {"id": 1, "status": "cancelled"}}, "message": "Permintaan enrollment berhasil dibatalkan."}
-     * @response 403 {"success": false, "message": "Anda tidak memiliki akses untuk membatalkan enrollment ini."}
-     * @response 404 {"success": false, "message": "Permintaan enrollment tidak ditemukan untuk course ini."}
-     */
+     *
+     * @summary Batalkan Permintaan Pendaftaran
+     * @response 200 scenario="Success" {"success": true, "data": {"enrollment": {"id": 1, "status": "cancelled"}}, "message": "Permintaan enrollment berhasil dibatalkan."}
+     * @response 403 scenario="Forbidden" {"success":false,"message":"Anda tidak memiliki akses untuk membatalkan enrollment ini."}
+     * @response 404 scenario="Not Found" {"success":false,"message":"Permintaan enrollment tidak ditemukan untuk course ini."}
+     *
+     * @authenticated
+     */    
     public function cancel(Request $request, Course $course)
     {
         /** @var \Modules\Auth\Models\User $user */
@@ -203,16 +255,20 @@ class EnrollmentsController extends Controller
     }
 
     /**
-     * @summary Undur Diri dari Kursus
+     * Undur Diri dari Kursus
      *
-     * @description Mengundurkan diri dari kursus yang sudah aktif. Progress pembelajaran akan disimpan jika user mendaftar kembali. Superadmin dapat mengundurkan user lain.
+     * Mengundurkan diri dari kursus yang sudah aktif. Progress pembelajaran akan disimpan jika user mendaftar kembali. Superadmin dapat mengundurkan user lain.
      *
      * Requires: Student (own), Superadmin (any)
      *
-     * @response 200 {"success": true, "data": {"enrollment": {"id": 1, "status": "withdrawn"}}, "message": "Anda berhasil mengundurkan diri dari course."}
-     * @response 403 {"success": false, "message": "Anda tidak memiliki akses untuk mengundurkan diri dari enrollment ini."}
-     * @response 404 {"success": false, "message": "Enrollment tidak ditemukan untuk course ini."}
-     */
+     *
+     * @summary Undur Diri dari Kursus
+     * @response 200 scenario="Success" {"success": true, "data": {"enrollment": {"id": 1, "status": "withdrawn"}}, "message": "Anda berhasil mengundurkan diri dari course."}
+     * @response 403 scenario="Forbidden" {"success":false,"message":"Anda tidak memiliki akses untuk mengundurkan diri dari enrollment ini."}
+     * @response 404 scenario="Not Found" {"success":false,"message":"Enrollment tidak ditemukan untuk course ini."}
+     *
+     * @authenticated
+     */    
     public function withdraw(Request $request, Course $course)
     {
         /** @var \Modules\Auth\Models\User $user */
@@ -245,18 +301,22 @@ class EnrollmentsController extends Controller
     }
 
     /**
-     * @summary Status Pendaftaran
+     * Status Pendaftaran
      *
-     * @description Mengecek status enrollment user pada kursus tertentu. Mengembalikan status "not_enrolled" jika belum terdaftar.
+     * Mengecek status enrollment user pada kursus tertentu. Mengembalikan status "not_enrolled" jika belum terdaftar.
      *
      * Requires: Student (own), Admin, Instructor (course owner), Superadmin
      *
+     *
+     * @summary Status Pendaftaran
      * @queryParam user_id integer ID user untuk dicek (Superadmin only). Example: 1
      *
-     * @response 200 {"success": true, "data": {"status": "active", "enrollment": {"id": 1, "user_id": 1, "course_id": 1, "status": "active", "course": {"id": 1, "title": "Belajar Laravel"}}}, "message": "Status enrollment berhasil diambil."}
-     * @response 200 {"success": true, "data": {"status": "not_enrolled", "enrollment": null}, "message": "Anda belum terdaftar pada course ini."}
-     * @response 403 {"success": false, "message": "Anda tidak memiliki akses untuk melihat status enrollment ini."}
-     */
+     * @response 200 scenario="Success" {"success": true, "data": {"status": "active", "enrollment": {"id": 1, "user_id": 1, "course_id": 1, "status": "active", "course": {"id": 1, "title": "Belajar Laravel"}}}, "message": "Status enrollment berhasil diambil."}
+     * @response 200 scenario="Success" {"success": true, "data": {"status": "not_enrolled", "enrollment": null}, "message": "Anda belum terdaftar pada course ini."}
+     * @response 403 scenario="Forbidden" {"success":false,"message":"Anda tidak memiliki akses untuk melihat status enrollment ini."}
+     *
+     * @authenticated
+     */    
     public function status(Request $request, Course $course)
     {
         /** @var \Modules\Auth\Models\User $user */
@@ -298,15 +358,19 @@ class EnrollmentsController extends Controller
     }
 
     /**
-     * @summary Setujui Pendaftaran
+     * Setujui Pendaftaran
      *
-     * @description Menyetujui permintaan enrollment yang masih pending. Hanya instructor atau admin kursus yang dapat menyetujui.
+     * Menyetujui permintaan enrollment yang masih pending. Hanya instructor atau admin kursus yang dapat menyetujui.
      *
      * Requires: Admin, Instructor (course owner), Superadmin
      *
-     * @response 200 {"success": true, "data": {"enrollment": {"id": 1, "status": "active", "approved_at": "2024-01-15T10:00:00Z"}}, "message": "Permintaan enrollment disetujui."}
-     * @response 403 {"success": false, "message": "Anda tidak memiliki akses untuk menyetujui enrollment ini."}
-     */
+     *
+     * @summary Setujui Pendaftaran
+     * @response 200 scenario="Success" {"success": true, "data": {"enrollment": {"id": 1, "status": "active", "approved_at": "2024-01-15T10:00:00Z"}}, "message": "Permintaan enrollment disetujui."}
+     * @response 403 scenario="Forbidden" {"success":false,"message":"Anda tidak memiliki akses untuk menyetujui enrollment ini."}
+     *
+     * @authenticated
+     */    
     public function approve(Enrollment $enrollment)
     {
         /** @var \Modules\Auth\Models\User $user */
@@ -324,15 +388,19 @@ class EnrollmentsController extends Controller
     }
 
     /**
-     * @summary Tolak Pendaftaran
+     * Tolak Pendaftaran
      *
-     * @description Menolak permintaan enrollment yang masih pending. Hanya instructor atau admin kursus yang dapat menolak.
+     * Menolak permintaan enrollment yang masih pending. Hanya instructor atau admin kursus yang dapat menolak.
      *
      * Requires: Admin, Instructor (course owner), Superadmin
      *
-     * @response 200 {"success": true, "data": {"enrollment": {"id": 1, "status": "declined"}}, "message": "Permintaan enrollment ditolak."}
-     * @response 403 {"success": false, "message": "Anda tidak memiliki akses untuk menolak enrollment ini."}
-     */
+     *
+     * @summary Tolak Pendaftaran
+     * @response 200 scenario="Success" {"success": true, "data": {"enrollment": {"id": 1, "status": "declined"}}, "message": "Permintaan enrollment ditolak."}
+     * @response 403 scenario="Forbidden" {"success":false,"message":"Anda tidak memiliki akses untuk menolak enrollment ini."}
+     *
+     * @authenticated
+     */    
     public function decline(Enrollment $enrollment)
     {
         /** @var \Modules\Auth\Models\User $user */
@@ -350,15 +418,19 @@ class EnrollmentsController extends Controller
     }
 
     /**
-     * @summary Hapus Pendaftaran dari Kursus
+     * Hapus Pendaftaran dari Kursus
      *
-     * @description Mengeluarkan peserta dari kursus. Hanya instructor atau admin kursus yang dapat mengeluarkan peserta.
+     * Mengeluarkan peserta dari kursus. Hanya instructor atau admin kursus yang dapat mengeluarkan peserta.
      *
      * Requires: Admin, Instructor (course owner), Superadmin
      *
-     * @response 200 {"success": true, "data": {"enrollment": {"id": 1, "status": "removed"}}, "message": "Peserta berhasil dikeluarkan dari course."}
-     * @response 403 {"success": false, "message": "Anda tidak memiliki akses untuk mengeluarkan peserta dari course ini."}
-     */
+     *
+     * @summary Hapus Pendaftaran dari Kursus
+     * @response 200 scenario="Success" {"success": true, "data": {"enrollment": {"id": 1, "status": "removed"}}, "message": "Peserta berhasil dikeluarkan dari course."}
+     * @response 403 scenario="Forbidden" {"success":false,"message":"Anda tidak memiliki akses untuk mengeluarkan peserta dari course ini."}
+     *
+     * @authenticated
+     */    
     public function remove(Enrollment $enrollment)
     {
         /** @var \Modules\Auth\Models\User $user */

@@ -21,6 +21,13 @@ class SearchController extends Controller
 
     /**
      * Search content (news and announcements).
+     *
+     *
+     * @summary Search content (news and announcements).
+     *
+     * @response 200 scenario="Success" {"success":true,"message":"Success","data":{"id":1,"name":"Example Search"}}
+     * @response 401 scenario="Unauthorized" {"success":false,"message":"Tidak terotorisasi."}
+     * @authenticated
      */
     public function search(Request $request): JsonResponse
     {

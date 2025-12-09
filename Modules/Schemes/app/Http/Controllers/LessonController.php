@@ -26,13 +26,20 @@ class LessonController extends Controller
     ) {}
 
     /**
+     * Daftar Lesson
+     *
+     * Mengambil daftar lesson dalam sebuah unit kompetensi. Student harus enrolled di course untuk mengakses.
+     *
+     *
      * @summary Daftar Lesson
-     *
-     * @description Mengambil daftar lesson dalam sebuah unit kompetensi. Student harus enrolled di course untuk mengakses.
-     *
      * @allowedFilters status, content_type
      *
+     * @queryParam status string Filter berdasarkan status. Example: 
+     * @queryParam content_type string Filter berdasarkan tipe konten. Example: 
+     *
      * @allowedSorts order, title, created_at
+     *
+     * @queryParam sort string Field untuk sorting. Allowed: order, title, created_at. Prefix dengan '-' untuk descending. Example: -created_at
      *
      * @allowedIncludes blocks, unit
      *
@@ -40,9 +47,11 @@ class LessonController extends Controller
      * @filterEnum content_type markdown|video|link
      *
      * @response 200 scenario="Success" {"success": true, "message": "Success", "data": [{"id": 1, "title": "Lesson 1: Pengenalan", "content_type": "markdown", "order": 1, "status": "published", "duration_minutes": 15}], "meta": {"current_page": 1, "last_page": 1, "per_page": 15, "total": 5}}
-     * @response 403 scenario="Not Enrolled" {"success": false, "message": "Anda tidak memiliki akses untuk melihat lessons di course ini."}
-     * @response 404 scenario="Unit Not Found" {"success": false, "message": "Unit tidak ditemukan di course ini."}
-     */
+     * @response 403 scenario="Not Enrolled" {"success":false,"message":"Anda tidak memiliki akses untuk melihat lessons di course ini."}
+     * @response 404 scenario="Unit Not Found" {"success":false,"message":"Unit tidak ditemukan di course ini."}
+     *
+     * @authenticated
+     */    
     public function index(Request $request, Course $course, Unit $unit)
     {
         /** @var \Modules\Auth\Models\User $user */
@@ -85,15 +94,19 @@ class LessonController extends Controller
     }
 
     /**
+     * Buat Lesson Baru
+     *
+     * Membuat lesson baru dalam sebuah unit. **Memerlukan role: Admin atau Superadmin (owner course)**
+     *
+     *
      * @summary Buat Lesson Baru
-     *
-     * @description Membuat lesson baru dalam sebuah unit. **Memerlukan role: Admin atau Superadmin (owner course)**
-     *
      * @response 201 scenario="Success" {"success": true, "message": "Lesson berhasil dibuat.", "data": {"lesson": {"id": 1, "title": "Lesson 1", "content_type": "markdown", "order": 1, "status": "draft"}}}
-     * @response 401 scenario="Unauthorized" {"success": false, "message": "Tidak terotorisasi."}
-     * @response 403 scenario="Forbidden" {"success": false, "message": "Anda hanya dapat membuat lesson untuk course yang Anda buat atau course yang Anda kelola sebagai admin."}
-     * @response 404 scenario="Unit Not Found" {"success": false, "message": "Unit tidak ditemukan di course ini."}
-     */
+     * @response 401 scenario="Unauthorized" {"success":false,"message":"Tidak terotorisasi."}
+     * @response 403 scenario="Forbidden" {"success":false,"message":"Anda hanya dapat membuat lesson untuk course yang Anda buat atau course yang Anda kelola sebagai admin."}
+     * @response 404 scenario="Unit Not Found" {"success":false,"message":"Unit tidak ditemukan di course ini."}
+     *
+     * @authenticated
+     */    
     public function store(LessonRequest $request, Course $course, Unit $unit)
     {
         /** @var \Modules\Auth\Models\User $user */
@@ -128,15 +141,19 @@ class LessonController extends Controller
     }
 
     /**
+     * Detail Lesson
+     *
+     * Mengambil detail lesson termasuk content blocks. Student harus enrolled dan memenuhi prasyarat untuk mengakses.
+     *
+     *
      * @summary Detail Lesson
-     *
-     * @description Mengambil detail lesson termasuk content blocks. Student harus enrolled dan memenuhi prasyarat untuk mengakses.
-     *
      * @response 200 scenario="Success" {"success": true, "data": {"lesson": {"id": 1, "title": "Lesson 1", "content_type": "markdown", "content": "# Pengenalan...", "duration_minutes": 15, "blocks": []}}}
-     * @response 403 scenario="Locked" {"success": false, "message": "Lesson masih terkunci karena prasyarat belum selesai."}
-     * @response 403 scenario="Not Enrolled" {"success": false, "message": "Anda belum terdaftar pada course ini."}
-     * @response 404 scenario="Not Found" {"success": false, "message": "Lesson tidak ditemukan."}
-     */
+     * @response 403 scenario="Locked" {"success":false,"message":"Lesson masih terkunci karena prasyarat belum selesai."}
+     * @response 403 scenario="Not Enrolled" {"success":false,"message":"Anda belum terdaftar pada course ini."}
+     * @response 404 scenario="Not Found" {"success":false,"message":"Lesson tidak ditemukan."}
+     *
+     * @authenticated
+     */    
     public function show(Course $course, Unit $unit, Lesson $lesson)
     {
         /** @var \Modules\Auth\Models\User $user */
@@ -192,15 +209,19 @@ class LessonController extends Controller
     }
 
     /**
+     * Perbarui Lesson
+     *
+     * Memperbarui data lesson. **Memerlukan role: Admin atau Superadmin (owner course)**
+     *
+     *
      * @summary Perbarui Lesson
-     *
-     * @description Memperbarui data lesson. **Memerlukan role: Admin atau Superadmin (owner course)**
-     *
      * @response 200 scenario="Success" {"success": true, "message": "Lesson berhasil diperbarui.", "data": {"lesson": {"id": 1, "title": "Lesson 1 Updated"}}}
-     * @response 401 scenario="Unauthorized" {"success": false, "message": "Tidak terotorisasi."}
-     * @response 403 scenario="Forbidden" {"success": false, "message": "Anda tidak memiliki akses untuk mengubah lesson ini."}
-     * @response 404 scenario="Not Found" {"success": false, "message": "Lesson tidak ditemukan."}
-     */
+     * @response 401 scenario="Unauthorized" {"success":false,"message":"Tidak terotorisasi."}
+     * @response 403 scenario="Forbidden" {"success":false,"message":"Anda tidak memiliki akses untuk mengubah lesson ini."}
+     * @response 404 scenario="Not Found" {"success":false,"message":"Lesson tidak ditemukan."}
+     *
+     * @authenticated
+     */    
     public function update(LessonRequest $request, Course $course, Unit $unit, Lesson $lesson)
     {
         $found = $this->service->show($unit->id, $lesson->id);
@@ -221,15 +242,19 @@ class LessonController extends Controller
     }
 
     /**
+     * Hapus Lesson
+     *
+     * Menghapus lesson beserta semua blocks di dalamnya. **Memerlukan role: Admin atau Superadmin (owner course)**
+     *
+     *
      * @summary Hapus Lesson
+     * @response 200 scenario="Success" {"success":true,"message":"Lesson berhasil dihapus.","data":[]}
+     * @response 401 scenario="Unauthorized" {"success":false,"message":"Tidak terotorisasi."}
+     * @response 403 scenario="Forbidden" {"success":false,"message":"Anda tidak memiliki akses untuk menghapus lesson ini."}
+     * @response 404 scenario="Not Found" {"success":false,"message":"Lesson tidak ditemukan."}
      *
-     * @description Menghapus lesson beserta semua blocks di dalamnya. **Memerlukan role: Admin atau Superadmin (owner course)**
-     *
-     * @response 200 scenario="Success" {"success": true, "message": "Lesson berhasil dihapus.", "data": []}
-     * @response 401 scenario="Unauthorized" {"success": false, "message": "Tidak terotorisasi."}
-     * @response 403 scenario="Forbidden" {"success": false, "message": "Anda tidak memiliki akses untuk menghapus lesson ini."}
-     * @response 404 scenario="Not Found" {"success": false, "message": "Lesson tidak ditemukan."}
-     */
+     * @authenticated
+     */    
     public function destroy(Course $course, Unit $unit, Lesson $lesson)
     {
         $found = $this->service->show($unit->id, $lesson->id);
@@ -249,15 +274,19 @@ class LessonController extends Controller
     }
 
     /**
+     * Publish Lesson
+     *
+     * Mempublish lesson agar dapat diakses oleh student. **Memerlukan role: Admin atau Superadmin (owner course)**
+     *
+     *
      * @summary Publish Lesson
-     *
-     * @description Mempublish lesson agar dapat diakses oleh student. **Memerlukan role: Admin atau Superadmin (owner course)**
-     *
      * @response 200 scenario="Success" {"success": true, "message": "Lesson berhasil dipublish.", "data": {"lesson": {"id": 1, "status": "published"}}}
-     * @response 401 scenario="Unauthorized" {"success": false, "message": "Tidak terotorisasi."}
-     * @response 403 scenario="Forbidden" {"success": false, "message": "Anda tidak memiliki akses untuk mempublish lesson ini."}
-     * @response 404 scenario="Not Found" {"success": false, "message": "Lesson tidak ditemukan."}
-     */
+     * @response 401 scenario="Unauthorized" {"success":false,"message":"Tidak terotorisasi."}
+     * @response 403 scenario="Forbidden" {"success":false,"message":"Anda tidak memiliki akses untuk mempublish lesson ini."}
+     * @response 404 scenario="Not Found" {"success":false,"message":"Lesson tidak ditemukan."}
+     *
+     * @authenticated
+     */    
     public function publish(Course $course, Unit $unit, Lesson $lesson)
     {
         $found = $this->service->show($unit->id, $lesson->id);
@@ -277,15 +306,19 @@ class LessonController extends Controller
     }
 
     /**
+     * Unpublish Lesson
+     *
+     * Meng-unpublish lesson. **Memerlukan role: Admin atau Superadmin (owner course)**
+     *
+     *
      * @summary Unpublish Lesson
-     *
-     * @description Meng-unpublish lesson. **Memerlukan role: Admin atau Superadmin (owner course)**
-     *
      * @response 200 scenario="Success" {"success": true, "message": "Lesson berhasil diunpublish.", "data": {"lesson": {"id": 1, "status": "draft"}}}
-     * @response 401 scenario="Unauthorized" {"success": false, "message": "Tidak terotorisasi."}
-     * @response 403 scenario="Forbidden" {"success": false, "message": "Anda tidak memiliki akses untuk unpublish lesson ini."}
-     * @response 404 scenario="Not Found" {"success": false, "message": "Lesson tidak ditemukan."}
-     */
+     * @response 401 scenario="Unauthorized" {"success":false,"message":"Tidak terotorisasi."}
+     * @response 403 scenario="Forbidden" {"success":false,"message":"Anda tidak memiliki akses untuk unpublish lesson ini."}
+     * @response 404 scenario="Not Found" {"success":false,"message":"Lesson tidak ditemukan."}
+     *
+     * @authenticated
+     */    
     public function unpublish(Course $course, Unit $unit, Lesson $lesson)
     {
         $found = $this->service->show($unit->id, $lesson->id);
