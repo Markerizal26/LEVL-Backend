@@ -76,20 +76,20 @@ return [
     ],
 
     /*
-     * The list of servers of the API. By default, when `null`, server URL will be created from
-     * `scramble.api_path` and `scramble.api_domain` config variables. When providing an array, you
-     * will need to specify the local server URL manually (if needed).
-     *
-     * Example of non-default config (final URLs are generated using Laravel `url` helper):
-     *
-     * ```php
-     * 'servers' => [
-     *     'Live' => 'api',
-     *     'Prod' => 'https://scramble.dedoc.co/api',
-     * ],
-     * ```
+     * The list of servers of the API. Configured in AppServiceProvider::configureServers()
+     * for dynamic URL generation based on environment.
      */
     'servers' => null,
+
+    /*
+     * Rate limiting configuration for documentation.
+     * These values are used in PHPDoc annotations to document rate limits.
+     */
+    'rate_limits' => [
+        'default' => '60 requests per minute',
+        'auth' => '10 requests per minute',
+        'enrollment' => '5 requests per minute',
+    ],
 
     /**
      * Determines how Scramble stores the descriptions of enum cases.

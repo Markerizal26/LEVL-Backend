@@ -49,12 +49,36 @@ Tambahkan docblock singkat di controller method:
 /**
  * @summary Judul singkat endpoint
  * @description Endpoint ini digunakan untuk ...
+ * 
+ * @queryParam filter[status] string Filter berdasarkan status. Nilai: draft, pending, published. Example: published
+ * @queryParam filter[course_id] integer Filter berdasarkan ID kursus. Example: 1
+ * @queryParam sort string Field untuk sorting. Prefix - untuk descending. Example: -created_at
+ * @queryParam page integer Nomor halaman. Default: 1. Example: 1
+ * @queryParam per_page integer Jumlah item per halaman. Default: 15. Example: 15
  */
-public function store(Request $request)
+public function index(Request $request)
 {
     // ...
 }
 ```
+
+### 4. Format Filter Query Parameters
+
+Semua filter menggunakan format `filter[nama_filter]` dengan nilai yang valid:
+
+| Filter | Parameter | Nilai Valid | Contoh |
+|--------|-----------|-------------|--------|
+| Status Content | `filter[status]` | draft, pending, published, archived | `?filter[status]=published` |
+| Status User | `filter[status]` | active, inactive, suspended | `?filter[status]=active` |
+| Status Enrollment | `filter[status]` | pending, active, completed, cancelled | `?filter[status]=active` |
+| Priority | `filter[priority]` | low, normal, high, urgent | `?filter[priority]=high` |
+| Difficulty | `filter[difficulty_level]` | beginner, intermediate, advanced | `?filter[difficulty_level]=beginner` |
+| Course ID | `filter[course_id]` | integer | `?filter[course_id]=1` |
+| Category ID | `filter[category_id]` | integer | `?filter[category_id]=5` |
+| Date Range | `filter[date_from]`, `filter[date_to]` | Y-m-d | `?filter[date_from]=2025-01-01` |
+| Boolean | `filter[featured]`, `filter[unread]` | true, false | `?filter[featured]=true` |
+| User ID | `filter[user_id]` | integer | `?filter[user_id]=5` |
+| Type | `filter[type]` | varies by endpoint | `?filter[type]=daily` |
 
 ## 📁 Struktur Organisasi
 

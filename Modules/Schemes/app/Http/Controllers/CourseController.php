@@ -31,34 +31,26 @@ class CourseController extends Controller
      *
      *
      * @summary Daftar Kursus
-     * @allowedFilters filter[search], filter[status], filter[level_tag], filter[type], filter[category_id], filter[tag]
      *
-     * @queryParam filter[search] string Filter berdasarkan pencarian (nama, email, dll). Example: 
-     * @queryParam filter[status] string Filter berdasarkan status. Example: 
-     * @queryParam filter[level_tag] string Filter berdasarkan level tag. Example: 
-     * @queryParam filter[type] string Filter berdasarkan tipe. Example: 
-     * @queryParam filter[category_id] string Filter berdasarkan ID kategori. Example: 
-     * @queryParam filter[tag] string Filter berdasarkan tag. Example: 
-     *
-     * @allowedSorts id, code, title, created_at, updated_at, published_at
-     *
-     * @queryParam sort string Field untuk sorting. Allowed: id, code, title, created_at, updated_at, published_at. Prefix dengan '-' untuk descending. Example: -created_at
-     *
-     * @allowedIncludes tags, outcomes, units, instructor
-     *
-     * @filterEnum status draft|published|archived
-     * @filterEnum level_tag dasar|menengah|mahir
-     * @filterEnum type okupasi|kluster
-     *
+     * @queryParam search string Kata kunci pencarian (nama, deskripsi, code). Example: pemrograman
      * @queryParam page integer Nomor halaman. Example: 1
      * @queryParam per_page integer Jumlah item per halaman (default: 15). Example: 15
-     * @queryParam search string Kata kunci pencarian. Example: pemrograman
+     * @queryParam filter[status] string Filter berdasarkan status (draft|published|archived). Example: published
+     * @queryParam filter[level_tag] string Filter berdasarkan level tag (dasar|menengah|mahir). Example: dasar
+     * @queryParam filter[type] string Filter berdasarkan tipe (okupasi|kluster). Example: okupasi
+     * @queryParam filter[category_id] integer Filter berdasarkan ID kategori. Example: 1
+     * @queryParam filter[tag] string Filter berdasarkan tag. Example: laravel
+     * @queryParam sort string Field untuk sorting. Allowed: id, code, title, created_at, updated_at, published_at. Prefix dengan '-' untuk descending. Example: -created_at
+     *
+     * @allowedFilters status, level_tag, type, category_id, tag
+     * @allowedSorts id, code, title, created_at, updated_at, published_at
+     * @allowedIncludes tags, outcomes, units, instructor
      *
      * @response 200 scenario="Success" {"success": true, "message": "Success", "data": [{"id": 1, "code": "CS101", "title": "Pemrograman Dasar", "slug": "pemrograman-dasar", "status": "published", "level_tag": "dasar", "type": "okupasi"}], "meta": {"current_page": 1, "last_page": 5, "per_page": 15, "total": 75}, "links": {"first": "...", "last": "...", "prev": null, "next": "..."}}
      * @response 401 scenario="Unauthorized" {"success":false,"message":"Tidak terotorisasi."}
      *
      * @authenticated
-     */    
+     */
     public function index(Request $request)
     {
         $status = $request->input('filter.status');
@@ -78,6 +70,7 @@ class CourseController extends Controller
      *
      *
      * @summary Buat Kursus Baru
+     *
      * @bodyParam code string required Kode unik kursus. Example: CS101
      * @bodyParam title string required Judul kursus. Example: Pemrograman Dasar
      * @bodyParam description string optional Deskripsi kursus. Example: Belajar pemrograman dari dasar
@@ -98,7 +91,7 @@ class CourseController extends Controller
      * @authenticated
      *
      * @role Admin|Instructor
-     */    
+     */
     public function store(CourseRequest $request)
     {
         $data = $request->validated();
@@ -130,11 +123,12 @@ class CourseController extends Controller
      *
      *
      * @summary Detail Kursus
+     *
      * @response 200 scenario="Success" {"success": true, "data": {"course": {"id": 1, "code": "CS101", "title": "Pemrograman Dasar", "slug": "pemrograman-dasar", "description": "Kursus dasar pemrograman", "status": "published", "tags": [{"id": 1, "name": "Programming"}], "outcomes": [{"id": 1, "description": "Memahami dasar pemrograman"}]}}}
      * @response 404 scenario="Not Found" {"success":false,"message":"Course tidak ditemukan."}
      *
      * @authenticated
-     */    
+     */
     public function show(Course $course)
     {
         return $this->success(['course' => $course->load(['tags', 'outcomes'])]);
@@ -147,6 +141,7 @@ class CourseController extends Controller
      *
      *
      * @summary Perbarui Kursus
+     *
      * @bodyParam code string optional Kode unik kursus. Example: CS101
      * @bodyParam title string optional Judul kursus. Example: Pemrograman Dasar Updated
      * @bodyParam description string optional Deskripsi kursus. Example: Belajar pemrograman dari dasar
@@ -165,7 +160,7 @@ class CourseController extends Controller
      * @authenticated
      *
      * @role Admin|Instructor
-     */    
+     */
     public function update(CourseRequest $request, Course $course)
     {
         /** @var \Modules\Auth\Models\User $user */
@@ -202,13 +197,14 @@ class CourseController extends Controller
      *
      *
      * @summary Hapus Kursus
+     *
      * @response 200 scenario="Success" {"success":true,"message":"Course berhasil dihapus.","data":[]}
      * @response 401 scenario="Unauthorized" {"success":false,"message":"Tidak terotorisasi."}
      * @response 403 scenario="Forbidden" {"success":false,"message":"Anda tidak memiliki akses untuk menghapus kursus ini."}
      * @response 404 scenario="Not Found" {"success":false,"message":"Course tidak ditemukan."}
      *
      * @authenticated
-     */    
+     */
     public function destroy(Course $course)
     {
         $ok = $this->service->delete($course->id);
@@ -223,13 +219,14 @@ class CourseController extends Controller
      *
      *
      * @summary Publish Kursus
+     *
      * @response 200 scenario="Success" {"success": true, "message": "Course berhasil dipublish.", "data": {"course": {"id": 1, "status": "published", "published_at": "2024-01-15T10:00:00Z"}}}
      * @response 401 scenario="Unauthorized" {"success":false,"message":"Tidak terotorisasi."}
      * @response 403 scenario="Forbidden" {"success":false,"message":"Anda tidak memiliki akses untuk mempublish course ini."}
      * @response 404 scenario="Not Found" {"success":false,"message":"Course tidak ditemukan."}
      *
      * @authenticated
-     */    
+     */
     public function publish(Course $course)
     {
         /** @var \Modules\Auth\Models\User $user */
@@ -250,13 +247,14 @@ class CourseController extends Controller
      *
      *
      * @summary Unpublish Kursus
+     *
      * @response 200 scenario="Success" {"success": true, "message": "Course berhasil diunpublish.", "data": {"course": {"id": 1, "status": "draft", "published_at": null}}}
      * @response 401 scenario="Unauthorized" {"success":false,"message":"Tidak terotorisasi."}
      * @response 403 scenario="Forbidden" {"success":false,"message":"Anda tidak memiliki akses untuk unpublish course ini."}
      * @response 404 scenario="Not Found" {"success":false,"message":"Course tidak ditemukan."}
      *
      * @authenticated
-     */    
+     */
     public function unpublish(Course $course)
     {
         /** @var \Modules\Auth\Models\User $user */
@@ -277,18 +275,12 @@ class CourseController extends Controller
      *
      *
      * @summary Buat Kunci Pendaftaran
-     * @response 200 scenario="Success" {
-     *   "success": true,
-     *   "message": "Enrollment key berhasil digenerate.",
-     *   "data": {
-     *     "enrollment_key": "ABC123XYZ789",
-     *     "course": { "id": 1, "slug": "course-slug", "enrollment_key": "ABC123XYZ789" }
-     *   }
-     * }
+     *
+     * @response 200 scenario="Success" {"success":true,"message":"Enrollment key berhasil digenerate.","data":{"enrollment_key":"ABC123XYZ789","course":{"id":1,"slug":"course-slug","enrollment_key":"ABC123XYZ789"}}}
      * @response 403 scenario="Unauthorized" {"success":false,"message":"Anda tidak memiliki akses untuk generate enrollment key course ini."}
      *
      * @authenticated
-     */    
+     */
     public function generateEnrollmentKey(Course $course)
     {
         /** @var \Modules\Auth\Models\User $user */
@@ -325,23 +317,17 @@ class CourseController extends Controller
      *
      *
      * @summary Perbarui Pengaturan Pendaftaran
+     *
      * @bodyParam enrollment_type string required Enrollment type. Example: key_based Enum: auto_accept, key_based, approval
      * @bodyParam enrollment_key string optional Enrollment key (max 100 chars). Auto-generated if enrollment_type=key_based and not provided. Example: CUSTOMKEY123
      *
-     * @response 200 scenario="Success with key" {
-     *   "success": true,
-     *   "message": "Enrollment settings berhasil diperbarui.",
-     *   "data": {
-     *     "enrollment_key": "CUSTOMKEY123",
-     *     "course": { "enrollment_type": "key_based" }
-     *   }
-     * }
-     * @response 422 scenario="Validation Error" { "success": false, "errors": { "enrollment_type": ["Jenis enrollment tidak valid."] } }
+     * @response 200 scenario="Success with key" {"success":true,"message":"Enrollment settings berhasil diperbarui.","data":{"enrollment_key":"CUSTOMKEY123","course":{"enrollment_type":"key_based"}}}
+     * @response 422 scenario="Validation Error" {"success":false,"errors":{"enrollment_type":["Jenis enrollment tidak valid."]}}
      *
      * Update the enrollment key and enrollment type for a course. Only Admin/Instructor can update keys for their courses.
      *
      * @authenticated
-     */    
+     */
     public function updateEnrollmentKey(Request $request, Course $course)
     {
         /** @var \Modules\Auth\Models\User $user */
@@ -388,15 +374,12 @@ class CourseController extends Controller
      *
      *
      * @summary Hapus Kunci Pendaftaran
-     * @response 200 scenario="Success" {
-     *   "success": true,
-     *   "message": "Enrollment key berhasil dihapus dan enrollment type diubah ke auto_accept.",
-     *   "data": { "course": { "enrollment_type": "auto_accept", "enrollment_key": null } }
-     * }
+     *
+     * @response 200 scenario="Success" {"success":true,"message":"Enrollment key berhasil dihapus dan enrollment type diubah ke auto_accept.","data":{"course":{"enrollment_type":"auto_accept","enrollment_key":null}}}
      * @response 403 scenario="Unauthorized" {"success":false,"message":"Anda tidak memiliki akses untuk remove enrollment key course ini."}
      *
      * @authenticated
-     */    
+     */
     public function removeEnrollmentKey(Course $course)
     {
         /** @var \Modules\Auth\Models\User $user */

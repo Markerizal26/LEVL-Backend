@@ -25,7 +25,9 @@ class ScrambleDocsValidator
     ];
 
     private array $moduleStats = [];
+
     private array $issues = [];
+
     private bool $strictMode = false;
 
     public function __construct(bool $strictMode = false)
@@ -36,7 +38,7 @@ class ScrambleDocsValidator
     public function run(): int
     {
         echo "📊 Scramble API Documentation Validation\n";
-        echo str_repeat('=', 50) . "\n\n";
+        echo str_repeat('=', 50)."\n\n";
 
         $modulesPath = base_path('Modules');
         $this->scanDirectory($modulesPath);
@@ -48,7 +50,7 @@ class ScrambleDocsValidator
 
     private function scanDirectory(string $path): void
     {
-        if (!is_dir($path)) {
+        if (! is_dir($path)) {
             return;
         }
 
@@ -74,7 +76,7 @@ class ScrambleDocsValidator
         $content = file_get_contents($filePath);
         $moduleName = $this->extractModuleName($filePath);
 
-        if (!isset($this->moduleStats[$moduleName])) {
+        if (! isset($this->moduleStats[$moduleName])) {
             $this->moduleStats[$moduleName] = [
                 'total' => 0,
                 'complete' => 0,
@@ -123,7 +125,7 @@ class ScrambleDocsValidator
 
     private function extractDocblock(string $content, string $methodName): string
     {
-        $pattern = '/\/\*\*\s*\n((?:\s*\*.*\n)*?)\s*\*\/\s*\n\s*public function ' . $methodName . '\(/';
+        $pattern = '/\/\*\*\s*\n((?:\s*\*.*\n)*?)\s*\*\/\s*\n\s*public function '.$methodName.'\(/';
 
         if (preg_match($pattern, $content, $matches)) {
             return $matches[0];
@@ -156,7 +158,7 @@ class ScrambleDocsValidator
 
             // Validate JSON
             $jsonIssues = $this->validateResponseJson($docblock);
-            if (!empty($jsonIssues)) {
+            if (! empty($jsonIssues)) {
                 $this->stats['invalid_json']++;
                 $issues = array_merge($issues, $jsonIssues);
             }
@@ -164,7 +166,7 @@ class ScrambleDocsValidator
             $issues[] = 'Missing @response';
         }
 
-        if (!empty($issues)) {
+        if (! empty($issues)) {
             $this->issues[] = [
                 'file' => $this->getRelativePath($filePath),
                 'method' => $methodName,
@@ -177,22 +179,78 @@ class ScrambleDocsValidator
 
     private function validateResponseJson(string $docblock): array
     {
-        preg_match_all('/@response\s+\d+.*?(\{.+?\})/s', $docblock, $matches);
-
         $issues = [];
-        foreach ($matches[1] as $json) {
+
+        // Find all @response tags
+        preg_match_all('/@response\s+\d+[^\{]*(\{)/s', $docblock, $matches, PREG_OFFSET_CAPTURE);
+
+        foreach ($matches[1] as $match) {
+            $startPos = $match[1];
+            $json = $this->extractBalancedJson($docblock, $startPos);
+
+            if ($json === null) {
+                $issues[] = 'Invalid JSON in @response: Could not extract balanced braces';
+                break;
+            }
+
             // Clean up the JSON (remove comments, extra spaces)
             $json = preg_replace('/\/\/.*$/m', '', $json);
             $json = trim($json);
 
             json_decode($json);
             if (json_last_error() !== JSON_ERROR_NONE) {
-                $issues[] = 'Invalid JSON in @response: ' . json_last_error_msg();
+                $issues[] = 'Invalid JSON in @response: '.json_last_error_msg();
                 break; // Only report once per method
             }
         }
 
         return $issues;
+    }
+
+    /**
+     * Extract balanced JSON string starting from a position
+     */
+    private function extractBalancedJson(string $content, int $startPos): ?string
+    {
+        $depth = 0;
+        $inString = false;
+        $escape = false;
+        $len = strlen($content);
+
+        for ($i = $startPos; $i < $len; $i++) {
+            $char = $content[$i];
+
+            if ($escape) {
+                $escape = false;
+
+                continue;
+            }
+
+            if ($char === '\\' && $inString) {
+                $escape = true;
+
+                continue;
+            }
+
+            if ($char === '"') {
+                $inString = ! $inString;
+
+                continue;
+            }
+
+            if (! $inString) {
+                if ($char === '{') {
+                    $depth++;
+                } elseif ($char === '}') {
+                    $depth--;
+                    if ($depth === 0) {
+                        return substr($content, $startPos, $i - $startPos + 1);
+                    }
+                }
+            }
+        }
+
+        return null; // Unbalanced braces
     }
 
     private function extractModuleName(string $filePath): string
@@ -206,14 +264,14 @@ class ScrambleDocsValidator
 
     private function getRelativePath(string $filePath): string
     {
-        return str_replace(base_path() . '/', '', $filePath);
+        return str_replace(base_path().'/', '', $filePath);
     }
 
     private function printReport(): void
     {
         // Module-level report
         echo "📁 Coverage by Module:\n";
-        echo str_repeat('-', 50) . "\n";
+        echo str_repeat('-', 50)."\n";
 
         ksort($this->moduleStats);
 
@@ -227,19 +285,19 @@ class ScrambleDocsValidator
             echo sprintf(
                 "%s %-20s %5.1f%% (%d/%d endpoints)\n",
                 $icon,
-                $module . ':',
+                $module.':',
                 $coverage,
                 $stats['complete'],
                 $stats['total']
             );
 
             // Show issues for this module
-            if (!empty($stats['issues']) && count($stats['issues']) <= 3) {
+            if (! empty($stats['issues']) && count($stats['issues']) <= 3) {
                 foreach ($stats['issues'] as $issue) {
-                    echo "   └─ {$issue['method']}: " . implode(', ', $issue['issues']) . "\n";
+                    echo "   └─ {$issue['method']}: ".implode(', ', $issue['issues'])."\n";
                 }
-            } elseif (!empty($stats['issues'])) {
-                echo "   └─ " . count($stats['issues']) . " endpoints need improvement\n";
+            } elseif (! empty($stats['issues'])) {
+                echo '   └─ '.count($stats['issues'])." endpoints need improvement\n";
             }
         }
 
@@ -247,7 +305,7 @@ class ScrambleDocsValidator
 
         // Overall statistics
         echo "📊 Overall Statistics:\n";
-        echo str_repeat('-', 50) . "\n";
+        echo str_repeat('-', 50)."\n";
 
         $overallCoverage = $this->stats['total_methods'] > 0
             ? round(($this->moduleStats ? array_sum(array_column($this->moduleStats, 'complete')) : 0) / $this->stats['total_methods'] * 100, 1)
@@ -270,9 +328,9 @@ class ScrambleDocsValidator
         }
 
         echo "\n";
-        echo str_repeat('=', 50) . "\n";
+        echo str_repeat('=', 50)."\n";
         echo sprintf("Overall Coverage:  %5.1f%%\n", $overallCoverage);
-        echo str_repeat('=', 50) . "\n";
+        echo str_repeat('=', 50)."\n";
 
         // Missing tags summary
         $missingSummary = $this->stats['total_methods'] - $this->stats['methods_with_summary'];
@@ -309,7 +367,7 @@ class ScrambleDocsValidator
 
     private function getExitCode(): int
     {
-        if (!$this->strictMode) {
+        if (! $this->strictMode) {
             return 0;
         }
 
@@ -323,9 +381,9 @@ class ScrambleDocsValidator
 
 // Run the script
 if (php_sapi_name() === 'cli') {
-    require_once __DIR__ . '/../vendor/autoload.php';
+    require_once __DIR__.'/../vendor/autoload.php';
 
-    $app = require_once __DIR__ . '/../bootstrap/app.php';
+    $app = require_once __DIR__.'/../bootstrap/app.php';
     $app->make(\Illuminate\Contracts\Console\Kernel::class)->bootstrap();
 
     $strictMode = in_array('--strict', $argv ?? []);

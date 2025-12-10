@@ -25,24 +25,22 @@ class ChallengeController extends Controller
      *
      * Mengambil daftar challenge yang sedang aktif. Jika user sudah login, akan menyertakan progress user untuk setiap challenge.
      *
+     * **Filter yang tersedia:**
+     * - `filter[type]` (string): Filter berdasarkan tipe challenge. Nilai: daily, weekly, special
      *
-     * @summary Mengambil daftar challenge aktif
+     * **Sorting:** Gunakan parameter `sort` dengan prefix `-` untuk descending. Nilai: type, points_reward, created_at
+     *
+     * @summary Daftar Challenge Aktif
+     *
+     * @queryParam filter[type] string Filter berdasarkan tipe challenge. Nilai: daily, weekly, special. Example: daily
+     * @queryParam sort string Field untuk sorting. Prefix dengan '-' untuk descending. Example: -points_reward
+     * @queryParam page integer Nomor halaman. Default: 1. Example: 1
      * @queryParam per_page integer Jumlah item per halaman. Default: 15. Example: 15
      *
-     * @allowedFilters type
-     *
-     * @queryParam type string Filter berdasarkan tipe. Example: 
-     *
-     * @allowedSorts type, points_reward, created_at
-     *
-     * @queryParam sort string Field untuk sorting. Allowed: type, points_reward, created_at. Prefix dengan '-' untuk descending. Example: -created_at
-     *
-     * @filterEnum type daily|weekly|special
-     *
-     * @response 200 scenario="Success" {"success": true, "data": {"challenges": [{"id": 1, "name": "Login Harian", "description": "Login setiap hari", "type": "daily", "points_reward": 10, "criteria_target": 1, "badge": null, "user_progress": {"current": 0, "target": 1, "percentage": 0, "status": "in_progress", "expires_at": "2024-01-16T00:00:00Z"}}]}, "meta": {"current_page": 1, "per_page": 15, "total": 5}}
+     * @response 200 scenario="Success" {"success": true, "message": "Berhasil", "data": [{"id": 1, "name": "Login Harian", "description": "Login setiap hari untuk mendapatkan poin", "type": "daily", "points_reward": 10, "criteria_target": 1, "badge": null, "user_progress": {"current": 0, "target": 1, "percentage": 0, "status": "in_progress", "expires_at": "2025-01-16T00:00:00Z"}}], "meta": {"pagination": {"current_page": 1, "per_page": 15, "total": 5}}}
      *
      * @authenticated
-     */    
+     */
     public function index(Request $request): JsonResponse
     {
         $challenges = Challenge::active()
@@ -82,11 +80,12 @@ class ChallengeController extends Controller
      *
      *
      * @summary Mengambil detail challenge
+     *
      * @response 200 scenario="Success" {"success": true, "data": {"challenge": {"id": 1, "name": "Login Harian", "description": "Login setiap hari", "type": "daily", "points_reward": 10, "criteria_target": 1, "badge": {"id": 1, "name": "Daily Warrior"}, "user_progress": {"current": 1, "target": 1, "percentage": 100, "status": "completed", "expires_at": "2024-01-16T00:00:00Z", "is_claimable": true}}}}
      * @response 404 scenario="Not Found" {"success":false,"message":"Challenge tidak ditemukan."}
      *
      * @authenticated
-     */    
+     */
     public function show(int $challengeId, Request $request): JsonResponse
     {
         $challenge = Challenge::with('badge')->find($challengeId);
@@ -122,10 +121,11 @@ class ChallengeController extends Controller
      *
      *
      * @summary Mengambil challenge yang di-assign ke user
+     *
      * @response 200 scenario="Success" {"success": true, "data": {"challenges": [{"id": 1, "challenge": {"id": 1, "name": "Login Harian"}, "progress": {"current": 1, "target": 1, "percentage": 100}, "status": "completed", "status_label": "Selesai", "assigned_date": "2024-01-15", "expires_at": "2024-01-16T00:00:00Z", "is_claimable": true}]}}
      *
      * @authenticated
-     */    
+     */
     public function myChallenges(Request $request): JsonResponse
     {
         $userId = $request->user()->id;
@@ -158,12 +158,13 @@ class ChallengeController extends Controller
      *
      *
      * @summary Mengambil riwayat challenge yang sudah selesai
+     *
      * @queryParam limit integer Jumlah item yang diambil. Default: 15. Example: 15
      *
      * @response 200 scenario="Success" {"success": true, "data": {"completions": [{"id": 1, "challenge": {"id": 1, "name": "Login Harian"}, "completed_date": "2024-01-15", "xp_earned": 10, "completion_data": null}]}}
      *
      * @authenticated
-     */    
+     */
     public function completed(Request $request): JsonResponse
     {
         $userId = $request->user()->id;
@@ -191,11 +192,12 @@ class ChallengeController extends Controller
      *
      *
      * @summary Klaim reward challenge yang sudah selesai
+     *
      * @response 200 scenario="Success" {"success": true, "data": {"message": "Reward berhasil diklaim!", "rewards": {"xp": 50, "badge": {"id": 1, "name": "Daily Warrior"}}}}
      * @response 400 scenario="Bad Request" {"success":false,"message":"Challenge belum selesai atau sudah diklaim."}
      *
      * @authenticated
-     */    
+     */
     public function claim(int $challengeId, Request $request): JsonResponse
     {
         $userId = $request->user()->id;

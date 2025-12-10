@@ -12,6 +12,8 @@ use Illuminate\Validation\ValidationException;
 use Laravel\Socialite\Contracts\Factory as SocialiteFactory;
 use Laravel\Socialite\Two\AbstractProvider as SocialiteAbstractProvider;
 use Modules\Auth\Contracts\AuthRepositoryInterface;
+use Modules\Auth\DTOs\LoginDTO;
+use Modules\Auth\DTOs\RegisterDTO;
 use Modules\Auth\Enums\UserStatus;
 use Modules\Auth\Http\Requests\LoginRequest;
 use Modules\Auth\Http\Requests\LogoutRequest;
@@ -739,17 +741,17 @@ class AuthApiController extends Controller
      * @summary Daftar Semua Pengguna
      * @description Mengambil daftar semua pengguna dengan pagination dan filter. **Memerlukan role: Admin atau Superadmin**
      *
-     * @allowedFilters filter[search], filter[status], filter[role], filter[created_from], filter[created_to]
-     *
-     * @queryParam filter[search] string Filter berdasarkan pencarian (nama, email, dll). Example: 
-     * @queryParam filter[status] string Filter berdasarkan status. Example: 
-     * @queryParam filter[role] string Filter berdasarkan role pengguna. Example: 
-     * @queryParam filter[created_from] string Filter berdasarkan tanggal dibuat (dari). Example: 
-     * @queryParam filter[created_to] string Filter berdasarkan tanggal dibuat (sampai). Example: 
-     *
-     * @allowedSorts name, email, username, status, created_at
-     *
+     * @queryParam search string Kata kunci pencarian (nama, email, username). Example: john
+     * @queryParam page integer Nomor halaman. Example: 1
+     * @queryParam per_page integer Jumlah item per halaman (default: 15). Example: 15
+     * @queryParam filter[status] string Filter berdasarkan status (pending|active|inactive|banned). Example: active
+     * @queryParam filter[role] string Filter berdasarkan role pengguna (Student|Instructor|Admin|Superadmin). Example: Student
+     * @queryParam filter[created_from] string Filter berdasarkan tanggal dibuat (dari, format: Y-m-d). Example: 2025-01-01
+     * @queryParam filter[created_to] string Filter berdasarkan tanggal dibuat (sampai, format: Y-m-d). Example: 2025-12-31
      * @queryParam sort string Field untuk sorting. Allowed: name, email, username, status, created_at. Prefix dengan '-' untuk descending. Example: -created_at
+     *
+     * @allowedFilters status, role, created_from, created_to
+     * @allowedSorts name, email, username, status, created_at
      *
      * @filterEnum status pending|active|inactive|banned
      * @filterEnum role Student|Instructor|Admin|Superadmin

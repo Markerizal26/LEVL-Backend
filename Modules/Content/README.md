@@ -50,11 +50,14 @@ http://your-domain.com/scalar
 
 ### 📄 OpenAPI Spec
 
-OpenAPI specification tersedia di:
+OpenAPI specification di-generate otomatis oleh Scramble:
 
 ```
-Modules/Content/openapi.yaml
+/docs/api          # Scramble UI
+/docs/api.json     # OpenAPI JSON spec
 ```
+
+> **Note:** File `openapi.yaml` di module ini sudah deprecated. Gunakan Scramble untuk dokumentasi terbaru.
 
 ### 🔗 API Endpoints
 
@@ -361,9 +364,10 @@ This module is part of the LMS platform.
 ## Support
 
 For issues or questions:
-- Check documentation: `Modules/Content/API_DOCUMENTATION.md`
-- View OpenAPI spec: `Modules/Content/openapi.yaml`
+- View interactive API docs: `/docs/api` atau `/scalar`
 - Run tests: `php artisan test --filter=Content`
+
+> **Note:** File `API_DOCUMENTATION.md` dan `openapi.yaml` sudah deprecated. Gunakan Scramble untuk dokumentasi terbaru.
 
 ---
 

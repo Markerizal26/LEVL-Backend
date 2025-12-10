@@ -31,36 +31,40 @@ class NewsController extends Controller
     /**
      * Daftar Berita
      *
-     * Mengambil daftar berita dengan pagination dan filter. Dapat difilter berdasarkan kategori, tag, dan status featured.
+     * Mengambil daftar berita dengan pagination dan filter.
      *
+     * **Filter yang tersedia:**
+     * - `filter[category_id]` (integer): Filter berdasarkan ID kategori
+     * - `filter[tag_id]` (integer): Filter berdasarkan ID tag
+     * - `filter[featured]` (boolean): Filter berita unggulan. Nilai: true, false
+     * - `filter[date_from]` (string): Filter dari tanggal (format: Y-m-d)
+     * - `filter[date_to]` (string): Filter sampai tanggal (format: Y-m-d)
+     *
+     * **Sorting:** Gunakan parameter `sort` dengan prefix `-` untuk descending. Nilai: created_at, published_at, views_count
      *
      * @summary Daftar Berita
-     * @allowedFilters category_id, tag_id, featured, date_from, date_to
      *
-     * @queryParam category_id string Filter berdasarkan ID kategori. Example: 
-     * @queryParam tag_id string Filter berdasarkan ID tag. Example: 
-     * @queryParam featured string Filter berdasarkan status featured. Example: 
-     * @queryParam date_from string Filter berdasarkan tanggal (dari). Example: 
-     * @queryParam date_to string Filter berdasarkan tanggal (sampai). Example: 
+     * @queryParam filter[category_id] integer Filter berdasarkan ID kategori. Example: 5
+     * @queryParam filter[tag_id] integer Filter berdasarkan ID tag. Example: 3
+     * @queryParam filter[featured] boolean Filter berita unggulan. Nilai: true, false. Example: true
+     * @queryParam filter[date_from] string Filter dari tanggal (format: Y-m-d). Example: 2025-01-01
+     * @queryParam filter[date_to] string Filter sampai tanggal (format: Y-m-d). Example: 2025-12-31
+     * @queryParam sort string Field untuk sorting. Prefix dengan '-' untuk descending. Example: -views_count
+     * @queryParam page integer Nomor halaman. Default: 1. Example: 1
+     * @queryParam per_page integer Jumlah item per halaman. Default: 15. Example: 15
      *
-     * @allowedSorts created_at, published_at, views_count
-     *
-     * @queryParam sort string Field untuk sorting. Allowed: created_at, published_at, views_count. Prefix dengan '-' untuk descending. Example: -created_at
-     *
-     * @filterEnum featured true|false
-     *
-     * @response 200 scenario="Success" {"status": "success", "data": {"data": [{"id": 1, "title": "Berita Terbaru", "slug": "berita-terbaru", "excerpt": "Ringkasan berita...", "featured": true}], "meta": {"current_page": 1, "total": 10}}}
+     * @response 200 scenario="Success" {"success": true, "message": "Berhasil", "data": [{"id": 1, "title": "LSP Meluncurkan Program Sertifikasi Cloud Computing", "slug": "lsp-meluncurkan-program-sertifikasi-cloud-computing", "excerpt": "Dalam rangka memenuhi kebutuhan industri...", "is_featured": true, "views_count": 1250}], "meta": {"pagination": {"current_page": 1, "per_page": 15, "total": 75}}}
      *
      * @authenticated
-     */    
+     */
     public function index(Request $request): JsonResponse
     {
         $filters = [
-            'category_id' => $request->input('category_id'),
-            'tag_id' => $request->input('tag_id'),
-            'featured' => $request->boolean('featured'),
-            'date_from' => $request->input('date_from'),
-            'date_to' => $request->input('date_to'),
+            'category_id' => $request->input('filter.category_id'),
+            'tag_id' => $request->input('filter.tag_id'),
+            'featured' => $request->boolean('filter.featured'),
+            'date_from' => $request->input('filter.date_from'),
+            'date_to' => $request->input('filter.date_to'),
             'per_page' => $request->input('per_page', 15),
         ];
 
@@ -117,6 +121,7 @@ class NewsController extends Controller
      *
      *
      * @summary Perbarui Berita
+     *
      * @bodyParam title string optional Judul berita. Example: Berita Terbaru Hari Ini
      * @bodyParam content string optional Konten berita (HTML). Example: <p>Isi berita...</p>
      * @bodyParam excerpt string optional Ringkasan berita. Example: Ringkasan singkat
@@ -133,7 +138,7 @@ class NewsController extends Controller
      * @response 404 scenario="Not Found" {"status":"error","message":"Berita tidak ditemukan."}
      *
      * @authenticated
-     */    
+     */
     public function update(UpdateContentRequest $request, string $slug): JsonResponse
     {
         $news = News::where('slug', $slug)->firstOrFail();
@@ -167,13 +172,14 @@ class NewsController extends Controller
      *
      *
      * @summary Hapus Berita
+     *
      * @response 200 scenario="Success" {"status":"success","message":"Berita berhasil dihapus."}
      * @response 401 scenario="Unauthorized" {"status":"error","message":"Tidak terotorisasi."}
      * @response 403 scenario="Forbidden" {"status":"error","message":"Anda tidak memiliki akses untuk menghapus berita ini."}
      * @response 404 scenario="Not Found" {"status":"error","message":"Berita tidak ditemukan."}
      *
      * @authenticated
-     */    
+     */
     public function destroy(string $slug): JsonResponse
     {
         $news = News::where('slug', $slug)->firstOrFail();
@@ -195,13 +201,14 @@ class NewsController extends Controller
      *
      *
      * @summary Publikasikan Berita
+     *
      * @response 200 scenario="Success" {"status": "success", "message": "Berita berhasil dipublikasikan.", "data": {"id": 1, "status": "published", "published_at": "2024-01-15T10:00:00Z"}}
      * @response 401 scenario="Unauthorized" {"status":"error","message":"Tidak terotorisasi."}
      * @response 403 scenario="Forbidden" {"status":"error","message":"Anda tidak memiliki akses untuk mempublikasikan berita ini."}
      * @response 404 scenario="Not Found" {"status":"error","message":"Berita tidak ditemukan."}
      *
      * @authenticated
-     */    
+     */
     public function publish(string $slug): JsonResponse
     {
         $news = News::where('slug', $slug)->firstOrFail();
@@ -224,6 +231,7 @@ class NewsController extends Controller
      *
      *
      * @summary Jadwalkan Berita
+     *
      * @response 200 scenario="Success" {"status": "success", "message": "Berita berhasil dijadwalkan.", "data": {"id": 1, "status": "scheduled", "scheduled_at": "2024-01-20T10:00:00Z"}}
      * @response 401 scenario="Unauthorized" {"status":"error","message":"Tidak terotorisasi."}
      * @response 403 scenario="Forbidden" {"status":"error","message":"Anda tidak memiliki akses untuk menjadwalkan berita ini."}
@@ -231,7 +239,7 @@ class NewsController extends Controller
      * @response 422 scenario="Invalid Date" {"status":"error","message":"Waktu publikasi harus di masa depan."}
      *
      * @authenticated
-     */    
+     */
     public function schedule(ScheduleContentRequest $request, string $slug): JsonResponse
     {
         $news = News::where('slug', $slug)->firstOrFail();
@@ -264,12 +272,13 @@ class NewsController extends Controller
      *
      *
      * @summary Berita Trending
+     *
      * @queryParam limit integer Jumlah berita yang ditampilkan (default: 10). Example: 10
      *
      * @response 200 scenario="Success" {"status": "success", "data": [{"id": 1, "title": "Berita Populer", "slug": "berita-populer", "views_count": 1500}]}
      *
      * @authenticated
-     */    
+     */
     public function trending(Request $request): JsonResponse
     {
         $limit = $request->input('limit', 10);

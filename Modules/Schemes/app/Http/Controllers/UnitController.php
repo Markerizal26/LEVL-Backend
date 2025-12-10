@@ -30,7 +30,7 @@ class UnitController extends Controller
      * @summary Daftar Unit Kompetensi
      * @allowedFilters status
      *
-     * @queryParam status string Filter berdasarkan status. Example: 
+     * @queryParam filter[status] string Filter berdasarkan status (draft|published). Example: published
      *
      * @allowedSorts order, title, created_at
      *

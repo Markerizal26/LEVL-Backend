@@ -29,39 +29,37 @@ class AnnouncementController extends Controller
     /**
      * Daftar Pengumuman
      *
-     * Mengambil daftar pengumuman dengan pagination dan filter. Dapat difilter berdasarkan course, priority, dan status baca.
+     * Mengambil daftar pengumuman dengan pagination dan filter.
      *
+     * **Filter yang tersedia:**
+     * - `filter[course_id]` (integer): Filter berdasarkan ID kursus
+     * - `filter[priority]` (string): Filter berdasarkan prioritas. Nilai: low, normal, high, urgent
+     * - `filter[unread]` (boolean): Filter hanya pengumuman yang belum dibaca
+     *
+     * **Sorting:** Gunakan parameter `sort` dengan prefix `-` untuk descending. Nilai: created_at, published_at
      *
      * @summary Daftar Pengumuman
-     * @allowedFilters course_id, priority, unread
      *
-     * @queryParam course_id string Filter berdasarkan ID kursus. Example: 
-     * @queryParam priority string Filter berdasarkan prioritas. Example: 
-     * @queryParam unread string Filter berdasarkan status belum dibaca. Example: 
+     * @queryParam filter[course_id] integer Filter berdasarkan ID kursus. Example: 1
+     * @queryParam filter[priority] string Filter berdasarkan prioritas. Nilai: low, normal, high, urgent. Example: high
+     * @queryParam filter[unread] boolean Filter hanya pengumuman yang belum dibaca. Nilai: true, false. Example: true
+     * @queryParam sort string Field untuk sorting. Prefix dengan '-' untuk descending. Example: -created_at
+     * @queryParam page integer Nomor halaman. Default: 1. Example: 1
+     * @queryParam per_page integer Jumlah item per halaman. Default: 15. Example: 15
      *
-     * @allowedSorts created_at, published_at
-     *
-     * @queryParam sort string Field untuk sorting. Allowed: created_at, published_at. Prefix dengan '-' untuk descending. Example: -created_at
-     *
-     * @filterEnum priority low|medium|high
-     * @filterEnum unread true|false
-     *
-     * @queryParam page integer Nomor halaman. Example: 1
-     * @queryParam per_page integer Jumlah item per halaman (default: 15). Example: 15
-     *
-     * @response 200 scenario="Success" {"success": true, "message": "Success", "data": [{"id": 1, "title": "Pengumuman Penting", "content": "Isi pengumuman...", "priority": "high", "status": "published", "author": {"id": 1, "name": "Admin"}}], "meta": {"current_page": 1, "last_page": 1, "per_page": 15, "total": 5}}
-     * @response 401 scenario="Unauthorized" {"success":false,"message":"Tidak terotorisasi."}
+     * @response 200 scenario="Success" {"success": true, "message": "Berhasil", "data": [{"id": 1, "title": "Jadwal Ujian Sertifikasi Batch Januari 2025", "content": "Kepada seluruh peserta sertifikasi...", "priority": "high", "status": "published", "author": {"id": 1, "name": "Admin LSP"}}], "meta": {"pagination": {"current_page": 1, "last_page": 5, "per_page": 15, "total": 75}}}
+     * @response 401 scenario="Unauthorized" {"success":false,"message":"Token tidak valid atau tidak ada","data":null,"meta":null,"errors":null}
      *
      * @authenticated
-     */    
+     */
     public function index(Request $request): JsonResponse
     {
         $user = auth()->user();
 
         $filters = [
-            'course_id' => $request->input('course_id'),
-            'priority' => $request->input('priority'),
-            'unread' => $request->boolean('unread'),
+            'course_id' => $request->input('filter.course_id'),
+            'priority' => $request->input('filter.priority'),
+            'unread' => $request->boolean('filter.unread'),
             'per_page' => $request->input('per_page', 15),
         ];
 
@@ -77,13 +75,14 @@ class AnnouncementController extends Controller
      *
      *
      * @summary Buat Pengumuman Baru
+     *
      * @response 201 scenario="Success" {"success": true, "message": "Pengumuman berhasil dibuat.", "data": {"announcement": {"id": 1, "title": "Pengumuman Baru", "status": "draft", "priority": "medium"}}}
      * @response 401 scenario="Unauthorized" {"success":false,"message":"Tidak terotorisasi."}
      * @response 403 scenario="Forbidden" {"success":false,"message":"Anda tidak memiliki akses untuk membuat pengumuman."}
      * @response 422 scenario="Validation Error" {"success": false, "message": "Validasi gagal.", "errors": {"title": ["Judul wajib diisi."]}}
      *
      * @authenticated
-     */    
+     */
     public function store(CreateAnnouncementRequest $request): JsonResponse
     {
         $this->authorize('createAnnouncement', Announcement::class);
@@ -123,12 +122,13 @@ class AnnouncementController extends Controller
      *
      *
      * @summary Detail Pengumuman
+     *
      * @response 200 scenario="Success" {"success": true, "data": {"announcement": {"id": 1, "title": "Pengumuman Penting", "content": "Isi lengkap...", "priority": "high", "author": {"id": 1, "name": "Admin"}, "course": null, "revisions": []}}}
      * @response 403 scenario="Forbidden" {"success":false,"message":"Anda tidak memiliki akses untuk melihat pengumuman ini."}
      * @response 404 scenario="Not Found" {"success":false,"message":"Pengumuman tidak ditemukan."}
      *
      * @authenticated
-     */    
+     */
     public function show(int $id): JsonResponse
     {
         $announcement = Announcement::with(['author', 'course', 'revisions.editor'])
@@ -152,13 +152,14 @@ class AnnouncementController extends Controller
      *
      *
      * @summary Perbarui Pengumuman
+     *
      * @response 200 scenario="Success" {"success": true, "message": "Pengumuman berhasil diperbarui.", "data": {"announcement": {"id": 1, "title": "Pengumuman Updated"}}}
      * @response 401 scenario="Unauthorized" {"success":false,"message":"Tidak terotorisasi."}
      * @response 403 scenario="Forbidden" {"success":false,"message":"Anda tidak memiliki akses untuk memperbarui pengumuman ini."}
      * @response 404 scenario="Not Found" {"success":false,"message":"Pengumuman tidak ditemukan."}
      *
      * @authenticated
-     */    
+     */
     public function update(UpdateContentRequest $request, int $id): JsonResponse
     {
         $announcement = Announcement::findOrFail($id);
@@ -188,13 +189,14 @@ class AnnouncementController extends Controller
      *
      *
      * @summary Hapus Pengumuman
+     *
      * @response 200 scenario="Success" {"success":true,"message":"Pengumuman berhasil dihapus.","data":[]}
      * @response 401 scenario="Unauthorized" {"success":false,"message":"Tidak terotorisasi."}
      * @response 403 scenario="Forbidden" {"success":false,"message":"Anda tidak memiliki akses untuk menghapus pengumuman ini."}
      * @response 404 scenario="Not Found" {"success":false,"message":"Pengumuman tidak ditemukan."}
      *
      * @authenticated
-     */    
+     */
     public function destroy(int $id): JsonResponse
     {
         $announcement = Announcement::findOrFail($id);
@@ -213,13 +215,14 @@ class AnnouncementController extends Controller
      *
      *
      * @summary Publikasikan Pengumuman
+     *
      * @response 200 scenario="Success" {"success": true, "message": "Pengumuman berhasil dipublikasikan.", "data": {"announcement": {"id": 1, "status": "published", "published_at": "2024-01-15T10:00:00Z"}}}
      * @response 401 scenario="Unauthorized" {"success":false,"message":"Tidak terotorisasi."}
      * @response 403 scenario="Forbidden" {"success":false,"message":"Anda tidak memiliki akses untuk mempublikasikan pengumuman ini."}
      * @response 404 scenario="Not Found" {"success":false,"message":"Pengumuman tidak ditemukan."}
      *
      * @authenticated
-     */    
+     */
     public function publish(int $id): JsonResponse
     {
         $announcement = Announcement::findOrFail($id);
@@ -241,6 +244,7 @@ class AnnouncementController extends Controller
      *
      *
      * @summary Jadwalkan Pengumuman
+     *
      * @response 200 scenario="Success" {"success": true, "message": "Pengumuman berhasil dijadwalkan.", "data": {"announcement": {"id": 1, "status": "scheduled", "scheduled_at": "2024-01-20T10:00:00Z"}}}
      * @response 401 scenario="Unauthorized" {"success":false,"message":"Tidak terotorisasi."}
      * @response 403 scenario="Forbidden" {"success":false,"message":"Anda tidak memiliki akses untuk menjadwalkan pengumuman ini."}
@@ -248,7 +252,7 @@ class AnnouncementController extends Controller
      * @response 422 scenario="Invalid Date" {"success":false,"message":"Waktu publikasi harus di masa depan."}
      *
      * @authenticated
-     */    
+     */
     public function schedule(ScheduleContentRequest $request, int $id): JsonResponse
     {
         $announcement = Announcement::findOrFail($id);
@@ -277,12 +281,13 @@ class AnnouncementController extends Controller
      *
      *
      * @summary Tandai Pengumuman Dibaca
+     *
      * @response 200 scenario="Success" {"success":true,"message":"Pengumuman ditandai sudah dibaca.","data":[]}
      * @response 401 scenario="Unauthorized" {"success":false,"message":"Tidak terotorisasi."}
      * @response 404 scenario="Not Found" {"success":false,"message":"Pengumuman tidak ditemukan."}
      *
      * @authenticated
-     */    
+     */
     public function markAsRead(int $id): JsonResponse
     {
         $announcement = Announcement::findOrFail($id);

@@ -34,8 +34,8 @@ class LessonController extends Controller
      * @summary Daftar Lesson
      * @allowedFilters status, content_type
      *
-     * @queryParam status string Filter berdasarkan status. Example: 
-     * @queryParam content_type string Filter berdasarkan tipe konten. Example: 
+     * @queryParam filter[status] string Filter berdasarkan status (draft|published). Example: published
+     * @queryParam filter[content_type] string Filter berdasarkan tipe konten (markdown|video|link). Example: video
      *
      * @allowedSorts order, title, created_at
      *

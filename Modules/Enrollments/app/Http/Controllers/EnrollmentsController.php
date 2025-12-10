@@ -31,14 +31,10 @@ class EnrollmentsController extends Controller
      * @queryParam filter[course_id] integer Filter berdasarkan kursus. Example: 1
      * @queryParam filter[user_id] integer Filter berdasarkan user. Example: 5
      * @queryParam filter[status] string Filter berdasarkan status (pending|active|completed|cancelled). Example: active
+     * @queryParam filter[enrollment_date] string Filter berdasarkan tanggal pendaftaran. Example: 2025-01-01
      * @queryParam sort string Sorting field. Example: -created_at
      *
-     * @allowedFilters course_id,user_id,status,enrollment_date
-     *
-     * @queryParam course_id string Filter berdasarkan ID kursus. Example: 
-     * @queryParam user_id string Filter berdasarkan ID pengguna. Example: 
-     * @queryParam status string Filter berdasarkan status. Example: 
-     * @queryParam enrollment_date string Filter berdasarkan tanggal pendaftaran. Example: 
+     * @allowedFilters course_id,user_id,status,enrollment_date 
      *
      * @allowedSorts created_at,updated_at,enrollment_date,completion_date
      *
@@ -76,13 +72,10 @@ class EnrollmentsController extends Controller
      * @queryParam per_page integer Jumlah item per halaman. Default: 15. Example: 15
      * @queryParam filter[status] string Filter berdasarkan status. Example: active
      * @queryParam filter[user_id] integer Filter berdasarkan user. Example: 5
+     * @queryParam filter[enrollment_date] string Filter berdasarkan tanggal pendaftaran. Example: 2025-01-01
      * @queryParam sort string Sorting field. Example: -enrollment_date
      *
-     * @allowedFilters status,user_id,enrollment_date
-     *
-     * @queryParam status string Filter berdasarkan status. Example: 
-     * @queryParam user_id string Filter berdasarkan ID pengguna. Example: 
-     * @queryParam enrollment_date string Filter berdasarkan tanggal pendaftaran. Example: 
+     * @allowedFilters status,user_id,enrollment_date 
      *
      * @allowedSorts created_at,enrollment_date,completion_date
      *

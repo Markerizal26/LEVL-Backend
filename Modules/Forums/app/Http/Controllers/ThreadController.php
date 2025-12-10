@@ -45,12 +45,7 @@ class ThreadController extends Controller
      * @queryParam filter[is_locked] boolean Filter thread yang dikunci. Example: false
      * @queryParam sort string Sorting field. Example: -created_at
      *
-     * @allowedFilters user_id,is_pinned,is_solved,is_locked
-     *
-     * @queryParam user_id string Filter berdasarkan ID pengguna. Example: 
-     * @queryParam is_pinned string Filter berdasarkan status di-pin. Example: 
-     * @queryParam is_solved string Filter berdasarkan status terjawab. Example: 
-     * @queryParam is_locked string Filter berdasarkan status terkunci. Example: 
+     * @allowedFilters user_id,is_pinned,is_solved,is_locked 
      *
      * @allowedSorts created_at,updated_at,replies_count,views_count
      *
@@ -263,7 +258,7 @@ class ThreadController extends Controller
      *
      *
      * @summary Cari Thread
-     * @queryParam q string required Kata kunci pencarian. Example: laravel
+     * @queryParam search string required Kata kunci pencarian. Example: laravel
      *
      * @response 200 scenario="Success" {"success": true, "data": [{"id": 1, "title": "Pertanyaan tentang Laravel"}], "message": "Hasil pencarian berhasil diambil."}
      * @response 400 scenario="Bad Request" {"success":false,"message":"Query pencarian diperlukan."}
@@ -272,7 +267,7 @@ class ThreadController extends Controller
      */    
     public function search(Request $request, int $schemeId): JsonResponse
     {
-        $query = $request->input('q', '');
+        $query = $request->input('search', '');
 
         if (empty($query)) {
             return $this->error(__('forums.search_query_required'), 400);

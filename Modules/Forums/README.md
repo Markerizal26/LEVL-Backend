@@ -224,6 +224,13 @@ Response:
 GET /api/v1/schemes/{scheme_id}/forum/statistics/me
 ```
 
+## API Documentation
+
+Dokumentasi API interaktif tersedia di:
+- **Scramble UI:** `/docs/api`
+- **Scalar UI:** `/scalar`
+- **OpenAPI JSON:** `/docs/api.json`
+
 ## Authorization
 
 All endpoints require authentication via JWT token:

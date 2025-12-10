@@ -30,33 +30,38 @@ class ForumStatisticsController extends Controller
      *
      * Requires: Admin, Instructor, Superadmin
      *
+     * **Filter yang tersedia:**
+     * - `filter[period_start]` (date): Tanggal mulai periode. Default: awal bulan ini
+     * - `filter[period_end]` (date): Tanggal akhir periode. Default: akhir bulan ini
+     * - `filter[user_id]` (integer): ID user untuk statistik individual
      *
      * @summary Statistik Forum per Scheme
-     * @queryParam period_start date Tanggal mulai periode. Default: awal bulan ini. Example: 2024-01-01
-     * @queryParam period_end date Tanggal akhir periode. Default: akhir bulan ini. Example: 2024-01-31
-     * @queryParam user_id integer ID user untuk statistik individual. Example: 1
+     *
+     * @queryParam filter[period_start] date Tanggal mulai periode. Default: awal bulan ini. Example: 2025-01-01
+     * @queryParam filter[period_end] date Tanggal akhir periode. Default: akhir bulan ini. Example: 2025-01-31
+     * @queryParam filter[user_id] integer ID user untuk statistik individual. Example: 1
      *
      * @response 200 scenario="Success" {"success": true, "data": {"total_threads": 50, "total_replies": 200, "active_users": 25, "resolved_threads": 30}, "message": "Statistik berhasil diambil."}
      *
      * @authenticated
-     */    
+     */
     public function index(Request $request, int $schemeId): JsonResponse
     {
         $request->validate([
-            'period_start' => 'nullable|date',
-            'period_end' => 'nullable|date|after_or_equal:period_start',
-            'user_id' => 'nullable|integer|exists:users,id',
+            'filter.period_start' => 'nullable|date',
+            'filter.period_end' => 'nullable|date|after_or_equal:filter.period_start',
+            'filter.user_id' => 'nullable|integer|exists:users,id',
         ]);
 
-        $periodStart = $request->input('period_start')
-            ? Carbon::parse($request->input('period_start'))
+        $periodStart = $request->input('filter.period_start')
+            ? Carbon::parse($request->input('filter.period_start'))
             : Carbon::now()->startOfMonth();
 
-        $periodEnd = $request->input('period_end')
-            ? Carbon::parse($request->input('period_end'))
+        $periodEnd = $request->input('filter.period_end')
+            ? Carbon::parse($request->input('filter.period_end'))
             : Carbon::now()->endOfMonth();
 
-        $userId = $request->input('user_id');
+        $userId = $request->input('filter.user_id');
 
         try {
             if ($userId) {
@@ -102,28 +107,32 @@ class ForumStatisticsController extends Controller
      *
      * Mengambil statistik forum untuk user yang sedang login dalam periode waktu tertentu.
      *
+     * **Filter yang tersedia:**
+     * - `filter[period_start]` (date): Tanggal mulai periode. Default: awal bulan ini
+     * - `filter[period_end]` (date): Tanggal akhir periode. Default: akhir bulan ini
      *
      * @summary Statistik Forum User
-     * @queryParam period_start date Tanggal mulai periode. Default: awal bulan ini. Example: 2024-01-01
-     * @queryParam period_end date Tanggal akhir periode. Default: akhir bulan ini. Example: 2024-01-31
+     *
+     * @queryParam filter[period_start] date Tanggal mulai periode. Default: awal bulan ini. Example: 2025-01-01
+     * @queryParam filter[period_end] date Tanggal akhir periode. Default: akhir bulan ini. Example: 2025-01-31
      *
      * @response 200 scenario="Success" {"success": true, "data": {"threads_created": 5, "replies_posted": 20, "reactions_received": 15, "accepted_answers": 3}, "message": "Statistik user berhasil diambil."}
      *
      * @authenticated
-     */    
+     */
     public function userStats(Request $request, int $schemeId): JsonResponse
     {
         $request->validate([
-            'period_start' => 'nullable|date',
-            'period_end' => 'nullable|date|after_or_equal:period_start',
+            'filter.period_start' => 'nullable|date',
+            'filter.period_end' => 'nullable|date|after_or_equal:filter.period_start',
         ]);
 
-        $periodStart = $request->input('period_start')
-            ? Carbon::parse($request->input('period_start'))
+        $periodStart = $request->input('filter.period_start')
+            ? Carbon::parse($request->input('filter.period_start'))
             : Carbon::now()->startOfMonth();
 
-        $periodEnd = $request->input('period_end')
-            ? Carbon::parse($request->input('period_end'))
+        $periodEnd = $request->input('filter.period_end')
+            ? Carbon::parse($request->input('filter.period_end'))
             : Carbon::now()->endOfMonth();
 
         try {

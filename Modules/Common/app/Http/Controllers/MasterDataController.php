@@ -59,11 +59,13 @@ class MasterDataController extends Controller
     /**
      * Daftar Tipe Master Data
      *
+     * Mengambil daftar semua tipe master data yang tersedia di sistem, termasuk tipe CRUD (database) dan Enum (read-only).
      *
      * @summary Daftar Tipe Master Data
      *
-     * @response 200 scenario="Success" {"success":true,"message":"Success","data":[{"id":1,"name":"Example MasterData"}],"meta":{"current_page":1,"last_page":5,"per_page":15,"total":75},"links":{"first":"...","last":"...","prev":null,"next":"..."}}
+     * @response 200 scenario="Success" {"success":true,"message":"Daftar tipe master data","data":[{"key":"categories","label":"Kategori","type":"crud"},{"key":"tags","label":"Tags","type":"crud"},{"key":"user-status","label":"Status Pengguna","type":"enum"},{"key":"roles","label":"Peran","type":"enum"},{"key":"course-status","label":"Status Kursus","type":"enum"}]}
      * @response 401 scenario="Unauthorized" {"success":false,"message":"Tidak terotorisasi."}
+     * 
      * @authenticated
      */
     public function index(): JsonResponse
@@ -112,11 +114,13 @@ class MasterDataController extends Controller
     /**
      * Daftar Status Pengguna
      *
+     * Mengambil enum values untuk status pengguna (pending, active, suspended, inactive).
      *
      * @summary Daftar Status Pengguna
      *
-     * @response 200 scenario="Success" {"success":true,"message":"Success","data":{"id":1,"name":"Example MasterData"}}
+     * @response 200 scenario="Success" {"success":true,"message":"Daftar status pengguna","data":[{"value":"pending","label":"Pending"},{"value":"active","label":"Aktif"},{"value":"suspended","label":"Ditangguhkan"},{"value":"inactive","label":"Tidak Aktif"}]}
      * @response 401 scenario="Unauthorized" {"success":false,"message":"Tidak terotorisasi."}
+     * 
      * @authenticated
      */
     public function userStatuses(): JsonResponse
@@ -130,11 +134,13 @@ class MasterDataController extends Controller
     /**
      * Daftar Peran
      *
+     * Mengambil daftar semua peran (roles) yang tersedia di sistem (Student, Instructor, Admin, Superadmin).
      *
      * @summary Daftar Peran
      *
-     * @response 200 scenario="Success" {"success":true,"message":"Success","data":{"id":1,"name":"Example MasterData"}}
+     * @response 200 scenario="Success" {"success":true,"message":"Daftar peran","data":[{"value":"Student","label":"Siswa"},{"value":"Instructor","label":"Instruktur"},{"value":"Admin","label":"Admin"},{"value":"Superadmin","label":"Super Admin"}]}
      * @response 401 scenario="Unauthorized" {"success":false,"message":"Tidak terotorisasi."}
+     * 
      * @authenticated
      */
     public function roles(): JsonResponse
@@ -152,11 +158,13 @@ class MasterDataController extends Controller
     /**
      * Daftar Status Kursus
      *
+     * Mengambil enum values untuk status kursus (draft, published, archived, cancelled).
      *
      * @summary Daftar Status Kursus
      *
-     * @response 200 scenario="Success" {"success":true,"message":"Success","data":{"id":1,"name":"Example MasterData"}}
+     * @response 200 scenario="Success" {"success":true,"message":"Daftar status kursus","data":[{"value":"draft","label":"Draft"},{"value":"published","label":"Dipublikasikan"},{"value":"archived","label":"Diarsipkan"},{"value":"cancelled","label":"Dibatalkan"}]}
      * @response 401 scenario="Unauthorized" {"success":false,"message":"Tidak terotorisasi."}
+     * 
      * @authenticated
      */
     public function courseStatuses(): JsonResponse
@@ -170,11 +178,13 @@ class MasterDataController extends Controller
     /**
      * Daftar Tipe Kursus
      *
+     * Mengambil enum values untuk tipe kursus (scheme, course).
      *
      * @summary Daftar Tipe Kursus
      *
-     * @response 200 scenario="Success" {"success":true,"message":"Success","data":{"id":1,"name":"Example MasterData"}}
+     * @response 200 scenario="Success" {"success":true,"message":"Daftar tipe kursus","data":[{"value":"scheme","label":"Skema Sertifikasi"},{"value":"course","label":"Kursus Mandiri"}]}
      * @response 401 scenario="Unauthorized" {"success":false,"message":"Tidak terotorisasi."}
+     * 
      * @authenticated
      */
     public function courseTypes(): JsonResponse
@@ -188,11 +198,13 @@ class MasterDataController extends Controller
     /**
      * Daftar Tipe Pendaftaran
      *
+     * Mengambil enum values untuk tipe enrollment kursus (open, key, invite_only, approval).
      *
      * @summary Daftar Tipe Pendaftaran
      *
-     * @response 200 scenario="Success" {"success":true,"message":"Success","data":{"id":1,"name":"Example MasterData"}}
+     * @response 200 scenario="Success" {"success":true,"message":"Daftar tipe pendaftaran","data":[{"value":"open","label":"Terbuka untuk Semua"},{"value":"key","label":"Memerlukan Kunci Pendaftaran"},{"value":"invite_only","label":"Hanya dengan Undangan"},{"value":"approval","label":"Memerlukan Persetujuan"}]}
      * @response 401 scenario="Unauthorized" {"success":false,"message":"Tidak terotorisasi."}
+     * 
      * @authenticated
      */
     public function enrollmentTypes(): JsonResponse

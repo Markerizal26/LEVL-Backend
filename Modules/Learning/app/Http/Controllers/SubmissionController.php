@@ -25,23 +25,25 @@ class SubmissionController extends Controller
      *
      * Requires: Student (own submissions only), Admin, Instructor, Superadmin
      *
+     * **Filter yang tersedia:**
+     * - `filter[user_id]` (integer): Filter berdasarkan ID pengguna
+     * - `filter[status]` (string): Filter berdasarkan status. Nilai: pending, submitted, graded, returned
      *
-     * @summary Mengambil daftar submission untuk assignment
-     * @allowedFilters user_id
+     * **Sorting:** Gunakan parameter `sort` dengan prefix `-` untuk descending. Nilai: created_at, submitted_at
      *
-     * @queryParam user_id string Filter berdasarkan ID pengguna. Example: 
+     * @summary Daftar Pengumpulan
      *
-     * @allowedSorts created_at
+     * @queryParam filter[user_id] integer Filter berdasarkan ID pengguna. Example: 5
+     * @queryParam filter[status] string Filter berdasarkan status pengumpulan. Nilai: pending, submitted, graded, returned. Example: submitted
+     * @queryParam sort string Field untuk sorting. Prefix dengan '-' untuk descending. Example: -created_at
+     * @queryParam page integer Nomor halaman. Default: 1. Example: 1
+     * @queryParam per_page integer Jumlah item per halaman. Default: 15. Example: 15
      *
-     * @queryParam sort string Field untuk sorting. Allowed: created_at. Prefix dengan '-' untuk descending. Example: -created_at
-     *
-     * @filterEnum user_id integer
-     *
-     * @response 200 scenario="Success" {"success": true, "data": {"submissions": [{"id": 1, "assignment_id": 1, "user_id": 1, "answer_text": "Jawaban saya...", "status": "draft", "created_at": "2024-01-15T10:00:00Z"}]}}
-     * @response 403 scenario="Forbidden" {"success":false,"message":"Anda tidak memiliki akses."}
+     * @response 200 scenario="Success" {"success": true, "message": "Berhasil", "data": {"submissions": [{"id": 1, "assignment_id": 1, "user_id": 1, "answer_text": "Jawaban saya untuk tugas ini...", "status": "submitted", "created_at": "2025-01-15T10:00:00Z"}]}}
+     * @response 403 scenario="Forbidden" {"success":false,"message":"Anda tidak memiliki akses","data":null,"meta":null,"errors":null}
      *
      * @authenticated
-     */    
+     */
     public function index(Request $request, Assignment $assignment)
     {
         /** @var \Modules\Auth\Models\User $user */
@@ -61,11 +63,12 @@ class SubmissionController extends Controller
      *
      *
      * @summary Membuat submission baru
+     *
      * @response 201 scenario="Created" {"success": true, "data": {"submission": {"id": 1, "assignment_id": 1, "user_id": 1, "answer_text": "Jawaban saya...", "status": "draft"}}, "message": "Submission berhasil dibuat."}
      * @response 422 scenario="Validation Error" {"success": false, "message": "Validation error", "errors": {"answer_text": ["The answer text field is required."]}}
      *
      * @authenticated
-     */    
+     */
     public function store(Request $request, Assignment $assignment)
     {
         $validated = $request->validate([
@@ -89,12 +92,13 @@ class SubmissionController extends Controller
      *
      *
      * @summary Detail Submission
+     *
      * @response 200 scenario="Success" {"success": true, "data": {"submission": {"id": 1, "assignment_id": 1, "user_id": 1, "answer_text": "Jawaban saya...", "status": "submitted", "assignment": {"id": 1, "title": "Tugas 1"}, "user": {"id": 1, "name": "John Doe", "email": "john@example.com"}, "grade": {"score": 85, "feedback": "Bagus!"}}}}
      * @response 403 scenario="Forbidden" {"success":false,"message":"Anda tidak memiliki akses untuk melihat submission ini."}
      * @response 404 scenario="Not Found" {"success":false,"message":"Submission tidak ditemukan."}
      *
      * @authenticated
-     */    
+     */
     public function show(Submission $submission)
     {
         /** @var \Modules\Auth\Models\User $user */
@@ -119,12 +123,13 @@ class SubmissionController extends Controller
      *
      *
      * @summary Perbarui Submission
+     *
      * @response 200 scenario="Success" {"success": true, "data": {"submission": {"id": 1, "answer_text": "Jawaban yang diperbarui..."}}, "message": "Submission berhasil diperbarui."}
      * @response 403 scenario="Forbidden" {"success":false,"message":"Anda tidak memiliki akses untuk mengubah submission ini."}
      * @response 422 scenario="Validation Error" {"success":false,"message":"Hanya submission dengan status draft yang dapat diubah."}
      *
      * @authenticated
-     */    
+     */
     public function update(Request $request, Submission $submission)
     {
         /** @var \Modules\Auth\Models\User $user */
@@ -158,12 +163,13 @@ class SubmissionController extends Controller
      *
      *
      * @summary Nilai Submission
+     *
      * @response 200 scenario="Success" {"success": true, "data": {"submission": {"id": 1, "status": "graded", "grade": {"score": 85, "feedback": "Bagus!"}}}, "message": "Submission berhasil dinilai."}
      * @response 403 scenario="Forbidden" {"success":false,"message":"Anda tidak memiliki akses untuk menilai submission ini."}
      * @response 422 scenario="Validation Error" {"success": false, "message": "Validation error", "errors": {"score": ["The score field is required."]}}
      *
      * @authenticated
-     */    
+     */
     public function grade(Request $request, Submission $submission)
     {
         /** @var \Modules\Auth\Models\User $user */
