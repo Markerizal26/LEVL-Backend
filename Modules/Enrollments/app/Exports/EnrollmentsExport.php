@@ -2,27 +2,27 @@
 
 namespace Modules\Enrollments\Exports;
 
-use Illuminate\Support\Collection;
-use Maatwebsite\Excel\Concerns\FromCollection;
+use Illuminate\Database\Eloquent\Builder;
+use Maatwebsite\Excel\Concerns\FromQuery;
 use Maatwebsite\Excel\Concerns\WithHeadings;
 use Maatwebsite\Excel\Concerns\WithMapping;
 use Maatwebsite\Excel\Concerns\WithTitle;
 
-class EnrollmentsExport implements FromCollection, WithHeadings, WithMapping, WithTitle
+class EnrollmentsExport implements FromQuery, WithHeadings, WithMapping, WithTitle
 {
-    protected Collection $enrollments;
+    protected Builder $query;
 
-    public function __construct(Collection $enrollments)
+    public function __construct(Builder $query)
     {
-        $this->enrollments = $enrollments;
+        $this->query = $query;
     }
 
     /**
-     * @return Collection
+     * @return Builder
      */
-    public function collection()
+    public function query()
     {
-        return $this->enrollments;
+        return $this->query;
     }
 
     /**

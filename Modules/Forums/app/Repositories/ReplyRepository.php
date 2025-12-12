@@ -6,7 +6,6 @@ use App\Repositories\BaseRepository;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Model;
 use Modules\Forums\Models\Reply;
-use Modules\Forums\Models\Thread;
 
 class ReplyRepository extends BaseRepository
 {
@@ -16,8 +15,11 @@ class ReplyRepository extends BaseRepository
     }
 
     protected array $allowedFilters = ['thread_id', 'parent_id', 'is_accepted_answer'];
+
     protected array $allowedSorts = ['id', 'created_at', 'is_accepted_answer'];
+
     protected string $defaultSort = 'created_at';
+
     protected array $with = ['author'];
 
     public function getRepliesForThread(int $threadId): Collection
@@ -55,14 +57,26 @@ class ReplyRepository extends BaseRepository
         return Reply::create($data);
     }
 
-    public function update(Reply $reply, array $data): Reply
+    public function update(Model $model, array $attributes): Model
+    {
+        $model->update($attributes);
+
+        return $model->fresh();
+    }
+
+    public function updateReply(Reply $reply, array $data): Reply
     {
         $reply->update($data);
 
         return $reply->fresh();
     }
 
-    public function delete(Reply $reply, ?int $deletedBy = null): bool
+    public function delete(Model $model): bool
+    {
+        return $model->delete();
+    }
+
+    public function deleteReply(Reply $reply, ?int $deletedBy = null): bool
     {
         if ($deletedBy) {
             $reply->deleted_by = $deletedBy;

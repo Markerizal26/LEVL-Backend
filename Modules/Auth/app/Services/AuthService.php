@@ -2,18 +2,23 @@
 
 namespace Modules\Auth\Services;
 
+use App\Exceptions\BusinessException;
 use Illuminate\Auth\Access\AuthorizationException;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Mail;
+use Illuminate\Support\Str;
 use Illuminate\Validation\ValidationException;
 use Modules\Auth\Contracts\AuthRepositoryInterface;
 use Modules\Auth\Contracts\AuthServiceInterface;
+use Modules\Auth\DTOs\LoginDTO;
+use Modules\Auth\DTOs\RegisterDTO;
 use Modules\Auth\Enums\UserStatus;
 use Modules\Auth\Models\User;
 use Modules\Auth\Support\TokenPairDTO;
+use Modules\Common\Models\Audit;
 use Modules\Enrollments\Models\Enrollment;
 use Modules\Schemes\Models\CourseAdmin;
 use Spatie\QueryBuilder\AllowedFilter;
@@ -67,8 +72,12 @@ class AuthService implements AuthServiceInterface
         return $response;
     }
 
-    public function login(LoginDTO|string $loginOrDto, ?string $password, string $ip, ?string $userAgent): array
-    {
+    public function login(
+        LoginDTO|string $loginOrDto,
+        ?string $password,
+        string $ip,
+        ?string $userAgent,
+    ): array {
         if ($loginOrDto instanceof LoginDTO) {
             $login = $loginOrDto->login;
             $password = $loginOrDto->password;
@@ -95,7 +104,7 @@ class AuthService implements AuthServiceInterface
             throw new BusinessException(
                 'Username/email atau password salah.',
                 ['login' => ['Username/email atau password salah.']],
-                401
+                401,
             );
         }
 
@@ -103,7 +112,10 @@ class AuthService implements AuthServiceInterface
         $isPrivileged = $roles->intersect(['Superadmin', 'Admin', 'Instructor'])->isNotEmpty();
 
         $wasAutoVerified = false;
-        if ($isPrivileged && (($user->status === UserStatus::Pending) || $user->email_verified_at === null)) {
+        if (
+            $isPrivileged &&
+            ($user->status === UserStatus::Pending || $user->email_verified_at === null)
+        ) {
             $user->email_verified_at = now();
             $user->status = UserStatus::Active;
             $user->save();
@@ -131,11 +143,16 @@ class AuthService implements AuthServiceInterface
 
         $userArray = $user->toArray();
         $userArray['roles'] = $user->getRoleNames()->values();
-        $userArray['status'] = $user->status instanceof UserStatus ? $user->status->value : (string) $user->status;
+        $userArray['status'] =
+          $user->status instanceof UserStatus ? $user->status->value : (string) $user->status;
 
         $response = ['user' => $userArray] + $pair->toArray();
 
-        if ($user->status === UserStatus::Pending && $user->email_verified_at === null && ! $isPrivileged) {
+        if (
+            $user->status === UserStatus::Pending &&
+            $user->email_verified_at === null &&
+            ! $isPrivileged
+        ) {
             $verificationUuid = $this->emailVerification->sendVerificationLink($user);
             $response['status'] = UserStatus::Pending->value;
             $response['message'] = 'Akun Anda belum aktif. Silakan verifikasi email terlebih dahulu.';
@@ -335,15 +352,7 @@ class AuthService implements AuthServiceInterface
         $searchQuery = request('filter.search');
 
         $builder = QueryBuilder::for(User::class)
-            ->select([
-                'id',
-                'name',
-                'email',
-                'username',
-                'status',
-                'created_at',
-                'email_verified_at',
-            ])
+            ->select(['id', 'name', 'email', 'username', 'status', 'created_at', 'email_verified_at'])
             ->with(['roles', 'media']);
 
         if ($searchQuery && trim($searchQuery) !== '') {
@@ -355,7 +364,9 @@ class AuthService implements AuthServiceInterface
             ->allowedFilters([
                 AllowedFilter::exact('status'),
                 AllowedFilter::callback('role', function (Builder $query, $value) {
-                    $roles = is_array($value) ? $value : Str::of($value)->explode(',')->map(fn($r) => trim($r))->toArray();
+                    $roles = is_array($value)
+                      ? $value
+                      : Str::of($value)->explode(',')->map(fn ($r) => trim($r))->toArray();
                     $query->whereHas('roles', fn ($q) => $q->whereIn('name', $roles));
                 }),
                 AllowedFilter::callback('created_from', function (Builder $query, $value) {
@@ -504,8 +515,12 @@ class AuthService implements AuthServiceInterface
         return ['user' => $userArray];
     }
 
-    public function logProfileUpdate(User $user, array $changes, ?string $ip, ?string $userAgent): void
-    {
+    public function logProfileUpdate(
+        User $user,
+        array $changes,
+        ?string $ip,
+        ?string $userAgent,
+    ): void {
         Audit::create([
             'action' => 'update',
             'user_id' => $user->id,
@@ -519,8 +534,13 @@ class AuthService implements AuthServiceInterface
         ]);
     }
 
-    public function logEmailChangeRequest(User $user, string $newEmail, string $uuid, ?string $ip, ?string $userAgent): void
-    {
+    public function logEmailChangeRequest(
+        User $user,
+        string $newEmail,
+        string $uuid,
+        ?string $ip,
+        ?string $userAgent,
+    ): void {
         Audit::create([
             'action' => 'update',
             'user_id' => $user->id,

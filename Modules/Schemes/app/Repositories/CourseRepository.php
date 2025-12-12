@@ -12,148 +12,153 @@ use Modules\Schemes\Models\Course;
 
 class CourseRepository extends BaseRepository implements CourseRepositoryInterface
 {
-    protected array $allowedFilters = [
-        'status',
-        'level_tag',
-        'type',
-        'category_id',
-    ];
+  protected array $allowedFilters = ["status", "level_tag", "type", "category_id"];
 
-    protected array $allowedSorts = [
-        'id',
-        'code',
-        'title',
-        'created_at',
-        'updated_at',
-        'published_at',
-    ];
+  protected array $allowedSorts = [
+    "id",
+    "code",
+    "title",
+    "created_at",
+    "updated_at",
+    "published_at",
+  ];
 
-    protected string $defaultSort = 'title';
+  protected string $defaultSort = "title";
 
-    protected array $with = ['tags'];
+  protected array $with = ["tags"];
 
-    protected function model(): string
-    {
-        return Course::class;
+  protected function model(): string
+  {
+    return Course::class;
+  }
+
+  public function findBySlug(string $slug): ?Course
+  {
+    return $this->query()->where("slug", $slug)->first();
+  }
+
+  public function paginate(array $params = [], int $perPage = 15): LengthAwarePaginator
+  {
+    $query = $this->query();
+
+    $searchQuery = $params["search"] ?? (request("filter.search") ?? request("search"));
+
+    if ($searchQuery && trim($searchQuery) !== "") {
+      $ids = Course::search($searchQuery)->keys()->toArray();
+
+      if (!empty($ids)) {
+        $query->whereIn("id", $ids);
+      } else {
+        $query->whereRaw("1 = 0");
+      }
     }
 
-    public function findBySlug(string $slug): ?Course
-    {
-        return $this->query()->where('slug', $slug)->first();
+    $tagFilter = $params["filter"]["tag"] ?? request("filter.tag");
+    if ($tagFilter) {
+      $this->applyTagFilters($query, $tagFilter);
     }
 
-    public function paginate(array $params = [], int $perPage = 15): LengthAwarePaginator
-    {
-        $query = $this->query();
+    return $this->filteredPaginate(
+      $query,
+      $params,
+      $this->allowedFilters,
+      $this->allowedSorts,
+      $this->defaultSort,
+      $perPage,
+    );
+  }
 
-        $searchQuery = $params['search'] ?? request('filter.search') ?? request('search');
+  public function list(array $params = []): Collection
+  {
+    $query = $this->query();
 
-        if ($searchQuery && trim($searchQuery) !== '') {
-            $ids = Course::search($searchQuery)->keys()->toArray();
+    $searchQuery = $params["search"] ?? (request("filter.search") ?? request("search"));
 
-            if (! empty($ids)) {
-                $query->whereIn('id', $ids);
-            } else {
-                $query->whereRaw('1 = 0');
-            }
-        }
+    if ($searchQuery && trim($searchQuery) !== "") {
+      $ids = Course::search($searchQuery)->keys()->toArray();
 
-        $tagFilter = $params['filter']['tag'] ?? request('filter.tag');
-        if ($tagFilter) {
-            $this->applyTagFilters($query, $tagFilter);
-        }
-
-        return $this->filteredPaginate(
-            $query,
-            $params,
-            $this->allowedFilters,
-            $this->allowedSorts,
-            $this->defaultSort,
-            $perPage
-        );
+      if (!empty($ids)) {
+        $query->whereIn("id", $ids);
+      } else {
+        return new Collection();
+      }
     }
 
-    public function list(array $params = []): Collection
-    {
-        $query = $this->query();
-
-        $searchQuery = $params['search'] ?? request('filter.search') ?? request('search');
-
-        if ($searchQuery && trim($searchQuery) !== '') {
-            $ids = Course::search($searchQuery)->keys()->toArray();
-
-            if (! empty($ids)) {
-                $query->whereIn('id', $ids);
-            } else {
-                return new Collection;
-            }
-        }
-
-        $tagFilter = $params['filter']['tag'] ?? request('filter.tag');
-        if ($tagFilter) {
-            $this->applyTagFilters($query, $tagFilter);
-        }
-
-        $this->applyFiltering($query, $params, $this->allowedFilters, $this->allowedSorts, $this->defaultSort);
-
-        return $query->get();
+    $tagFilter = $params["filter"]["tag"] ?? request("filter.tag");
+    if ($tagFilter) {
+      $this->applyTagFilters($query, $tagFilter);
     }
 
-    private function applyTagFilters(Builder $query, $filterTag): void
-    {
-        $tags = $this->parseArrayFilter($filterTag);
+    $this->applyFiltering(
+      $query,
+      $params,
+      $this->allowedFilters,
+      $this->allowedSorts,
+      $this->defaultSort,
+    );
 
-        if (empty($tags)) {
-            return;
-        }
+    // Add default limit to prevent unbounded queries (configurable via params)
+    $limit = $params["limit"] ?? 1000;
 
-        foreach ($tags as $tagValue) {
-            $value = trim((string) $tagValue);
-            if ($value === '') {
-                continue;
-            }
+    return $query->limit($limit)->get();
+  }
 
-            $slug = Str::slug($value);
+  private function applyTagFilters(Builder $query, $filterTag): void
+  {
+    $tags = $this->parseArrayFilter($filterTag);
 
-            $query->whereHas('tags', function (Builder $tagQuery) use ($value, $slug) {
-                $tagQuery->where(function (Builder $inner) use ($value, $slug) {
-                    $inner->where('slug', $slug)
-                        ->orWhere('slug', $value)
-                        ->orWhereRaw('LOWER(name) = ?', [mb_strtolower($value)]);
-                });
-            });
-        }
+    if (empty($tags)) {
+      return;
     }
 
-    private function parseArrayFilter($value): array
-    {
-        if (is_array($value)) {
-            return $value;
-        }
+    foreach ($tags as $tagValue) {
+      $value = trim((string) $tagValue);
+      if ($value === "") {
+        continue;
+      }
 
-        if (is_string($value)) {
-            $trim = trim($value);
+      $slug = Str::slug($value);
 
-            if ($trim === '') {
-                return [];
-            }
+      $query->whereHas("tags", function (Builder $tagQuery) use ($value, $slug) {
+        $tagQuery->where(function (Builder $inner) use ($value, $slug) {
+          $inner
+            ->where("slug", $slug)
+            ->orWhere("slug", $value)
+            ->orWhereRaw("LOWER(name) = ?", [mb_strtolower($value)]);
+        });
+      });
+    }
+  }
 
-            if ($trim[0] === '[' || str_starts_with($trim, '%5B')) {
-                $decoded = json_decode($trim, true);
-                if (json_last_error() === JSON_ERROR_NONE && is_array($decoded)) {
-                    return $decoded;
-                }
+  private function parseArrayFilter($value): array
+  {
+    if (is_array($value)) {
+      return $value;
+    }
 
-                $urldec = urldecode($trim);
-                $decoded = json_decode($urldec, true);
-                if (json_last_error() === JSON_ERROR_NONE && is_array($decoded)) {
-                    return $decoded;
-                }
-            }
+    if (is_string($value)) {
+      $trim = trim($value);
 
-            return [$trim];
-        }
-
+      if ($trim === "") {
         return [];
+      }
+
+      if ($trim[0] === "[" || str_starts_with($trim, "%5B")) {
+        $decoded = json_decode($trim, true);
+        if (json_last_error() === JSON_ERROR_NONE && is_array($decoded)) {
+          return $decoded;
+        }
+
+        $urldec = urldecode($trim);
+        $decoded = json_decode($urldec, true);
+        if (json_last_error() === JSON_ERROR_NONE && is_array($decoded)) {
+          return $decoded;
+        }
+      }
+
+      return [$trim];
     }
+
+    return [];
+  }
 }

@@ -12,7 +12,6 @@ use Modules\Content\Contracts\Services\NewsServiceInterface;
 use Modules\Content\DTOs\CreateNewsDTO;
 use Modules\Content\DTOs\UpdateNewsDTO;
 use Modules\Content\Events\NewsPublished;
-use Modules\Content\Models\ContentRevision;
 use Modules\Content\Models\News;
 use Spatie\QueryBuilder\AllowedFilter;
 use Spatie\QueryBuilder\QueryBuilder;
@@ -145,5 +144,10 @@ class NewsService implements NewsServiceInterface
     public function getScheduledForPublishing(): Collection
     {
         return $this->repository->getScheduledForPublishing();
+    }
+
+    public function incrementViews(News $news): void
+    {
+        $news->increment('views_count');
     }
 }

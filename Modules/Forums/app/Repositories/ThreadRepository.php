@@ -16,8 +16,11 @@ class ThreadRepository extends BaseRepository
     }
 
     protected array $allowedFilters = ['pinned', 'resolved', 'closed', 'scheme_id'];
+
     protected array $allowedSorts = ['id', 'created_at', 'last_activity_at', 'is_pinned'];
+
     protected string $defaultSort = '-last_activity_at';
+
     protected array $with = ['author'];
 
     public function getThreadsForScheme(int $schemeId, array $filters = []): LengthAwarePaginator
@@ -74,14 +77,26 @@ class ThreadRepository extends BaseRepository
         return $thread;
     }
 
-    public function update(Thread $thread, array $data): Thread
+    public function update(Model $model, array $attributes): Model
+    {
+        $model->update($attributes);
+
+        return $model->fresh();
+    }
+
+    public function updateThread(Thread $thread, array $data): Thread
     {
         $thread->update($data);
 
         return $thread->fresh();
     }
 
-    public function delete(Thread $thread, ?int $deletedBy = null): bool
+    public function delete(Model $model): bool
+    {
+        return $model->delete();
+    }
+
+    public function deleteThread(Thread $thread, ?int $deletedBy = null): bool
     {
         if ($deletedBy) {
             $thread->deleted_by = $deletedBy;

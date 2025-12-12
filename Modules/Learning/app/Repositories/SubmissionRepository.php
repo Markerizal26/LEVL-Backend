@@ -17,9 +17,13 @@ class SubmissionRepository extends BaseRepository
     }
 
     protected array $allowedFilters = ['assignment_id', 'user_id', 'status'];
+
     protected array $allowedSorts = ['id', 'created_at', 'submitted_at', 'graded_at'];
+
     protected string $defaultSort = '-created_at';
+
     protected array $with = ['user', 'enrollment'];
+
     public function listForAssignment(Assignment $assignment, User $user, array $filters = []): Collection
     {
         $query = Submission::query()
@@ -40,16 +44,23 @@ class SubmissionRepository extends BaseRepository
         return Submission::create($attributes);
     }
 
-    public function update(Submission $submission, array $attributes): Submission
+    public function update(Model $model, array $attributes): Model
+    {
+        $model->fill($attributes)->save();
+
+        return $model;
+    }
+
+    public function updateSubmission(Submission $submission, array $attributes): Submission
     {
         $submission->fill($attributes)->save();
 
         return $submission;
     }
 
-    public function delete(Submission $submission): bool
+    public function delete(Model $model): bool
     {
-        return $submission->delete();
+        return $model->delete();
     }
 
     public function latestCommittedSubmission(Assignment $assignment, int $userId): ?Submission

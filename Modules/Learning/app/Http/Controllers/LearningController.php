@@ -12,120 +12,120 @@ use Modules\Learning\Services\LearningPageService;
  */
 class LearningController extends Controller
 {
-    use ApiResponse;
+  use ApiResponse;
 
-    public function __construct(private readonly LearningPageService $service) {}
+  public function __construct(private readonly LearningPageService $service) {}
 
-    /**
-     * Menampilkan daftar data
-     *
-     *
-     * @summary Menampilkan daftar data
-     *
-     * @response 200 scenario="Success" {"success":true,"message":"Success","data":[{"id":1,"name":"Example Learning"}],"meta":{"current_page":1,"last_page":5,"per_page":15,"total":75},"links":{"first":"...","last":"...","prev":null,"next":"..."}}
-     * @response 401 scenario="Unauthorized" {"success":false,"message":"Tidak terotorisasi."}
-     * @authenticated
-     */
-    public function index()
-    {
-        return $this->service->render('index');
-    }
+  /**
+   * Menampilkan daftar data
+   *
+   *
+   * @summary Menampilkan daftar data
+   *
+   * @response 200 scenario="Success" {"success":true,"message":"Success","data":[{"id":1,"name":"Example Learning"}],"meta":{"current_page":1,"last_page":5,"per_page":15,"total":75},"links":{"first":"...","last":"...","prev":null,"next":"..."}}
+   * @response 401 scenario="Unauthorized" {"success":false,"message":"Tidak terotorisasi."}
+   * @authenticated
+   */
+  public function index()
+  {
+    return $this->service->render("index");
+  }
 
-    /**
-     * Menampilkan form untuk membuat data baru
-     *
-     *
-     * @summary Menampilkan form untuk membuat data baru
-     *
-     * @response 200 scenario="Success" {"success":true,"message":"Success","data":{"id":1,"name":"Example Learning"}}
-     * @response 401 scenario="Unauthorized" {"success":false,"message":"Tidak terotorisasi."}
-     * @authenticated
-     */
-    public function create()
-    {
-        return $this->service->render('create');
-    }
+  /**
+   * Menampilkan form untuk membuat data baru
+   *
+   *
+   * @summary Menampilkan form untuk membuat data baru
+   *
+   * @response 200 scenario="Success" {"success":true,"message":"Success","data":{"id":1,"name":"Example Learning"}}
+   * @response 401 scenario="Unauthorized" {"success":false,"message":"Tidak terotorisasi."}
+   * @authenticated
+   */
+  public function create()
+  {
+    return $this->service->render("create");
+  }
 
-    /**
-     * Menyimpan data baru
-     *
-     *
-     * @summary Menyimpan data baru
-     *
-     * @response 201 scenario="Success" {"success":true,"message":"Learning berhasil dibuat.","data":{"id":1,"name":"New Learning"}}
-     * @response 401 scenario="Unauthorized" {"success":false,"message":"Tidak terotorisasi."}
-     * @response 422 scenario="Validation Error" {"success":false,"message":"Validasi gagal.","errors":{"field":["Field wajib diisi."]}}
-     * @response 501 scenario="Not Implemented" {"success":false,"message":"Fitur belum tersedia."}
-     * @authenticated
-     */
-    public function store(Request $request)
-    {
-        return $this->error('Fitur belum tersedia.', 501);
-    }
+  /**
+   * Menyimpan data baru
+   *
+   *
+   * @summary Menyimpan data baru
+   *
+   * @response 201 scenario="Success" {"success":true,"message":"Learning berhasil dibuat.","data":{"id":1,"name":"New Learning"}}
+   * @response 401 scenario="Unauthorized" {"success":false,"message":"Tidak terotorisasi."}
+   * @response 422 scenario="Validation Error" {"success":false,"message":"Validasi gagal.","errors":{"field":["Field wajib diisi."]}}
+   * @response 501 scenario="Not Implemented" {"success":false,"message":"Fitur belum tersedia."}
+   * @authenticated
+   */
+  public function store(Request $request)
+  {
+    return $this->error(__("messages.feature_unavailable"), 501);
+  }
 
-    /**
-     * Menampilkan data tertentu
-     *
-     *
-     * @summary Menampilkan data tertentu
-     *
-     * @response 200 scenario="Success" {"success":true,"message":"Success","data":{"id":1,"name":"Example Learning"}}
-     * @response 401 scenario="Unauthorized" {"success":false,"message":"Tidak terotorisasi."}
-     * @response 404 scenario="Not Found" {"success":false,"message":"Learning tidak ditemukan."}
-     * @authenticated
-     */
-    public function show($id)
-    {
-        return $this->service->render('show');
-    }
+  /**
+   * Menampilkan data tertentu
+   *
+   *
+   * @summary Menampilkan data tertentu
+   *
+   * @response 200 scenario="Success" {"success":true,"message":"Success","data":{"id":1,"name":"Example Learning"}}
+   * @response 401 scenario="Unauthorized" {"success":false,"message":"Tidak terotorisasi."}
+   * @response 404 scenario="Not Found" {"success":false,"message":"Learning tidak ditemukan."}
+   * @authenticated
+   */
+  public function show($id)
+  {
+    return $this->service->render("show");
+  }
 
-    /**
-     * Menampilkan form untuk edit data
-     *
-     *
-     * @summary Menampilkan form untuk edit data
-     *
-     * @response 200 scenario="Success" {"success":true,"message":"Success","data":{"id":1,"name":"Example Learning"}}
-     * @response 401 scenario="Unauthorized" {"success":false,"message":"Tidak terotorisasi."}
-     * @authenticated
-     */
-    public function edit($id)
-    {
-        return $this->service->render('edit');
-    }
+  /**
+   * Menampilkan form untuk edit data
+   *
+   *
+   * @summary Menampilkan form untuk edit data
+   *
+   * @response 200 scenario="Success" {"success":true,"message":"Success","data":{"id":1,"name":"Example Learning"}}
+   * @response 401 scenario="Unauthorized" {"success":false,"message":"Tidak terotorisasi."}
+   * @authenticated
+   */
+  public function edit($id)
+  {
+    return $this->service->render("edit");
+  }
 
-    /**
-     * Memperbarui data
-     *
-     *
-     * @summary Memperbarui data
-     *
-     * @response 200 scenario="Success" {"success":true,"message":"Learning berhasil diperbarui.","data":{"id":1,"name":"Updated Learning"}}
-     * @response 401 scenario="Unauthorized" {"success":false,"message":"Tidak terotorisasi."}
-     * @response 404 scenario="Not Found" {"success":false,"message":"Learning tidak ditemukan."}
-     * @response 422 scenario="Validation Error" {"success":false,"message":"Validasi gagal.","errors":{"field":["Field wajib diisi."]}}
-     * @response 501 scenario="Not Implemented" {"success":false,"message":"Fitur belum tersedia."}
-     * @authenticated
-     */
-    public function update(Request $request, $id)
-    {
-        return $this->error('Fitur belum tersedia.', 501);
-    }
+  /**
+   * Memperbarui data
+   *
+   *
+   * @summary Memperbarui data
+   *
+   * @response 200 scenario="Success" {"success":true,"message":"Learning berhasil diperbarui.","data":{"id":1,"name":"Updated Learning"}}
+   * @response 401 scenario="Unauthorized" {"success":false,"message":"Tidak terotorisasi."}
+   * @response 404 scenario="Not Found" {"success":false,"message":"Learning tidak ditemukan."}
+   * @response 422 scenario="Validation Error" {"success":false,"message":"Validasi gagal.","errors":{"field":["Field wajib diisi."]}}
+   * @response 501 scenario="Not Implemented" {"success":false,"message":"Fitur belum tersedia."}
+   * @authenticated
+   */
+  public function update(Request $request, string $id)
+  {
+    return $this->error(__("messages.feature_unavailable"), 501);
+  }
 
-    /**
-     * Menghapus data
-     *
-     *
-     * @summary Menghapus data
-     *
-     * @response 200 scenario="Success" {"success":true,"message":"Learning berhasil dihapus.","data":[]}
-     * @response 401 scenario="Unauthorized" {"success":false,"message":"Tidak terotorisasi."}
-     * @response 404 scenario="Not Found" {"success":false,"message":"Learning tidak ditemukan."}
-     * @response 501 scenario="Not Implemented" {"success":false,"message":"Fitur belum tersedia."}
-     * @authenticated
-     */
-    public function destroy($id)
-    {
-        return $this->error('Fitur belum tersedia.', 501);
-    }
+  /**
+   * Menghapus data
+   *
+   *
+   * @summary Menghapus data
+   *
+   * @response 200 scenario="Success" {"success":true,"message":"Learning berhasil dihapus.","data":[]}
+   * @response 401 scenario="Unauthorized" {"success":false,"message":"Tidak terotorisasi."}
+   * @response 404 scenario="Not Found" {"success":false,"message":"Learning tidak ditemukan."}
+   * @response 501 scenario="Not Implemented" {"success":false,"message":"Fitur belum tersedia."}
+   * @authenticated
+   */
+  public function destroy(string $id)
+  {
+    return $this->error(__("messages.feature_unavailable"), 501);
+  }
 }

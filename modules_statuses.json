@@ -10,5 +10,6 @@
     "Common": true,
     "Forums": true,
     "Content": true,
-    "Search": true
+    "Search": true,
+    "Questions": true
 }

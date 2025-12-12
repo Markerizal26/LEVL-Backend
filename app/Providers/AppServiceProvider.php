@@ -35,7 +35,12 @@ class AppServiceProvider extends ServiceProvider
     public function boot(): void
     {
         $this->configureRateLimiting();
-        $this->configureScramble();
+
+        // Only configure Scramble when explicitly needed (not on every request)
+        // This prevents memory issues during normal API requests
+        if (request()->is('docs*') || request()->is('docs/api.json')) {
+            $this->configureScramble();
+        }
 
         if ($this->app->environment('local')) {
             Mail::alwaysTo(config('mail.development_to', 'dev@local.test'));

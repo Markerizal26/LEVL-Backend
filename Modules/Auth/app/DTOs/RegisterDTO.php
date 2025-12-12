@@ -2,25 +2,32 @@
 
 namespace Modules\Auth\DTOs;
 
-use Spatie\LaravelData\Attributes\Validation\Email;
-use Spatie\LaravelData\Attributes\Validation\Max;
-use Spatie\LaravelData\Attributes\Validation\Min;
-use Spatie\LaravelData\Attributes\Validation\Required;
-use Spatie\LaravelData\Data;
-
-final class RegisterDTO extends Data
+final class RegisterDTO
 {
     public function __construct(
-        #[Required, Max(255)]
-        public string $name,
-
-        #[Required, Max(255)]
-        public string $username,
-
-        #[Required, Email, Max(255)]
-        public string $email,
-
-        #[Required, Min(8)]
-        public string $password,
+        public readonly string $name,
+        public readonly string $username,
+        public readonly string $email,
+        public readonly string $password,
     ) {}
+
+    public static function fromRequest(array $data): static
+    {
+        return new self(
+            name: $data['name'] ?? '',
+            username: $data['username'] ?? '',
+            email: $data['email'] ?? '',
+            password: $data['password'] ?? '',
+        );
+    }
+
+    public function toArray(): array
+    {
+        return [
+            'name' => $this->name,
+            'username' => $this->username,
+            'email' => $this->email,
+            'password' => $this->password,
+        ];
+    }
 }

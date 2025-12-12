@@ -10,52 +10,57 @@ use Modules\Learning\Mail\AssignmentPublishedMail;
 
 class NotifyEnrolledUsersOnAssignmentPublished
 {
-    public function handle(AssignmentPublished $event): void
-    {
-        $assignment = $event->assignment->fresh(['lesson.unit.course']);
+  public function handle(AssignmentPublished $event): void
+  {
+    $assignment = $event->assignment->fresh(["lesson.unit.course"]);
 
-        if (! $assignment->lesson || ! $assignment->lesson->unit || ! $assignment->lesson->unit->course) {
-            return;
-        }
+    if (!$assignment->lesson || !$assignment->lesson->unit || !$assignment->lesson->unit->course) {
+      return;
+    }
 
-        $course = $assignment->lesson->unit->course;
+    $course = $assignment->lesson->unit->course;
 
-        // Get all active enrollments for this course
-        $enrollments = Enrollment::query()
-            ->where('course_id', $course->id)
-            ->where('status', EnrollmentStatus::Active->value)
-            ->with(['user:id,name,email'])
-            ->get();
+    $courseUrl = $this->getCourseUrl($course);
+    $assignmentUrl = $this->getAssignmentUrl($course, $assignment);
 
-        $courseUrl = $this->getCourseUrl($course);
-        $assignmentUrl = $this->getAssignmentUrl($course, $assignment);
-
+    // Process enrollments in chunks to prevent memory exhaustion
+    Enrollment::query()
+      ->where("course_id", $course->id)
+      ->where("status", EnrollmentStatus::Active->value)
+      ->with(["user:id,name,email"])
+      ->chunk(100, function ($enrollments) use ($course, $assignment, $courseUrl, $assignmentUrl) {
         foreach ($enrollments as $enrollment) {
-            if ($enrollment->user && $enrollment->user->email) {
-                Mail::to($enrollment->user->email)->send(
-                    new AssignmentPublishedMail(
-                        $enrollment->user,
-                        $course,
-                        $assignment,
-                        $courseUrl,
-                        $assignmentUrl
-                    )
-                );
-            }
+          if ($enrollment->user && $enrollment->user->email) {
+            // Queue email instead of sending synchronously
+            Mail::to($enrollment->user->email)->queue(
+              new AssignmentPublishedMail(
+                $enrollment->user,
+                $course,
+                $assignment,
+                $courseUrl,
+                $assignmentUrl,
+              ),
+            );
+          }
         }
-    }
+      });
+  }
 
-    private function getCourseUrl($course): string
-    {
-        $frontendUrl = config('app.frontend_url', env('FRONTEND_URL', 'http://localhost:3000'));
+  private function getCourseUrl($course): string
+  {
+    $frontendUrl = config("app.frontend_url", env("FRONTEND_URL", "http://localhost:3000"));
 
-        return rtrim($frontendUrl, '/').'/courses/'.$course->slug;
-    }
+    return rtrim($frontendUrl, "/") . "/courses/" . $course->slug;
+  }
 
-    private function getAssignmentUrl($course, $assignment): string
-    {
-        $frontendUrl = config('app.frontend_url', env('FRONTEND_URL', 'http://localhost:3000'));
+  private function getAssignmentUrl($course, $assignment): string
+  {
+    $frontendUrl = config("app.frontend_url", env("FRONTEND_URL", "http://localhost:3000"));
 
-        return rtrim($frontendUrl, '/').'/courses/'.$course->slug.'/assignments/'.$assignment->id;
-    }
+    return rtrim($frontendUrl, "/") .
+      "/courses/" .
+      $course->slug .
+      "/assignments/" .
+      $assignment->id;
+  }
 }

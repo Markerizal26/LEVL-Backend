@@ -44,15 +44,14 @@ class LogApiAction
             ];
 
             if (in_array($request->method(), ['POST', 'PUT', 'PATCH'])) {
-                $body = $request->all();
-                $sensitiveFields = ['password', 'password_confirmation', 'old_password', 'token', 'api_key', 'secret'];
-                foreach ($sensitiveFields as $field) {
-                    unset($body[$field]);
-                }
+                // Limit request body logging to prevent memory issues
+                $body = $request->except(['password', 'password_confirmation', 'old_password', 'token', 'api_key', 'secret']);
+
                 // Filter out file uploads as they cannot be JSON encoded
                 $body = array_filter($body, function ($value) {
                     return ! ($value instanceof \Illuminate\Http\UploadedFile);
                 });
+
                 // Also handle arrays of files
                 foreach ($body as $key => $value) {
                     if (is_array($value)) {
@@ -61,6 +60,14 @@ class LogApiAction
                         });
                     }
                 }
+
+                // Truncate large string values to prevent memory issues
+                foreach ($body as $key => $value) {
+                    if (is_string($value) && strlen($value) > 1000) {
+                        $body[$key] = substr($value, 0, 1000).'... [truncated]';
+                    }
+                }
+
                 $meta['request_body'] = $body;
             }
 

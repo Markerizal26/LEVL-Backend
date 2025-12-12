@@ -9,34 +9,37 @@ use Modules\Schemes\Models\Lesson;
 
 class AssignmentRepository implements AssignmentRepositoryInterface
 {
-    public function listForLesson(Lesson $lesson, array $filters = []): Collection
-    {
-        $query = Assignment::query()
-            ->where('lesson_id', $lesson->id)
-            ->with(['creator:id,name,email', 'lesson:id,title,slug']);
+  public function listForLesson(Lesson $lesson, array $filters = []): Collection
+  {
+    $query = Assignment::query()
+      ->where("lesson_id", $lesson->id)
+      ->with(["creator:id,name,email", "lesson:id,title,slug"]);
 
-        $status = $filters['status'] ?? ($filters['filter']['status'] ?? null);
-        if ($status) {
-            $query->where('status', $status);
-        }
-
-        return $query->orderBy('created_at', 'desc')->get();
+    $status = $filters["status"] ?? ($filters["filter"]["status"] ?? null);
+    if ($status) {
+      $query->where("status", $status);
     }
 
-    public function create(array $attributes): Assignment
-    {
-        return Assignment::create($attributes);
-    }
+    // Add default limit to prevent unbounded queries
+    $limit = $filters["limit"] ?? 100;
 
-    public function update(Assignment $assignment, array $attributes): Assignment
-    {
-        $assignment->fill($attributes)->save();
+    return $query->orderBy("created_at", "desc")->limit($limit)->get();
+  }
 
-        return $assignment;
-    }
+  public function create(array $attributes): Assignment
+  {
+    return Assignment::create($attributes);
+  }
 
-    public function delete(Assignment $assignment): bool
-    {
-        return $assignment->delete();
-    }
+  public function update(Assignment $assignment, array $attributes): Assignment
+  {
+    $assignment->fill($attributes)->save();
+
+    return $assignment;
+  }
+
+  public function delete(Assignment $assignment): bool
+  {
+    return $assignment->delete();
+  }
 }
