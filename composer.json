@@ -12,6 +12,7 @@
     "php": "^8.2",
     "dedoc/scramble": "^0.13.7",
     "http-interop/http-factory-guzzle": "^1.2",
+    "jenssegers/agent": "^2.6",
     "laravel/framework": "^11.0",
     "laravel/scout": "*",
     "laravel/socialite": "^5.23",

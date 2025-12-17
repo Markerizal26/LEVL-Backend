@@ -100,7 +100,7 @@ class User extends Authenticatable implements HasMedia, JWTSubject
     "status" => UserStatus::class,
   ];
 
-  protected $appends = ["avatar_url"];
+  protected $appends = ["avatar_url", "last_active_relative"];
 
   public function getAvatarUrlAttribute(): ?string
   {

@@ -7,20 +7,20 @@ use Illuminate\Database\Seeder;
 
 class DatabaseSeeder extends Seeder
 {
-    use WithoutModelEvents;
+  use WithoutModelEvents;
 
-    /**
-     * Seed the application's database.
-     */
-    public function run(): void
-    {
-        $this->call([
-
-            RoleSeeder::class,
-            SuperAdminSeeder::class,
-            ActiveUsersSeeder::class,
-            \Modules\Common\Database\Seeders\SystemSettingSeeder::class,
-            \Modules\Common\Database\Seeders\CategorySeeder::class,
-        ]);
-    }
+  /**
+   * Seed the application's database.
+   */
+  public function run(): void
+  {
+    $this->call([
+      RoleSeeder::class,
+      SuperAdminSeeder::class,
+      ActiveUsersSeeder::class,
+      \Modules\Common\Database\Seeders\SystemSettingSeeder::class,
+      \Modules\Common\Database\Seeders\CategorySeeder::class,
+      MasterDataSeeder::class,
+    ]);
+  }
 }

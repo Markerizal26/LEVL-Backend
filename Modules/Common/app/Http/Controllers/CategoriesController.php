@@ -72,7 +72,7 @@ class CategoriesController extends Controller
    *
    * @authenticated
    */
-  public function show(int $category)
+  public function show(int|string $category)
   {
     $model = $this->service->find($category);
     if (!$model) {

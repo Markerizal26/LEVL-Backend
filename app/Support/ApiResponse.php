@@ -55,24 +55,58 @@ trait ApiResponse
     protected function paginateResponse(
         LengthAwarePaginator $paginator,
         string $message = 'Berhasil',
-        int $status = 200
+        int $status = 200,
+        ?array $additionalMeta = null
     ): JsonResponse {
+        $request = request();
+        
+        $meta = [
+            'pagination' => [
+                'current_page' => $paginator->currentPage(),
+                'per_page' => $paginator->perPage(),
+                'total' => $paginator->total(),
+                'last_page' => $paginator->lastPage(),
+                'from' => $paginator->firstItem(),
+                'to' => $paginator->lastItem(),
+                'has_next' => $paginator->hasMorePages(),
+                'has_prev' => $paginator->currentPage() > 1,
+            ],
+        ];
+
+        // Add sorting info if present
+        if ($request->has('sort')) {
+            $meta['sorting'] = [
+                'sort_by' => $request->get('sort'),
+                'sort_order' => $request->get('sort_order', 'asc'),
+            ];
+        }
+
+        // Add filtering info if present
+        $filterKeys = ['filter', 'filters'];
+        foreach ($filterKeys as $key) {
+            if ($request->has($key)) {
+                $meta['filtering'] = $request->get($key);
+                break;
+            }
+        }
+
+        // Add search info if present
+        if ($request->has('search') && $request->search) {
+            $meta['search'] = [
+                'query' => $request->get('search'),
+            ];
+        }
+
+        // Merge additional meta if provided
+        if ($additionalMeta) {
+            $meta = array_merge($meta, $additionalMeta);
+        }
+
         return $this->success(
             data: $paginator->items(),
             message: $message,
             status: $status,
-            meta: [
-                'pagination' => [
-                    'current_page' => $paginator->currentPage(),
-                    'per_page' => $paginator->perPage(),
-                    'total' => $paginator->total(),
-                    'last_page' => $paginator->lastPage(),
-                    'from' => $paginator->firstItem(),
-                    'to' => $paginator->lastItem(),
-                    'has_next' => $paginator->hasMorePages(),
-                    'has_prev' => $paginator->currentPage() > 1,
-                ],
-            ]
+            meta: $meta
         );
     }
 

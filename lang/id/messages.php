@@ -331,4 +331,18 @@ return [
     "no_update_access" => "Anda tidak memiliki akses untuk mengubah blok ini.",
     "no_delete_access" => "Anda tidak memiliki akses untuk menghapus blok ini.",
   ],
+
+  // Users Module - Bulk Operations
+  "users" => [
+    "bulk_export_queued" => "Export sedang diproses dan akan dikirim ke email Anda",
+    "bulk_activated" => ":count pengguna berhasil diaktifkan",
+    "bulk_deactivated" => ":count pengguna berhasil dinonaktifkan",
+    "bulk_deleted" => ":count pengguna berhasil dihapus",
+    "no_export_access" => "Anda tidak memiliki akses untuk export pengguna",
+    "no_activate_access" => "Anda tidak memiliki akses untuk mengaktifkan pengguna",
+    "no_deactivate_access" => "Anda tidak memiliki akses untuk menonaktifkan pengguna",
+    "no_delete_access" => "Anda tidak memiliki akses untuk menghapus pengguna",
+    "cannot_deactivate_self" => "Tidak dapat menonaktifkan akun Anda sendiri",
+    "cannot_delete_self" => "Tidak dapat menghapus akun Anda sendiri",
+  ],
 ];

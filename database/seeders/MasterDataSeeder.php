@@ -7,119 +7,83 @@ use Illuminate\Database\Seeder;
 
 class MasterDataSeeder extends Seeder
 {
-    /**
-     * All enum classes to seed from.
-     */
-    private array $enumClasses = [
-        // Auth Module
-        'user-status' => \Modules\Auth\Enums\UserStatus::class,
-
-        // Common Module
-        'category-status' => \Modules\Common\Enums\CategoryStatus::class,
-        'setting-types' => \Modules\Common\Enums\SettingType::class,
-
-        // Content Module
-        'content-status' => \Modules\Content\Enums\ContentStatus::class,
-        'priorities' => \Modules\Content\Enums\Priority::class,
-        'target-types' => \Modules\Content\Enums\TargetType::class,
-
-        // Enrollments Module
-        'enrollment-status' => \Modules\Enrollments\Enums\EnrollmentStatus::class,
-        'progress-status' => \Modules\Enrollments\Enums\ProgressStatus::class,
-
-        // Gamification Module
-        'badge-types' => \Modules\Gamification\Enums\BadgeType::class,
-        'challenge-assignment-status' => \Modules\Gamification\Enums\ChallengeAssignmentStatus::class,
-        'challenge-criteria-types' => \Modules\Gamification\Enums\ChallengeCriteriaType::class,
-        'challenge-types' => \Modules\Gamification\Enums\ChallengeType::class,
-        'point-reasons' => \Modules\Gamification\Enums\PointReason::class,
-        'point-source-types' => \Modules\Gamification\Enums\PointSourceType::class,
-
-        // Grading Module
-        'grade-status' => \Modules\Grading\Enums\GradeStatus::class,
-        'grade-source-types' => \Modules\Grading\Enums\SourceType::class,
-
-        // Learning Module
-        'assignment-status' => \Modules\Learning\Enums\AssignmentStatus::class,
-        'submission-status' => \Modules\Learning\Enums\SubmissionStatus::class,
-        'submission-types' => \Modules\Learning\Enums\SubmissionType::class,
-
-        // Notifications Module
-        'notification-channels' => \Modules\Notifications\Enums\NotificationChannel::class,
-        'notification-frequencies' => \Modules\Notifications\Enums\NotificationFrequency::class,
-        'notification-types' => \Modules\Notifications\Enums\NotificationType::class,
-
-        // Schemes Module
-        'content-types' => \Modules\Schemes\Enums\ContentType::class,
-        'course-status' => \Modules\Schemes\Enums\CourseStatus::class,
-        'course-types' => \Modules\Schemes\Enums\CourseType::class,
-        'enrollment-types' => \Modules\Schemes\Enums\EnrollmentType::class,
-        'level-tags' => \Modules\Schemes\Enums\LevelTag::class,
-        'progression-modes' => \Modules\Schemes\Enums\ProgressionMode::class,
+  /**
+   * Run the database seeds.
+   */
+  public function run(): void
+  {
+    // Categories (migrated from legacy CategorySeeder)
+    $categories = [
+      ["value" => "information-technology", "label" => "Teknologi Informasi"],
+      ["value" => "project-management", "label" => "Manajemen Proyek"],
+      ["value" => "marketing", "label" => "Pemasaran"],
+      ["value" => "finance", "label" => "Keuangan"],
+      ["value" => "human-resources", "label" => "Sumber Daya Manusia"],
+      ["value" => "english-language", "label" => "Bahasa Inggris"],
+      ["value" => "design", "label" => "Desain"],
     ];
 
-    /**
-     * Run the database seeds.
-     */
-    public function run(): void
-    {
-        // Disable Scout syncing during seeding to avoid Meilisearch connection issues
-        MasterDataItem::withoutSyncingToSearch(function () {
-            foreach ($this->enumClasses as $type => $enumClass) {
-                $this->seedFromEnum($type, $enumClass);
-            }
-        });
-
-        $this->command->info('Master data seeded successfully from '.count($this->enumClasses).' enums.');
+    foreach ($categories as $index => $item) {
+      MasterDataItem::firstOrCreate(
+        [
+          "type" => "categories",
+          "value" => $item["value"],
+        ],
+        [
+          "label" => $item["label"],
+          "is_active" => true,
+          "sort_order" => $index + 1,
+        ],
+      );
     }
 
-    /**
-     * Seed master data from an enum class.
-     */
-    private function seedFromEnum(string $type, string $enumClass): void
-    {
-        if (! enum_exists($enumClass)) {
-            $this->command->warn("Enum class not found: {$enumClass}");
+    // Difficulty Levels
+    $difficultyLevels = [
+      ["value" => "beginner", "label" => "Beginner", "label_id" => "Pemula"],
+      ["value" => "intermediate", "label" => "Intermediate", "label_id" => "Menengah"],
+      ["value" => "advanced", "label" => "Advanced", "label_id" => "Lanjutan"],
+    ];
 
-            return;
-        }
-
-        $cases = $enumClass::cases();
-        $sortOrder = 0;
-
-        foreach ($cases as $case) {
-            $value = $case->value ?? $case->name;
-            $label = $this->getLabel($case);
-
-            MasterDataItem::updateOrCreate(
-                ['type' => $type, 'value' => $value],
-                [
-                    'label' => $label,
-                    'is_system' => true,
-                    'is_active' => true,
-                    'sort_order' => $sortOrder++,
-                ]
-            );
-        }
-
-        $this->command->info("Seeded {$type}: ".count($cases).' items');
+    foreach ($difficultyLevels as $index => $item) {
+      MasterDataItem::firstOrCreate(
+        [
+          "type" => "difficulty-levels",
+          "value" => $item["value"],
+        ],
+        [
+          "label" => $item["label_id"],
+          "is_active" => true,
+          "sort_order" => $index + 1,
+          "metadata" => ["label_en" => $item["label"]],
+        ],
+      );
     }
 
-    /**
-     * Get label from enum case.
-     */
-    private function getLabel($case): string
-    {
-        // Try to get label from enum method if exists
-        if (method_exists($case, 'label')) {
-            return $case->label();
-        }
+    // Content Types (Example dynamic types)
+    $contentTypes = [
+      ["value" => "article", "label" => "Article"],
+      ["value" => "video", "label" => "Video"],
+      ["value" => "quiz", "label" => "Quiz"],
+    ];
 
-        if (method_exists($case, 'getLabel')) {
-            return $case->getLabel();
-        }
-
-        // Fallback: convert case name to title case
-        return str_replace('_', ' ', ucwords(strtolower($case->name), '_'));
+    foreach ($contentTypes as $index => $item) {
+      MasterDataItem::firstOrCreate(
+        [
+          "type" => "content-types",
+          "value" => $item["value"],
+        ],
+        [
+          "label" => $item["label"],
+          "is_active" => true,
+          "sort_order" => $index + 1,
+        ],
+      );
     }
+  }
+
+  private static function getRandomColor(): string
+  {
+    $colors = ["red", "blue", "green", "yellow", "purple", "orange"];
+    return $colors[array_rand($colors)];
+  }
 }
