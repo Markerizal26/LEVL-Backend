@@ -88,6 +88,45 @@ class EnrollmentService implements EnrollmentServiceInterface
         return $query->paginate($perPage);
     }
 
+    /**
+     * Get managed enrollments for a user (courses they manage)
+     */
+    public function getManagedEnrollments(User $user, int $perPage = 15, ?string $courseSlug = null): array
+    {
+        // Get courses managed by user
+        $courses = Course::query()
+            ->select(['id', 'slug', 'title'])
+            ->where(function ($query) use ($user) {
+                $query
+                    ->where('instructor_id', $user->id)
+                    ->orWhereHas('admins', function ($adminQuery) use ($user) {
+                        $adminQuery->where('user_id', $user->id);
+                    });
+            })
+            ->get();
+
+        $courseIds = $courses->pluck('id')->all();
+
+        // Handle course_slug filter
+        if ($courseSlug) {
+            $course = $courses->firstWhere('slug', $courseSlug);
+            if (! $course) {
+                return [
+                    'found' => false,
+                    'paginator' => null,
+                ];
+            }
+            $paginator = $this->paginateByCourse($course->id, $perPage);
+        } else {
+            $paginator = $this->paginateByCourseIds($courseIds, $perPage);
+        }
+
+        return [
+            'found' => true,
+            'paginator' => $paginator,
+        ];
+    }
+
     public function findById(int $id): ?Enrollment
     {
         return $this->repository->findById($id);
@@ -343,15 +382,11 @@ class EnrollmentService implements EnrollmentServiceInterface
 
     private function getCourseUrl(Course $course): string
     {
-        $frontendUrl = config('app.frontend_url', env('FRONTEND_URL', 'http://localhost:3000'));
-
-        return rtrim($frontendUrl, '/').'/courses/'.$course->slug;
+        return UrlHelper::getCourseUrl($course);
     }
 
     private function getEnrollmentsUrl(Course $course): string
     {
-        $frontendUrl = config('app.frontend_url', env('FRONTEND_URL', 'http://localhost:3000'));
-
-        return rtrim($frontendUrl, '/').'/courses/'.$course->slug.'/enrollments';
+        return UrlHelper::getEnrollmentsUrl($course);
     }
 }

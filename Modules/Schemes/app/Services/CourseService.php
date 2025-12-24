@@ -10,13 +10,14 @@ use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Str;
 use Modules\Schemes\Contracts\Repositories\CourseRepositoryInterface;
+use Modules\Schemes\Contracts\Services\CourseServiceInterface;
 use Modules\Schemes\DTOs\CreateCourseDTO;
 use Modules\Schemes\DTOs\UpdateCourseDTO;
 use Modules\Schemes\Models\Course;
 use Spatie\QueryBuilder\AllowedFilter;
 use Spatie\QueryBuilder\QueryBuilder;
 
-class CourseService
+class CourseService implements CourseServiceInterface
 {
     public function __construct(
         private readonly CourseRepositoryInterface $repository
@@ -115,12 +116,17 @@ class CourseService
         return $this->repository->findBySlug($slug);
     }
 
-    public function create(CreateCourseDTO|array $data): Course
+    public function create(CreateCourseDTO|array $data, ?\Modules\Auth\Models\User $actor = null): Course
     {
         $attributes = $data instanceof CreateCourseDTO ? $data->toArrayWithoutNull() : $data;
 
         if (! isset($attributes['code'])) {
             $attributes['code'] = $this->generateCourseCode();
+        }
+
+        // Set instructor_id from actor if provided and not already set
+        if ($actor && ! isset($attributes['instructor_id'])) {
+            $attributes['instructor_id'] = $actor->id;
         }
 
         $tags = $attributes['tags'] ?? null;
@@ -243,5 +249,43 @@ class CourseService
         $course->clearMediaCollection('banner');
 
         return $course->fresh();
+    }
+
+    /**
+     * Verify an enrollment key against a course's stored hash.
+     */
+    public function verifyEnrollmentKey(Course $course, string $plainKey): bool
+    {
+        if (empty($course->enrollment_key_hash)) {
+            return false;
+        }
+
+        // Get the hasher from container
+        $hasher = app(\App\Contracts\EnrollmentKeyHasherInterface::class);
+
+        return $hasher->verify($plainKey, $course->enrollment_key_hash);
+    }
+
+    /**
+     * Generate a new enrollment key.
+     */
+    public function generateEnrollmentKey(int $length = 12): string
+    {
+        $characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+        $key = '';
+
+        for ($i = 0; $i < $length; $i++) {
+            $key .= $characters[random_int(0, strlen($characters) - 1)];
+        }
+
+        return $key;
+    }
+
+    /**
+     * Check if a course has an enrollment key set.
+     */
+    public function hasEnrollmentKey(Course $course): bool
+    {
+        return ! empty($course->enrollment_key_hash);
     }
 }

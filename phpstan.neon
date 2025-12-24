@@ -1,26 +1,28 @@
 includes:
-    - ./vendor/larastan/larastan/extension.neon
+    - ./vendor/nunomaduro/larastan/extension.neon
     - phpstan-baseline.neon
 
 parameters:
-    level: 5
+    # Level scan paling ketat
+    level: max
+
+    # Folder yang dianalisis (kode utama)
     paths:
         - app
         - Modules
-    
-    # Exclude specific paths
-    excludePaths:
-        - */database/*
-        - */tests/*
-        - */config/*
-        - */routes/*
-        - */bootstrap/*
-        - */storage/*
-        - */public/*
-    
-    # Treat PHP Doc types as native types
-    treatPhpDocTypesAsCertain: true
-    
-    # Report unmatched ignored errors
-    reportUnmatchedIgnoredErrors: false
+        - bootstrap
+        - routes
+        - resources
 
+    # Folder yang dikecualikan (non-kode atau vendor)
+    excludePaths:
+        - */vendor/*
+        - */storage/*
+        - */node_modules/*
+
+    # Autoload file Laravel supaya container & service provider dikenali
+    autoload_files:
+        - bootstrap/app.php
+
+    # Abaikan error pada ignoreErrors yang tidak ada
+    reportUnmatchedIgnoredErrors: false
