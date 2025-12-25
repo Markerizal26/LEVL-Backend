@@ -23,6 +23,7 @@
     "nwidart/laravel-modules": "^11.0",
     "scalar/laravel": "^0.2.0",
     "spatie/laravel-activitylog": "^4.10",
+    "spatie/laravel-backup": "^9.3",
     "spatie/laravel-data": "^4.18",
     "spatie/laravel-medialibrary": "^11.0",
     "spatie/laravel-permission": "^6.22",
