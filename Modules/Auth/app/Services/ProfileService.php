@@ -97,7 +97,7 @@ class ProfileService implements ProfileServiceInterface
     public function getPublicProfile(User $user, User $viewer): array
     {
         if (! $this->privacyService->canViewProfile($user, $viewer)) {
-            throw new \Exception('You do not have permission to view this profile.');
+            throw new \Exception(__('messages.profile.no_permission'));
         }
 
         $profileData = $this->getProfileData($user, $viewer);
@@ -125,11 +125,11 @@ class ProfileService implements ProfileServiceInterface
     public function changePassword(User $user, string $currentPassword, string $newPassword): bool
     {
         if (! Hash::check($currentPassword, $user->password)) {
-            throw new \Exception('Current password is incorrect.');
+            throw new \Exception(__('messages.auth.current_password_incorrect'));
         }
 
         if (strlen($newPassword) < 8) {
-            throw new \Exception('New password must be at least 8 characters long.');
+            throw new \Exception(__('messages.auth.password_min_length'));
         }
 
         $user->password = Hash::make($newPassword);
@@ -143,7 +143,7 @@ class ProfileService implements ProfileServiceInterface
     public function deleteAccount(User $user, string $password): bool
     {
         if (! Hash::check($password, $user->password)) {
-            throw new \Exception('Password is incorrect.');
+            throw new \Exception(__('messages.auth.password_incorrect'));
         }
 
         $user->account_status = 'deleted';

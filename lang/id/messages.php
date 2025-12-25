@@ -72,6 +72,14 @@ return [
     "unavailable" => "Lesson belum tersedia.",
   ],
 
+  // Questions Module
+  "questions" => [
+    "created" => "Pertanyaan berhasil dibuat.",
+    "updated" => "Pertanyaan berhasil diperbarui.",
+    "deleted" => "Pertanyaan berhasil dihapus.",
+    "not_found" => "Pertanyaan tidak ditemukan.",
+  ],
+
   // Lesson Blocks Module
   "lesson_blocks" => [
     "created" => "Blok lesson berhasil dibuat.",
@@ -177,6 +185,20 @@ return [
     "status_updated" => "Status user berhasil diperbarui.",
     "password_changed" => "Password berhasil diubah.",
     "avatar_deleted" => "Avatar berhasil dihapus.",
+    "username_already_set" => "Username sudah diatur untuk akun Anda.",
+    "username_set_success" => "Username berhasil diatur.",
+    "cannot_deactivate_self" => "Tidak dapat menonaktifkan akun Anda sendiri.",
+    "cannot_delete_self" => "Tidak dapat menghapus akun Anda sendiri.",
+    "no_access_to_user" => "Anda tidak memiliki akses untuk melihat pengguna ini.",
+    "current_password_incorrect" => "Password saat ini salah.",
+    "password_min_length" => "Password baru harus minimal 8 karakter.",
+    "password_incorrect" => "Password salah.",
+    "profile_retrieved" => "Profil berhasil diambil.",
+  ],
+
+  // User Module
+  "user" => [
+    "not_found" => "Pengguna tidak ditemukan.",
   ],
 
   // Password Module
@@ -201,6 +223,16 @@ return [
     "not_found" => "Profil tidak ditemukan.",
     "account_updated" => "Informasi akun berhasil diperbarui.",
     "account_deleted" => "Akun berhasil dihapus. Anda memiliki 30 hari untuk memulihkannya.",
+    "updated_success" => "Profil berhasil diperbarui.",
+    "suspended_success" => "Akun berhasil ditangguhkan.",
+    "activated_success" => "Akun berhasil diaktifkan.",
+    "no_permission" => "Anda tidak memiliki izin untuk melihat profil ini.",
+  ],
+
+  // Achievement Module
+  "achievement" => [
+    "badge_not_owned" => "Anda tidak memiliki badge ini.",
+    "badge_not_pinned" => "Badge tidak disematkan.",
   ],
 
   // Announcements Module
@@ -252,6 +284,11 @@ return [
     "student_only" => "Hanya peserta yang dapat melakukan enrollment.",
     "request_not_found" => "Permintaan enrollment tidak ditemukan untuk course ini.",
     "expelled" => "Peserta berhasil dikeluarkan dari course.",
+    "not_enrolled" => "Anda belum terdaftar pada course ini.",
+    "approved" => "Permintaan enrollment disetujui.",
+    "rejected" => "Permintaan enrollment ditolak.",
+    "key_required" => "Kode enrollment wajib diisi.",
+    "key_invalid" => "Kode enrollment tidak valid.",
   ],
 
   // Assignments Module

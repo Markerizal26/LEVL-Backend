@@ -147,7 +147,10 @@ class EnrollmentService implements EnrollmentServiceInterface
         $existing = $this->repository->findByCourseAndUser($course->id, $user->id);
 
         if ($existing && collect([EnrollmentStatus::Active, EnrollmentStatus::Pending])->contains($existing->status)) {
-            throw new BusinessException('Anda sudah terdaftar pada course ini.', ['course' => 'Anda sudah terdaftar pada course ini.']);
+            throw new BusinessException(
+                __('messages.enrollments.already_enrolled'),
+                ['course' => __('messages.enrollments.already_enrolled')]
+            );
         }
 
         $enrollment = $existing ?? new Enrollment([
@@ -318,11 +321,17 @@ class EnrollmentService implements EnrollmentServiceInterface
         $providedKey = trim((string) ($dto->enrollmentKey ?? ''));
 
         if ($providedKey === '') {
-            throw new BusinessException('Kode enrollment wajib diisi.', ['enrollment_key' => 'Kode enrollment wajib diisi.']);
+            throw new BusinessException(
+                __('messages.enrollments.key_required'),
+                ['enrollment_key' => __('messages.enrollments.key_required')]
+            );
         }
 
         if (empty($course->enrollment_key_hash) || ! $this->keyHasher->verify($providedKey, $course->enrollment_key_hash)) {
-            throw new BusinessException('Kode enrollment tidak valid.', ['enrollment_key' => 'Kode enrollment tidak valid.']);
+            throw new BusinessException(
+                __('messages.enrollments.key_invalid'),
+                ['enrollment_key' => __('messages.enrollments.key_invalid')]
+            );
         }
 
         return ['active', 'Enrol berhasil menggunakan kode kunci.'];
@@ -392,17 +401,11 @@ class EnrollmentService implements EnrollmentServiceInterface
 
     public function isUserEnrolledInCourse(int $userId, int $courseId): bool
     {
-        return Enrollment::where('user_id', $userId)
-            ->where('course_id', $courseId)
-            ->whereIn('status', [EnrollmentStatus::Active->value, EnrollmentStatus::Completed->value])
-            ->exists();
+        return $this->repository->hasActiveEnrollment($userId, $courseId);
     }
 
     public function getActiveEnrollment(int $userId, int $courseId): ?Enrollment
     {
-        return Enrollment::where('user_id', $userId)
-            ->where('course_id', $courseId)
-            ->whereIn('status', [EnrollmentStatus::Active->value, EnrollmentStatus::Completed->value])
-            ->first();
+        return $this->repository->getActiveEnrollment($userId, $courseId);
     }
 }

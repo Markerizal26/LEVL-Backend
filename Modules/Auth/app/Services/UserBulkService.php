@@ -3,11 +3,12 @@
 namespace Modules\Auth\Services;
 
 use Modules\Auth\Contracts\Repositories\UserBulkRepositoryInterface;
+use Modules\Auth\Contracts\Services\UserBulkServiceInterface;
 use Modules\Auth\Enums\UserStatus;
 use Modules\Auth\Jobs\ExportUsersToEmailJob;
 use Modules\Auth\Models\User;
 
-class UserBulkService
+class UserBulkService implements UserBulkServiceInterface
 {
     public function __construct(private UserBulkRepositoryInterface $repository) {}
 
@@ -30,7 +31,7 @@ class UserBulkService
         $userIds = array_diff($userIds, [$currentUserId]);
 
         if (empty($userIds)) {
-            throw new \InvalidArgumentException('Tidak dapat menonaktifkan akun Anda sendiri');
+            throw new \InvalidArgumentException(__('messages.auth.cannot_deactivate_self'));
         }
 
         $updated = $this->repository->bulkUpdateStatus($userIds, UserStatus::Inactive->value);
@@ -45,7 +46,7 @@ class UserBulkService
         $userIds = array_diff($userIds, [$currentUserId]);
 
         if (empty($userIds)) {
-            throw new \InvalidArgumentException('Tidak dapat menghapus akun Anda sendiri');
+            throw new \InvalidArgumentException(__('messages.auth.cannot_delete_self'));
         }
 
         return $this->repository->bulkDelete($userIds);

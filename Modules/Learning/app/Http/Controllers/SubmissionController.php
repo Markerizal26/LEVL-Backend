@@ -6,6 +6,9 @@ use App\Support\ApiResponse;
 use App\Support\Traits\HandlesFiltering;
 use Illuminate\Http\Request;
 use Illuminate\Routing\Controller;
+use Modules\Learning\Http\Requests\StoreSubmissionRequest;
+use Modules\Learning\Http\Requests\UpdateSubmissionRequest;
+use Modules\Learning\Http\Requests\GradeSubmissionRequest;
 use Modules\Learning\Models\Assignment;
 use Modules\Learning\Models\Submission;
 use Modules\Learning\Services\SubmissionService;
@@ -73,11 +76,9 @@ class SubmissionController extends Controller
    *
    * @authenticated
    */
-  public function store(Request $request, Assignment $assignment)
+  public function store(StoreSubmissionRequest $request, Assignment $assignment)
   {
-    $validated = $request->validate([
-      "answer_text" => ["nullable", "string"],
-    ]);
+    $validated = $request->validated();
 
     /** @var \Modules\Auth\Models\User $user */
     $user = auth("api")->user();
@@ -132,7 +133,7 @@ class SubmissionController extends Controller
    *
    * @authenticated
    */
-  public function update(Request $request, Submission $submission)
+  public function update(UpdateSubmissionRequest $request, Submission $submission)
   {
     /** @var \Modules\Auth\Models\User $user */
     $user = auth("api")->user();
@@ -147,9 +148,7 @@ class SubmissionController extends Controller
       }
     }
 
-    $validated = $request->validate([
-      "answer_text" => ["sometimes", "string"],
-    ]);
+    $validated = $request->validated();
 
     $updated = $this->service->update($submission, $validated);
 
@@ -172,7 +171,7 @@ class SubmissionController extends Controller
    *
    * @authenticated
    */
-  public function grade(Request $request, Submission $submission)
+  public function grade(GradeSubmissionRequest $request, Submission $submission)
   {
     /** @var \Modules\Auth\Models\User $user */
     $user = auth("api")->user();
@@ -186,10 +185,7 @@ class SubmissionController extends Controller
       return $this->error(__("messages.submissions.no_grade_access"), 403);
     }
 
-    $validated = $request->validate([
-      "score" => ["required", "integer", "min:0"],
-      "feedback" => ["nullable", "string"],
-    ]);
+    $validated = $request->validated();
 
     $graded = $this->service->grade(
       $submission,

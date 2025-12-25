@@ -47,4 +47,12 @@ interface UnitRepositoryInterface
      * @param  int  $courseId  Course ID
      */
     public function getAllByCourse(int $courseId): Collection;
+
+    /**
+     * Update order for a specific unit.
+     *
+     * @param  int  $unitId  Unit ID
+     * @param  int  $order  New order value
+     */
+    public function updateOrder(int $unitId, int $order): bool;
 }

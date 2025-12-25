@@ -2,10 +2,11 @@
 
 namespace Modules\Auth\Services;
 
+use Modules\Auth\Contracts\Services\ProfilePrivacyServiceInterface;
 use Modules\Auth\Models\ProfilePrivacySetting;
 use Modules\Auth\Models\User;
 
-class ProfilePrivacyService
+class ProfilePrivacyService implements ProfilePrivacyServiceInterface
 {
     public function updatePrivacySettings(User $user, array $settings): ProfilePrivacySetting
     {

@@ -141,4 +141,51 @@ class EnrollmentRepository extends BaseRepository implements EnrollmentRepositor
             ->where('user_id', $userId)
             ->first();
     }
+
+    public function hasActiveEnrollment(int $userId, int $courseId): bool
+    {
+        return $this->query()
+            ->where('user_id', $userId)
+            ->where('course_id', $courseId)
+            ->whereIn('status', [\Modules\Enrollments\Enums\EnrollmentStatus::Active->value, \Modules\Enrollments\Enums\EnrollmentStatus::Completed->value])
+            ->exists();
+    }
+
+    public function getActiveEnrollment(int $userId, int $courseId): ?Enrollment
+    {
+        return $this->query()
+            ->where('user_id', $userId)
+            ->where('course_id', $courseId)
+            ->whereIn('status', [\Modules\Enrollments\Enums\EnrollmentStatus::Active->value, \Modules\Enrollments\Enums\EnrollmentStatus::Completed->value])
+            ->first();
+    }
+
+    public function findActiveByUserAndCourse(int $userId, int $courseId): ?Enrollment
+    {
+        return $this->query()
+            ->where('user_id', $userId)
+            ->where('course_id', $courseId)
+            ->whereIn('status', [\Modules\Enrollments\Enums\EnrollmentStatus::Active->value, \Modules\Enrollments\Enums\EnrollmentStatus::Completed->value])
+            ->first();
+    }
+
+    public function incrementLessonProgress(int $enrollmentId, int $lessonId): void
+    {
+        $progress = \Modules\Enrollments\Models\LessonProgress::query()
+            ->where('enrollment_id', $enrollmentId)
+            ->where('lesson_id', $lessonId)
+            ->first();
+
+        if ($progress) {
+            $progress->increment('attempt_count');
+        } else {
+            \Modules\Enrollments\Models\LessonProgress::create([
+                'enrollment_id' => $enrollmentId,
+                'lesson_id' => $lessonId,
+                'status' => \Modules\Enrollments\Enums\ProgressStatus::NotStarted,
+                'progress_percent' => 0,
+                'attempt_count' => 1,
+            ]);
+        }
+    }
 }

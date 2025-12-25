@@ -21,6 +21,13 @@ class SearchHistoryRepository implements SearchHistoryRepositoryInterface
         return SearchHistory::create($data);
     }
 
+    public function getLastSearchByUser(int $userId): ?SearchHistory
+    {
+        return SearchHistory::where('user_id', $userId)
+            ->orderBy('created_at', 'desc')
+            ->first();
+    }
+
     public function deleteById(int $id, int $userId): int
     {
         return SearchHistory::where('user_id', $userId)

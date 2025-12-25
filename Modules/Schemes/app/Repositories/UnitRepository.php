@@ -99,4 +99,11 @@ class UnitRepository extends BaseRepository implements UnitRepositoryInterface
             ->orderBy('order', 'asc')
             ->get();
     }
+
+    public function updateOrder(int $unitId, int $order): bool
+    {
+        return (bool) $this->query()
+            ->where('id', $unitId)
+            ->update(['order' => (int) $order]);
+    }
 }

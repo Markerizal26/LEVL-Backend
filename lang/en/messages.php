@@ -72,6 +72,14 @@ return [
     "unavailable" => "Lesson is not yet available.",
   ],
 
+  // Questions Module
+  "questions" => [
+    "created" => "Question created successfully.",
+    "updated" => "Question updated successfully.",
+    "deleted" => "Question deleted successfully.",
+    "not_found" => "Question not found.",
+  ],
+
   // Lesson Blocks Module
   "lesson_blocks" => [
     "created" => "Lesson block created successfully.",
@@ -176,6 +184,20 @@ return [
     "status_updated" => "User status updated successfully.",
     "password_changed" => "Password changed successfully.",
     "avatar_deleted" => "Avatar deleted successfully.",
+    "username_already_set" => "Username is already set for your account.",
+    "username_set_success" => "Username successfully set.",
+    "cannot_deactivate_self" => "You cannot deactivate your own account.",
+    "cannot_delete_self" => "You cannot delete your own account.",
+    "no_access_to_user" => "You do not have access to view this user.",
+    "current_password_incorrect" => "Current password is incorrect.",
+    "password_min_length" => "New password must be at least 8 characters long.",
+    "password_incorrect" => "Password is incorrect.",
+    "profile_retrieved" => "Profile retrieved successfully.",
+  ],
+
+  // User Module
+  "user" => [
+    "not_found" => "User not found.",
   ],
 
   // Password Module
@@ -200,6 +222,16 @@ return [
     "not_found" => "Profile not found.",
     "account_updated" => "Account information updated successfully.",
     "account_deleted" => "Account deleted successfully. You have 30 days to recover it.",
+    "updated_success" => "Profile updated successfully.",
+    "suspended_success" => "Account suspended successfully.",
+    "activated_success" => "Account activated successfully.",
+    "no_permission" => "You do not have permission to view this profile.",
+  ],
+
+  // Achievement Module
+  "achievement" => [
+    "badge_not_owned" => "You do not have this badge.",
+    "badge_not_pinned" => "Badge is not pinned.",
   ],
 
   // Announcements Module
@@ -250,6 +282,11 @@ return [
     "student_only" => "Only students can enroll in courses.",
     "request_not_found" => "Enrollment request not found for this course.",
     "expelled" => "Participant successfully removed from course.",
+    "not_enrolled" => "You are not enrolled in this course.",
+    "approved" => "Enrollment request approved.",
+    "rejected" => "Enrollment request rejected.",
+    "key_required" => "Enrollment key is required.",
+    "key_invalid" => "Enrollment key is invalid.",
   ],
 
   // Assignments Module

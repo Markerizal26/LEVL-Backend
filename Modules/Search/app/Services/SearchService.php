@@ -4,12 +4,16 @@ namespace Modules\Search\Services;
 
 use Modules\Auth\Models\User;
 use Modules\Schemes\Models\Course;
+use Modules\Search\Contracts\Repositories\SearchHistoryRepositoryInterface;
 use Modules\Search\Contracts\Services\SearchServiceInterface;
 use Modules\Search\DTOs\SearchResultDTO;
-use Modules\Search\Models\SearchHistory;
 
 class SearchService implements SearchServiceInterface
 {
+    public function __construct(
+        private readonly SearchHistoryRepositoryInterface $historyRepository
+    ) {}
+
     /**
      * Perform full-text search with filters.
      *
@@ -106,16 +110,14 @@ class SearchService implements SearchServiceInterface
         }
 
         // Check if the last search by this user is the same query
-        $lastSearch = SearchHistory::where('user_id', $user->id)
-            ->orderBy('created_at', 'desc')
-            ->first();
+        $lastSearch = $this->historyRepository->getLastSearchByUser($user->id);
 
         // Avoid duplicate consecutive searches
         if ($lastSearch && $lastSearch->query === $query) {
             return;
         }
 
-        SearchHistory::create([
+        $this->historyRepository->create([
             'user_id' => $user->id,
             'query' => $query,
             'filters' => $filters,

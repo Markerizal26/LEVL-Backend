@@ -4,10 +4,11 @@ namespace Modules\Auth\Services;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Collection;
+use Modules\Auth\Contracts\Services\UserActivityServiceInterface;
 use Modules\Auth\Models\User;
 use Modules\Auth\Models\UserActivity;
 
-class UserActivityService
+class UserActivityService implements UserActivityServiceInterface
 {
     public function logActivity(User $user, string $type, array $data, ?Model $related = null): UserActivity
     {

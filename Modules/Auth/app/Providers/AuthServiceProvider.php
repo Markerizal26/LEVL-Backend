@@ -73,6 +73,37 @@ class AuthServiceProvider extends ServiceProvider
             \Modules\Auth\Contracts\Repositories\PasswordResetTokenRepositoryInterface::class,
             \Modules\Auth\Repositories\PasswordResetTokenRepository::class,
         );
+
+        // Service bindings
+        $this->app->bind(
+            \Modules\Auth\Contracts\Services\EmailVerificationServiceInterface::class,
+            \Modules\Auth\Services\EmailVerificationService::class,
+        );
+
+        $this->app->bind(
+            \Modules\Auth\Contracts\Services\LoginThrottlingServiceInterface::class,
+            \Modules\Auth\Services\LoginThrottlingService::class,
+        );
+
+        $this->app->bind(
+            \Modules\Auth\Contracts\Services\ProfilePrivacyServiceInterface::class,
+            \Modules\Auth\Services\ProfilePrivacyService::class,
+        );
+
+        $this->app->bind(
+            \Modules\Auth\Contracts\Services\ProfileStatisticsServiceInterface::class,
+            \Modules\Auth\Services\ProfileStatisticsService::class,
+        );
+
+        $this->app->bind(
+            \Modules\Auth\Contracts\Services\UserActivityServiceInterface::class,
+            \Modules\Auth\Services\UserActivityService::class,
+        );
+
+        $this->app->bind(
+            \Modules\Auth\Contracts\Services\UserBulkServiceInterface::class,
+            \Modules\Auth\Services\UserBulkService::class,
+        );
     }
 
     /**

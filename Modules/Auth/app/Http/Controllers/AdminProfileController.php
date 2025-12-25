@@ -4,6 +4,7 @@ namespace Modules\Auth\Http\Controllers;
 
 use App\Contracts\Services\ProfileServiceInterface;
 use App\Http\Controllers\Controller;
+use App\Support\ApiResponse;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Modules\Auth\Contracts\Repositories\ProfileAuditLogRepositoryInterface;
@@ -14,6 +15,7 @@ use Modules\Auth\Models\User;
  */
 class AdminProfileController extends Controller
 {
+    use ApiResponse;
     public function __construct(
         private ProfileServiceInterface $profileService,
         private ProfileAuditLogRepositoryInterface $auditLogRepository
@@ -38,10 +40,7 @@ class AdminProfileController extends Controller
         $user = User::findOrFail($userId);
         $profileData = $this->profileService->getProfileData($user, $request->user());
 
-        return response()->json([
-            'success' => true,
-            'data' => $profileData,
-        ]);
+        return $this->success($profileData, __('messages.success'));
     }
 
     /**
@@ -87,11 +86,10 @@ class AdminProfileController extends Controller
             'user_agent' => $request->userAgent(),
         ]);
 
-        return response()->json([
-            'success' => true,
-            'message' => 'User profile updated successfully.',
-            'data' => $this->profileService->getProfileData($updatedUser, $admin),
-        ]);
+        return $this->success(
+            $this->profileService->getProfileData($updatedUser, $admin),
+            __('messages.profile.updated_success')
+        );
     }
 
     /**
@@ -123,10 +121,7 @@ class AdminProfileController extends Controller
             'user_agent' => $request->userAgent(),
         ]);
 
-        return response()->json([
-            'success' => true,
-            'message' => 'User account suspended successfully.',
-        ]);
+        return $this->success([], __('messages.profile.suspended_success'));
     }
 
     /**
@@ -158,10 +153,7 @@ class AdminProfileController extends Controller
             'user_agent' => $request->userAgent(),
         ]);
 
-        return response()->json([
-            'success' => true,
-            'message' => 'User account activated successfully.',
-        ]);
+        return $this->success([], __('messages.profile.activated_success'));
     }
 
     /**
@@ -179,9 +171,6 @@ class AdminProfileController extends Controller
     {
         $logs = $this->auditLogRepository->findByUserId($userId, 20);
 
-        return response()->json([
-            'success' => true,
-            'data' => $logs,
-        ]);
+        return $this->success($logs, __('messages.success'));
     }
 }

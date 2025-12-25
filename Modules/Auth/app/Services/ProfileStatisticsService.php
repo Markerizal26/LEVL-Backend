@@ -4,9 +4,10 @@ namespace Modules\Auth\Services;
 
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
+use Modules\Auth\Contracts\Services\ProfileStatisticsServiceInterface;
 use Modules\Auth\Models\User;
 
-class ProfileStatisticsService
+class ProfileStatisticsService implements ProfileStatisticsServiceInterface
 {
     public function getStatistics(User $user): array
     {

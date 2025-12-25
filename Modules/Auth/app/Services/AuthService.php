@@ -343,11 +343,11 @@ class AuthService implements AuthServiceInterface
         $isAdmin = $authUser->hasRole('Admin');
 
         if (! $isSuperadmin && ! $isAdmin) {
-            throw new AuthorizationException('Tidak terotorisasi.');
+            throw new AuthorizationException(__('messages.unauthorized'));
         }
 
         if ($isAdmin && ! $isSuperadmin && ! $this->adminCanSeeUser($authUser, $target)) {
-            throw new AuthorizationException('Anda tidak memiliki akses untuk melihat pengguna ini.');
+            throw new AuthorizationException(__('messages.auth.no_access_to_user'));
         }
 
         return $this->formatUserDetails($target);

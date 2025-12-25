@@ -21,10 +21,14 @@ use Modules\Schemes\Models\Lesson;
 class SubmissionService
 {
     private SubmissionRepository $repository;
+    private \Modules\Enrollments\Contracts\Repositories\EnrollmentRepositoryInterface $enrollmentRepository;
 
-    public function __construct(?SubmissionRepository $repository = null)
-    {
+    public function __construct(
+        ?SubmissionRepository $repository = null,
+        ?\Modules\Enrollments\Contracts\Repositories\EnrollmentRepositoryInterface $enrollmentRepository = null
+    ) {
         $this->repository = $repository ?? app(SubmissionRepository::class);
+        $this->enrollmentRepository = $enrollmentRepository ?? app(\Modules\Enrollments\Contracts\Repositories\EnrollmentRepositoryInterface::class);
     }
 
     public function listForAssignment(Assignment $assignment, User $user, array $filters = []): Collection
@@ -171,30 +175,11 @@ class SubmissionService
             return null;
         }
 
-        return Enrollment::query()
-            ->where('course_id', $lesson->unit->course->id)
-            ->where('user_id', $userId)
-            ->whereIn('status', [EnrollmentStatus::Active, EnrollmentStatus::Completed])
-            ->first();
+        return $this->enrollmentRepository->findActiveByUserAndCourse($userId, $lesson->unit->course->id);
     }
 
     private function incrementLessonProgressAttempt(int $enrollmentId, int $lessonId): void
     {
-        $progress = LessonProgress::query()
-            ->where('enrollment_id', $enrollmentId)
-            ->where('lesson_id', $lessonId)
-            ->first();
-
-        if ($progress) {
-            $progress->increment('attempt_count');
-        } else {
-            LessonProgress::create([
-                'enrollment_id' => $enrollmentId,
-                'lesson_id' => $lessonId,
-                'status' => ProgressStatus::NotStarted,
-                'progress_percent' => 0,
-                'attempt_count' => 1,
-            ]);
-        }
+        $this->enrollmentRepository->incrementLessonProgress($enrollmentId, $lessonId);
     }
 }

@@ -7,6 +7,7 @@ use App\Traits\ManagesCourse;
 use Illuminate\Http\Request;
 use Illuminate\Routing\Controller;
 use Modules\Enrollments\DTOs\CreateEnrollmentDTO;
+use Modules\Enrollments\Http\Requests\EnrollRequest;
 use Modules\Enrollments\Models\Enrollment;
 use Modules\Enrollments\Services\EnrollmentService;
 use Modules\Schemes\Models\Course;
@@ -170,7 +171,7 @@ class EnrollmentsController extends Controller
      *
      * @authenticated
      */
-    public function enroll(Request $request, Course $course)
+    public function enroll(EnrollRequest $request, Course $course)
     {
         /** @var \Modules\Auth\Models\User $user */
         $user = auth('api')->user();
@@ -178,10 +179,6 @@ class EnrollmentsController extends Controller
         if (! $user->hasRole('Student')) {
             return $this->error(__('messages.enrollments.student_only'), 403);
         }
-
-        $request->validate([
-            'enrollment_key' => ['nullable', 'string', 'max:100'],
-        ]);
 
         $dto = CreateEnrollmentDTO::fromRequest([
             'course_id' => $course->id,
@@ -310,7 +307,7 @@ class EnrollmentsController extends Controller
                     'status' => 'not_enrolled',
                     'enrollment' => null,
                 ],
-                'Anda belum terdaftar pada course ini.',
+                __('messages.enrollments.not_enrolled'),
             );
         }
 
@@ -358,7 +355,7 @@ class EnrollmentsController extends Controller
 
         $updated = $this->service->approve($enrollment);
 
-        return $this->success(['enrollment' => $updated], 'Permintaan enrollment disetujui.');
+        return $this->success(['enrollment' => $updated], __('messages.enrollments.approved'));
     }
 
     /**
@@ -389,7 +386,7 @@ class EnrollmentsController extends Controller
 
         $updated = $this->service->decline($enrollment);
 
-        return $this->success(['enrollment' => $updated], 'Permintaan enrollment ditolak.');
+        return $this->success(['enrollment' => $updated], __('messages.enrollments.rejected'));
     }
 
     /**

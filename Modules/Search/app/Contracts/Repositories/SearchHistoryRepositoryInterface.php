@@ -18,6 +18,11 @@ interface SearchHistoryRepositoryInterface
     public function create(array $data): SearchHistory;
 
     /**
+     * Get user's last search
+     */
+    public function getLastSearchByUser(int $userId): ?SearchHistory;
+
+    /**
      * Delete a specific search history entry by ID and user ID
      */
     public function deleteById(int $id, int $userId): int;

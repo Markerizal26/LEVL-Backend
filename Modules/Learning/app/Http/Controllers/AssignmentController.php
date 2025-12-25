@@ -8,6 +8,8 @@ use Illuminate\Routing\Controller;
 use Illuminate\Validation\Rule;
 use Modules\Learning\Enums\AssignmentStatus;
 use Modules\Learning\Enums\SubmissionType;
+use Modules\Learning\Http\Requests\StoreAssignmentRequest;
+use Modules\Learning\Http\Requests\UpdateAssignmentRequest;
 use Modules\Learning\Models\Assignment;
 use Modules\Learning\Services\AssignmentService;
 
@@ -60,7 +62,7 @@ class AssignmentController extends Controller
    * @authenticated
    */
   public function store(
-    Request $request,
+    StoreAssignmentRequest $request,
     \Modules\Schemes\Models\Course $course,
     \Modules\Schemes\Models\Unit $unit,
     \Modules\Schemes\Models\Lesson $lesson,
@@ -70,18 +72,7 @@ class AssignmentController extends Controller
     /** @var \Modules\Auth\Models\User $user */
     $user = auth("api")->user();
 
-    $validated = $request->validate([
-      "title" => ["required", "string", "max:255"],
-      "description" => ["nullable", "string"],
-      "submission_type" => ["required", Rule::enum(SubmissionType::class)],
-      "max_score" => ["nullable", "integer", "min:1", "max:1000"],
-      "available_from" => ["nullable", "date"],
-      "deadline_at" => ["nullable", "date", "after_or_equal:available_from"],
-      "status" => ["nullable", Rule::enum(AssignmentStatus::class)],
-      "allow_resubmit" => ["nullable", "boolean"],
-      "late_penalty_percent" => ["nullable", "integer", "min:0", "max:100"],
-    ]);
-
+    $validated = $request->validated();
     $validated["lesson_id"] = $lesson->id;
 
     $assignment = $this->service->create($validated, $user->id);
@@ -122,21 +113,11 @@ class AssignmentController extends Controller
    *
    * @authenticated
    */
-  public function update(Request $request, Assignment $assignment)
+  public function update(UpdateAssignmentRequest $request, Assignment $assignment)
   {
     $this->authorize("update", $assignment);
 
-    $validated = $request->validate([
-      "title" => ["sometimes", "string", "max:255"],
-      "description" => ["nullable", "string"],
-      "submission_type" => ["sometimes", Rule::enum(SubmissionType::class)],
-      "max_score" => ["nullable", "integer", "min:1", "max:1000"],
-      "available_from" => ["nullable", "date"],
-      "deadline_at" => ["nullable", "date", "after_or_equal:available_from"],
-      "status" => ["sometimes", Rule::enum(AssignmentStatus::class)],
-      "allow_resubmit" => ["nullable", "boolean"],
-      "late_penalty_percent" => ["nullable", "integer", "min:0", "max:100"],
-    ]);
+    $validated = $request->validated();
 
     $updated = $this->service->update($assignment, $validated);
 

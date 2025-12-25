@@ -772,12 +772,13 @@ class AuthApiController extends Controller
         $authUser = auth('api')->user();
         if (! $authUser) {
             return $this->error('Tidak terotorisasi.', 401);
+            return $this->error(__('messages.unauthorized'), 401);
         }
 
         $isSuperadmin = $authUser->hasRole('Superadmin');
         $isAdmin = $authUser->hasRole('Admin');
         if (! $isSuperadmin && ! $isAdmin) {
-            return $this->error('Tidak terotorisasi.', 403);
+            return $this->error(__('messages.unauthorized'), 403);
         }
 
         $perPage = max(1, (int) $request->query('per_page', 15));
@@ -800,30 +801,26 @@ class AuthApiController extends Controller
      *
      * @authenticated
      */
-    public function showUser(User $user): JsonResponse
+    public function showUser(Request $request, User $user): JsonResponse
     {
         /** @var \Modules\Auth\Models\User|null $authUser */
         $authUser = auth('api')->user();
         if (! $authUser) {
-            return $this->error('Tidak terotorisasi.', 401);
+            return $this->error(__('messages.unauthorized'), 401);
         }
 
-        try {
-            $data = $this->auth->showUser($authUser, $user);
-        } catch (AuthorizationException $e) {
-            return $this->error($e->getMessage(), 403);
-        }
+        $data = $this->auth->showUser($authUser, $user);
 
         return $this->success(['user' => $data]);
     }
 
     /**
-     * Atur Username Pertama Kali
+     * Atur Username
      *
      *
-     * @summary Atur Username Pertama Kali
+     * @summary Atur Username
      *
-     * @description Mengatur username untuk pertama kali (biasanya setelah login via Google OAuth).
+     * @description Endpoint untuk mengatur username setelah registrasi via OAuth (Google). Hanya dapat digunakan jika username belum diatur.
      *
      * @response 200 scenario="Success" {"success": true, "message": "Username berhasil diatur.", "data": {"user": {"id": 1, "name": "John Doe", "email": "john@example.com", "username": "johndoe"}}}
      * @response 401 scenario="Unauthorized" {"success":false,"message":"Tidak terotorisasi."}
@@ -836,15 +833,15 @@ class AuthApiController extends Controller
     {
         $user = auth('api')->user();
         if (! $user) {
-            return $this->error('Tidak terotorisasi.', 401);
+            return $this->error(__('messages.unauthorized'), 401);
         }
 
         if ($user->username) {
-            return $this->error('Username sudah diatur untuk akun Anda.', 422);
+            return $this->error(__('messages.auth.username_already_set'), 422);
         }
 
-        $data = $this->auth->setUsername($user, $request->validated('username'));
+        $data = $this->auth->setUsername($user, $request->string('username'));
 
-        return $this->success($data, 'Username berhasil diatur.');
+        return $this->success($data, __('messages.auth.username_set_success'));
     }
 }

@@ -65,7 +65,7 @@ class ProfileAchievementController extends Controller
         // Check if user has this badge
         $hasBadge = $user->badges()->where('badge_id', $badgeId)->exists();
         if (! $hasBadge) {
-            return $this->notFound('You do not have this badge.');
+            return $this->notFound(__('messages.achievement.badge_not_owned'));
         }
 
         // Check if already pinned
@@ -103,7 +103,7 @@ class ProfileAchievementController extends Controller
         $pinnedBadge = $this->pinnedBadgeRepository->findByUserAndBadge($user->id, $badgeId);
 
         if (! $pinnedBadge) {
-            return $this->notFound('Badge is not pinned.');
+            return $this->notFound(__('messages.achievement.badge_not_pinned'));
         }
 
         $this->pinnedBadgeRepository->delete($pinnedBadge);

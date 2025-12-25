@@ -75,12 +75,16 @@ class UnitService
         return $this->repository->delete($unit);
     }
 
-    public function reorder(int $courseId, array $order): void
+    public function reorder(int $courseId, array $data): bool
     {
-        foreach ($order as $index => $unitId) {
-            Unit::where('id', $unitId)
-                ->where('course_id', $courseId)
-                ->update(['order' => $index + 1]);
+        foreach ($data['units'] as $item) {
+            $unitId = $item['id'];
+            $newOrder = $item['order'];
+
+            // Use repository method instead of direct model query
+            $this->repository->updateOrder($unitId, $newOrder);
         }
+
+        return true;
     }
 }

@@ -48,7 +48,7 @@ class QuestionService implements QuestionServiceInterface
             $question = $this->repository->findById($id);
 
             if (! $question) {
-                throw new \Exception('Question not found');
+                throw new \Exception(__('messages.questions.not_found'));
             }
 
             $data = $dto->toModelArray();
@@ -69,7 +69,7 @@ class QuestionService implements QuestionServiceInterface
         $question = $this->repository->findById($id);
 
         if (! $question) {
-            throw new \Exception('Question not found');
+            throw new \Exception(__('messages.questions.not_found'));
         }
 
         return $this->repository->delete($question);

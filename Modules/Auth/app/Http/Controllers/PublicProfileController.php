@@ -33,15 +33,17 @@ class PublicProfileController extends Controller
      */
     public function show(Request $request, int $userId): JsonResponse
     {
-        try {
-            $user = User::findOrFail($userId);
-            $viewer = $request->user();
+        $user = User::find($userId);
 
-            $profileData = $this->profileService->getPublicProfile($user, $viewer);
-
-            return $this->success($profileData);
-        } catch (\Illuminate\Database\Eloquent\ModelNotFoundException $e) {
-            return $this->notFound('User not found.');
+        if (! $user) {
+            return $this->notFound(__('messages.user.not_found'));
         }
+
+        $viewer = $request->user();
+
+        $profileData = $this->profileService->getPublicProfile($user, $viewer);
+
+        return $this->success($profileData);
     }
 }
+

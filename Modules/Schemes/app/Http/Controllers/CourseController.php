@@ -10,6 +10,7 @@ use Illuminate\Http\Request;
 use Illuminate\Routing\Controller;
 use Modules\Schemes\Contracts\Services\CourseServiceInterface;
 use Modules\Schemes\Http\Requests\CourseRequest;
+use Modules\Schemes\Http\Requests\PublishCourseRequest;
 use Modules\Schemes\Models\Course;
 
 /**
@@ -305,14 +306,11 @@ class CourseController extends Controller
      *
      * @authenticated
      */
-    public function updateEnrollmentKey(Request $request, Course $course)
+    public function updateEnrollmentKey(PublishCourseRequest $request, Course $course)
     {
         $this->authorize('update', $course);
 
-        $validated = $request->validate([
-            'enrollment_type' => ['required', 'in:auto_accept,key_based,approval'],
-            'enrollment_key' => ['nullable', 'string', 'max:100'],
-        ]);
+        $validated = $request->validated();
 
         $plainKey = null;
 

@@ -70,18 +70,26 @@ class SchemesServiceProvider extends ServiceProvider
             \Modules\Schemes\Services\LessonService::class
         );
 
-        // Bind repository interfaces
+        // Bind repositories
         $this->app->bind(
             \Modules\Schemes\Contracts\Repositories\CourseRepositoryInterface::class,
             \Modules\Schemes\Repositories\CourseRepository::class
+        );
+        $this->app->bind(
+            \Modules\Schemes\Contracts\Repositories\LessonRepositoryInterface::class,
+            \Modules\Schemes\Repositories\LessonRepository::class
         );
         $this->app->bind(
             \Modules\Schemes\Contracts\Repositories\UnitRepositoryInterface::class,
             \Modules\Schemes\Repositories\UnitRepository::class
         );
         $this->app->bind(
-            \Modules\Schemes\Contracts\Repositories\LessonRepositoryInterface::class,
-            \Modules\Schemes\Repositories\LessonRepository::class
+            \Modules\Schemes\Contracts\Repositories\LessonBlockRepositoryInterface::class,
+            \Modules\Schemes\Repositories\LessonBlockRepository::class
+        );
+        $this->app->bind(
+            \Modules\Schemes\Contracts\Repositories\TagRepositoryInterface::class,
+            \Modules\Schemes\Repositories\TagRepository::class
         );
     }
 

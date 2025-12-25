@@ -154,6 +154,17 @@ jobs:
             echo "::notice::Code updated to latest version."
             echo "::endgroup::"
 
+            echo "::group::Creating database backup"
+            BACKUP_DIR="storage/app/backups"
+            mkdir -p "$BACKUP_DIR"
+            BACKUP_FILE="$BACKUP_DIR/db-backup-$(date +%Y%m%d-%H%M%S).sql"
+            if php artisan backup:run --only-db 2>/dev/null; then
+              echo "::notice::Database backup created successfully"
+            else
+              echo "::warning::Backup command not available or failed, proceeding without backup"
+            fi
+            echo "::endgroup::"
+
             echo "::group::Installing dependencies (with dev for testing)"
             if ! composer install --no-interaction --prefer-dist --optimize-autoloader; then
               echo "::error::Composer install failed"
@@ -170,11 +181,29 @@ jobs:
             echo "::notice::Database migrations completed successfully."
             echo "::endgroup::"
 
+            echo "::group::Optimizing Laravel caches"
+            # Clear old caches
+            php artisan config:clear || true
+            php artisan route:clear || true
+            php artisan view:clear || true
+            php artisan cache:clear || true
+            
+            # Warm up new caches for production
+            php artisan config:cache || echo "::warning::Config cache failed"
+            php artisan route:cache || echo "::warning::Route cache failed"
+            php artisan view:cache || echo "::warning::View cache failed"
+            php artisan event:cache || echo "::warning::Event cache failed"
+            
+            echo "::notice::Laravel cache optimization completed."
+            echo "::endgroup::"
+
             echo "::group::Optimizing for production (removing dev dependencies)"
             if ! composer install --no-interaction --prefer-dist --optimize-autoloader --no-dev; then
               echo "::error::Composer install (production) failed"
               exit 79
             fi
+            # Optimize composer autoloader
+            composer dump-autoload --optimize --classmap-authoritative || true
             echo "::notice::Production dependencies optimized."
             echo "::endgroup::"
 
@@ -192,5 +221,43 @@ jobs:
               fi
               exit $code
             fi
-            echo "::notice::Deployment completed successfully."
+            echo "::notice::Deployment script completed successfully."
+            echo "::endgroup::"
+
+            echo "::group::Running post-deployment health checks"
+            # Wait for application to stabilize
+            sleep 3
+            
+            # Check if artisan is working
+            if ! php artisan --version > /dev/null 2>&1; then
+              echo "::error::Laravel artisan not responding after deployment"
+              exit 80
+            fi
+            echo "::notice::✓ Artisan check passed"
+            
+            # Check database connection
+            if ! php artisan db:show > /dev/null 2>&1; then
+              echo "::error::Database connection failed after deployment"
+              exit 81
+            fi
+            echo "::notice::✓ Database connection check passed"
+            
+            # Check if cache is working
+            if ! php artisan cache:clear > /dev/null 2>&1; then
+              echo "::warning::Cache system may have issues"
+            else
+              echo "::notice::✓ Cache system check passed"
+            fi
+            
+            # Optional: HTTP health check if web server is running
+            if command -v curl > /dev/null 2>&1; then
+              if curl -f -s -o /dev/null --max-time 5 http://localhost/api/health 2>/dev/null || \
+                 curl -f -s -o /dev/null --max-time 5 http://localhost/up 2>/dev/null; then
+                echo "::notice::✓ HTTP health check passed"
+              else
+                echo "::warning::HTTP health check not available (server may not be running on localhost)"
+              fi
+            fi
+            
+            echo "::notice::All health checks completed successfully ✓"
             echo "::endgroup::"

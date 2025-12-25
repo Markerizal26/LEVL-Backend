@@ -6,12 +6,17 @@ use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
+use Modules\Schemes\Contracts\Repositories\LessonBlockRepositoryInterface;
 use Modules\Schemes\Models\LessonBlock;
 use Spatie\QueryBuilder\AllowedFilter;
 use Spatie\QueryBuilder\QueryBuilder;
 
 class LessonBlockService
 {
+    public function __construct(
+        private LessonBlockRepositoryInterface $repository
+    ) {}
+
     public function list(int $lessonId): Collection
     {
         $query = QueryBuilder::for(LessonBlock::class)
@@ -28,10 +33,10 @@ class LessonBlockService
     public function create(int $lessonId, array $data, ?UploadedFile $mediaFile): LessonBlock
     {
         return DB::transaction(function () use ($lessonId, $data, $mediaFile) {
-            $nextOrder = LessonBlock::where('lesson_id', $lessonId)->max('order');
+            $nextOrder = $this->repository->getMaxOrderForLesson($lessonId);
             $nextOrder = $nextOrder ? $nextOrder + 1 : 1;
 
-            $block = LessonBlock::create([
+            $block = $this->repository->create([
                 'lesson_id' => $lessonId,
                 'slug' => (string) Str::uuid(),
                 'block_type' => $data['type'],
@@ -56,7 +61,11 @@ class LessonBlockService
     public function update(int $lessonId, int $blockId, array $data, ?UploadedFile $mediaFile): LessonBlock
     {
         return DB::transaction(function () use ($lessonId, $blockId, $data, $mediaFile) {
-            $block = LessonBlock::where('lesson_id', $lessonId)->findOrFail($blockId);
+            $block = $this->repository->findByLessonAndId($lessonId, $blockId);
+            
+            if (!$block) {
+                throw new \Illuminate\Database\Eloquent\ModelNotFoundException();
+            }
 
             $update = [
                 'block_type' => $data['type'] ?? $block->block_type,
@@ -88,7 +97,11 @@ class LessonBlockService
 
     public function delete(int $lessonId, int $blockId): bool
     {
-        $block = LessonBlock::where('lesson_id', $lessonId)->findOrFail($blockId);
+        $block = $this->repository->findByLessonAndId($lessonId, $blockId);
+        
+        if (!$block) {
+            throw new \Illuminate\Database\Eloquent\ModelNotFoundException();
+        }
 
         return (bool) $block->delete();
     }

@@ -6,9 +6,10 @@ use Illuminate\Cache\RateLimiter;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Str;
 use Illuminate\Validation\ValidationException;
+use Modules\Auth\Contracts\Services\LoginThrottlingServiceInterface;
 use Modules\Common\Models\SystemSetting;
 
-class LoginThrottlingService
+class LoginThrottlingService implements LoginThrottlingServiceInterface
 {
     public function __construct(private readonly RateLimiter $rateLimiter)
     {

@@ -4,6 +4,7 @@ namespace Modules\Auth\Services;
 
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Str;
+use Modules\Auth\Contracts\Services\EmailVerificationServiceInterface;
 use Modules\Auth\Enums\UserStatus;
 use Modules\Auth\Mail\ChangeEmailVerificationMail;
 use Modules\Auth\Mail\VerifyEmailLinkMail;
@@ -11,7 +12,7 @@ use Modules\Auth\Models\OtpCode;
 use Modules\Auth\Models\User;
 use Modules\Common\Models\SystemSetting;
 
-class EmailVerificationService
+class EmailVerificationService implements EmailVerificationServiceInterface
 {
     public const PURPOSE = 'register_verification';
 

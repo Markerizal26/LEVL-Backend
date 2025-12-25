@@ -7,6 +7,7 @@ use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Support\Collection as BaseCollection;
 use Illuminate\Support\Str;
+use Modules\Schemes\Contracts\Repositories\TagRepositoryInterface;
 use Modules\Schemes\Models\Course;
 use Modules\Schemes\Models\Tag;
 use Spatie\QueryBuilder\AllowedFilter;
@@ -14,6 +15,10 @@ use Spatie\QueryBuilder\QueryBuilder;
 
 class TagService
 {
+    public function __construct(
+        private TagRepositoryInterface $repository
+    ) {}
+
     public function list(int $perPage = 0): LengthAwarePaginator|Collection
     {
         $query = $this->buildQuery();
@@ -68,7 +73,7 @@ class TagService
 
     public function update(int $id, array $data): ?Tag
     {
-        $tag = Tag::find($id);
+        $tag = $this->repository->findById($id);
         if (! $tag) {
             return null;
         }
@@ -82,7 +87,7 @@ class TagService
 
     public function delete(int $id): bool
     {
-        $tag = Tag::find($id);
+        $tag = $this->repository->findById($id);
         if (! $tag) {
             return false;
         }
@@ -124,7 +129,7 @@ class TagService
 
         $payload = $this->preparePayload(['name' => $name]);
 
-        return Tag::create($payload);
+        return $this->repository->create($payload);
     }
 
     private function ensureUniqueSlug(string $slug, ?int $ignoreId = null): string
@@ -179,7 +184,7 @@ class TagService
 
                 $payload = $this->preparePayload(['name' => $value]);
 
-                return Tag::create($payload)->id;
+                return $this->repository->create($payload)->id;
             })
             ->filter()
             ->unique()

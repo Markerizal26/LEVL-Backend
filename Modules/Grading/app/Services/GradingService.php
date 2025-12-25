@@ -5,12 +5,13 @@ namespace Modules\Grading\Services;
 use Modules\Grading\Contracts\Repositories\GradingRepositoryInterface;
 use Modules\Grading\Contracts\Services\GradingServiceInterface;
 use Modules\Grading\Models\Grade;
-use Modules\Learning\Models\Submission;
+use Modules\Learning\Contracts\Repositories\SubmissionRepositoryInterface;
 
 class GradingService implements GradingServiceInterface
 {
     public function __construct(
-        private readonly GradingRepositoryInterface $repository
+        private readonly GradingRepositoryInterface $repository,
+        private readonly SubmissionRepositoryInterface $submissionRepository
     ) {}
 
     public function gradeSubmission(int $submissionId, array $data, int $gradedBy): Grade
@@ -24,7 +25,7 @@ class GradingService implements GradingServiceInterface
         $grade = $this->repository->create($gradeData);
 
         // Update submission status to graded
-        Submission::where('id', $submissionId)->update(['status' => 'graded']);
+        $this->submissionRepository->markAsGraded($submissionId);
 
         return $grade;
     }
