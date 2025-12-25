@@ -6,7 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Support\ApiResponse;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
-use Modules\Forums\Contracts\Repositories\ThreadRepositoryInterface;
+use Modules\Forums\Repositories\ThreadRepository;
 use Modules\Forums\Contracts\Services\ForumServiceInterface;
 use Modules\Forums\Http\Requests\UpdateThreadRequest;
 use Modules\Forums\Services\ModerationService;
@@ -21,7 +21,7 @@ class ThreadController extends Controller
     public function __construct(
         private ForumServiceInterface $forumService,
         private ModerationService $moderationService,
-        private ThreadRepositoryInterface $threadRepository
+        private ThreadRepository $threadRepository
     ) {}
 
     /**

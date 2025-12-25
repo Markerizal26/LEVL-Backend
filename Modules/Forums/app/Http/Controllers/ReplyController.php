@@ -6,12 +6,13 @@ use App\Http\Controllers\Controller;
 use App\Support\ApiResponse;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
-use Modules\Forums\Contracts\Repositories\ReplyRepositoryInterface;
 use Modules\Forums\Contracts\Services\ForumServiceInterface;
+use Modules\Forums\Contracts\Services\ModerationServiceInterface;
 use Modules\Forums\Http\Requests\CreateReplyRequest;
 use Modules\Forums\Http\Requests\UpdateReplyRequest;
 use Modules\Forums\Models\Reply;
 use Modules\Forums\Models\Thread;
+use Modules\Forums\Repositories\ReplyRepository;
 use Modules\Forums\Services\ModerationService;
 
 /**
@@ -24,7 +25,7 @@ class ReplyController extends Controller
     public function __construct(
         private ForumServiceInterface $forumService,
         private ModerationService $moderationService,
-        private ReplyRepositoryInterface $replyRepository
+        private ReplyRepository $replyRepository
     ) {}
 
     /**

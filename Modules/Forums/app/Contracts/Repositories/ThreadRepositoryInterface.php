@@ -2,14 +2,14 @@
 
 namespace Modules\Forums\Contracts\Repositories;
 
-use Illuminate\Pagination\LengthAwarePaginator;
+use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use Modules\Forums\Models\Thread;
 
 interface ThreadRepositoryInterface
 {
-    public function paginate(array $filters = []): LengthAwarePaginator;
+    public function paginate(array $filters = [], int $perPage = 15): LengthAwarePaginator;
 
-    public function paginateByCourse(int $courseId, array $filters = []): LengthAwarePaginator;
+    public function paginateByCourse(int $courseId, array $filters = [], int $perPage = 15): LengthAwarePaginator;
 
     public function find(int $id): ?Thread;
 

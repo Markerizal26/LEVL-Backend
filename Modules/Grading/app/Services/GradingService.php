@@ -5,13 +5,13 @@ namespace Modules\Grading\Services;
 use Modules\Grading\Contracts\Repositories\GradingRepositoryInterface;
 use Modules\Grading\Contracts\Services\GradingServiceInterface;
 use Modules\Grading\Models\Grade;
-use Modules\Learning\Contracts\Repositories\SubmissionRepositoryInterface;
+use Modules\Learning\Repositories\SubmissionRepository;
 
 class GradingService implements GradingServiceInterface
 {
     public function __construct(
         private readonly GradingRepositoryInterface $repository,
-        private readonly SubmissionRepositoryInterface $submissionRepository
+        private readonly SubmissionRepository $submissionRepository
     ) {}
 
     public function gradeSubmission(int $submissionId, array $data, int $gradedBy): Grade

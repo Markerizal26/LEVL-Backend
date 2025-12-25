@@ -4,7 +4,6 @@ namespace Modules\Forums\Repositories;
 
 use App\Repositories\BaseRepository;
 use Illuminate\Database\Eloquent\Collection;
-use Illuminate\Database\Eloquent\Model;
 use Illuminate\Pagination\LengthAwarePaginator;
 use Modules\Forums\Models\Thread;
 
@@ -22,6 +21,83 @@ class ThreadRepository extends BaseRepository
     protected string $defaultSort = '-last_activity_at';
 
     protected array $with = ['author'];
+
+    // ========================================================================
+    // Interface Methods - These satisfy ThreadRepositoryInterface
+    // ========================================================================
+
+    /**
+     * Paginate threads with filters.
+     * Satisfies both BaseRepository and ThreadRepositoryInterface signatures.
+     */
+    public function paginate(array $filters = [], int $perPage = 15): \Illuminate\Contracts\Pagination\LengthAwarePaginator
+    {
+        $query = $this->query();
+        
+        $query = $this->applyFilters($query, $filters);
+        $query = $this->applySorting($query, $filters);
+        
+        $perPage = $filters['per_page'] ?? $perPage;
+        return $query->paginate($perPage);
+    }
+
+    public function paginateByCourse(int $courseId, array $filters = [], int $perPage = 15): \Illuminate\Contracts\Pagination\LengthAwarePaginator
+    {
+        return $this->getThreadsForScheme($courseId, $filters);
+    }
+
+    public function find(int $id): ?Thread
+    {
+        return Thread::find($id);
+    }
+
+    public function findWithReplies(int $id): ?Thread
+    {
+        return $this->findWithRelations($id);
+    }
+
+    public function create(array $data): Thread
+    {
+        $thread = Thread::create($data);
+        $thread->updateLastActivity();
+        return $thread;
+    }
+
+    // ========================================================================
+    // Additional Helper Methods (Not in interface, for internal use)
+    // ========================================================================
+
+    public function pin(Thread $thread): Thread
+    {
+        $thread->is_pinned = true;
+        $thread->save();
+        return $thread;
+    }
+
+    public function unpin(Thread $thread): Thread
+    {
+        $thread->is_pinned = false;
+        $thread->save();
+        return $thread;
+    }
+
+    public function lock(Thread $thread): Thread
+    {
+        $thread->is_locked = true;
+        $thread->save();
+        return $thread;
+    }
+
+    public function unlock(Thread $thread): Thread
+    {
+        $thread->is_locked = false;
+        $thread->save();
+        return $thread;
+    }
+
+    // ========================================================================
+    // Additional Helper Methods (Not in interface, for internal use)
+    // ========================================================================
 
     public function getThreadsForScheme(int $schemeId, array $filters = []): LengthAwarePaginator
     {
@@ -67,43 +143,6 @@ class ThreadRepository extends BaseRepository
         return Thread::with(['author', 'scheme', 'replies.author', 'replies.children'])
             ->withCount('replies')
             ->find($threadId);
-    }
-
-    public function create(array $data): Thread
-    {
-        $thread = Thread::create($data);
-        $thread->updateLastActivity();
-
-        return $thread;
-    }
-
-    public function update(Model $model, array $attributes): Model
-    {
-        $model->update($attributes);
-
-        return $model->fresh();
-    }
-
-    public function updateThread(Thread $thread, array $data): Thread
-    {
-        $thread->update($data);
-
-        return $thread->fresh();
-    }
-
-    public function delete(Model $model): bool
-    {
-        return $model->delete();
-    }
-
-    public function deleteThread(Thread $thread, ?int $deletedBy = null): bool
-    {
-        if ($deletedBy) {
-            $thread->deleted_by = $deletedBy;
-            $thread->save();
-        }
-
-        return $thread->delete();
     }
 
     public function getPinnedThreads(int $schemeId): Collection

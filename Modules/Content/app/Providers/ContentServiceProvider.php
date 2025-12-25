@@ -83,7 +83,7 @@ class ContentServiceProvider extends ServiceProvider
             \Modules\Content\Services\ContentService::class
         );
         $this->app->bind(
-            \Modules\Content\Contracts\ContentWorkflowServiceInterface::class,
+            \Modules\Content\Contracts\Services\ContentWorkflowServiceInterface::class,
             \Modules\Content\Services\ContentWorkflowService::class
         );
     }
