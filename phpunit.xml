@@ -3,24 +3,48 @@
          xsi:noNamespaceSchemaLocation="vendor/phpunit/phpunit/phpunit.xsd"
          bootstrap="vendor/autoload.php"
          colors="true"
+         stopOnFailure="false"
+         processIsolation="false"
+         backupGlobals="false"
+         cacheDirectory=".phpunit.cache"
 >
     <testsuites>
         <testsuite name="Unit">
             <directory>tests/Unit</directory>
+            <exclude>tests/Unit/ExampleTest.php</exclude>
         </testsuite>
         <testsuite name="Feature">
             <directory>tests/Feature</directory>
+            <exclude>tests/Feature/ExampleTest.php</exclude>
         </testsuite>
         <testsuite name="Modules">
-            <directory>Modules/*/tests</directory>
+            <directory>Modules/*/tests/Unit</directory>
+            <directory>Modules/*/tests/Feature</directory>
         </testsuite>
     </testsuites>
     
     <source>
         <include>
             <directory>app</directory>
+            <directory>Modules/*/app</directory>
         </include>
+        <exclude>
+            <directory>app/Console</directory>
+            <directory>app/Exceptions</directory>
+            <directory>app/Http/Middleware</directory>
+            <directory>Modules/*/app/Providers</directory>
+            <directory>Modules/*/database</directory>
+            <file>app/Support/helpers.php</file>
+        </exclude>
     </source>
+    
+    <coverage>
+        <report>
+            <html outputDirectory="tests/reports/coverage"/>
+            <clover outputFile="tests/reports/coverage.xml"/>
+            <text outputFile="php://stdout" showUncoveredFiles="false"/>
+        </report>
+    </coverage>
     
     <logging>
         <testdoxHtml outputFile="tests/reports/testdox.html"/>
@@ -29,7 +53,11 @@
     
     <php>
         <ini name="memory_limit" value="512M"/>
+        <ini name="display_errors" value="1"/>
+        <ini name="error_reporting" value="-1"/>
         <env name="APP_ENV" value="testing"/>
+        <env name="APP_KEY" value="base64:eB0thLqaMhNvrveX+9c55MHGhgp8CQzXT1LZgHsdmuw="/>
+        <env name="APP_DEBUG" value="true"/>
         <env name="APP_MAINTENANCE_DRIVER" value="file"/>
         <env name="BCRYPT_ROUNDS" value="4"/>
         <env name="BROADCAST_CONNECTION" value="null"/>
@@ -40,7 +68,7 @@
         <env name="QUEUE_CONNECTION" value="sync"/>
         <env name="SESSION_DRIVER" value="array"/>
         <env name="PULSE_ENABLED" value="false"/>
-        <env name="TELESCOPE_ENABLED" value="true"/>
+        <env name="TELESCOPE_ENABLED" value="false"/>
         <env name="NIGHTWATCH_ENABLED" value="false"/>
         <env name="SCOUT_DRIVER" value="collection"/>
     </php>

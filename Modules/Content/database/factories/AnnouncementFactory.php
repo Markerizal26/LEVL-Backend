@@ -5,8 +5,10 @@ namespace Modules\Content\Database\Factories;
 use Illuminate\Database\Eloquent\Factories\Factory;
 use Modules\Auth\Models\User;
 use Modules\Content\Models\Announcement;
-use Modules\Schemes\Models\Course;
 
+/**
+ * @extends \Illuminate\Database\Eloquent\Factories\Factory<\Modules\Content\Models\Announcement>
+ */
 class AnnouncementFactory extends Factory
 {
     protected $model = Announcement::class;
@@ -15,48 +17,22 @@ class AnnouncementFactory extends Factory
     {
         return [
             'author_id' => User::factory(),
-            'course_id' => null,
             'title' => fake()->sentence(),
+            'slug' => fake()->unique()->slug(),
             'content' => fake()->paragraphs(3, true),
-            'status' => 'draft',
-            'target_type' => 'all',
-            'target_value' => null,
+            'status' => 'published',
             'priority' => 'normal',
-            'published_at' => null,
-            'scheduled_at' => null,
-            'views_count' => 0,
+            'published_at' => now(),
+            'expires_at' => now()->addDays(30),
+            'views_count' => fake()->numberBetween(0, 500),
         ];
     }
 
-    public function published(): static
+    public function draft(): static
     {
         return $this->state(fn (array $attributes) => [
-            'status' => 'published',
-            'published_at' => now()->subDays(rand(1, 30)),
-        ]);
-    }
-
-    public function scheduled(): static
-    {
-        return $this->state(fn (array $attributes) => [
-            'status' => 'scheduled',
-            'scheduled_at' => now()->addDays(rand(1, 7)),
-        ]);
-    }
-
-    public function forCourse(): static
-    {
-        return $this->state(fn (array $attributes) => [
-            'course_id' => Course::factory(),
-            'target_type' => 'course',
-        ]);
-    }
-
-    public function forRole(string $role): static
-    {
-        return $this->state(fn (array $attributes) => [
-            'target_type' => 'role',
-            'target_value' => $role,
+            'status' => 'draft',
+            'published_at' => null,
         ]);
     }
 
@@ -64,6 +40,13 @@ class AnnouncementFactory extends Factory
     {
         return $this->state(fn (array $attributes) => [
             'priority' => 'high',
+        ]);
+    }
+
+    public function expired(): static
+    {
+        return $this->state(fn (array $attributes) => [
+            'expires_at' => now()->subDays(1),
         ]);
     }
 }

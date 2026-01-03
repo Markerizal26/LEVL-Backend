@@ -33,7 +33,7 @@ abstract class TestCase extends BaseTestCase
         try {
             // Try to connect to MySQL server (without database)
             $pdo = new \PDO(
-                "mysql:host={$host};port=".config('database.connections.mysql.port', 26032003),
+                "mysql:host={$host};port=".config('database.connections.mysql.port', 3306),
                 $username,
                 $password
             );
@@ -44,5 +44,14 @@ abstract class TestCase extends BaseTestCase
             // Database server might not be available, skip creation
             // Tests will fail with proper error message
         }
+    }
+
+    /**
+     * Clean up the test environment.
+     */
+    protected function tearDown(): void
+    {
+        // Clean up any test artifacts
+        parent::tearDown();
     }
 }
