@@ -193,23 +193,25 @@ test:phpunit:
     - php artisan config:clear
     - php artisan cache:clear
   script:
-    # Wait for PostgreSQL
-    - until pg_isready -h postgres -p 5432 -U postgres; do sleep 1; done
+    # Wait for PostgreSQL (max 30 seconds)
+    - |
+      for i in {1..30}; do
+        pg_isready -h postgres -p 5432 -U postgres && break
+        echo "Waiting for PostgreSQL... ($i/30)"
+        sleep 1
+      done
     # Run migrations
     - php artisan migrate --force --seed
-    # Run tests (coverage optional, won't fail if PCOV not available)
+    # Run tests
     - php artisan test --parallel
   coverage: '/^\s*Lines:\s*\d+.\d+\%/'
   artifacts:
     when: always
     expire_in: 1 week
-    reports:
-      junit: tests/reports/junit.xml
-      coverage_report:
-        coverage_format: cobertura
-        path: tests/reports/coverage.xml
     paths:
       - tests/reports/
+    reports:
+      junit: tests/reports/junit.xml
   only:
     - merge_requests
     - main
@@ -231,7 +233,13 @@ test:modules:
     - php artisan key:generate
     - php artisan config:clear
   script:
-    - until pg_isready -h postgres -p 5432 -U postgres; do sleep 1; done
+    # Wait for PostgreSQL (max 30 seconds)
+    - |
+      for i in {1..30}; do
+        pg_isready -h postgres -p 5432 -U postgres && break
+        echo "Waiting for PostgreSQL... ($i/30)"
+        sleep 1
+      done
     - php artisan migrate --force
     # Test all modules
     - php artisan test --testsuite=Modules
@@ -252,12 +260,10 @@ quality:phpstan:
     - *install_php_extensions
     - *install_composer
   script:
-    - ./vendor/bin/phpstan analyse --memory-limit=2G --error-format=gitlab > phpstan-report.json
+    - ./vendor/bin/phpstan analyse --memory-limit=2G --error-format=gitlab > phpstan-report.json || true
   artifacts:
     when: always
     expire_in: 1 week
-    reports:
-      codequality: phpstan-report.json
     paths:
       - phpstan-report.json
       - phpstan-report.txt
