@@ -385,6 +385,12 @@ return [
     "failed_reset_preferences" => "Gagal mereset preferensi notifikasi.",
   ],
 
+  // Search Module  
+  "search" => [
+    "history_cleared" => "Riwayat pencarian berhasil dihapus",
+    "history_deleted" => "Riwayat pencarian berhasil dihapus",
+  ],
+
   // Common action messages
   "created" => "Berhasil dibuat.",
   "updated" => "Berhasil diperbarui.",

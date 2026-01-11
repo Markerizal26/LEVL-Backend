@@ -77,7 +77,7 @@ class SearchController extends Controller
 
         // Build sort options - support both old (sort_by/sort_direction) and new (sort) formats
         $sort = [
-            'field' => $request->input('sort_by') ?? ($params['sort'] ? ltrim($params['sort'], '-') : 'relevance'),
+            'field' => $request->input('sort_by') ?? (isset($params['sort']) ? ltrim($params['sort'], '-') : 'relevance'),
             'direction' => $request->input('sort_direction') ??
               (isset($params['sort']) && str_starts_with($params['sort'], '-') ? 'desc' : 'asc'),
         ];

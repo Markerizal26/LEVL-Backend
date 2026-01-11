@@ -383,6 +383,12 @@ return [
     "failed_reset_preferences" => "Failed to reset notification preferences.",
   ],
 
+  // Search Module
+  "search" => [
+    "history_cleared" => "Search history cleared successfully",
+    "history_deleted" => "Search history entry deleted successfully",
+  ],
+
   // Permission messages
   "permission_denied" => "Permission denied.",
   "insufficient_permissions" => "You do not have sufficient permissions.",
