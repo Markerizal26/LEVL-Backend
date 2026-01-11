@@ -1,0 +1,401 @@
+# ============================================
+# GitLab CI/CD Pipeline - Production Ready
+# ============================================
+# Laravel Application Deployment to VPS
+# - PostgreSQL Database
+# - Nginx Web Server
+# - No Docker
+# ============================================
+
+# ============================================
+# Global Configuration
+# ============================================
+default:
+  image: php:8.4-cli
+  
+workflow:
+  rules:
+    # Run pipeline for merge requests
+    - if: $CI_PIPELINE_SOURCE == "merge_request_event"
+    # Run pipeline for main/master/develop branches
+    - if: $CI_COMMIT_BRANCH == "main" || $CI_COMMIT_BRANCH == "master" || $CI_COMMIT_BRANCH == "develop"
+    # Run pipeline for tags
+    - if: $CI_COMMIT_TAG
+
+# ============================================
+# Pipeline Stages
+# ============================================
+stages:
+  - prepare      # Install dependencies & setup cache
+  - test         # Run automated tests
+  - quality      # Code quality & security checks
+  - build        # Build production assets
+  - deploy       # Deploy to VPS
+
+# ============================================
+# Variables
+# ============================================
+variables:
+  # Composer Configuration
+  COMPOSER_CACHE_DIR: "${CI_PROJECT_DIR}/.composer-cache"
+  COMPOSER_ALLOW_SUPERUSER: "1"
+  COMPOSER_NO_INTERACTION: "1"
+  
+  # NPM Configuration
+  NPM_CONFIG_CACHE: "${CI_PROJECT_DIR}/.npm-cache"
+  
+  # PostgreSQL Test Database
+  POSTGRES_DB: "levl_test"
+  POSTGRES_USER: "postgres"
+  POSTGRES_PASSWORD: "test_password"
+  POSTGRES_HOST_AUTH_METHOD: "trust"
+  
+  # Laravel Test Environment
+  DB_CONNECTION: "pgsql"
+  DB_HOST: "postgres"
+  DB_PORT: "5432"
+  DB_DATABASE: "levl_test"
+  DB_USERNAME: "postgres"
+  DB_PASSWORD: "test_password"
+  
+  # Deployment Configuration (override via CI/CD Variables)
+  DEPLOY_SERVER: "${DEPLOY_SERVER}"      # Set in GitLab CI/CD Variables
+  DEPLOY_USER: "${DEPLOY_USER}"          # Set in GitLab CI/CD Variables
+  DEPLOY_PATH: "${DEPLOY_PATH}"          # Set in GitLab CI/CD Variables
+  PHP_FPM_SERVICE: "php8.4-fpm"          # Adjust based on your VPS PHP version
+
+# ============================================
+# Cache Configuration
+# ============================================
+.cache_composer: &cache_composer
+  cache:
+    key: 
+      files:
+        - composer.lock
+    paths:
+      - .composer-cache/
+      - vendor/
+    policy: pull
+
+.cache_composer_push: &cache_composer_push
+  cache:
+    key: 
+      files:
+        - composer.lock
+    paths:
+      - .composer-cache/
+      - vendor/
+    policy: pull-push
+
+.cache_npm: &cache_npm
+  cache:
+    key:
+      files:
+        - package-lock.json
+    paths:
+      - .npm-cache/
+      - node_modules/
+    policy: pull
+
+.cache_npm_push: &cache_npm_push
+  cache:
+    key:
+      files:
+        - package-lock.json
+    paths:
+      - .npm-cache/
+      - node_modules/
+    policy: pull-push
+
+# ============================================
+# Reusable Scripts
+# ============================================
+.install_system_dependencies: &install_system_dependencies
+  - apt-get update -qq
+  - apt-get install -y -qq git curl libpq-dev zip unzip libzip-dev libpng-dev libjpeg-dev libfreetype6-dev
+
+.install_php_extensions: &install_php_extensions
+  - docker-php-ext-configure gd --with-freetype --with-jpeg
+  - docker-php-ext-install -j$(nproc) pdo pdo_pgsql pgsql zip gd bcmath
+
+.install_composer: &install_composer
+  - php -r "copy('https://getcomposer.org/installer', 'composer-setup.php');"
+  - php composer-setup.php --quiet
+  - rm composer-setup.php
+  - mv composer.phar /usr/local/bin/composer
+  - composer --version
+
+.install_nodejs: &install_nodejs
+  - curl -fsSL https://deb.nodesource.com/setup_20.x | bash -
+  - apt-get install -y nodejs
+  - node --version
+  - npm --version
+
+# ============================================
+# STAGE: PREPARE
+# ============================================
+prepare:composer:
+  stage: prepare
+  <<: *cache_composer_push
+  before_script:
+    - *install_system_dependencies
+    - *install_php_extensions
+    - *install_composer
+  script:
+    - composer install --prefer-dist --no-progress --no-suggest --optimize-autoloader
+    - composer dump-autoload --optimize
+  artifacts:
+    expire_in: 1 hour
+    paths:
+      - vendor/
+  only:
+    - merge_requests
+    - main
+    - master
+    - develop
+    - tags
+
+prepare:npm:
+  stage: prepare
+  image: node:20-alpine
+  <<: *cache_npm_push
+  script:
+    - npm ci --prefer-offline --no-audit
+  artifacts:
+    expire_in: 1 hour
+    paths:
+      - node_modules/
+  only:
+    - merge_requests
+    - main
+    - master
+    - develop
+    - tags
+
+# ============================================
+# STAGE: TEST
+# ============================================
+test:phpunit:
+  stage: test
+  <<: *cache_composer
+  services:
+    - postgres:15-alpine
+  before_script:
+    - *install_system_dependencies
+    - *install_php_extensions
+    - *install_composer
+    # Setup Laravel for testing
+    - cp .env.testing .env
+    - php artisan key:generate
+    - php artisan config:clear
+    - php artisan cache:clear
+  script:
+    # Wait for PostgreSQL
+    - until pg_isready -h postgres -p 5432 -U postgres; do sleep 1; done
+    # Run migrations
+    - php artisan migrate --force --seed
+    # Run tests with coverage
+    - php artisan test --parallel --coverage --min=70
+  coverage: '/^\s*Lines:\s*\d+.\d+\%/'
+  artifacts:
+    when: always
+    expire_in: 1 week
+    reports:
+      junit: tests/reports/junit.xml
+      coverage_report:
+        coverage_format: cobertura
+        path: tests/reports/coverage.xml
+    paths:
+      - tests/reports/
+  only:
+    - merge_requests
+    - main
+    - master
+    - develop
+    - tags
+
+# Run tests for each module in parallel
+test:modules:
+  stage: test
+  <<: *cache_composer
+  services:
+    - postgres:15-alpine
+  before_script:
+    - *install_system_dependencies
+    - *install_php_extensions
+    - *install_composer
+    - cp .env.testing .env
+    - php artisan key:generate
+    - php artisan config:clear
+  script:
+    - until pg_isready -h postgres -p 5432 -U postgres; do sleep 1; done
+    - php artisan migrate --force
+    # Test all modules
+    - php artisan test --testsuite=Modules
+  only:
+    - merge_requests
+    - main
+    - master
+    - develop
+
+# ============================================
+# STAGE: QUALITY
+# ============================================
+quality:phpstan:
+  stage: quality
+  <<: *cache_composer
+  before_script:
+    - *install_system_dependencies
+    - *install_php_extensions
+    - *install_composer
+  script:
+    - ./vendor/bin/phpstan analyse --memory-limit=2G --error-format=gitlab > phpstan-report.json
+  artifacts:
+    when: always
+    expire_in: 1 week
+    reports:
+      codequality: phpstan-report.json
+    paths:
+      - phpstan-report.json
+      - phpstan-report.txt
+  allow_failure: true
+  only:
+    - merge_requests
+    - main
+    - master
+    - develop
+
+quality:pint:
+  stage: quality
+  <<: *cache_composer
+  before_script:
+    - *install_system_dependencies
+    - *install_php_extensions
+    - *install_composer
+  script:
+    - ./vendor/bin/pint --test -v
+  allow_failure: true
+  only:
+    - merge_requests
+    - main
+    - master
+    - develop
+
+quality:security:
+  stage: quality
+  <<: *cache_composer
+  before_script:
+    - *install_composer
+  script:
+    # Check for known security vulnerabilities in dependencies
+    - composer audit
+  allow_failure: true
+  only:
+    - merge_requests
+    - main
+    - master
+    - develop
+
+# ============================================
+# STAGE: BUILD
+# ============================================
+build:assets:
+  stage: build
+  image: node:20-alpine
+  <<: *cache_npm
+  dependencies:
+    - prepare:npm
+  before_script:
+    - apk add --no-cache git
+  script:
+    # Build production assets with Vite
+    - npm run build
+  artifacts:
+    expire_in: 1 week
+    paths:
+      - public/build/
+  only:
+    - main
+    - master
+    - develop
+    - tags
+
+# ============================================
+# STAGE: DEPLOY
+# ============================================
+.deploy_template: &deploy_template
+  stage: deploy
+  image: alpine:latest
+  dependencies:
+    - prepare:composer
+    - build:assets
+  before_script:
+    # Install deployment dependencies
+    - apk add --no-cache openssh-client rsync git
+    # Setup SSH
+    - eval $(ssh-agent -s)
+    - echo "$SSH_PRIVATE_KEY" | tr -d '\r' | ssh-add -
+    - mkdir -p ~/.ssh
+    - chmod 700 ~/.ssh
+    - ssh-keyscan -H "$DEPLOY_SERVER" >> ~/.ssh/known_hosts
+    - chmod 644 ~/.ssh/known_hosts
+  script:
+    # Make deployment script executable
+    - chmod +x .gitlab/scripts/deploy.sh
+    # Run deployment
+    - .gitlab/scripts/deploy.sh
+  after_script:
+    # Run health check
+    - chmod +x .gitlab/scripts/health-check.sh
+    - .gitlab/scripts/health-check.sh || echo "Health check failed, but deployment completed"
+
+# Deploy to staging (automatic for develop branch)
+deploy:staging:
+  <<: *deploy_template
+  environment:
+    name: staging
+    url: https://staging.ta-prep-lsp.local
+  only:
+    - develop
+  except:
+    - tags
+
+# Deploy to production (manual approval required)
+deploy:production:
+  <<: *deploy_template
+  environment:
+    name: production
+    url: https://levl-backend.site
+  when: manual
+  only:
+    - main
+    - master
+    - tags
+  except:
+    variables:
+      - $CI_COMMIT_MESSAGE =~ /\[skip-deploy\]/
+
+# ============================================
+# Rollback Job (Manual)
+# ============================================
+rollback:production:
+  stage: deploy
+  image: alpine:latest
+  before_script:
+    - apk add --no-cache openssh-client
+    - eval $(ssh-agent -s)
+    - echo "$SSH_PRIVATE_KEY" | tr -d '\r' | ssh-add -
+    - mkdir -p ~/.ssh
+    - chmod 700 ~/.ssh
+    - ssh-keyscan -H "$DEPLOY_SERVER" >> ~/.ssh/known_hosts
+  script:
+    - chmod +x .gitlab/scripts/rollback.sh
+    - .gitlab/scripts/rollback.sh
+  when: manual
+  environment:
+    name: production
+    action: rollback
+  only:
+    - main
+    - master
+    - tags

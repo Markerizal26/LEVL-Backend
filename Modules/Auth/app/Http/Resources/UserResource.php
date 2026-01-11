@@ -19,7 +19,7 @@ class UserResource extends JsonResource
             'name' => $this['name'] ?? $this->name,
             'email' => $this['email'] ?? $this->email,
             'username' => $this['username'] ?? $this->username,
-            'avatar_url' => $this['avatar_url'] ?? $this->avatar_url,
+            'avatar_url' => $this['avatar_url'] ?? (is_object($this->resource) ? $this->resource->avatar_url ?? null : null),
             'status' => isset($this['status']) && $this['status'] instanceof UserStatus 
                 ? $this['status']->value 
                 : (string) ($this['status'] ?? $this->status),
@@ -43,7 +43,6 @@ class UserResource extends JsonResource
 
     protected function getRoles(): array
     {
-        // If roles is passed directly in the array (as Collection or Array)
         if (isset($this['roles'])) {
             $roles = $this['roles'];
             if ($roles instanceof \Illuminate\Support\Collection) {
