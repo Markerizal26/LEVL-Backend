@@ -112,7 +112,7 @@ variables:
 # ============================================
 .install_system_dependencies: &install_system_dependencies
   - apt-get update -qq
-  - apt-get install -y -qq git curl libpq-dev zip unzip libzip-dev libpng-dev libjpeg-dev libfreetype6-dev libicu-dev autoconf pkg-config
+  - apt-get install -y -qq git curl libpq-dev postgresql-client zip unzip libzip-dev libpng-dev libjpeg-dev libfreetype6-dev libicu-dev autoconf pkg-config
 
 .install_php_extensions: &install_php_extensions
   - docker-php-ext-configure gd --with-freetype --with-jpeg
