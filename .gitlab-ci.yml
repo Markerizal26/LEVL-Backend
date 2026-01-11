@@ -142,7 +142,7 @@ prepare:composer:
     - *install_php_extensions
     - *install_composer
   script:
-    - composer install --prefer-dist --no-progress --no-suggest --optimize-autoloader
+    - composer install --prefer-dist --no-progress --optimize-autoloader --no-interaction
     - composer dump-autoload --optimize
   artifacts:
     expire_in: 1 hour
