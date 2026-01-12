@@ -2,7 +2,7 @@
 
 return [
   // HTTP status messages
-  "success" => "Success",
+  "success" => "Success.",
   "created" => "Created successfully",
   "updated" => "Updated successfully",
   "deleted" => "Deleted successfully",
@@ -32,6 +32,14 @@ return [
   "session_not_found" => "Session not found. Please login again.",
   "user_data_not_found" => "User data not found.",
   "invalid_credentials" => "Invalid credentials.",
+
+  // Common action messages
+  "resource_created" => ":resource created successfully.",
+  "items_count" => "{0} No items|{1} 1 item|[2,*] :count items",
+  "users_count" => "{0} No users|{1} One user|[2,*] :count users",
+  "minutes" => "{1} :count minute|[2,*] :count minutes",
+  "hours" => "{1} :count hour|[2,*] :count hours",
+  "records_found" => "{0} No records found|{1} 1 record found|[2,*] :count records found",
 
   // Common Module
   "categories" => [

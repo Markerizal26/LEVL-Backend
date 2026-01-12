@@ -2,7 +2,7 @@
 
 return [
   // HTTP status messages
-  "success" => "Sukses",
+  "success" => "Berhasil.",
   "data_retrieved" => "Data berhasil diambil.",
   "error" => "Terjadi kesalahan.",
   "not_found" => "Resource tidak ditemukan.",
@@ -21,6 +21,14 @@ return [
   "session_not_found" => "Sesi tidak ditemukan. Silakan login kembali.",
   "user_data_not_found" => "Data pengguna tidak ditemukan.",
   "invalid_credentials" => "Kredensial tidak valid.",
+
+  // Common action messages
+  "resource_created" => ":resource berhasil dibuat.",
+  "items_count" => "{0} Tidak ada item|{1} 1 item|[2,*] :count item",
+  "users_count" => "{0} Tidak ada pengguna|{1} 1 pengguna|[2,*] :count pengguna",
+  "minutes" => "{1} :count menit|[2,*] :count menit",
+  "hours" => "{1} :count jam|[2,*] :count jam",
+  "records_found" => "{0} Tidak ada record ditemukan|{1} 1 record ditemukan|[2,*] :count record ditemukan",
 
   // Common Module
   "categories" => [
