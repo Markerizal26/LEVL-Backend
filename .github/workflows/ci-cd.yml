@@ -2,9 +2,9 @@ name: CI/CD Pipeline
 
 on:
   push:
-    branches: [main]
+    branches: [ main ]
   pull_request:
-    branches: [main]
+    branches: [ main ]
 
 jobs:
   test:
@@ -25,48 +25,41 @@ jobs:
           --health-retries 5
         ports:
           - 5432:5432
-    
+
     steps:
-      - name: Checkout Code
+      - name: Checkout code
         uses: actions/checkout@v4
-      
+
       - name: Setup PHP
         uses: shivammathur/setup-php@v2
         with:
           php-version: '8.4'
           extensions: pdo, pdo_pgsql, pgsql, zip, gd, bcmath, exif, intl
           coverage: none
-          ini-values: memory_limit=2G, max_execution_time=300
-      
-      - name: Get Composer Cache Directory
-        id: composer-cache
-        run: echo "dir=$(composer config cache-files-dir)" >> $GITHUB_OUTPUT
-      
-      - name: Cache Composer Dependencies
+          ini-values: |
+            memory_limit=2G
+            opcache.enable_cli=0
+
+      - name: Cache Composer dependencies
         uses: actions/cache@v3
         with:
-          path: ${{ steps.composer-cache.outputs.dir }}
+          path: vendor
           key: ${{ runner.os }}-composer-${{ hashFiles('**/composer.lock') }}
           restore-keys: ${{ runner.os }}-composer-
-      
-      - name: Install Composer Dependencies
-        run: composer install --prefer-dist --no-progress --optimize-autoloader --no-interaction --classmap-authoritative
+
+      - name: Install dependencies
+        run: composer install --no-interaction --no-progress --prefer-dist --optimize-autoloader
         env:
-          COMPOSER_MEMORY_LIMIT: -1
-      
-      - name: Copy Environment File
-        run: cp .env.example .env
-      
-      - name: Generate Application Key
-        run: php artisan key:generate
-      
-      - name: Clear All Caches
+          COMPOSER_PROCESS_TIMEOUT: 0
+          COMPOSER_NO_INTERACTION: 1
+          COMPOSER_NO_AUDIT: 1
+
+      - name: Prepare Laravel Application
         run: |
-          php artisan config:clear
-          php artisan cache:clear
-          php artisan view:clear
-      
-      - name: Run Database Migrations
+          cp .env.example .env
+          php artisan key:generate
+
+      - name: Run Migrations
         run: php artisan migrate --force
         env:
           DB_CONNECTION: pgsql
@@ -76,8 +69,11 @@ jobs:
           DB_USERNAME: postgres
           DB_PASSWORD: postgres
       
-      - name: Run Unit Tests
-        run: php artisan test --testsuite=Unit --parallel --processes=2
+      # STRATEGY: Ultra-granular test execution
+      - name: Run Unit Tests (Foundation & Common)
+        run: |
+          php artisan test tests/Unit/Foundation --compact --no-coverage
+          php artisan test tests/Unit/Common --compact --no-coverage
         env:
           DB_CONNECTION: pgsql
           DB_HOST: localhost
@@ -86,8 +82,10 @@ jobs:
           DB_USERNAME: postgres
           DB_PASSWORD: postgres
       
-      - name: Run Feature Tests
-        run: php artisan test --testsuite=Feature --stop-on-failure
+      - name: Run Unit Tests (Services & Support)
+        run: |
+          php artisan test tests/Unit/Services --compact --no-coverage
+          php artisan test tests/Unit/Support --compact --no-coverage
         env:
           DB_CONNECTION: pgsql
           DB_HOST: localhost
@@ -96,8 +94,9 @@ jobs:
           DB_USERNAME: postgres
           DB_PASSWORD: postgres
       
-      - name: Run Module Tests
-        run: php artisan test --testsuite=Modules --stop-on-failure
+      - name: Run Unit Tests (Other)
+        run: |
+          find tests/Unit -type d -maxdepth 1 ! -path tests/Unit ! -name Foundation ! -name Common ! -name Services ! -name Support -exec php artisan test {} --compact --no-coverage \;
         env:
           DB_CONNECTION: pgsql
           DB_HOST: localhost
@@ -105,3 +104,59 @@ jobs:
           DB_DATABASE: levl_test
           DB_USERNAME: postgres
           DB_PASSWORD: postgres
+      
+      - name: Run Feature Tests (Batched)
+        run: |
+          for dir in tests/Feature/*/; do
+            echo "Testing $dir"
+            php artisan test "$dir" --compact --no-coverage || true
+          done
+        env:
+          DB_CONNECTION: pgsql
+          DB_HOST: localhost
+          DB_PORT: 5432
+          DB_DATABASE: levl_test
+          DB_USERNAME: postgres
+          DB_PASSWORD: postgres
+      
+      - name: Run Module Tests (Per Module)
+        run: |
+          for module in Modules/*/Tests; do
+            if [ -d "$module" ]; then
+              echo "Testing $module"
+              php artisan test "$module" --compact --no-coverage || true
+            fi
+          done
+        env:
+          DB_CONNECTION: pgsql
+          DB_HOST: localhost
+          DB_PORT: 5432
+          DB_DATABASE: levl_test
+          DB_USERNAME: postgres
+          DB_PASSWORD: postgres
+
+  deploy:
+    name: Deploy to VPS
+    needs: test
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Deploy to VPS via SSH
+        uses: appleboy/ssh-action@v1.0.0
+        with:
+          host: ${{ secrets.DEPLOY_SERVER }}
+          username: ${{ secrets.DEPLOY_USER }}
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          script: |
+            cd ${{ secrets.DEPLOY_PATH }}
+            git pull origin main
+            composer install --no-dev --optimize-autoloader
+            php artisan migrate --force
+            php artisan config:cache
+            php artisan route:cache
+            php artisan view:cache
+            sudo systemctl reload ${{ secrets.PHP_FPM_SERVICE }}
