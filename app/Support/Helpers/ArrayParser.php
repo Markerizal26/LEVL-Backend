@@ -98,7 +98,7 @@ class ArrayParser
         $parts = explode(',', $value);
 
         if ($trimValues) {
-            return collect($parts)->map('trim')->all();
+            return collect($parts)->map(fn($item) => trim($item))->all();
         }
 
         return $parts;
