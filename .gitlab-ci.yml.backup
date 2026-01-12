@@ -76,3 +76,35 @@ deploy:production:
   environment:
     name: production
     url: https://your-api-domain.com
+
+deploy:heroku:staging:
+  stage: deploy
+  image: ruby:3.2-alpine
+  before_script:
+    - apk add --no-cache git curl
+    - gem install dpl
+  script:
+    - dpl --provider=heroku --app=$HEROKU_APP_STAGING --api-key=$HEROKU_API_KEY
+  when: manual
+  environment:
+    name: heroku-staging
+    url: https://$HEROKU_APP_STAGING.herokuapp.com
+  only:
+    - main
+
+deploy:heroku:production:
+  stage: deploy
+  resource_group: heroku-production
+  image: ruby:3.2-alpine
+  before_script:
+    - apk add --no-cache git curl
+    - gem install dpl
+  script:
+    - dpl --provider=heroku --app=$HEROKU_APP_PRODUCTION --api-key=$HEROKU_API_KEY
+  when: manual
+  environment:
+    name: heroku-production
+    url: https://$HEROKU_APP_PRODUCTION.herokuapp.com
+  only:
+    - main
+    - tags

@@ -1,0 +1,49 @@
+name: Deploy to VPS
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    name: Deploy to Production VPS
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        
+      - name: Setup SSH
+        env:
+          SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
+          DEPLOY_SERVER: ${{ secrets.DEPLOY_SERVER }}
+        run: |
+          mkdir -p ~/.ssh
+          echo "$SSH_PRIVATE_KEY" | tr -d '\r' > ~/.ssh/id_rsa
+          chmod 600 ~/.ssh/id_rsa
+          ssh-keyscan -H "$DEPLOY_SERVER" >> ~/.ssh/known_hosts
+          chmod 644 ~/.ssh/known_hosts
+          
+      - name: Deploy to VPS
+        env:
+          DEPLOY_SERVER: ${{ secrets.DEPLOY_SERVER }}
+          DEPLOY_USER: ${{ secrets.DEPLOY_USER }}
+          DEPLOY_PATH: ${{ secrets.DEPLOY_PATH }}
+          PHP_FPM_SERVICE: ${{ secrets.PHP_FPM_SERVICE }}
+        run: |
+          # Make deploy script executable
+          chmod +x .gitlab/scripts/deploy.sh
+          
+          # Export variables for deploy script
+          export DEPLOY_SERVER DEPLOY_USER DEPLOY_PATH PHP_FPM_SERVICE
+          
+          # Run deployment
+          ./.gitlab/scripts/deploy.sh
+          
+      - name: Deployment Summary
+        if: success()
+        run: |
+          echo "✅ Deployment to VPS completed successfully!"
+          echo "Server: ${{ secrets.DEPLOY_SERVER }}"
