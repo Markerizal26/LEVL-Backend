@@ -3,7 +3,6 @@
 namespace Modules\Forums\Contracts\Services;
 
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
-use Illuminate\Support\Collection;
 use Modules\Auth\Models\User;
 use Modules\Forums\Models\Reply;
 use Modules\Forums\Models\Thread;
@@ -24,5 +23,5 @@ interface ForumServiceInterface
 
     public function deleteReply(Reply $reply, User $user): bool;
 
-    public function searchThreads(string $query, ?int $schemeId = null): Collection;
+    public function searchThreads(string $query, int $schemeId): LengthAwarePaginator;
 }
