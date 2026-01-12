@@ -8,7 +8,7 @@ uses(\Illuminate\Foundation\Testing\RefreshDatabase::class);
 
 function getTagService(): TagService
 {
-  return new TagService();
+  return app(TagService::class);
 }
 
 test("create generates slug automatically", function () {
