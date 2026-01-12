@@ -75,7 +75,7 @@ interface ForumServiceInterface
      *
      * @throws \Exception If thread is closed or max depth exceeded
      */
-    public function createReply(Thread $thread, array $data, User $user, ?Reply $parent = null): Reply;
+    public function createReply(Thread $thread, array $data, User $user, ?int $parentId = null): Reply;
 
     /**
      * Update a reply.
