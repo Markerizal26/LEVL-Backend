@@ -36,6 +36,7 @@ jobs:
           php-version: '8.4'
           extensions: pdo, pdo_pgsql, pgsql, zip, gd, bcmath, exif, intl
           coverage: none
+          ini-values: memory_limit=1G
       
       - name: Get Composer Cache Directory
         id: composer-cache
