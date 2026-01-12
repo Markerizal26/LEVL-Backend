@@ -3,6 +3,17 @@
 return [
   // HTTP status messages
   "success" => "Success",
+  "created" => "Created successfully",
+  "updated" => "Updated successfully",
+  "deleted" => "Deleted successfully",
+  "saved" => "Saved successfully",
+  "published" => "Published successfully",
+  "unpublished" => "Unpublished successfully",
+  "archived" => "Archived successfully",
+  "restored" => "Restored successfully",
+  "approved" => "Approved successfully",
+  "rejected" => "Rejected successfully",
+  "sent" => "Sent successfully",
   "data_retrieved" => "Data retrieved successfully.",
   "error" => "An error occurred.",
   "not_found" => "Resource not found.",

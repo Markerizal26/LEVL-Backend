@@ -12,6 +12,16 @@ class BusinessException extends Exception
     protected array $errors = [];
 
     /**
+     * HTTP status code for this exception.
+     */
+    protected int $statusCode = 500;
+
+    /**
+     * Application-specific error code.
+     */
+    protected string $errorCode = 'BUSINESS_ERROR';
+
+    /**
      * @param  array<string, array<string>>  $errors
      */
     public function __construct(string $message, array $errors = [], int $code = 422)
@@ -28,5 +38,21 @@ class BusinessException extends Exception
     public function getErrors(): array
     {
         return $this->errors;
+    }
+
+    /**
+     * Get the HTTP status code for this exception.
+     */
+    public function getStatusCode(): int
+    {
+        return $this->statusCode ?? 500;
+    }
+
+    /**
+     * Get the application-specific error code.
+     */
+    public function getErrorCode(): string
+    {
+        return $this->errorCode ?? 'INTERNAL_SERVER_ERROR';
     }
 }
