@@ -36,7 +36,8 @@ class LessonController extends Controller
             $request->query('filter', []),
             (int) $request->query('per_page', 15)
         );
-        return $this->paginateResponse($paginator, LessonResource::class);
+        $paginator->setCollection(LessonResource::collection($paginator->getCollection()));
+        return $this->paginateResponse($paginator);
     }
 
     public function store(LessonRequest $request, Course $course, Unit $unit)

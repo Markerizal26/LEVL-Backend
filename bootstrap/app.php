@@ -110,6 +110,26 @@ return Application::configure(basePath: dirname(__DIR__))
             );
         });
 
+        $exceptions->render(function (\Spatie\QueryBuilder\Exceptions\InvalidFilterQuery $e, \Illuminate\Http\Request $request) {
+            return response()->json([
+                'success' => false,
+                'message' => $e->getMessage(),
+                'data' => null,
+                'meta' => null,
+                'errors' => null,
+            ], 400);
+        });
+
+        $exceptions->render(function (\Spatie\QueryBuilder\Exceptions\InvalidSortQuery $e, \Illuminate\Http\Request $request) {
+            return response()->json([
+                'success' => false,
+                'message' => $e->getMessage(),
+                'data' => null,
+                'meta' => null,
+                'errors' => null,
+            ], 400);
+        });
+
         // Handle generic BusinessException for business rule violations
         $exceptions->render(function (BusinessException $e, \Illuminate\Http\Request $request) {
             $message = $e->getMessage() ?: __('messages.error');
@@ -309,7 +329,7 @@ return Application::configure(basePath: dirname(__DIR__))
             \Illuminate\Database\Eloquent\ModelNotFoundException $e,
             \Illuminate\Http\Request $request,
         ) {
-            if ($request->is('api/*')) {
+            if ($request->is('api/*') || $request->is('v1/*')) {
                 return response()->json(
                     [
                         'status' => 'error',
@@ -324,7 +344,7 @@ return Application::configure(basePath: dirname(__DIR__))
             \Symfony\Component\HttpKernel\Exception\NotFoundHttpException $e,
             \Illuminate\Http\Request $request,
         ) {
-            if ($request->is('api/*')) {
+            if ($request->is('api/*') || $request->is('v1/*')) {
                 $prev = $e->getPrevious();
                 if ($prev instanceof \Illuminate\Database\Eloquent\ModelNotFoundException) {
                     return response()->json(

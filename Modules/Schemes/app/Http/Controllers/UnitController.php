@@ -28,7 +28,8 @@ class UnitController extends Controller
             (int) $request->query('per_page', 15)
         );
 
-        return $this->paginateResponse($paginator, UnitResource::class);
+        $paginator->setCollection(UnitResource::collection($paginator->getCollection()));
+        return $this->paginateResponse($paginator);
     }
 
     public function store(UnitRequest $request, Course $course)

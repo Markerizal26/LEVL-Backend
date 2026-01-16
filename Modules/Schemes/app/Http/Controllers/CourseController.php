@@ -29,8 +29,8 @@ class CourseController extends Controller
             $request->query('filter', []),
             (int) $request->query('per_page', 15)
         );
-
-        return $this->paginateResponse($paginator, CourseResource::class);
+        $paginator->setCollection(CourseResource::collection($paginator->getCollection()));
+        return $this->paginateResponse($paginator);
     }
 
     public function store(CourseRequest $request)

@@ -66,20 +66,13 @@ trait ApiResponse
 
     protected function paginateResponse(
         LengthAwarePaginator $paginator,
-        string $resourceOrMessage = 'messages.success',
+        string $message = 'messages.success',
         int $status = 200,
         ?array $additionalMeta = null,
         array $params = []
     ): JsonResponse {
         $request = request();
-        $message = 'messages.success';
         $collection = $paginator->getCollection();
-
-        if (is_string($resourceOrMessage) && is_subclass_of($resourceOrMessage, \Illuminate\Http\Resources\Json\JsonResource::class)) {
-            $collection = $resourceOrMessage::collection($collection);
-        } elseif ($resourceOrMessage !== 'messages.success') {
-            $message = $resourceOrMessage;
-        }
 
         $meta = [
             'pagination' => [
