@@ -165,4 +165,10 @@ jobs:
             php artisan config:cache
             php artisan route:cache
             php artisan view:cache
-            sudo systemctl reload ${{ secrets.PHP_FPM_SERVICE }}
+            php artisan view:cache
+            
+            # Allow Roadrunner binary execution
+            chmod +x rr
+            
+            # Reload Octane Workers
+            php artisan octane:reload
