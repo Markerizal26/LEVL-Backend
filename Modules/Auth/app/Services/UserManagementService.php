@@ -35,7 +35,7 @@ class UserManagementService implements UserManagementServiceInterface
         }
 
         $query = QueryBuilder::for(User::class)
-            ->select(['id', 'name', 'email', 'username', 'status', 'account_status', 'created_at', 'email_verified_at'])
+            ->select(['id', 'name', 'email', 'username', 'status', 'account_status', 'created_at', 'email_verified_at', 'is_password_set'])
             ->with(['roles', 'media']);
 
         if ($search && trim($search) !== '') {

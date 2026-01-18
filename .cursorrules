@@ -1157,6 +1157,245 @@ class TrackRequestMiddleware {
 
 ---
 
+# Laravel Octane / FrankenPHP State Management (CRITICAL)
+
+## Overview
+This application uses **Laravel Octane with FrankenPHP** for high performance. Unlike traditional PHP-FPM, Octane keeps the application in memory between requests, which means **state can leak between requests** if not handled properly.
+
+## CRITICAL RULES - State Management
+
+### ❌ ABSOLUTELY FORBIDDEN
+
+#### 1. Static Properties with Mutable State
+```php
+// ❌ FORBIDDEN - State leaks between requests
+class UserController {
+    protected static $currentUser;  // DANGER!
+    protected static $cache = [];   // DANGER!
+    
+    public function index() {
+        self::$currentUser = auth()->user(); // Leaks to next request!
+    }
+}
+```
+
+#### 2. Global Variables
+```php
+// ❌ FORBIDDEN
+global $userData;
+$userData = auth()->user(); // Persists across requests!
+
+function setCurrentUser($user) {
+    global $currentUser;
+    $currentUser = $user; // DANGER!
+}
+```
+
+#### 3. Singleton Services with Mutable State
+```php
+// ❌ FORBIDDEN
+class CacheService {
+    protected $cachedData = [];  // Persists across requests!
+    
+    public function cache($key, $value) {
+        $this->cachedData[$key] = $value; // DANGER!
+    }
+}
+
+// In ServiceProvider
+$this->app->singleton(CacheService::class); // DANGER with mutable state!
+```
+
+#### 4. Class-Level Caching
+```php
+// ❌ FORBIDDEN
+class ProductRepository {
+    protected $products;  // Cached forever!
+    
+    public function all() {
+        if (!$this->products) {
+            $this->products = Product::all(); // Stale data!
+        }
+        return $this->products;
+    }
+}
+```
+
+#### 5. Instance Properties in Controllers/Middleware
+```php
+// ❌ FORBIDDEN
+class UserController {
+    protected $currentUser;  // Persists across requests!
+    
+    public function index() {
+        $this->currentUser = auth()->user(); // DANGER!
+    }
+}
+
+class TrackRequestMiddleware {
+    private int $requestCount = 0;  // Grows infinitely!
+    
+    public function handle(Request $request, Closure $next) {
+        $this->requestCount++; // DANGER!
+        return $next($request);
+    }
+}
+```
+
+### ✅ SAFE PATTERNS
+
+#### 1. Use Request-Scoped Services
+```php
+// ✅ CORRECT - Scoped to request
+// In ServiceProvider
+$this->app->scoped(UserService::class, function ($app) {
+    return new UserService($app['auth']->user());
+});
+```
+
+#### 2. Use Dependency Injection (No State)
+```php
+// ✅ CORRECT - Stateless service
+class UserManagementService {
+    public function __construct(
+        private readonly UserRepository $repository
+    ) {}
+    
+    public function listUsers(User $authUser, int $perPage) {
+        // All data from parameters, no class properties
+        return $this->repository->paginate($perPage);
+    }
+}
+```
+
+#### 3. Use Laravel Cache (Redis/Database)
+```php
+// ✅ CORRECT - Uses Redis/Database cache
+class ProductRepository {
+    public function all() {
+        return Cache::remember('products', 3600, function () {
+            return Product::all();
+        });
+    }
+}
+```
+
+#### 4. Stateless Controllers
+```php
+// ✅ CORRECT - No instance properties
+class UserController {
+    public function __construct(
+        private readonly UserService $userService
+    ) {}
+    
+    public function index(Request $request) {
+        $user = $request->user(); // Fresh per request
+        return $this->userService->list($user);
+    }
+}
+```
+
+## Octane Configuration (REQUIRED)
+
+### Cleanup Listeners
+Verify these are active in `config/octane.php`:
+
+```php
+OperationTerminated::class => [
+    FlushOnce::class,                      // ✅ Flushes one-time bindings
+    FlushTemporaryContainerInstances::class, // ✅ Clears temp instances
+    DisconnectFromDatabases::class,        // ✅ Closes DB connections
+    CollectGarbage::class,                 // ✅ Runs garbage collection
+],
+```
+
+### Services to Flush
+If you have services that need per-request reset:
+
+```php
+'flush' => [
+    \App\Services\YourStatefulService::class,
+],
+```
+
+## Code Review Checklist
+
+When reviewing PRs, check for:
+- [ ] No `static $` properties storing request data
+- [ ] No `global $` variables
+- [ ] Singletons are stateless or use `scoped()`
+- [ ] No class-level caching (use Laravel Cache)
+- [ ] Services use dependency injection
+- [ ] Controllers don't store state in properties
+- [ ] Middleware doesn't accumulate state
+- [ ] Event listeners don't cache data
+
+## Testing for State Leakage
+
+```php
+// Test concurrent requests with different users
+public function test_no_state_leakage_between_requests()
+{
+    // Request 1: User A
+    $response1 = $this->actingAs($userA)
+        ->getJson('/api/v1/users');
+    
+    // Request 2: User B
+    $response2 = $this->actingAs($userB)
+        ->getJson('/api/v1/users');
+    
+    // Verify no data from request 1 in request 2
+    $this->assertNotEquals(
+        $response1->json('data'),
+        $response2->json('data')
+    );
+}
+```
+
+## Development vs Production
+
+### Development (with --watch)
+```bash
+php artisan octane:start --watch --server=frankenphp
+```
+- Auto-reloads on code changes
+- Monitors: app/, Modules/, config/, routes/, .env
+
+### Production
+```bash
+php artisan octane:start --server=frankenphp
+```
+- No --watch (performance overhead)
+- Manual reload after deployment: `php artisan octane:reload`
+
+## Memory Monitoring
+
+Add to `AppServiceProvider` for development:
+
+```php
+if (app()->environment('local')) {
+    app('events')->listen(RequestHandled::class, function ($event) {
+        $memory = memory_get_usage(true) / 1024 / 1024;
+        if ($memory > 50) { // Alert if > 50MB
+            logger()->warning("High memory usage: {$memory}MB");
+        }
+    });
+}
+```
+
+## Summary - Octane Safety Rules
+
+1. ✅ **Use dependency injection** - No static/global state
+2. ✅ **Prefer `scoped()` over `singleton()`** - For request-dependent services
+3. ✅ **Use Laravel Cache** - Instead of class properties
+4. ✅ **Stateless services** - All data from parameters
+5. ✅ **Test concurrently** - Verify no state leakage
+6. ✅ **Monitor memory** - Watch for memory leaks
+
+**REMEMBER**: With Octane, your code runs once and serves thousands of requests. Any mutable state will leak between requests!
+
+---
+
 # Caching Rules
 
 

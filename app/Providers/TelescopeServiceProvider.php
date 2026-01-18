@@ -22,12 +22,10 @@ if (class_exists(\Laravel\Telescope\TelescopeApplicationServiceProvider::class))
             $telescopeEnabled = config('telescope.enabled', false);
 
             Telescope::filter(function (IncomingEntry $entry) use ($isLocal, $telescopeEnabled) {
-                // If Telescope is explicitly enabled via env, record everything
                 if ($telescopeEnabled) {
                     return true;
                 }
                 
-                // Fallback: only record in local or important entries
                 return $isLocal ||
                        $entry->isReportableException() ||
                        $entry->isFailedRequest() ||
