@@ -27,7 +27,8 @@ class CourseService implements CourseServiceInterface
     use \App\Support\Traits\BuildsQueryBuilderRequest;
 
     public function __construct(
-        private readonly CourseRepositoryInterface $repository
+        private readonly CourseRepositoryInterface $repository,
+        private readonly SchemesCacheService $cacheService
     ) {}
 
     public function paginate(array $filters = [], int $perPage = 15): LengthAwarePaginator
@@ -50,6 +51,14 @@ class CourseService implements CourseServiceInterface
     public function listPublic(int $perPage = 15, array $filters = []): LengthAwarePaginator
     {
         $perPage = max(1, $perPage);
+        $page = request()->get('page', 1);
+
+        // Try to get from cache first
+        $cached = $this->cacheService->getPublicCourses($page, $perPage, $filters);
+        if ($cached) {
+            return $cached;
+        }
+
         $query = $this->buildQuery($filters)->where('status', 'published');
 
         return $query->paginate($perPage);
@@ -92,12 +101,12 @@ class CourseService implements CourseServiceInterface
 
     public function find(int $id): ?Course
     {
-        return $this->repository->findById($id);
+        return $this->cacheService->getCourse($id);
     }
 
     public function findOrFail(int $id): Course
     {
-        $course = $this->repository->findById($id);
+        $course = $this->cacheService->getCourse($id);
         if (! $course) {
             throw new \Illuminate\Database\Eloquent\ModelNotFoundException;
         }
@@ -107,7 +116,7 @@ class CourseService implements CourseServiceInterface
 
     public function findBySlug(string $slug): ?Course
     {
-        return $this->repository->findBySlug($slug);
+        return $this->cacheService->getCourseBySlug($slug);
     }
 
     public function create(CreateCourseDTO|array $data, ?\Modules\Auth\Models\User $actor = null, array $files = []): Course
@@ -139,6 +148,9 @@ class CourseService implements CourseServiceInterface
 
                 $this->handleMedia($course, $files);
 
+                // Invalidate listing cache
+                $this->cacheService->invalidateListings();
+
                 return $course->fresh(['tags']);
             });
         } catch (QueryException $e) {
@@ -163,6 +175,9 @@ class CourseService implements CourseServiceInterface
                 }
 
                 $this->handleMedia($course, $files);
+
+                // Invalidate specific course cache + listings
+                $this->cacheService->invalidateCourse($course->id, $course->slug);
 
                 return $course->fresh(['tags']);
             });
