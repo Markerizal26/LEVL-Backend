@@ -214,6 +214,95 @@ foreach ($users as $user) {
 
 Already installed! Check responses for `query_detector` field.
 
+#### Step 2.4: Middleware Profiling & Queue Optimization
+
+**🎯 Goal**: Reduce request latency caused by middleware and heavy synchronous operations, ensuring target response time 30–80ms.
+
+##### Step 2.4.1: Analyze Middleware Overhead
+
+**Current middleware stack**:
+```
+api, auth:api, throttle:api, role:Admin,Superadmin
+```
+
+**Middleware Overhead Analysis**:
+
+| Middleware | Overhead Estimate | Optimization |
+|------------|------------------|--------------|
+| `api` | ~1–2ms | – |
+| `auth:api` | 2–30ms | Use stateless JWT, cache user/token data |
+| `throttle:api` | 1–3ms | Use Redis backend for rate limiting |
+| `role` | 1–15ms | Cache roles per user, eager-load during auth |
+
+**Total overhead**: 5–50ms depending on auth/role checks. Profiling required to pinpoint slow layers.
+
+##### Step 2.4.2: Middleware Profiling
+
+Use Clockwork, Telescope, or custom logging to measure execution time per middleware:
+
+```php
+// app/Http/Middleware/ProfilingMiddleware.php
+public function handle($request, Closure $next)
+{
+    $start = microtime(true);
+
+    $response = $next($request);
+
+    $time = microtime(true) - $start;
+    \Log::info("Middleware profiling: {$request->path()} took {$time} sec");
+
+    return $response;
+}
+```
+
+**Steps**:
+1. Deploy temporarily in local/staging
+2. Identify middleware contributing most to latency
+3. Apply caching or refactor as needed
+
+##### Step 2.4.3: Queue & Async Optimization
+
+Move heavy operations out of synchronous requests:
+- Email / notifications
+- Reports, CSV/PDF generation
+- External API calls
+- Analytics / logging
+
+**Example**:
+```php
+// Dispatch job asynchronously
+dispatch(new SendNewsletter($user));
+
+// Job definition: app/Jobs/SendNewsletter.php
+public function handle()
+{
+    Mail::to($this->user->email)->send(new NewsletterMail());
+}
+```
+
+**Queue Optimization Tips**:
+- Use Redis or database as queue driver
+- Tune worker concurrency to match server resources
+- Retry/failure policies for job robustness
+- Monitor queue length & processing time
+
+##### Step 2.4.4: Verification
+
+```bash
+# Middleware profiling
+open http://localhost:8000/clockwork
+open http://localhost:8000/telescope
+
+# Queue job monitoring
+php artisan queue:work --tries=3
+php artisan queue:failed
+```
+
+**Success Criteria**:
+- Middleware overhead <20ms per layer
+- Synchronous-heavy operations moved to async
+- Main request time reduced
+
 ### 🧪 Verification
 
 ```bash
