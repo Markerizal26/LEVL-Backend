@@ -10,7 +10,7 @@
   "license": "MIT",
   "require": {
     "php": "^8.2",
-    "beyondcode/laravel-query-detector": "*",
+    "beyondcode/laravel-query-detector": "^2.1",
     "darkaonline/l5-swagger": "^10.0",
     "dedoc/scramble": "^0.13.10",
     "hisorange/browser-detect": "^5.0",
@@ -40,6 +40,7 @@
     "barryvdh/laravel-ide-helper": "^3.6",
     "codedungeon/phpunit-result-printer": "^0.1.0",
     "fakerphp/faker": "^1.23",
+    "itsgoingd/clockwork": "*",
     "larastan/larastan": "^3.8",
     "laravel/pail": "^1.2.2",
     "laravel/pint": "^1.24",

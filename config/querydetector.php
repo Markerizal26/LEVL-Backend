@@ -63,7 +63,8 @@ return [
      * \BeyondCode\QueryDetector\Outputs\Log::class
      */
     'output' => [
-        \BeyondCode\QueryDetector\Outputs\Json::class,   // For Postman/API clients
-        \BeyondCode\QueryDetector\Outputs\Log::class,    // For log files
+        \BeyondCode\QueryDetector\Outputs\Json::class,       // For Postman/API clients
+        \BeyondCode\QueryDetector\Outputs\Log::class,        // For log files
+        \BeyondCode\QueryDetector\Outputs\Clockwork::class,  // For Clockwork integration
     ]
 ];
