@@ -31,8 +31,8 @@ class CreateReplyRequest extends FormRequest
     public function messages(): array
     {
         return [
-            'content.required' => 'Reply content is required',
-            'parent_id.exists' => 'Invalid parent reply',
+            'content.required' => __('validation.required', ['attribute' => __('validation.attributes.content')]),
+            'parent_id.exists' => __('validation.exists', ['attribute' => __('validation.attributes.parent_reply')]),
         ];
     }
 }

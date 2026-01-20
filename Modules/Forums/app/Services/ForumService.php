@@ -139,14 +139,14 @@ class ForumService implements ModuleForumServiceInterface, \App\Contracts\Servic
     {
         // Check if thread is closed
         if ($thread->isClosed()) {
-            throw new \Exception('Cannot reply to a closed thread.');
+            throw new \Exception(__('messages.forums.cannot_reply_closed_thread'));
         }
 
         $parent = $parentId ? Reply::find($parentId) : null;
 
         // Check depth limit if replying to another reply
         if ($parent && ! $parent->canHaveChildren()) {
-            throw new \Exception('Maximum reply depth exceeded.');
+            throw new \Exception(__('messages.forums.max_reply_depth_exceeded'));
         }
 
         return DB::transaction(function () use ($thread, $data, $user, $parent) {

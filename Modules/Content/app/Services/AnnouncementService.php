@@ -105,7 +105,7 @@ class AnnouncementService implements AnnouncementServiceInterface
     public function publish(Announcement $announcement): Announcement
     {
         if ($announcement->status === 'published') {
-            throw new BusinessException('Announcement sudah dipublikasikan.');
+            throw new BusinessException(__('messages.announcements.already_published'));
         }
 
         return DB::transaction(function () use ($announcement) {
@@ -127,7 +127,7 @@ class AnnouncementService implements AnnouncementServiceInterface
     public function schedule(Announcement $announcement, \Carbon\Carbon $publishAt): Announcement
     {
         if ($publishAt->isPast()) {
-            throw new BusinessException('Waktu jadwal harus di masa depan.');
+            throw new BusinessException(__('messages.content.schedule_future_required'));
         }
 
         $this->repository->update($announcement, [

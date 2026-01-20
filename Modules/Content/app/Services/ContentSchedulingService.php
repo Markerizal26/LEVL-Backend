@@ -34,7 +34,7 @@ class ContentSchedulingService
     public function schedulePublication($content, Carbon $publishAt): bool
     {
         if ($publishAt->isPast()) {
-            throw new \Exception('Scheduled time must be in the future.');
+            throw new \Exception(__('messages.content.schedule_future_required'));
         }
 
         return $content->update([

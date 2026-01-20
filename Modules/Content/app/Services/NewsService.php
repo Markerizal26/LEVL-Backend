@@ -98,7 +98,7 @@ class NewsService implements NewsServiceInterface
     public function publish(News $news): News
     {
         if ($news->status === 'published') {
-            throw new BusinessException('News sudah dipublikasikan.');
+            throw new BusinessException(__('messages.news.already_published'));
         }
 
         return DB::transaction(function () use ($news) {
@@ -120,7 +120,7 @@ class NewsService implements NewsServiceInterface
     public function schedule(News $news, \Carbon\Carbon $publishAt): News
     {
         if ($publishAt->isPast()) {
-            throw new BusinessException('Waktu jadwal harus di masa depan.');
+            throw new BusinessException(__('messages.content.schedule_future_required'));
         }
 
         $this->repository->update($news, [

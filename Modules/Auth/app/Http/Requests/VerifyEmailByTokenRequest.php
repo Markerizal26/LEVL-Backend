@@ -28,12 +28,12 @@ class VerifyEmailByTokenRequest extends FormRequest
     public function messages(): array
     {
         return [
-            'token.required' => 'Token verifikasi wajib diisi.',
-            'token.string' => 'Token verifikasi harus berupa teks.',
-            'token.size' => 'Token verifikasi harus 16 karakter.',
-            'uuid.required' => 'UUID verifikasi wajib diisi.',
-            'uuid.string' => 'UUID verifikasi harus berupa teks.',
-            'uuid.uuid' => 'UUID verifikasi tidak valid.',
+            'token.required' => __('validation.required', ['attribute' => __('validation.attributes.token')]),
+            'token.string' => __('validation.string', ['attribute' => __('validation.attributes.token')]),
+            'token.size' => __('validation.size.string', ['attribute' => __('validation.attributes.token'), 'size' => 16]),
+            'uuid.required' => __('validation.required', ['attribute' => __('validation.attributes.uuid')]),
+            'uuid.string' => __('validation.string', ['attribute' => __('validation.attributes.uuid')]),
+            'uuid.uuid' => __('validation.uuid', ['attribute' => __('validation.attributes.uuid')]),
         ];
     }
 }

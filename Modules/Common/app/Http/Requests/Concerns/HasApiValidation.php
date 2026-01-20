@@ -12,7 +12,7 @@ trait HasApiValidation
         $errors = $validator->errors()->toArray();
         $response = response()->json([
             'status' => 'error',
-            'message' => 'Data yang Anda kirim tidak valid. Periksa kembali isian Anda.',
+            'message' => __('messages.validation.failed'),
             'errors' => $errors,
         ], 422);
         throw new HttpResponseException($response);

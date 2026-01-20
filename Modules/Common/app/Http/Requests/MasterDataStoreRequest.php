@@ -25,10 +25,10 @@ class MasterDataStoreRequest extends FormRequest
     public function messages(): array
     {
         return [
-            'value.required' => 'Value wajib diisi',
-            'value.max' => 'Value maksimal 100 karakter',
-            'label.required' => 'Label wajib diisi',
-            'label.max' => 'Label maksimal 255 karakter',
+            'value.required' => __('validation.required', ['attribute' => __('validation.attributes.value')]),
+            'value.max' => __('validation.max.string', ['attribute' => __('validation.attributes.value'), 'max' => 100]),
+            'label.required' => __('validation.required', ['attribute' => __('validation.attributes.label')]),
+            'label.max' => __('validation.max.string', ['attribute' => __('validation.attributes.label'), 'max' => 255]),
         ];
     }
 }

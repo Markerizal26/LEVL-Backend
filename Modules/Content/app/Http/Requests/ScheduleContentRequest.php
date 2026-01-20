@@ -21,8 +21,8 @@ class ScheduleContentRequest extends FormRequest
     public function messages(): array
     {
         return [
-            'scheduled_at.required' => 'Waktu publikasi wajib diisi.',
-            'scheduled_at.after' => 'Waktu publikasi harus di masa depan.',
+            'scheduled_at.required' => __('validation.required', ['attribute' => __('validation.attributes.scheduled_at')]),
+            'scheduled_at.after' => __('validation.after', ['attribute' => __('validation.attributes.scheduled_at'), 'date' => 'now']),
         ];
     }
 }

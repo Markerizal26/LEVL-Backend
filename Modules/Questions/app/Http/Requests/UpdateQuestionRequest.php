@@ -38,14 +38,14 @@ class UpdateQuestionRequest extends FormRequest
     public function messages(): array
     {
         return [
-            'category_id.exists' => 'The selected category does not exist.',
-            'type.in' => 'The type must be one of: '.implode(', ', QuestionType::values()).'.',
-            'difficulty.in' => 'The difficulty must be one of: '.implode(', ', QuestionDifficulty::values()).'.',
-            'status.in' => 'The status must be one of: '.implode(', ', QuestionStatus::values()).'.',
-            'question_text.max' => 'The question text may not be greater than 5000 characters.',
-            'points.min' => 'The points must be at least 1.',
-            'options.*.option_text.required_with' => 'Option text is required.',
-            'options.*.is_correct.required_with' => 'You must specify if the option is correct.',
+            'category_id.exists' => __('validation.exists', ['attribute' => __('validation.attributes.category')]),
+            'type.in' => __('validation.in', ['attribute' => __('validation.attributes.type')]),
+            'difficulty.in' => __('validation.in', ['attribute' => __('validation.attributes.difficulty')]),
+            'status.in' => __('validation.in', ['attribute' => __('validation.attributes.status')]),
+            'question_text.max' => __('validation.max.string', ['attribute' => __('validation.attributes.question_text'), 'max' => 5000]),
+            'points.min' => __('validation.min.numeric', ['attribute' => __('validation.attributes.points'), 'min' => 1]),
+            'options.*.option_text.required_with' => __('validation.required_with', ['attribute' => __('validation.attributes.option_text'), 'values' => __('validation.attributes.options')]),
+            'options.*.is_correct.required_with' => __('validation.required_with', ['attribute' => __('validation.attributes.is_correct'), 'values' => __('validation.attributes.options')]),
         ];
     }
 }

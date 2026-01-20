@@ -50,8 +50,8 @@ class AuthenticationService implements AuthenticationServiceInterface
             $this->throttle->hitAttempt($login, $ip);
             $this->throttle->recordFailureAndMaybeLock($login);
             throw new BusinessException(
-                'Username/email atau password salah.',
-                ['login' => ['Username/email atau password salah.']],
+                __('messages.auth.invalid_credentials'),
+                ['login' => [__('messages.auth.invalid_credentials')]],
                 401
             );
         }

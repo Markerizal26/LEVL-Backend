@@ -29,11 +29,11 @@ class UpdateProfileRequest extends FormRequest
     public function messages(): array
     {
         return [
-            'name.max' => 'Name cannot exceed 100 characters.',
-            'email.email' => 'Please provide a valid email address.',
-            'email.unique' => 'This email is already taken.',
-            'phone.regex' => 'Please provide a valid phone number.',
-            'bio.max' => 'Bio cannot exceed 1000 characters.',
+            'name.max' => __('validation.max.string', ['attribute' => __('validation.attributes.name'), 'max' => 100]),
+            'email.email' => __('validation.email', ['attribute' => __('validation.attributes.email')]),
+            'email.unique' => __('validation.unique', ['attribute' => __('validation.attributes.email')]),
+            'phone.regex' => __('validation.regex', ['attribute' => __('validation.attributes.phone')]),
+            'bio.max' => __('validation.max.string', ['attribute' => __('validation.attributes.bio'), 'max' => 1000]),
         ];
     }
 }

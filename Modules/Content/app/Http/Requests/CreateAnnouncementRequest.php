@@ -32,11 +32,11 @@ class CreateAnnouncementRequest extends FormRequest
     public function messages(): array
     {
         return [
-            'title.required' => 'Judul pengumuman wajib diisi.',
-            'content.required' => 'Konten pengumuman wajib diisi.',
-            'target_type.required' => 'Tipe target audience wajib dipilih.',
-            'target_type.in' => 'Tipe target audience tidak valid.',
-            'scheduled_at.after' => 'Waktu publikasi harus di masa depan.',
+            'title.required' => __('validation.required', ['attribute' => __('validation.attributes.title')]),
+            'content.required' => __('validation.required', ['attribute' => __('validation.attributes.content')]),
+            'target_type.required' => __('validation.required', ['attribute' => __('validation.attributes.target_type')]),
+            'target_type.in' => __('validation.in', ['attribute' => __('validation.attributes.target_type')]),
+            'scheduled_at.after' => __('validation.after', ['attribute' => __('validation.attributes.scheduled_at'), 'date' => 'now']),
         ];
     }
 }

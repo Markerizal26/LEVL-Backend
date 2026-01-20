@@ -38,7 +38,7 @@ class UpdatePrivacySettingsRequest extends FormRequest
     public function messages(): array
     {
         return [
-            'profile_visibility.in' => 'Invalid profile visibility option.',
+            'profile_visibility.in' => __('validation.in', ['attribute' => __('validation.attributes.profile_visibility')]),
         ];
     }
 }

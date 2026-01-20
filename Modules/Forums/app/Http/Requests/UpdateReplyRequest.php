@@ -30,7 +30,7 @@ class UpdateReplyRequest extends FormRequest
     public function messages(): array
     {
         return [
-            'content.required' => 'Reply content is required',
+            'content.required' => __('validation.required', ['attribute' => __('validation.attributes.content')]),
         ];
     }
 }

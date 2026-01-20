@@ -24,7 +24,7 @@ class DeleteAccountRequest extends FormRequest
     public function messages(): array
     {
         return [
-            'password.required' => 'Password is required to delete your account.',
+            'password.required' => __('validation.required', ['attribute' => __('validation.attributes.password')]),
         ];
     }
 }

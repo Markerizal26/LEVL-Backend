@@ -73,33 +73,33 @@ trait HasSchemesRequestRules
     protected function messagesCourse(): array
     {
         return [
-            'code.required' => 'Kode wajib diisi.',
-            'code.unique' => 'Kode sudah digunakan.',
-            'title.required' => 'Judul wajib diisi.',
-            'level_tag.required' => 'Level wajib diisi.',
-            'type.required' => 'Tipe wajib diisi.',
-            'enrollment_type.required' => 'Jenis enrollment wajib dipilih.',
-            'enrollment_type.in' => 'Jenis enrollment tidak valid.',
-            'enrollment_key.required_if' => 'Kode enrollment wajib diisi untuk mode key-based.',
-            'enrollment_key.string' => 'Kode enrollment harus berupa teks.',
-            'enrollment_key.max' => 'Kode enrollment maksimal 100 karakter.',
-            'progression_mode.required' => 'Mode progres wajib diisi.',
-            'category_id.required' => 'Kategori wajib dipilih.',
-            'category_id.integer' => 'Kategori harus berupa ID (angka).',
-            'category_id.exists' => 'Kategori tidak ditemukan.',
-            'status.in' => 'Status tidak valid.',
-            'type.in' => 'Tipe tidak valid.',
-            'thumbnail.image' => 'Thumbnail harus berupa gambar.',
-            'banner.image' => 'Banner harus berupa gambar.',
-            'instructor_id.exists' => 'Instruktur tidak ditemukan.',
-            'course_admins.*.exists' => 'Admin course tidak ditemukan.',
-            'course_admins.*.integer' => 'Setiap item course_admins harus berupa angka (ID pengguna).',
-            'outcomes.*.string' => 'Setiap item outcomes harus berupa teks.',
-            'prereq.string' => 'Prasyarat harus berupa teks.',
-            'tags.*.string' => 'Setiap item tags harus berupa teks.',
-            'tags.array' => 'Field tags harus berupa array.',
-            'outcomes.array' => 'Field outcomes harus berupa array.',
-            'course_admins.array' => 'Field course_admins harus berupa array.',
+            'code.required' => __('validation.required', ['attribute' => __('validation.attributes.code')]),
+            'code.unique' => __('validation.unique', ['attribute' => __('validation.attributes.code')]),
+            'title.required' => __('validation.required', ['attribute' => __('validation.attributes.title')]),
+            'level_tag.required' => __('validation.required', ['attribute' => __('validation.attributes.level')]),
+            'type.required' => __('validation.required', ['attribute' => __('validation.attributes.type')]),
+            'enrollment_type.required' => __('validation.required', ['attribute' => __('validation.attributes.enrollment_type')]),
+            'enrollment_type.in' => __('validation.in', ['attribute' => __('validation.attributes.enrollment_type')]),
+            'enrollment_key.required_if' => __('validation.required_if', ['attribute' => __('validation.attributes.enrollment_key'), 'other' => __('validation.attributes.enrollment_type')]),
+            'enrollment_key.string' => __('validation.string', ['attribute' => __('validation.attributes.enrollment_key')]),
+            'enrollment_key.max' => __('validation.max.string', ['attribute' => __('validation.attributes.enrollment_key'), 'max' => 100]),
+            'progression_mode.required' => __('validation.required', ['attribute' => __('validation.attributes.progression_mode')]),
+            'category_id.required' => __('validation.required', ['attribute' => __('validation.attributes.category')]),
+            'category_id.integer' => __('validation.integer', ['attribute' => __('validation.attributes.category')]),
+            'category_id.exists' => __('validation.exists', ['attribute' => __('validation.attributes.category')]),
+            'status.in' => __('validation.in', ['attribute' => __('validation.attributes.status')]),
+            'type.in' => __('validation.in', ['attribute' => __('validation.attributes.type')]),
+            'thumbnail.image' => __('validation.image', ['attribute' => __('validation.attributes.thumbnail')]),
+            'banner.image' => __('validation.image', ['attribute' => __('validation.attributes.banner')]),
+            'instructor_id.exists' => __('validation.exists', ['attribute' => __('validation.attributes.instructor')]),
+            'course_admins.*.exists' => __('validation.exists', ['attribute' => __('validation.attributes.course_admin')]),
+            'course_admins.*.integer' => __('validation.integer', ['attribute' => __('validation.attributes.course_admin')]),
+            'outcomes.*.string' => __('validation.string', ['attribute' => __('validation.attributes.outcome')]),
+            'prereq.string' => __('validation.string', ['attribute' => __('validation.attributes.prerequisite')]),
+            'tags.*.string' => __('validation.string', ['attribute' => __('validation.attributes.tag')]),
+            'tags.array' => __('validation.array', ['attribute' => __('validation.attributes.tags')]),
+            'outcomes.array' => __('validation.array', ['attribute' => __('validation.attributes.outcomes')]),
+            'course_admins.array' => __('validation.array', ['attribute' => __('validation.attributes.course_admins')]),
         ];
     }
 
@@ -127,13 +127,13 @@ trait HasSchemesRequestRules
     protected function messagesUnit(): array
     {
         return [
-            'code.required' => 'Kode wajib diisi.',
-            'code.unique' => 'Kode sudah digunakan.',
-            'slug.unique' => 'Slug sudah digunakan di course ini.',
-            'title.required' => 'Judul wajib diisi.',
-            'order.integer' => 'Order harus berupa angka.',
-            'order.min' => 'Order minimal 1.',
-            'status.in' => 'Status harus draft atau published.',
+            'code.required' => __('validation.required', ['attribute' => __('validation.attributes.code')]),
+            'code.unique' => __('validation.unique', ['attribute' => __('validation.attributes.code')]),
+            'slug.unique' => __('validation.unique', ['attribute' => __('validation.attributes.slug')]),
+            'title.required' => __('validation.required', ['attribute' => __('validation.attributes.title')]),
+            'order.integer' => __('validation.integer', ['attribute' => __('validation.attributes.order')]),
+            'order.min' => __('validation.min.numeric', ['attribute' => __('validation.attributes.order'), 'min' => 1]),
+            'status.in' => __('validation.in', ['attribute' => __('validation.attributes.status')]),
         ];
     }
 
@@ -148,11 +148,11 @@ trait HasSchemesRequestRules
     protected function messagesReorderUnits(): array
     {
         return [
-            'units.required' => 'Daftar units wajib diisi.',
-            'units.array' => 'Units harus berupa array.',
-            'units.*.required' => 'Setiap item units wajib diisi.',
-            'units.*.integer' => 'Setiap item units harus berupa ID (angka).',
-            'units.*.exists' => 'Unit tidak ditemukan.',
+            'units.required' => __('validation.required', ['attribute' => __('validation.attributes.units')]),
+            'units.array' => __('validation.array', ['attribute' => __('validation.attributes.units')]),
+            'units.*.required' => __('validation.required', ['attribute' => __('validation.attributes.unit_item')]),
+            'units.*.integer' => __('validation.integer', ['attribute' => __('validation.attributes.unit_item')]),
+            'units.*.exists' => __('validation.exists', ['attribute' => __('validation.attributes.unit')]),
         ];
     }
 
@@ -179,14 +179,14 @@ trait HasSchemesRequestRules
     protected function messagesLesson(): array
     {
         return [
-            'slug.unique' => 'Slug sudah digunakan di unit ini.',
-            'title.required' => 'Judul wajib diisi.',
-            'markdown_content.string' => 'Markdown content harus berupa teks.',
-            'order.integer' => 'Order harus berupa angka.',
-            'order.min' => 'Order minimal 1.',
-            'duration_minutes.integer' => 'Durasi harus berupa angka.',
-            'duration_minutes.min' => 'Durasi minimal 0.',
-            'status.in' => 'Status harus draft atau published.',
+            'slug.unique' => __('validation.unique', ['attribute' => __('validation.attributes.slug')]),
+            'title.required' => __('validation.required', ['attribute' => __('validation.attributes.title')]),
+            'markdown_content.string' => __('validation.string', ['attribute' => __('validation.attributes.markdown_content')]),
+            'order.integer' => __('validation.integer', ['attribute' => __('validation.attributes.order')]),
+            'order.min' => __('validation.min.numeric', ['attribute' => __('validation.attributes.order'), 'min' => 1]),
+            'duration_minutes.integer' => __('validation.integer', ['attribute' => __('validation.attributes.duration_minutes')]),
+            'duration_minutes.min' => __('validation.min.numeric', ['attribute' => __('validation.attributes.duration_minutes'), 'min' => 0]),
+            'status.in' => __('validation.in', ['attribute' => __('validation.attributes.status')]),
         ];
     }
 }

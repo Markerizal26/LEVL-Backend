@@ -34,10 +34,10 @@ class CreateNewsRequest extends FormRequest
     public function messages(): array
     {
         return [
-            'title.required' => 'Judul berita wajib diisi.',
-            'content.required' => 'Konten berita wajib diisi.',
-            'slug.unique' => 'Slug sudah digunakan.',
-            'scheduled_at.after' => 'Waktu publikasi harus di masa depan.',
+            'title.required' => __('validation.required', ['attribute' => __('validation.attributes.title')]),
+            'content.required' => __('validation.required', ['attribute' => __('validation.attributes.content')]),
+            'slug.unique' => __('validation.unique', ['attribute' => __('validation.attributes.slug')]),
+            'scheduled_at.after' => __('validation.after', ['attribute' => __('validation.attributes.scheduled_at'), 'date' => 'now']),
         ];
     }
 }

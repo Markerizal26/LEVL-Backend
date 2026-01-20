@@ -20,11 +20,11 @@ trait HasCommonRequestRules
     protected function messagesCategoryStore(): array
     {
         return [
-            'name.required' => 'Nama wajib diisi.',
-            'value.required' => 'Value wajib diisi.',
-            'value.unique' => 'Value sudah digunakan.',
-            'status.required' => 'Status wajib diisi.',
-            'status.in' => 'Status harus active atau inactive.',
+            'name.required' => __('validation.required', ['attribute' => __('validation.attributes.name')]),
+            'value.required' => __('validation.required', ['attribute' => __('validation.attributes.value')]),
+            'value.unique' => __('validation.unique', ['attribute' => __('validation.attributes.value')]),
+            'status.required' => __('validation.required', ['attribute' => __('validation.attributes.status')]),
+            'status.in' => __('validation.in', ['attribute' => __('validation.attributes.status')]),
         ];
     }
 
@@ -41,11 +41,11 @@ trait HasCommonRequestRules
     protected function messagesCategoryUpdate(): array
     {
         return [
-            'name.required' => 'Nama wajib diisi.',
-            'value.required' => 'Value wajib diisi.',
-            'value.unique' => 'Value sudah digunakan.',
-            'status.required' => 'Status wajib diisi.',
-            'status.in' => 'Status harus active atau inactive.',
+            'name.required' => __('validation.required', ['attribute' => __('validation.attributes.name')]),
+            'value.required' => __('validation.required', ['attribute' => __('validation.attributes.value')]),
+            'value.unique' => __('validation.unique', ['attribute' => __('validation.attributes.value')]),
+            'status.required' => __('validation.required', ['attribute' => __('validation.attributes.status')]),
+            'status.in' => __('validation.in', ['attribute' => __('validation.attributes.status')]),
         ];
     }
 }

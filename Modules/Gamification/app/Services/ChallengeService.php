@@ -196,14 +196,14 @@ class ChallengeService implements ChallengeServiceInterface
             ->first();
 
         if (! $assignment) {
-            throw new \Exception('Challenge tidak ditemukan atau belum di-assign.');
+            throw new \Exception(__('messages.challenges.not_found_or_not_assigned'));
         }
 
         if (! $assignment->isClaimable()) {
             if ($assignment->reward_claimed) {
-                throw new \Exception('Reward sudah di-claim sebelumnya.');
+                throw new \Exception(__('messages.challenges.reward_already_claimed'));
             }
-            throw new \Exception('Challenge belum selesai, tidak dapat claim reward.');
+            throw new \Exception(__('messages.challenges.not_completed_cannot_claim'));
         }
 
         return DB::transaction(function () use ($assignment) {

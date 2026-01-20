@@ -31,9 +31,9 @@ class CreateThreadRequest extends FormRequest
     public function messages(): array
     {
         return [
-            'title.required' => 'Thread title is required',
-            'title.max' => 'Thread title must not exceed 255 characters',
-            'content.required' => 'Thread content is required',
+            'title.required' => __('validation.required', ['attribute' => __('validation.attributes.title')]),
+            'title.max' => __('validation.max.string', ['attribute' => __('validation.attributes.title'), 'max' => 255]),
+            'content.required' => __('validation.required', ['attribute' => __('validation.attributes.content')]),
         ];
     }
 }

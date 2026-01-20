@@ -45,8 +45,8 @@ class UpdateContentRequest extends FormRequest
     public function messages(): array
     {
         return [
-            'title.required' => 'Judul wajib diisi.',
-            'content.required' => 'Konten wajib diisi.',
+            'title.required' => __('validation.required', ['attribute' => __('validation.attributes.title')]),
+            'content.required' => __('validation.required', ['attribute' => __('validation.attributes.content')]),
         ];
     }
 }
