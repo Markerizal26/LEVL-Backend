@@ -1,16 +1,15 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Modules\Common\Services;
 
-use Modules\Common\Models\MasterDataItem;
-use Modules\Common\Repositories\MasterDataRepository;
-use Illuminate\Contracts\Pagination\LengthAwarePaginator;
-use Illuminate\Database\Eloquent\Collection;
-use Illuminate\Support\Collection as SupportCollection;
-use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Cache;
 use Modules\Auth\Enums\UserStatus;
 use Modules\Common\Enums\CategoryStatus;
 use Modules\Common\Enums\SettingType;
+use Modules\Common\Models\MasterDataItem;
+use Modules\Common\Repositories\MasterDataRepository;
 use Modules\Content\Enums\ContentStatus;
 use Modules\Content\Enums\Priority;
 use Modules\Content\Enums\TargetType;
@@ -40,381 +39,162 @@ use Spatie\Permission\Models\Role;
 
 class MasterDataService
 {
-  public function __construct(private readonly MasterDataRepository $repository) {}
+    private const CACHE_PREFIX = 'master_data:';
+    private const CACHE_TTL = 3600;
 
-  /**
-   * Get all master data types.
-   */
-  public function getTypes(array $params = []): SupportCollection
-  {
-    // CRUD / database-backed types
-    $crudTypes = $this->repository->getTypes($params);
+    public function __construct(
+        private readonly MasterDataRepository $repository
+    ) {}
 
-    // Make sure we don't duplicate keys when merging with enum-based types
-    $existingKeys = $crudTypes->pluck("key")->all();
+    /**
+     * Get data for a specific master data type.
+     */
+    public function get(string $type): array|\Illuminate\Support\Collection
+    {
+        $map = $this->getMap();
 
-    //Enum-based (read-only) master data types
-    $enumTypes = $this->getEnumTypes()->reject(
-      fn(array $type) => in_array($type["key"], $existingKeys, true)
-    );
+        if (isset($map[$type])) {
+            return $map[$type]();
+        }
 
-    $allTypes = $crudTypes->concat($enumTypes)->values();
-
-    // Apply is_crud filter if provided
-    if (isset($params['filter']['is_crud'])) {
-      $filterIsCrud = filter_var($params['filter']['is_crud'], FILTER_VALIDATE_BOOLEAN, FILTER_NULL_ON_FAILURE);
-      if ($filterIsCrud !== null) {
-        $allTypes = $allTypes->filter(fn($type) => $type['is_crud'] === $filterIsCrud)->values();
-      }
+        return Cache::remember(
+            self::CACHE_PREFIX . $type,
+            self::CACHE_TTL,
+            fn() => $this->repository->allByType($type, ['filter' => ['is_active' => true]])
+        );
     }
 
-    return $allTypes;
-  }
-
-  /**
-   * Get all master data types with pagination.
-   */
-  public function getTypesPaginated(array $params = [], int $perPage = 15): LengthAwarePaginator
-  {
-    $types = $this->getTypes($params);
-    
-    // Get page from params or request
-    $page = max(1, (int) ($params['page'] ?? request()->get('page', 1)));
-    
-    // Use Laravel's Paginator to create a LengthAwarePaginator from Collection
-    return new \Illuminate\Pagination\LengthAwarePaginator(
-      $types->forPage($page, $perPage)->values(),
-      $types->count(),
-      $perPage,
-      $page,
-      ['path' => \Illuminate\Pagination\Paginator::resolveCurrentPath()]
-    );
-  }
-
-  /**
-   * Get enum-based master data types configuration.
-   * This method centralizes all enum type definitions.
-   */
-  private function getEnumTypes(): SupportCollection
-  {
-    return collect([
-      [
-        "key" => "user-status",
-        "label" => "Status Pengguna",
-        "count" => count(UserStatus::cases()),
-        "last_updated" => null,
-        "is_crud" => false,
-      ],
-      [
-        "key" => "roles",
-        "label" => "Peran",
-        "count" => Role::count(),
-        "last_updated" => null,
-        "is_crud" => false,
-      ],
-      [
-        "key" => "course-status",
-        "label" => "Status Kursus",
-        "count" => count(CourseStatus::cases()),
-        "last_updated" => null,
-        "is_crud" => false,
-      ],
-      [
-        "key" => "course-types",
-        "label" => "Tipe Kursus",
-        "count" => count(CourseType::cases()),
-        "last_updated" => null,
-        "is_crud" => false,
-      ],
-      [
-        "key" => "enrollment-types",
-        "label" => "Tipe Pendaftaran",
-        "count" => count(EnrollmentType::cases()),
-        "last_updated" => null,
-        "is_crud" => false,
-      ],
-      [
-        "key" => "level-tags",
-        "label" => "Level Kesulitan",
-        "count" => count(LevelTag::cases()),
-        "last_updated" => null,
-        "is_crud" => false,
-      ],
-      [
-        "key" => "progression-modes",
-        "label" => "Mode Progres",
-        "count" => count(ProgressionMode::cases()),
-        "last_updated" => null,
-        "is_crud" => false,
-      ],
-      [
-        "key" => "content-types",
-        "label" => "Tipe Konten",
-        "count" => count(ContentType::cases()),
-        "last_updated" => null,
-        "is_crud" => false,
-      ],
-      [
-        "key" => "enrollment-status",
-        "label" => "Status Pendaftaran",
-        "count" => count(EnrollmentStatus::cases()),
-        "last_updated" => null,
-        "is_crud" => false,
-      ],
-      [
-        "key" => "progress-status",
-        "label" => "Status Progres",
-        "count" => count(ProgressStatus::cases()),
-        "last_updated" => null,
-        "is_crud" => false,
-      ],
-      [
-        "key" => "assignment-status",
-        "label" => "Status Tugas",
-        "count" => count(AssignmentStatus::cases()),
-        "last_updated" => null,
-        "is_crud" => false,
-      ],
-      [
-        "key" => "submission-status",
-        "label" => "Status Pengumpulan",
-        "count" => count(SubmissionStatus::cases()),
-        "last_updated" => null,
-        "is_crud" => false,
-      ],
-      [
-        "key" => "submission-types",
-        "label" => "Tipe Pengumpulan",
-        "count" => count(SubmissionType::cases()),
-        "last_updated" => null,
-        "is_crud" => false,
-      ],
-      [
-        "key" => "content-status",
-        "label" => "Status Konten",
-        "count" => count(ContentStatus::cases()),
-        "last_updated" => null,
-        "is_crud" => false,
-      ],
-      [
-        "key" => "priorities",
-        "label" => "Prioritas",
-        "count" => count(Priority::cases()),
-        "last_updated" => null,
-        "is_crud" => false,
-      ],
-      [
-        "key" => "target-types",
-        "label" => "Tipe Target",
-        "count" => count(TargetType::cases()),
-        "last_updated" => null,
-        "is_crud" => false,
-      ],
-      [
-        "key" => "challenge-types",
-        "label" => "Tipe Tantangan",
-        "count" => count(ChallengeType::cases()),
-        "last_updated" => null,
-        "is_crud" => false,
-      ],
-      [
-        "key" => "challenge-assignment-status",
-        "label" => "Status Tantangan User",
-        "count" => count(ChallengeAssignmentStatus::cases()),
-        "last_updated" => null,
-        "is_crud" => false,
-      ],
-      [
-        "key" => "challenge-criteria-types",
-        "label" => "Tipe Kriteria Tantangan",
-        "count" => count(ChallengeCriteriaType::cases()),
-        "last_updated" => null,
-        "is_crud" => false,
-      ],
-      [
-        "key" => "badge-types",
-        "label" => "Tipe Badge",
-        "count" => count(BadgeType::cases()),
-        "last_updated" => null,
-        "is_crud" => false,
-      ],
-      [
-        "key" => "point-source-types",
-        "label" => "Sumber Poin",
-        "count" => count(PointSourceType::cases()),
-        "last_updated" => null,
-        "is_crud" => false,
-      ],
-      [
-        "key" => "point-reasons",
-        "label" => "Alasan Poin",
-        "count" => count(PointReason::cases()),
-        "last_updated" => null,
-        "is_crud" => false,
-      ],
-      [
-        "key" => "notification-types",
-        "label" => "Tipe Notifikasi",
-        "count" => count(NotificationType::cases()),
-        "last_updated" => null,
-        "is_crud" => false,
-      ],
-      [
-        "key" => "notification-channels",
-        "label" => "Channel Notifikasi",
-        "count" => count(NotificationChannel::cases()),
-        "last_updated" => null,
-        "is_crud" => false,
-      ],
-      [
-        "key" => "notification-frequencies",
-        "label" => "Frekuensi Notifikasi",
-        "count" => count(NotificationFrequency::cases()),
-        "last_updated" => null,
-        "is_crud" => false,
-      ],
-      [
-        "key" => "grade-status",
-        "label" => "Status Nilai",
-        "count" => count(GradeStatus::cases()),
-        "last_updated" => null,
-        "is_crud" => false,
-      ],
-      [
-        "key" => "grade-source-types",
-        "label" => "Sumber Nilai",
-        "count" => count(SourceType::cases()),
-        "last_updated" => null,
-        "is_crud" => false,
-      ],
-      [
-        "key" => "category-status",
-        "label" => "Status Kategori",
-        "count" => count(CategoryStatus::cases()),
-        "last_updated" => null,
-        "is_crud" => false,
-      ],
-      [
-        "key" => "setting-types",
-        "label" => "Tipe Pengaturan",
-        "count" => count(SettingType::cases()),
-        "last_updated" => null,
-        "is_crud" => false,
-      ],
-    ]);
-  }
-
-  /**
-   * List master data by type with pagination.
-   */
-  public function paginate(string $type, int $perPage = 15): LengthAwarePaginator
-  {
-    return $this->repository->paginate($type, $perPage);
-  }
-
-  /**
-   * Get all master data by type (no pagination).
-   */
-  public function all(string $type): Collection
-  {
-    return $this->repository->all($type);
-  }
-
-  /**
-   * Find a master data item by type and id.
-   */
-  public function find(string $type, int $id): ?MasterDataItem
-  {
-    return $this->repository->find($type, $id);
-  }
-
-  /**
-   * Create a new master data item.
-   */
-  public function create(string $type, array $data): MasterDataItem
-  {
-    $item = $this->repository->create([
-      "type" => $type,
-      "value" => $data["value"],
-      "label" => $data["label"],
-      "metadata" => $data["metadata"] ?? null,
-      "is_system" => false,
-      "is_active" => $data["is_active"] ?? true,
-      "sort_order" => $data["sort_order"] ?? 0,
-    ]);
-
-    Log::info('Master data item created', [
-      'type' => $type,
-      'id' => $item->id,
-      'value' => $item->value,
-      'label' => $item->label,
-    ]);
-
-    return $item;
-  }
-
-  /**
-   * Update a master data item.
-   */
-  public function update(string $type, int $id, array $data): ?MasterDataItem
-  {
-    $item = $this->repository->find($type, $id);
-    if (!$item) {
-      return null;
+    /**
+     * Find a master data item by type and ID.
+     */
+    public function find(string $type, int $id): ?MasterDataItem
+    {
+        return $this->repository->find($type, $id);
     }
 
-    $oldData = $item->only(['value', 'label', 'is_active', 'sort_order']);
-
-    // System items: don't allow changing value
-    if ($item->is_system && isset($data["value"])) {
-      unset($data["value"]);
+    /**
+     * Paginate master data items by type.
+     */
+    public function paginate(string $type, int $perPage = 15): \Illuminate\Contracts\Pagination\LengthAwarePaginator
+    {
+        return $this->repository->paginateByType($type, [], $perPage);
     }
 
-    $updatedItem = $this->repository->update($item, $data);
+    /**
+     * Get all available types (Enums + Database types).
+     */
+    public function getAvailableTypes(): array
+    {
+        $staticTypes = array_map(function ($key) {
+            return [
+                'type' => $key,
+                'label' => __("messages.master_data.{$key}") ?? ucwords(str_replace('-', ' ', $key)),
+                'is_crud' => false,
+            ];
+        }, array_keys($this->getMap()));
 
-    Log::info('Master data item updated', [
-      'type' => $type,
-      'id' => $id,
-      'old_data' => $oldData,
-      'new_data' => $updatedItem->only(['value', 'label', 'is_active', 'sort_order']),
-    ]);
+        $dbTypes = $this->repository->getTypes()->toArray();
 
-    return $updatedItem;
-  }
-
-  /**
-   * Delete a master data item.
-   */
-  public function delete(string $type, int $id): bool|string
-  {
-    $item = $this->repository->find($type, $id);
-    if (!$item) {
-      return "not_found";
+        return array_merge($staticTypes, $dbTypes);
     }
 
-    if ($item->is_system) {
-      return "system_protected";
+    /**
+     * Create a new Master Data Item.
+     */
+    public function create(string $type, array $data): MasterDataItem
+    {
+        $data['type'] = $type;
+        $item = $this->repository->create($data);
+        $this->clearCache($type);
+        return $item;
     }
 
-    $itemData = $item->only(['value', 'label']);
-    $result = $this->repository->delete($item);
+    /**
+     * Update a Master Data Item.
+     */
+    public function update(string $type, int $id, array $data): MasterDataItem
+    {
+        $item = $this->repository->find($type, $id);
+        
+        if (!$item) {
+            throw new \Illuminate\Database\Eloquent\ModelNotFoundException("Master data item not found.");
+        }
 
-    if ($result === true) {
-      Log::info('Master data item deleted', [
-        'type' => $type,
-        'id' => $id,
-        'deleted_data' => $itemData,
-      ]);
+        $updated = $this->repository->update($item, $data);
+        $this->clearCache($type);
+        return $updated;
     }
 
-    return $result;
-  }
+    /**
+     * Delete a Master Data Item.
+     */
+    public function delete(string $type, int $id): bool
+    {
+        $item = $this->repository->find($type, $id);
 
-  /**
-   * Check if value already exists.
-   */
-  public function valueExists(string $type, string $value, ?int $excludeId = null): bool
-  {
-    return $this->repository->valueExists($type, $value, $excludeId);
-  }
+        if (!$item) {
+            throw new \Illuminate\Database\Eloquent\ModelNotFoundException("Master data item not found.");
+        }
+
+        $deleted = $this->repository->delete($item);
+        $this->clearCache($type);
+        return $deleted;
+    }
+
+    private function clearCache(string $type): void
+    {
+        Cache::forget(self::CACHE_PREFIX . $type);
+    }
+
+    /**
+     * Transform Enum to value/label array.
+     */
+    private function transformEnum(string $enumClass): array
+    {
+        return array_map(
+            fn($case) => [
+                "value" => $case->value,
+                "label" => $case->label(),
+            ],
+            $enumClass::cases(),
+        );
+    }
+
+    private function getMap(): array
+    {
+        return [
+            "user-status" => fn() => $this->transformEnum(UserStatus::class),
+            "roles" => fn() => Role::all()->map(fn($role) => [
+                "value" => $role->name,
+                "label" => __("enums.roles." . strtolower($role->name)),
+            ])->toArray(),
+            "course-status" => fn() => $this->transformEnum(CourseStatus::class),
+            "course-types" => fn() => $this->transformEnum(CourseType::class),
+            "enrollment-types" => fn() => $this->transformEnum(EnrollmentType::class),
+            "level-tags" => fn() => $this->transformEnum(LevelTag::class),
+            "progression-modes" => fn() => $this->transformEnum(ProgressionMode::class),
+            "content-types" => fn() => $this->transformEnum(ContentType::class),
+            "enrollment-status" => fn() => $this->transformEnum(EnrollmentStatus::class),
+            "progress-status" => fn() => $this->transformEnum(ProgressStatus::class),
+            "assignment-status" => fn() => $this->transformEnum(AssignmentStatus::class),
+            "submission-status" => fn() => $this->transformEnum(SubmissionStatus::class),
+            "submission-types" => fn() => $this->transformEnum(SubmissionType::class),
+            "content-status" => fn() => $this->transformEnum(ContentStatus::class),
+            "priorities" => fn() => $this->transformEnum(Priority::class),
+            "target-types" => fn() => $this->transformEnum(TargetType::class),
+            "challenge-types" => fn() => $this->transformEnum(ChallengeType::class),
+            "challenge-assignment-status" => fn() => $this->transformEnum(ChallengeAssignmentStatus::class),
+            "challenge-criteria-types" => fn() => $this->transformEnum(ChallengeCriteriaType::class),
+            "badge-types" => fn() => $this->transformEnum(BadgeType::class),
+            "point-source-types" => fn() => $this->transformEnum(PointSourceType::class),
+            "point-reasons" => fn() => $this->transformEnum(PointReason::class),
+            "notification-types" => fn() => $this->transformEnum(NotificationType::class),
+            "notification-channels" => fn() => $this->transformEnum(NotificationChannel::class),
+            "notification-frequencies" => fn() => $this->transformEnum(NotificationFrequency::class),
+            "grade-status" => fn() => $this->transformEnum(GradeStatus::class),
+            "grade-source-types" => fn() => $this->transformEnum(SourceType::class),
+            "category-status" => fn() => $this->transformEnum(CategoryStatus::class),
+            "setting-types" => fn() => $this->transformEnum(SettingType::class),
+        ];
+    }
 }

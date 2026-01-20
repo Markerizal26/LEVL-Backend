@@ -5,594 +5,131 @@ namespace Modules\Common\Http\Controllers;
 use App\Http\Controllers\Controller;
 use App\Support\ApiResponse;
 use Illuminate\Http\JsonResponse;
-use Modules\Auth\Enums\UserStatus;
-use Modules\Common\Enums\CategoryStatus;
-use Modules\Common\Enums\SettingType;
-use Modules\Content\Enums\ContentStatus;
-use Modules\Content\Enums\Priority;
-use Modules\Content\Enums\TargetType;
-use Modules\Enrollments\Enums\EnrollmentStatus;
-use Modules\Enrollments\Enums\ProgressStatus;
-use Modules\Gamification\Enums\BadgeType;
-use Modules\Gamification\Enums\ChallengeAssignmentStatus;
-use Modules\Gamification\Enums\ChallengeCriteriaType;
-use Modules\Gamification\Enums\ChallengeType;
-use Modules\Gamification\Enums\PointReason;
-use Modules\Gamification\Enums\PointSourceType;
-use Modules\Grading\Enums\GradeStatus;
-use Modules\Grading\Enums\SourceType;
-use Modules\Learning\Enums\AssignmentStatus;
-use Modules\Learning\Enums\SubmissionStatus;
-use Modules\Learning\Enums\SubmissionType;
-use Modules\Notifications\Enums\NotificationChannel;
-use Modules\Notifications\Enums\NotificationFrequency;
-use Modules\Notifications\Enums\NotificationType;
-use Modules\Schemes\Enums\ContentType;
-use Modules\Schemes\Enums\CourseStatus;
-use Modules\Schemes\Enums\CourseType;
-use Modules\Schemes\Enums\EnrollmentType;
-use Modules\Schemes\Enums\LevelTag;
-use Modules\Schemes\Enums\ProgressionMode;
-use Spatie\Permission\Models\Role;
+use Illuminate\Http\Request;
+use Modules\Common\Services\MasterDataService;
 
 /**
  * @tags Data Master
  */
 class MasterDataController extends Controller
 {
-  use ApiResponse;
+    use ApiResponse;
 
-  /**
-   * Transform enum cases to value-label array
-   */
-  private function transformEnum(string $enumClass): array
-  {
-    return array_map(
-      fn($case) => [
-        "value" => $case->value,
-        "label" => $case->label(),
-      ],
-      $enumClass::cases(),
-    );
-  }
+    public function __construct(
+        private readonly MasterDataService $service
+    ) {}
 
-  /**
-   * Daftar Tipe Master Data
-   *
-   * Mengambil daftar semua tipe master data yang tersedia di sistem.
-   *
-   * @summary Daftar Tipe Master Data
-   *
-   * @response 200 scenario="Success" {"success":true,"message":"Daftar tipe master data","data":[{"type":"user-status","label":"Status Pengguna"},{"type":"roles","label":"Peran"}]}
-   *
-   * @unauthenticated
-   */
-  public function types(): JsonResponse
-  {
-    $types = [
-      ["type" => "categories", "label" => __("messages.master_data.categories")],
-      ["type" => "user-status", "label" => __("messages.master_data.user_statuses")],
-      ["type" => "roles", "label" => __("messages.master_data.roles")],
-      ["type" => "course-status", "label" => __("messages.master_data.course_statuses")],
-      ["type" => "course-types", "label" => __("messages.master_data.course_types")],
-      ["type" => "enrollment-types", "label" => __("messages.master_data.enrollment_types")],
-      ["type" => "level-tags", "label" => __("messages.master_data.level_tags")],
-      ["type" => "progression-modes", "label" => __("messages.master_data.progression_modes")],
-      ["type" => "content-types", "label" => __("messages.master_data.content_types")],
-      ["type" => "enrollment-status", "label" => __("messages.master_data.enrollment_statuses")],
-      ["type" => "progress-status", "label" => __("messages.master_data.progress_statuses")],
-      ["type" => "assignment-status", "label" => __("messages.master_data.assignment_statuses")],
-      ["type" => "submission-status", "label" => __("messages.master_data.submission_statuses")],
-      ["type" => "submission-types", "label" => __("messages.master_data.submission_types")],
-      ["type" => "content-status", "label" => __("messages.master_data.content_statuses")],
-      ["type" => "priorities", "label" => __("messages.master_data.priorities")],
-      ["type" => "target-types", "label" => __("messages.master_data.target_types")],
-      ["type" => "challenge-types", "label" => __("messages.master_data.challenge_types")],
-      ["type" => "challenge-assignment-status", "label" => __("messages.master_data.challenge_assignment_statuses")],
-      ["type" => "challenge-criteria-types", "label" => __("messages.master_data.challenge_criteria_types")],
-      ["type" => "badge-types", "label" => __("messages.master_data.badge_types")],
-      ["type" => "point-source-types", "label" => __("messages.master_data.point_source_types")],
-      ["type" => "point-reasons", "label" => __("messages.master_data.point_reasons")],
-      ["type" => "notification-types", "label" => __("messages.master_data.notification_types")],
-      ["type" => "notification-channels", "label" => __("messages.master_data.notification_channels")],
-      ["type" => "notification-frequencies", "label" => __("messages.master_data.notification_frequencies")],
-      ["type" => "grade-status", "label" => __("messages.master_data.grade_statuses")],
-      ["type" => "grade-source-types", "label" => __("messages.master_data.grade_source_types")],
-      ["type" => "category-status", "label" => __("messages.master_data.category_statuses")],
-      ["type" => "setting-types", "label" => __("messages.master_data.setting_types")],
-    ];
+    /**
+     * Daftar Tipe Master Data
+     *
+     * Mengambil daftar semua tipe master data yang tersedia di sistem.
+     *
+     * @summary Daftar Tipe Master Data
+     * @response 200 scenario="Success" {"success":true,"message":"Daftar tipe master data","data":[{"type":"user-status","label":"Status Pengguna"}]}
+     * @unauthenticated
+     */
+    public function types(): JsonResponse
+    {
+        $types = $this->service->getAvailableTypes();
+        return $this->success($types, __("messages.master_data.types_retrieved"));
+    }
 
-    return $this->success($types, __("messages.master_data.types_retrieved"));
-  }
+    /**
+     * Get Master Data by Type
+     *
+     * Mengambil data master berdasarkan tipe yang diminta.
+     *
+     * @summary Get Master Data by Type
+     * @param string $type
+     * @return JsonResponse
+     */
+    public function get(string $type): JsonResponse
+    {
+        try {
+            $data = $this->service->get($type);
+            return $this->success($data, __("messages.master_data.retrieved"));
+        } catch (\Exception $e) {
+            return $this->error(__("messages.master_data.not_found"), 404);
+        }
+    }
 
+    /**
+     * List Items (Pagination)
+     *
+     * @summary List Items
+     * @param Request $request
+     * @param string $type
+     * @return JsonResponse
+     */
+    public function index(Request $request, string $type): JsonResponse
+    {
+        $perPage = (int) $request->query('per_page', 15);
+        $paginator = $this->service->paginate($type, $perPage);
+        return $this->paginateResponse($paginator, __("messages.master_data.retrieved"));
+    }
 
-  // ==================== AUTH ====================
+    /**
+     * Show Item
+     * 
+     * @summary Show Item
+     */
+    public function show(string $type, int $id): JsonResponse
+    {
+        $item = $this->service->find($type, $id);
+        
+        if (!$item) {
+             return $this->error(__("messages.master_data.not_found"), 404);
+        }
+        
+        return $this->success($item, __("messages.master_data.retrieved"));
+    }
 
-  /**
-   * Daftar Status Pengguna
-   *
-   * Mengambil enum values untuk status pengguna (pending, active, suspended, inactive).
-   *
-   * @summary Daftar Status Pengguna
-   *
-   * @response 200 scenario="Success" {"success":true,"message":"Daftar status pengguna","data":[{"value":"pending","label":"Pending"},{"value":"active","label":"Aktif"},{"value":"suspended","label":"Ditangguhkan"},{"value":"inactive","label":"Tidak Aktif"}]}
-   * @response 401 scenario="Unauthorized" {"success":false,"message":"Tidak terotorisasi."}
-   *
-   * @authenticated
-   */
-  public function userStatuses(): JsonResponse
-  {
-    return $this->success($this->transformEnum(UserStatus::class), __('messages.master_data.user_statuses'));
-  }
+    /**
+     * Create Item (Superadmin)
+     * 
+     * @summary Create Item
+     */
+    public function store(Request $request, string $type): JsonResponse
+    {
+        $data = $request->validate([
+            'value' => 'required|string|max:255',
+            'label' => 'required|string|max:255',
+            'is_active' => 'boolean',
+            'sort_order' => 'integer',
+            'metadata' => 'nullable|array',
+        ]);
+        
+        $item = $this->service->create($type, $data);
+        return $this->success($item, __("messages.master_data.created"));
+    }
 
-  /**
-   * Daftar Peran
-   *
-   * Mengambil daftar semua peran (roles) yang tersedia di sistem (Student, Instructor, Admin, Superadmin).
-   *
-   * @summary Daftar Peran
-   *
-   * @response 200 scenario="Success" {"success":true,"message":"Daftar peran","data":[{"value":"Student","label":"Siswa"},{"value":"Instructor","label":"Instruktur"},{"value":"Admin","label":"Admin"},{"value":"Superadmin","label":"Super Admin"}]}
-   * @response 401 scenario="Unauthorized" {"success":false,"message":"Tidak terotorisasi."}
-   *
-   * @authenticated
-   */
-  public function roles(): JsonResponse
-  {
-    $roles = Role::all()
-      ->map(
-        fn($role) => [
-          "value" => $role->name,
-          "label" => __("enums.roles." . strtolower($role->name)),
-        ],
-      )
-      ->toArray();
+    /**
+     * Update Item (Superadmin)
+     * 
+     * @summary Update Item
+     */
+    public function update(Request $request, string $type, int $id): JsonResponse
+    {
+        $data = $request->validate([
+            'value' => 'sometimes|string|max:255',
+            'label' => 'sometimes|string|max:255',
+            'is_active' => 'boolean',
+            'sort_order' => 'integer',
+            'metadata' => 'nullable|array',
+        ]);
+        
+        $item = $this->service->update($type, $id, $data);
+        return $this->success($item, __("messages.master_data.updated"));
+    }
 
-    return $this->success($roles, __("messages.master_data.roles_retrieved"));
-  }
-
-  // ==================== SCHEMES ====================
-
-  /**
-   * Daftar Status Kursus
-   *
-   * Mengambil enum values untuk status kursus (draft, published, archived, cancelled).
-   *
-   * @summary Daftar Status Kursus
-   *
-   * @response 200 scenario="Success" {"success":true,"message":"Daftar status kursus","data":[{"value":"draft","label":"Draft"},{"value":"published","label":"Dipublikasikan"},{"value":"archived","label":"Diarsipkan"},{"value":"cancelled","label":"Dibatalkan"}]}
-   * @response 401 scenario="Unauthorized" {"success":false,"message":"Tidak terotorisasi."}
-   *
-   * @authenticated
-   */
-  public function courseStatuses(): JsonResponse
-  {
-    return $this->success($this->transformEnum(CourseStatus::class), __('messages.master_data.course_statuses'));
-  }
-
-  /**
-   * Daftar Tipe Kursus
-   *
-   * Mengambil enum values untuk tipe kursus (scheme, course).
-   *
-   * @summary Daftar Tipe Kursus
-   *
-   * @response 200 scenario="Success" {"success":true,"message":"Daftar tipe kursus","data":[{"value":"scheme","label":"Skema Sertifikasi"},{"value":"course","label":"Kursus Mandiri"}]}
-   * @response 401 scenario="Unauthorized" {"success":false,"message":"Tidak terotorisasi."}
-   *
-   * @authenticated
-   */
-  public function courseTypes(): JsonResponse
-  {
-    return $this->success($this->transformEnum(CourseType::class), __('messages.master_data.course_types'));
-  }
-
-  /**
-   * Daftar Tipe Pendaftaran
-   *
-   * Mengambil enum values untuk tipe enrollment kursus (open, key, invite_only, approval).
-   *
-   * @summary Daftar Tipe Pendaftaran
-   *
-   * @response 200 scenario="Success" {"success":true,"message":"Daftar tipe pendaftaran","data":[{"value":"open","label":"Terbuka untuk Semua"},{"value":"key","label":"Memerlukan Kunci Pendaftaran"},{"value":"invite_only","label":"Hanya dengan Undangan"},{"value":"approval","label":"Memerlukan Persetujuan"}]}
-   * @response 401 scenario="Unauthorized" {"success":false,"message":"Tidak terotorisasi."}
-   *
-   * @authenticated
-   */
-  public function enrollmentTypes(): JsonResponse
-  {
-    return $this->success($this->transformEnum(EnrollmentType::class), __('messages.master_data.enrollment_types'));
-  }
-
-  /**
-   * Daftar Level Kesulitan
-   *
-   *
-   * @summary Daftar Level Kesulitan
-   *
-   * @response 200 scenario="Success" {"success":true,"message":"Success","data":{"id":1,"name":"Example MasterData"}}
-   * @response 401 scenario="Unauthorized" {"success":false,"message":"Tidak terotorisasi."}
-   * @authenticated
-   */
-  public function levelTags(): JsonResponse
-  {
-    return $this->success($this->transformEnum(LevelTag::class), __('messages.master_data.level_tags'));
-  }
-
-  /**
-   * Daftar Mode Progres
-   *
-   *
-   * @summary Daftar Mode Progres
-   *
-   * @response 200 scenario="Success" {"success":true,"message":"Success","data":{"id":1,"name":"Example MasterData"}}
-   * @response 401 scenario="Unauthorized" {"success":false,"message":"Tidak terotorisasi."}
-   * @authenticated
-   */
-  public function progressionModes(): JsonResponse
-  {
-    return $this->success($this->transformEnum(ProgressionMode::class), __('messages.master_data.progression_modes'));
-  }
-
-  /**
-   * Daftar Tipe Konten Lesson
-   *
-   *
-   * @summary Daftar Tipe Konten Lesson
-   *
-   * @response 200 scenario="Success" {"success":true,"message":"Success","data":{"id":1,"name":"Example MasterData"}}
-   * @response 401 scenario="Unauthorized" {"success":false,"message":"Tidak terotorisasi."}
-   * @authenticated
-   */
-  public function contentTypes(): JsonResponse
-  {
-    return $this->success($this->transformEnum(ContentType::class), __('messages.master_data.content_types'));
-  }
-
-  // ==================== ENROLLMENTS ====================
-
-  /**
-   * Daftar Status Pendaftaran
-   *
-   *
-   * @summary Daftar Status Pendaftaran
-   *
-   * @response 200 scenario="Success" {"success":true,"message":"Success","data":{"id":1,"name":"Example MasterData"}}
-   * @response 401 scenario="Unauthorized" {"success":false,"message":"Tidak terotorisasi."}
-   * @authenticated
-   */
-  public function enrollmentStatuses(): JsonResponse
-  {
-    return $this->success(
-      $this->transformEnum(EnrollmentStatus::class),
-      __('messages.master_data.enrollment_statuses'),
-    );
-  }
-
-  /**
-   * Daftar Status Progres
-   *
-   *
-   * @summary Daftar Status Progres
-   *
-   * @response 200 scenario="Success" {"success":true,"message":"Success","data":{"id":1,"name":"Example MasterData"}}
-   * @response 401 scenario="Unauthorized" {"success":false,"message":"Tidak terotorisasi."}
-   * @authenticated
-   */
-  public function progressStatuses(): JsonResponse
-  {
-    return $this->success($this->transformEnum(ProgressStatus::class), __('messages.master_data.progress_statuses'));
-  }
-
-  // ==================== LEARNING ====================
-
-  /**
-   * Daftar Status Tugas
-   *
-   *
-   * @summary Daftar Status Tugas
-   *
-   * @response 200 scenario="Success" {"success":true,"message":"Success","data":{"id":1,"name":"Example MasterData"}}
-   * @response 401 scenario="Unauthorized" {"success":false,"message":"Tidak terotorisasi."}
-   * @authenticated
-   */
-  public function assignmentStatuses(): JsonResponse
-  {
-    return $this->success($this->transformEnum(AssignmentStatus::class), __('messages.master_data.assignment_statuses'));
-  }
-
-  /**
-   * Daftar Status Pengumpulan
-   *
-   *
-   * @summary Daftar Status Pengumpulan
-   *
-   * @response 200 scenario="Success" {"success":true,"message":"Success","data":{"id":1,"name":"Example MasterData"}}
-   * @response 401 scenario="Unauthorized" {"success":false,"message":"Tidak terotorisasi."}
-   * @authenticated
-   */
-  public function submissionStatuses(): JsonResponse
-  {
-    return $this->success(
-      $this->transformEnum(SubmissionStatus::class),
-      __('messages.master_data.submission_statuses'),
-    );
-  }
-
-  /**
-   * Daftar Tipe Pengumpulan
-   *
-   *
-   * @summary Daftar Tipe Pengumpulan
-   *
-   * @response 200 scenario="Success" {"success":true,"message":"Success","data":{"id":1,"name":"Example MasterData"}}
-   * @response 401 scenario="Unauthorized" {"success":false,"message":"Tidak terotorisasi."}
-   * @authenticated
-   */
-  public function submissionTypes(): JsonResponse
-  {
-    return $this->success($this->transformEnum(SubmissionType::class), __('messages.master_data.submission_types'));
-  }
-
-  // ==================== CONTENT ====================
-
-  /**
-   * Daftar Status Konten
-   *
-   *
-   * @summary Daftar Status Konten
-   *
-   * @response 200 scenario="Success" {"success":true,"message":"Success","data":{"id":1,"name":"Example MasterData"}}
-   * @response 401 scenario="Unauthorized" {"success":false,"message":"Tidak terotorisasi."}
-   * @authenticated
-   */
-  public function contentStatuses(): JsonResponse
-  {
-    return $this->success($this->transformEnum(ContentStatus::class), __('messages.master_data.content_statuses'));
-  }
-
-  /**
-   * Daftar Prioritas
-   *
-   *
-   * @summary Daftar Prioritas
-   *
-   * @response 200 scenario="Success" {"success":true,"message":"Success","data":{"id":1,"name":"Example MasterData"}}
-   * @response 401 scenario="Unauthorized" {"success":false,"message":"Tidak terotorisasi."}
-   * @authenticated
-   */
-  public function priorities(): JsonResponse
-  {
-    return $this->success($this->transformEnum(Priority::class), __('messages.master_data.priorities'));
-  }
-
-  /**
-   * Daftar Tipe Target
-   *
-   *
-   * @summary Daftar Tipe Target
-   *
-   * @response 200 scenario="Success" {"success":true,"message":"Success","data":{"id":1,"name":"Example MasterData"}}
-   * @response 401 scenario="Unauthorized" {"success":false,"message":"Tidak terotorisasi."}
-   * @authenticated
-   */
-  public function targetTypes(): JsonResponse
-  {
-    return $this->success($this->transformEnum(TargetType::class), __('messages.master_data.target_types'));
-  }
-
-  // ==================== GAMIFICATION ====================
-
-  /**
-   * Daftar Tipe Tantangan
-   *
-   *
-   * @summary Daftar Tipe Tantangan
-   *
-   * @response 200 scenario="Success" {"success":true,"message":"Success","data":{"id":1,"name":"Example MasterData"}}
-   * @response 401 scenario="Unauthorized" {"success":false,"message":"Tidak terotorisasi."}
-   * @authenticated
-   */
-  public function challengeTypes(): JsonResponse
-  {
-    return $this->success($this->transformEnum(ChallengeType::class), __('messages.master_data.challenge_types'));
-  }
-
-  /**
-   * Daftar Status Tantangan User
-   *
-   *
-   * @summary Daftar Status Tantangan User
-   *
-   * @response 200 scenario="Success" {"success":true,"message":"Success","data":{"id":1,"name":"Example MasterData"}}
-   * @response 401 scenario="Unauthorized" {"success":false,"message":"Tidak terotorisasi."}
-   * @authenticated
-   */
-  public function challengeAssignmentStatuses(): JsonResponse
-  {
-    return $this->success(
-      $this->transformEnum(ChallengeAssignmentStatus::class),
-      __('messages.master_data.challenge_assignment_statuses'),
-    );
-  }
-
-  /**
-   * Daftar Kriteria Tantangan
-   *
-   *
-   * @summary Daftar Kriteria Tantangan
-   *
-   * @response 200 scenario="Success" {"success":true,"message":"Success","data":{"id":1,"name":"Example MasterData"}}
-   * @response 401 scenario="Unauthorized" {"success":false,"message":"Tidak terotorisasi."}
-   * @authenticated
-   */
-  public function challengeCriteriaTypes(): JsonResponse
-  {
-    return $this->success(
-      $this->transformEnum(ChallengeCriteriaType::class),
-      __('messages.master_data.challenge_criteria_types'),
-    );
-  }
-
-  /**
-   * Daftar Tipe Badge
-   *
-   *
-   * @summary Daftar Tipe Badge
-   *
-   * @response 200 scenario="Success" {"success":true,"message":"Success","data":{"id":1,"name":"Example MasterData"}}
-   * @response 401 scenario="Unauthorized" {"success":false,"message":"Tidak terotorisasi."}
-   * @authenticated
-   */
-  public function badgeTypes(): JsonResponse
-  {
-    return $this->success($this->transformEnum(BadgeType::class), __('messages.master_data.badge_types'));
-  }
-
-  /**
-   * Daftar Sumber Poin
-   *
-   *
-   * @summary Daftar Sumber Poin
-   *
-   * @response 200 scenario="Success" {"success":true,"message":"Success","data":{"id":1,"name":"Example MasterData"}}
-   * @response 401 scenario="Unauthorized" {"success":false,"message":"Tidak terotorisasi."}
-   * @authenticated
-   */
-  public function pointSourceTypes(): JsonResponse
-  {
-    return $this->success($this->transformEnum(PointSourceType::class), __('messages.master_data.point_source_types'));
-  }
-
-  /**
-   * Daftar Alasan Poin
-   *
-   *
-   * @summary Daftar Alasan Poin
-   *
-   * @response 200 scenario="Success" {"success":true,"message":"Success","data":{"id":1,"name":"Example MasterData"}}
-   * @response 401 scenario="Unauthorized" {"success":false,"message":"Tidak terotorisasi."}
-   * @authenticated
-   */
-  public function pointReasons(): JsonResponse
-  {
-    return $this->success($this->transformEnum(PointReason::class), __('messages.master_data.point_reasons'));
-  }
-
-  // ==================== NOTIFICATIONS ====================
-
-  /**
-   * Daftar Tipe Notifikasi
-   *
-   *
-   * @summary Daftar Tipe Notifikasi
-   *
-   * @response 200 scenario="Success" {"success":true,"message":"Success","data":{"id":1,"name":"Example MasterData"}}
-   * @response 401 scenario="Unauthorized" {"success":false,"message":"Tidak terotorisasi."}
-   * @authenticated
-   */
-  public function notificationTypes(): JsonResponse
-  {
-    return $this->success($this->transformEnum(NotificationType::class), __('messages.master_data.notification_types'));
-  }
-
-  /**
-   * Daftar Channel Notifikasi
-   *
-   *
-   * @summary Daftar Channel Notifikasi
-   *
-   * @response 200 scenario="Success" {"success":true,"message":"Success","data":{"id":1,"name":"Example MasterData"}}
-   * @response 401 scenario="Unauthorized" {"success":false,"message":"Tidak terotorisasi."}
-   * @authenticated
-   */
-  public function notificationChannels(): JsonResponse
-  {
-    return $this->success(
-      $this->transformEnum(NotificationChannel::class),
-      __('messages.master_data.notification_channels'),
-    );
-  }
-
-  /**
-   * Daftar Frekuensi Notifikasi
-   *
-   *
-   * @summary Daftar Frekuensi Notifikasi
-   *
-   * @response 200 scenario="Success" {"success":true,"message":"Success","data":{"id":1,"name":"Example MasterData"}}
-   * @response 401 scenario="Unauthorized" {"success":false,"message":"Tidak terotorisasi."}
-   * @authenticated
-   */
-  public function notificationFrequencies(): JsonResponse
-  {
-    return $this->success(
-      $this->transformEnum(NotificationFrequency::class),
-      __('messages.master_data.notification_frequencies'),
-    );
-  }
-
-  // ==================== GRADING ====================
-
-  /**
-   * Daftar Status Nilai
-   *
-   *
-   * @summary Daftar Status Nilai
-   *
-   * @response 200 scenario="Success" {"success":true,"message":"Success","data":{"id":1,"name":"Example MasterData"}}
-   * @response 401 scenario="Unauthorized" {"success":false,"message":"Tidak terotorisasi."}
-   * @authenticated
-   */
-  public function gradeStatuses(): JsonResponse
-  {
-    return $this->success($this->transformEnum(GradeStatus::class), __('messages.master_data.grade_statuses'));
-  }
-
-  /**
-   * Daftar Sumber Nilai
-   *
-   *
-   * @summary Daftar Sumber Nilai
-   *
-   * @response 200 scenario="Success" {"success":true,"message":"Success","data":{"id":1,"name":"Example MasterData"}}
-   * @response 401 scenario="Unauthorized" {"success":false,"message":"Tidak terotorisasi."}
-   * @authenticated
-   */
-  public function gradeSourceTypes(): JsonResponse
-  {
-    return $this->success($this->transformEnum(SourceType::class), __('messages.master_data.grade_source_types'));
-  }
-
-  // ==================== COMMON ====================
-
-  /**
-   * Daftar Status Kategori
-   *
-   *
-   * @summary Daftar Status Kategori
-   *
-   * @response 200 scenario="Success" {"success":true,"message":"Success","data":{"id":1,"name":"Example MasterData"}}
-   * @response 401 scenario="Unauthorized" {"success":false,"message":"Tidak terotorisasi."}
-   * @authenticated
-   */
-  public function categoryStatuses(): JsonResponse
-  {
-    return $this->success($this->transformEnum(CategoryStatus::class), __('messages.master_data.category_statuses'));
-  }
-
-  /**
-   * Daftar Tipe Pengaturan
-   *
-   *
-   * @summary Daftar Tipe Pengaturan
-   *
-   * @response 200 scenario="Success" {"success":true,"message":"Success","data":{"id":1,"name":"Example MasterData"}}
-   * @response 401 scenario="Unauthorized" {"success":false,"message":"Tidak terotorisasi."}
-   * @authenticated
-   */
-  public function settingTypes(): JsonResponse
-  {
-    return $this->success($this->transformEnum(SettingType::class), __('messages.master_data.setting_types'));
-  }
+    /**
+     * Delete Item (Superadmin)
+     * 
+     * @summary Delete Item
+     */
+    public function destroy(string $type, int $id): JsonResponse
+    {
+        $this->service->delete($type, $id);
+        return $this->success(null, __("messages.master_data.deleted"));
+    }
 }

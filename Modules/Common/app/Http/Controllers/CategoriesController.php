@@ -39,6 +39,9 @@ class CategoriesController extends Controller
     $perPage = $params["per_page"] ?? 15;
 
     $paginator = $this->service->paginate($perPage);
+    
+    // Transform collection to Resource
+    $paginator->getCollection()->transform(fn($item) => new \Modules\Common\Http\Resources\CategoryResource($item));
 
     $metadata = $this->buildMetadata(
         allowedSorts: ['name', 'value', 'created_at', 'updated_at'],
@@ -74,7 +77,7 @@ class CategoriesController extends Controller
   {
     $category = $this->service->create($request->validated());
 
-    return $this->created(["category" => $category], __("messages.categories.created"));
+    return $this->created(new \Modules\Common\Http\Resources\CategoryResource($category), __("messages.categories.created"));
   }
 
   /**
@@ -96,7 +99,7 @@ class CategoriesController extends Controller
       return $this->error(__("messages.categories.not_found"), 404);
     }
 
-    return $this->success(["category" => $model]);
+    return $this->success(new \Modules\Common\Http\Resources\CategoryResource($model));
   }
 
   /**
@@ -119,7 +122,7 @@ class CategoriesController extends Controller
       return $this->error(__("messages.categories.not_found"), 404);
     }
 
-    return $this->success(["category" => $updated], __("messages.categories.updated"));
+    return $this->success(new \Modules\Common\Http\Resources\CategoryResource($updated), __("messages.categories.updated"));
   }
 
   /**
