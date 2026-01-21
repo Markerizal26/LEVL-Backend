@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Modules\Common\Services;
 
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
@@ -12,13 +14,6 @@ class CategoryService
 {
     public function __construct(private readonly CategoryRepository $repository) {}
 
-    /**
-     * Paginate categories.
-     *
-     * Supports:
-     * - filter[name], filter[search]
-     * - sort: name, created_at (prefix with - for desc)
-     */
     public function paginate(int $perPage = 15): LengthAwarePaginator
     {
         $perPage = max(1, $perPage);

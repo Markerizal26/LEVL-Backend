@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Modules\Common\Repositories;
 
 use App\Repositories\BaseRepository;
@@ -9,11 +11,6 @@ use Modules\Common\Models\Category;
 
 class CategoryRepository extends BaseRepository
 {
-    /**
-     * Allowed filter keys.
-     *
-     * @var array<int, string>
-     */
     protected array $allowedFilters = [
         'name',
         'value',
@@ -21,11 +18,6 @@ class CategoryRepository extends BaseRepository
         'status',
     ];
 
-    /**
-     * Allowed sort fields.
-     *
-     * @var array<int, string>
-     */
     protected array $allowedSorts = [
         'name',
         'value',
@@ -34,9 +26,6 @@ class CategoryRepository extends BaseRepository
         'updated_at',
     ];
 
-    /**
-     * Default sort field.
-     */
     protected string $defaultSort = '-created_at';
 
     protected function model(): string

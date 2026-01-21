@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Modules\Common\Http\Controllers;
 
 use App\Http\Controllers\Controller;
@@ -8,9 +10,6 @@ use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Modules\Common\Services\MasterDataService;
 
-/**
- * @tags Data Master
- */
 class MasterDataController extends Controller
 {
     use ApiResponse;
@@ -19,25 +18,6 @@ class MasterDataController extends Controller
         private readonly MasterDataService $service
     ) {}
 
-    private function ensureCrudAllowed(string $type): void
-    {
-        if (!$this->service->isCrudAllowed($type)) {
-            $message = __("messages.master_data.crud_not_allowed");
-            throw new \Illuminate\Http\Exceptions\HttpResponseException(
-                $this->forbidden($message)
-            );
-        }
-    }
-
-    /**
-     * Daftar Tipe Master Data
-     *
-     * Mengambil daftar semua tipe master data yang tersedia di sistem.
-     *
-     * @summary Daftar Tipe Master Data
-     * @response 200 scenario="Success" {"success":true,"message":"Daftar tipe master data","data":[{"type":"user-status","label":"Status Pengguna"}]}
-     * @unauthenticated
-     */
     public function types(Request $request): JsonResponse
     {
         $params = [
@@ -55,15 +35,6 @@ class MasterDataController extends Controller
         return $this->paginateResponse($paginator, __("messages.master_data.types_retrieved"));
     }
 
-    /**
-     * Get Master Data by Type
-     *
-     * Mengambil data master berdasarkan tipe yang diminta.
-     *
-     * @summary Get Master Data by Type
-     * @param string $type
-     * @return JsonResponse
-     */
     public function get(string $type): JsonResponse
     {
         try {
@@ -74,14 +45,6 @@ class MasterDataController extends Controller
         }
     }
 
-    /**
-     * List Items (Pagination)
-     *
-     * @summary List Items
-     * @param Request $request
-     * @param string $type
-     * @return JsonResponse
-     */
     public function index(Request $request, string $type): JsonResponse
     {
         $perPage = (int) $request->query('per_page', 15);
@@ -89,11 +52,6 @@ class MasterDataController extends Controller
         return $this->paginateResponse($paginator, __("messages.master_data.retrieved"));
     }
 
-    /**
-     * Show Item
-     * 
-     * @summary Show Item
-     */
     public function show(string $type, int $id): JsonResponse
     {
         $item = $this->service->find($type, $id);
@@ -105,14 +63,11 @@ class MasterDataController extends Controller
         return $this->success($item, __("messages.master_data.retrieved"));
     }
 
-    /**
-     * Create Item (Superadmin)
-     * 
-     * @summary Create Item
-     */
     public function store(Request $request, string $type): JsonResponse
     {
-        $this->ensureCrudAllowed($type);
+        if (!$this->service->isCrudAllowed($type)) {
+            return $this->forbidden(__("messages.master_data.crud_not_allowed"));
+        }
 
         $data = $request->validate([
             'value' => 'required|string|max:255',
@@ -126,14 +81,11 @@ class MasterDataController extends Controller
         return $this->success($item, __("messages.master_data.created"));
     }
 
-    /**
-     * Update Item (Superadmin)
-     * 
-     * @summary Update Item
-     */
     public function update(Request $request, string $type, int $id): JsonResponse
     {
-        $this->ensureCrudAllowed($type);
+        if (!$this->service->isCrudAllowed($type)) {
+            return $this->forbidden(__("messages.master_data.crud_not_allowed"));
+        }
 
         $data = $request->validate([
             'value' => 'sometimes|string|max:255',
@@ -147,14 +99,11 @@ class MasterDataController extends Controller
         return $this->success($item, __("messages.master_data.updated"));
     }
 
-    /**
-     * Delete Item (Superadmin)
-     * 
-     * @summary Delete Item
-     */
     public function destroy(string $type, int $id): JsonResponse
     {
-        $this->ensureCrudAllowed($type);
+        if (!$this->service->isCrudAllowed($type)) {
+            return $this->forbidden(__("messages.master_data.crud_not_allowed"));
+        }
 
         $this->service->delete($type, $id);
         return $this->success(null, __("messages.master_data.deleted"));

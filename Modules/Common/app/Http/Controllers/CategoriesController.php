@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Modules\Common\Http\Controllers;
 
 use App\Support\ApiResponse;
@@ -11,9 +13,6 @@ use Modules\Common\Http\Requests\CategoryStoreRequest;
 use Modules\Common\Http\Requests\CategoryUpdateRequest;
 use Modules\Common\Services\CategoryService;
 
-/**
- * @tags Data Master
- */
 class CategoriesController extends Controller
 {
   use ApiResponse;
@@ -22,17 +21,6 @@ class CategoriesController extends Controller
 
   public function __construct(private readonly CategoryService $service) {}
 
-  /**
-     * Daftar Kategori
-     *
-     *
-     * @summary Daftar Kategori
-     *
-     * @authenticated
-
-     *
-     * @queryParam page integer Halaman yang ingin ditampilkan. Example: 1
-     * @queryParam per_page integer Jumlah item per halaman (default: 15, max: 100). Example: 15     */
   public function index(Request $request)
   {
     $params = $this->extractFilterParams($request);
@@ -40,7 +28,6 @@ class CategoriesController extends Controller
 
     $paginator = $this->service->paginate($perPage);
     
-    // Transform collection to Resource
     $paginator->getCollection()->transform(fn($item) => new \Modules\Common\Http\Resources\CategoryResource($item));
 
     $metadata = $this->buildMetadata(
@@ -61,18 +48,6 @@ class CategoriesController extends Controller
   }
 
 
-  /**
-   * Buat Kategori Baru
-   *
-   *
-   * @summary Buat Kategori Baru
-   *
-   * @response 201 scenario="Success" {"success":true,"message":"Categories berhasil dibuat.","data":{"id":1,"name":"New Categories"}}
-   * @response 401 scenario="Unauthorized" {"success":false,"message":"Tidak terotorisasi."}
-   * @response 422 scenario="Validation Error" {"success":false,"message":"Validasi gagal.","errors":{"field":["Field wajib diisi."]}}
-   *
-   * @authenticated
-   */
   public function store(CategoryStoreRequest $request)
   {
     $category = $this->service->create($request->validated());
@@ -80,18 +55,6 @@ class CategoriesController extends Controller
     return $this->created(new \Modules\Common\Http\Resources\CategoryResource($category), __("messages.categories.created"));
   }
 
-  /**
-   * Detail Kategori
-   *
-   *
-   * @summary Detail Kategori
-   *
-   * @response 200 scenario="Success" {"success":true,"message":"Success","data":{"id":1,"name":"Example Categories"}}
-   * @response 401 scenario="Unauthorized" {"success":false,"message":"Tidak terotorisasi."}
-   * @response 404 scenario="Not Found" {"success":false,"message":"Categories tidak ditemukan."}
-   *
-   * @authenticated
-   */
   public function show(int|string $category)
   {
     $model = $this->service->find($category);
@@ -102,19 +65,6 @@ class CategoriesController extends Controller
     return $this->success(new \Modules\Common\Http\Resources\CategoryResource($model));
   }
 
-  /**
-   * Perbarui Kategori
-   *
-   *
-   * @summary Perbarui Kategori
-   *
-   * @response 200 scenario="Success" {"success":true,"message":"Categories berhasil diperbarui.","data":{"id":1,"name":"Updated Categories"}}
-   * @response 401 scenario="Unauthorized" {"success":false,"message":"Tidak terotorisasi."}
-   * @response 404 scenario="Not Found" {"success":false,"message":"Categories tidak ditemukan."}
-   * @response 422 scenario="Validation Error" {"success":false,"message":"Validasi gagal.","errors":{"field":["Field wajib diisi."]}}
-   *
-   * @authenticated
-   */
   public function update(CategoryUpdateRequest $request, int $category)
   {
     $updated = $this->service->update($category, $request->validated());
@@ -125,18 +75,6 @@ class CategoriesController extends Controller
     return $this->success(new \Modules\Common\Http\Resources\CategoryResource($updated), __("messages.categories.updated"));
   }
 
-  /**
-   * Hapus Kategori
-   *
-   *
-   * @summary Hapus Kategori
-   *
-   * @response 200 scenario="Success" {"success":true,"message":"Categories berhasil dihapus.","data":[]}
-   * @response 401 scenario="Unauthorized" {"success":false,"message":"Tidak terotorisasi."}
-   * @response 404 scenario="Not Found" {"success":false,"message":"Categories tidak ditemukan."}
-   *
-   * @authenticated
-   */
   public function destroy(int $category)
   {
     $deleted = $this->service->delete($category);

@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Modules\Common\Models;
 
 use Illuminate\Database\Eloquent\Model;
@@ -29,19 +31,10 @@ class MasterDataItem extends Model
         'sort_order' => 'integer',
     ];
 
-    /**
-     * Cache key prefix for master data.
-     */
     private const CACHE_PREFIX = 'master_data:';
 
-    /**
-     * Cache TTL in seconds (1 hour).
-     */
     private const CACHE_TTL = 3600;
 
-    /**
-     * Get all items by type (cached).
-     */
     public static function getByType(string $type): \Illuminate\Database\Eloquent\Collection
     {
         return Cache::remember(
@@ -54,9 +47,6 @@ class MasterDataItem extends Model
         );
     }
 
-    /**
-     * Get a single item by type and value (cached).
-     */
     public static function getByTypeAndValue(string $type, string $value): ?self
     {
         $items = self::getByType($type);
@@ -64,28 +54,18 @@ class MasterDataItem extends Model
         return $items->firstWhere('value', $value);
     }
 
-    /**
-     * Clear cache for a specific type.
-     */
     public static function clearCache(string $type): void
     {
         Cache::forget(self::CACHE_PREFIX.$type);
     }
 
-    /**
-     * Clear all master data cache.
-     */
     public static function clearAllCache(): void
     {
-        // Get all distinct types and clear each
         self::distinct('type')->pluck('type')->each(function ($type) {
             self::clearCache($type);
         });
     }
 
-    /**
-     * Boot method to handle cache invalidation.
-     */
     protected static function booted(): void
     {
         static::saved(function (self $item) {
@@ -97,25 +77,16 @@ class MasterDataItem extends Model
         });
     }
 
-    /**
-     * Scope for active items only.
-     */
     public function scopeActive($query)
     {
         return $query->where('is_active', true);
     }
 
-    /**
-     * Scope for specific type.
-     */
     public function scopeOfType($query, string $type)
     {
         return $query->where('type', $type);
     }
 
-    /**
-     * Get the indexable data array for the model.
-     */
     public function toSearchableArray(): array
     {
         return [
@@ -127,17 +98,11 @@ class MasterDataItem extends Model
         ];
     }
 
-    /**
-     * Get the name of the index associated with the model.
-     */
     public function searchableAs(): string
     {
         return 'master_data_index';
     }
 
-    /**
-     * Determine if the model should be searchable.
-     */
     public function shouldBeSearchable(): bool
     {
         return $this->is_active;

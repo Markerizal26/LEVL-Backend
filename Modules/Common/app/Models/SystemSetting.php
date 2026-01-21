@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Modules\Common\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -10,38 +12,20 @@ class SystemSetting extends Model
 {
     use HasFactory;
 
-    /**
-     * The table associated with the model.
-     */
     protected $table = 'system_settings';
 
-    /**
-     * The primary key for the model.
-     */
     protected $primaryKey = 'key';
 
-    /**
-     * The "type" of the primary key ID.
-     */
     protected $keyType = 'string';
 
-    /**
-     * Indicates if the IDs are auto-incrementing.
-     */
     public $incrementing = false;
 
-    /**
-     * The attributes that are mass assignable.
-     */
     protected $fillable = [
         'key',
         'value',
         'type',
     ];
 
-    /**
-     * The attributes that should be cast.
-     */
     protected $casts = [
         'value' => 'string',
         'type' => SettingType::class,

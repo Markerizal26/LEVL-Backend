@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Modules\Common\Services;
 
 use Modules\Common\Models\Audit;
@@ -7,14 +9,6 @@ use Illuminate\Support\Facades\Auth;
 
 class AuditService
 {
-    /**
-     * Log an audit entry.
-     *
-     * @param string $action Action performed (create, update, delete, etc.)
-     * @param mixed $target Target model or array with target_table and target_id
-     * @param array $options Additional options (module, context, meta, properties)
-     * @return Audit
-     */
     public function log(
         string $action,
         $target = null,
@@ -22,7 +16,6 @@ class AuditService
     ): Audit {
         $user = Auth::guard('api')->user();
 
-        // Determine target information
         $targetTable = null;
         $targetType = null;
         $targetId = null;
@@ -39,15 +32,12 @@ class AuditService
             }
         }
 
-        // Determine actor information
         $actorType = null;
         $actorId = null;
         if ($user) {
             $actorType = get_class($user);
             $actorId = $user->id;
         }
-
-        // Get request metadata
         $request = request();
         $ipAddress = $request->ip();
         $userAgent = $request->userAgent();

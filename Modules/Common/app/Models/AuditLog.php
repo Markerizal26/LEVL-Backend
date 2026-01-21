@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Modules\Common\Models;
 
 use Illuminate\Database\Eloquent\Model;
@@ -12,14 +14,8 @@ class AuditLog extends Model
 {
     use HasFactory;
 
-    /**
-     * The table associated with the model.
-     */
     protected $table = 'audit_logs';
 
-    /**
-     * The attributes that are mass assignable.
-     */
     protected $fillable = [
         'event',
         'target_type',
@@ -30,25 +26,16 @@ class AuditLog extends Model
         'properties',
     ];
 
-    /**
-     * The attributes that should be cast.
-     */
     protected $casts = [
         'properties' => 'array',
         'logged_at' => 'datetime',
     ];
 
-    /**
-     * Get the target entity that was affected.
-     */
     public function target(): MorphTo
     {
         return $this->morphTo('target');
     }
 
-    /**
-     * Get the actor that performed the action.
-     */
     public function actor(): MorphTo
     {
         return $this->morphTo('actor');

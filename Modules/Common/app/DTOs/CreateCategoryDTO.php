@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Modules\Common\DTOs;
 
 use App\Support\BaseDTO;

@@ -46,9 +46,6 @@ class MasterDataService
         private readonly MasterDataRepository $repository
     ) {}
 
-    /**
-     * Get data for a specific master data type.
-     */
     public function get(string $type): array|\Illuminate\Support\Collection
     {
         $map = $this->getMap();
@@ -64,36 +61,21 @@ class MasterDataService
         );
     }
 
-    /**
-     * Find a master data item by type and ID.
-     */
     public function find(string $type, int $id): ?MasterDataItem
     {
         return $this->repository->find($type, $id);
     }
 
-    /**
-     * Paginate master data items by type.
-     */
     public function paginate(string $type, int $perPage = 15): \Illuminate\Contracts\Pagination\LengthAwarePaginator
     {
         return $this->repository->paginateByType($type, [], $perPage);
     }
 
-    /**
-     * Check if CRUD is allowed for a type.
-     */
     public function isCrudAllowed(string $type): bool
     {
         return !array_key_exists($type, $this->getMap());
     }
 
-    /**
-     * Get all available types (Enums + Database types).
-     */
-    /**
-     * Get all available types (Enums + Database types) with pagination, search, and sorting.
-     */
     public function getAvailableTypes(array $params = []): \Illuminate\Contracts\Pagination\LengthAwarePaginator
     {
         $map = $this->getMap();
@@ -178,9 +160,6 @@ class MasterDataService
         );
     }
 
-    /**
-     * Create a new Master Data Item.
-     */
     public function create(string $type, array $data): MasterDataItem
     {
         $data['type'] = $type;
@@ -188,9 +167,6 @@ class MasterDataService
         return $item;
     }
 
-    /**
-     * Update a Master Data Item.
-     */
     public function update(string $type, int $id, array $data): MasterDataItem
     {
         $item = $this->repository->find($type, $id);
@@ -203,9 +179,6 @@ class MasterDataService
         return $updated;
     }
 
-    /**
-     * Delete a Master Data Item.
-     */
     public function delete(string $type, int $id): bool
     {
         $item = $this->repository->find($type, $id);
@@ -218,11 +191,6 @@ class MasterDataService
         return $deleted;
     }
 
-
-
-    /**
-     * Transform Enum to value/label array.
-     */
     private function transformEnum(string $enumClass): array
     {
         return array_map(
