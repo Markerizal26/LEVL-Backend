@@ -8,10 +8,6 @@ use Illuminate\Foundation\Events\Dispatchable;
 use Illuminate\Queue\SerializesModels;
 use Modules\Learning\Models\Submission;
 
-/**
- * Event dispatched when a student achieves a new high score on an assignment.
- * Requirements: 22.4, 22.5
- */
 class NewHighScoreAchieved
 {
     use Dispatchable, SerializesModels;

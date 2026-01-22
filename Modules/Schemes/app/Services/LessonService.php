@@ -7,6 +7,7 @@ namespace Modules\Schemes\Services;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Arr;
 use Modules\Schemes\Contracts\Repositories\LessonRepositoryInterface;
+use Modules\Schemes\Contracts\Services\LessonServiceInterface;
 use Modules\Schemes\DTOs\CreateLessonDTO;
 use Modules\Schemes\DTOs\UpdateLessonDTO;
 use Modules\Schemes\Models\Course;
@@ -15,7 +16,7 @@ use Modules\Schemes\Models\Unit;
 use Spatie\QueryBuilder\AllowedFilter;
 use Spatie\QueryBuilder\QueryBuilder;
 
-class LessonService
+class LessonService implements LessonServiceInterface
 {
     use \App\Support\Traits\BuildsQueryBuilderRequest;
 
@@ -175,5 +176,10 @@ class LessonService
         app(\Modules\Schemes\Services\SchemesCacheService::class)->invalidateCourse($courseId);
 
         return $lesson->fresh();
+    }
+
+    public function getRepository(): LessonRepositoryInterface
+    {
+        return $this->repository;
     }
 }

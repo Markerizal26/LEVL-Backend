@@ -26,7 +26,7 @@ class QuestionService implements QuestionServiceInterface
 
         $data['assignment_id'] = $assignmentId;
 
-        // Set default order if not provided
+        
         if (! isset($data['order'])) {
             $maxOrder = Question::where('assignment_id', $assignmentId)->max('order') ?? -1;
             $data['order'] = $maxOrder + 1;
@@ -46,7 +46,7 @@ class QuestionService implements QuestionServiceInterface
             }
         }
 
-        return $this->questionRepository->update($questionId, $data);
+        return $this->questionRepository->updateQuestion($questionId, $data);
     }
 
     public function deleteQuestion(int $questionId, ?int $assignmentId = null): bool
@@ -58,7 +58,7 @@ class QuestionService implements QuestionServiceInterface
             }
         }
 
-        return $this->questionRepository->delete($questionId);
+        return $this->questionRepository->deleteQuestion($questionId);
     }
 
     public function updateAnswerKey(int $questionId, array $answerKey, int $instructorId): void
@@ -75,7 +75,7 @@ class QuestionService implements QuestionServiceInterface
 
         $oldAnswerKey = $question->answer_key ?? [];
 
-        $this->questionRepository->update($questionId, ['answer_key' => $answerKey]);
+        $this->questionRepository->updateQuestion($questionId, ['answer_key' => $answerKey]);
 
         $question = $this->questionRepository->find($questionId);
 
@@ -114,18 +114,18 @@ class QuestionService implements QuestionServiceInterface
 
     private function validateQuestionData(array $data, bool $isUpdate = false): void
     {
-        // Weight must be positive
+        
         if (isset($data['weight']) && $data['weight'] <= 0) {
             throw new \InvalidArgumentException('Question weight must be a positive number');
         }
 
-        // Type validation for new questions
+        
         if (! $isUpdate && isset($data['type'])) {
             $type = $data['type'] instanceof QuestionType
                 ? $data['type']
                 : QuestionType::from($data['type']);
 
-            // MCQ and Checkbox require options
+            
             if ($type->requiresOptions() && empty($data['options'])) {
                 throw new \InvalidArgumentException('Options are required for this question type');
             }

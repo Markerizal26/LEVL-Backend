@@ -4,7 +4,9 @@ declare(strict_types=1);
 
 namespace Modules\Learning\Repositories;
 
-class LearningRepository
+use Modules\Learning\Contracts\Repositories\LearningRepositoryInterface;
+
+class LearningRepository implements LearningRepositoryInterface
 {
     public function view(string $template): string
     {

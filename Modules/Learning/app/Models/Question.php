@@ -36,59 +36,44 @@ class Question extends Model
         'allow_multiple_files' => 'boolean',
     ];
 
-    /**
-     * Get the assignment this question belongs to.
-     */
-    public function assignment(): BelongsTo
+        public function assignment(): BelongsTo
     {
         return $this->belongsTo(Assignment::class);
     }
 
-    /**
-     * Get all answers for this question.
-     */
-    public function answers(): HasMany
+        public function answers(): HasMany
     {
         return $this->hasMany(Answer::class);
     }
 
-    /**
-     * Check if this question can be auto-graded.
-     */
-    public function canAutoGrade(): bool
+        public function canAutoGrade(): bool
     {
         return $this->type->canAutoGrade();
     }
 
-    /**
-     * Check if this question requires options.
-     */
-    public function requiresOptions(): bool
+        public function requiresOptions(): bool
     {
         return $this->type->requiresOptions();
     }
 
-    /**
-     * Validate that the question has valid configuration.
-     */
-    public function isValid(): bool
+        public function isValid(): bool
     {
-        // Must have content
+        
         if (empty($this->content)) {
             return false;
         }
 
-        // Must have positive weight
+        
         if ($this->weight <= 0) {
             return false;
         }
 
-        // MCQ and Checkbox must have options
+        
         if ($this->requiresOptions() && empty($this->options)) {
             return false;
         }
 
-        // Auto-gradable questions should have answer key
+        
         if ($this->canAutoGrade() && empty($this->answer_key)) {
             return false;
         }
@@ -96,26 +81,17 @@ class Question extends Model
         return true;
     }
 
-    /**
-     * Scope to order by display order.
-     */
-    public function scopeOrdered($query)
+        public function scopeOrdered($query)
     {
         return $query->orderBy('order');
     }
 
-    /**
-     * Scope to filter by type.
-     */
-    public function scopeOfType($query, QuestionType $type)
+        public function scopeOfType($query, QuestionType $type)
     {
         return $query->where('type', $type);
     }
 
-    /**
-     * Scope to filter auto-gradable questions.
-     */
-    public function scopeAutoGradable($query)
+        public function scopeAutoGradable($query)
     {
         return $query->whereIn('type', [
             QuestionType::MultipleChoice->value,
@@ -123,10 +99,7 @@ class Question extends Model
         ]);
     }
 
-    /**
-     * Scope to filter manual grading questions.
-     */
-    public function scopeManualGrading($query)
+        public function scopeManualGrading($query)
     {
         return $query->whereIn('type', [
             QuestionType::Essay->value,

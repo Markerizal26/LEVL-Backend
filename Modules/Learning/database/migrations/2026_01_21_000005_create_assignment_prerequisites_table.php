@@ -14,10 +14,10 @@ return new class extends Migration
             $table->foreignId('prerequisite_id')->constrained('assignments')->onDelete('cascade');
             $table->timestamps();
 
-            // Unique constraint to prevent duplicate prerequisites
+            
             $table->unique(['assignment_id', 'prerequisite_id'], 'uniq_assignment_prerequisite');
 
-            // Indexes
+            
             $table->index('assignment_id', 'idx_prereq_assignment');
             $table->index('prerequisite_id', 'idx_prereq_prerequisite');
         });

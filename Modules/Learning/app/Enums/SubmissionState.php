@@ -35,9 +35,6 @@ enum SubmissionState: string
         };
     }
 
-    /**
-     * Get valid transitions from this state.
-     */
     public function validTransitions(): array
     {
         return match ($this) {
@@ -50,9 +47,6 @@ enum SubmissionState: string
         };
     }
 
-    /**
-     * Check if transition to given state is valid.
-     */
     public function canTransitionTo(self $newState): bool
     {
         return in_array($newState, $this->validTransitions(), true);

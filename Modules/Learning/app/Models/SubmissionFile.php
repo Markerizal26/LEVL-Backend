@@ -18,18 +18,15 @@ class SubmissionFile extends Model implements HasMedia
 
     protected $appends = ['file_url', 'file_name', 'file_size'];
 
-    /**
-     * Register media collections for this model.
-     */
-    public function registerMediaCollections(): void
+        public function registerMediaCollections(): void
     {
         $this->addMediaCollection('file')
             ->singleFile()
             ->useDisk('do')
             ->acceptsMimeTypes([
-                // Images
+                
                 'image/jpeg', 'image/png', 'image/gif', 'image/webp',
-                // Documents
+                
                 'application/pdf',
                 'application/msword',
                 'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
@@ -37,9 +34,9 @@ class SubmissionFile extends Model implements HasMedia
                 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
                 'application/vnd.ms-powerpoint',
                 'application/vnd.openxmlformats-officedocument.presentationml.presentation',
-                // Text
+                
                 'text/plain',
-                // Archives
+                
                 'application/zip', 'application/x-rar-compressed',
             ]);
     }

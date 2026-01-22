@@ -555,4 +555,17 @@ return [
     // Validation messages
     'invalid_input' => 'Invalid input provided.',
     'missing_required_field' => 'Required field is missing.',
+
+    'validations' => [
+        'override_attempts_required' => 'Additional attempts is required for attempts override.',
+        'override_deadline_required' => 'Extended deadline is required for deadline override.',
+        'question_options_required' => 'Options are required for multiple choice and checkbox questions.',
+        'question_file_types_required' => 'Allowed file types are required for file upload questions.',
+        'answers_required' => 'You must provide answers to submit.',
+        'answers_array' => 'Answers must be provided as an array.',
+        'question_id_required' => 'Each answer must specify a question ID.',
+        'question_not_found' => 'The specified question does not exist.',
+        'score_max_gte' => 'Maximum score must be greater than or equal to minimum score.',
+        'date_to_after_equal' => 'End date must be after or equal to start date.',
+    ],
 ];

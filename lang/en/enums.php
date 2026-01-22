@@ -85,6 +85,39 @@ return [
         'mixed' => 'Mixed',
     ],
 
+    'submission_state' => [
+        'in_progress' => 'In Progress',
+        'submitted' => 'Submitted',
+        'auto_graded' => 'Auto Graded',
+        'pending_manual_grading' => 'Pending Manual Grading',
+        'graded' => 'Graded',
+        'released' => 'Released',
+    ],
+
+    'override_type' => [
+        'prerequisite' => 'Prerequisite',
+        'deadline' => 'Deadline',
+        'attempts' => 'Attempts',
+    ],
+
+    'override_type_desc' => [
+        'prerequisite' => 'Allows student to bypass prerequisite requirements',
+        'deadline' => 'Extends the assignment deadline for the student',
+        'attempts' => 'Grants additional attempts beyond the maximum limit',
+    ],
+
+    'randomization_type' => [
+        'static' => 'Static',
+        'random_order' => 'Random Order',
+        'bank' => 'Question Bank',
+    ],
+
+    'review_mode' => [
+        'immediate' => 'Immediate',
+        'deferred' => 'Deferred',
+        'hidden' => 'Hidden',
+    ],
+
     // Content
     'content_status' => [
         'draft' => 'Draft',
@@ -193,6 +226,7 @@ return [
     // Questions
     'question_type' => [
         'multiple_choice' => 'Multiple Choice',
+        'checkbox' => 'Checkbox',
         'essay' => 'Essay',
         'file_upload' => 'File Upload',
         'true_false' => 'True/False',

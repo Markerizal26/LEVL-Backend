@@ -25,3 +25,8 @@ parameters:
         - bootstrap/app.php
 
     reportUnmatchedIgnoredErrors: false
+
+    ignoreErrors:
+        - '#missing @#'
+        - '#phpDoc#'
+        - '#needs documentation#'

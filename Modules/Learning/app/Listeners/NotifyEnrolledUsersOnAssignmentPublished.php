@@ -25,7 +25,7 @@ class NotifyEnrolledUsersOnAssignmentPublished
         $courseUrl = $this->getCourseUrl($course);
         $assignmentUrl = $this->getAssignmentUrl($course, $assignment);
 
-        // Process enrollments in chunks to prevent memory exhaustion
+        
         Enrollment::query()
             ->where('course_id', $course->id)
             ->where('status', EnrollmentStatus::Active->value)
@@ -33,7 +33,7 @@ class NotifyEnrolledUsersOnAssignmentPublished
             ->chunk(100, function ($enrollments) use ($course, $assignment, $courseUrl, $assignmentUrl) {
                 foreach ($enrollments as $enrollment) {
                     if ($enrollment->user && $enrollment->user->email) {
-                        // Queue email instead of sending synchronously
+                        
                         Mail::to($enrollment->user->email)->queue(
                             new AssignmentPublishedMail(
                                 $enrollment->user,

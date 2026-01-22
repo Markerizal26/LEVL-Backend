@@ -9,11 +9,6 @@ use Illuminate\Http\Resources\Json\JsonResource;
 
 class SubmissionResource extends JsonResource
 {
-    /**
-     * Transform the resource into an array.
-     *
-     * @return array<string, mixed>
-     */
     public function toArray(Request $request): array
     {
         return [
@@ -34,10 +29,10 @@ class SubmissionResource extends JsonResource
             'created_at' => $this->created_at,
             'updated_at' => $this->updated_at,
 
-            // Dynamic attribute for highest score marking (Requirement 22.3)
+            
             'is_highest' => $this->when(isset($this->is_highest), $this->is_highest),
 
-            // Relationships
+            
             'assignment' => $this->whenLoaded('assignment'),
             'user' => $this->whenLoaded('user', function () {
                 return [
@@ -55,9 +50,6 @@ class SubmissionResource extends JsonResource
         ];
     }
 
-    /**
-     * Create a new resource instance with default relationships loaded.
-     */
     public static function make(...$parameters)
     {
         $resource = $parameters[0] ?? null;

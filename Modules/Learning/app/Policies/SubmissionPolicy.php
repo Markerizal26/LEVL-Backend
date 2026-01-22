@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Modules\Learning\Policies;
 
 use Modules\Auth\Models\User;
+use Modules\Learning\Models\Assignment;
 use Modules\Learning\Models\Submission;
 
 class SubmissionPolicy
@@ -24,12 +25,44 @@ class SubmissionPolicy
             return true;
         }
 
-        return $user->hasRole('Instructor') && $submission->assignment?->lesson?->unit?->course?->instructor_id === $user->id;
+        $submission->loadMissing('assignment.lesson.unit.course');
+        $course = $submission->assignment?->lesson?->unit?->course;
+        
+        if (!$course) {
+            return false;
+        }
+
+        if ($user->hasRole('Instructor')) {
+            return $course->instructor_id === $user->id;
+        }
+
+        return false;
     }
 
     public function create(User $user): bool
     {
         return $user->hasRole('Student') || $user->hasRole('Superadmin');
+    }
+
+    public function createForAssignment(User $user, Assignment $assignment): bool
+    {
+        if ($user->hasRole('Superadmin')) {
+            return true;
+        }
+
+        if (!$user->hasRole('Student')) {
+            return false;
+        }
+
+        $courseId = $assignment->getCourseId();
+        if (!$courseId) {
+            return false;
+        }
+
+        return \Modules\Enrollments\Models\Enrollment::where('user_id', $user->id)
+            ->where('course_id', $courseId)
+            ->whereIn('status', ['active', 'completed'])
+            ->exists();
     }
 
     public function update(User $user, Submission $submission): bool
@@ -52,10 +85,21 @@ class SubmissionPolicy
 
     public function grade(User $user, Submission $submission): bool
     {
-        if ($user->hasRole('Superadmin') || $user->hasRole('Admin')) {
+        if ($user->hasRole('Superadmin')) {
             return true;
         }
 
-        return $user->hasRole('Instructor') && $submission->assignment?->lesson?->unit?->course?->instructor_id === $user->id;
+        $submission->loadMissing('assignment.lesson.unit.course');
+        $course = $submission->assignment?->lesson?->unit?->course;
+        
+        if (!$course) {
+            return false;
+        }
+
+        if ($user->hasRole('Admin')) {
+            return $course->admins()->where('user_id', $user->id)->exists();
+        }
+
+        return $user->hasRole('Instructor') && $course->instructor_id === $user->id;
     }
 }

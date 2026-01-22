@@ -46,7 +46,7 @@ class SubmissionController extends Controller
 
     public function store(StoreSubmissionRequest $request, Assignment $assignment): JsonResponse
     {
-        $this->authorize('create', Submission::class);
+        $this->authorize('createForAssignment', [Submission::class, $assignment]);
 
         $user = auth('api')->user();
         $validated = $request->validated();
@@ -87,7 +87,7 @@ class SubmissionController extends Controller
 
     public function start(StartSubmissionRequest $request, Assignment $assignment): JsonResponse
     {
-        $this->authorize('create', Submission::class);
+        $this->authorize('createForAssignment', [Submission::class, $assignment]);
 
         $user = auth('api')->user();
         $submission = $this->service->startSubmission($assignment->id, $user->id);

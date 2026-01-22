@@ -22,36 +22,36 @@ return new class extends Migration
      */
     public function up(): void
     {
-        // Submissions table indexes
+        
         Schema::table('submissions', function (Blueprint $table) {
-            // Composite index for student-assignment queries (finding all submissions by a student for an assignment)
-            // Note: user_id is the student_id in this context
+            
+            
             if (! $this->indexExists('submissions', 'idx_submissions_student_assignment')) {
                 $table->index(['user_id', 'assignment_id'], 'idx_submissions_student_assignment');
             }
 
-            // Index for submitted_at queries (ordering by submission time)
+            
             if (! $this->indexExists('submissions', 'idx_submissions_submitted_at')) {
                 $table->index('submitted_at', 'idx_submissions_submitted_at');
             }
 
-            // Index for score-based queries (filtering by score range)
+            
             if (! $this->indexExists('submissions', 'idx_submissions_score')) {
                 $table->index('score', 'idx_submissions_score');
             }
         });
 
-        // Grades table indexes
+        
         Schema::table('grades', function (Blueprint $table) {
-            // Index for grader queries (finding all grades by a specific grader)
+            
             if (! $this->indexExists('grades', 'idx_grades_grader')) {
                 $table->index('graded_by', 'idx_grades_grader');
             }
         });
 
-        // Assignments table indexes
+        
         Schema::table('assignments', function (Blueprint $table) {
-            // Index for deadline queries (finding assignments by deadline)
+            
             if (! $this->indexExists('assignments', 'idx_assignments_deadline')) {
                 $table->index('deadline_at', 'idx_assignments_deadline');
             }
@@ -124,7 +124,7 @@ return new class extends Migration
             return count($indexes) > 0;
         }
 
-        // For other drivers, assume index doesn't exist and let the migration handle duplicates
+        
         return false;
     }
 };

@@ -8,24 +8,13 @@ use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
 use Modules\Learning\Enums\QuestionType;
 
-/**
- * Request validation for creating a new question.
- */
 class StoreQuestionRequest extends FormRequest
 {
-    /**
-     * Determine if the user is authorized to make this request.
-     */
     public function authorize(): bool
     {
-        return true; // Authorization handled by controller policy
+        return true; 
     }
 
-    /**
-     * Get the validation rules that apply to the request.
-     *
-     * @return array<string, \Illuminate\Contracts\Validation\ValidationRule|array<mixed>|string>
-     */
     public function rules(): array
     {
         return [
@@ -37,42 +26,33 @@ class StoreQuestionRequest extends FormRequest
             'weight' => ['required', 'numeric', 'gt:0'],
             'order' => ['nullable', 'integer', 'min:0'],
             'max_score' => ['nullable', 'numeric', 'gt:0'],
-            'max_file_size' => ['nullable', 'integer', 'min:1', 'max:104857600'], // Max 100MB
+            'max_file_size' => ['nullable', 'integer', 'min:1', 'max:104857600'], 
             'allowed_file_types' => ['nullable', 'array'],
             'allowed_file_types.*' => ['string', 'max:50'],
             'allow_multiple_files' => ['nullable', 'boolean'],
         ];
     }
 
-    /**
-     * Configure the validator instance.
-     */
     public function withValidator(\Illuminate\Validation\Validator $validator): void
     {
         $validator->after(function (\Illuminate\Validation\Validator $validator) {
             $type = $this->input('type');
 
-            // MCQ and Checkbox require options
+
             if (in_array($type, [QuestionType::MultipleChoice->value, QuestionType::Checkbox->value])) {
                 if (empty($this->input('options'))) {
-                    $validator->errors()->add('options', 'Options are required for multiple choice and checkbox questions.');
+                    $validator->errors()->add('options', __('messages.validations.question_options_required'));
                 }
             }
 
-            // File upload questions should have file configuration
             if ($type === QuestionType::FileUpload->value) {
                 if (empty($this->input('allowed_file_types'))) {
-                    $validator->errors()->add('allowed_file_types', 'Allowed file types are required for file upload questions.');
+                    $validator->errors()->add('allowed_file_types', __('messages.validations.question_file_types_required'));
                 }
             }
         });
     }
 
-    /**
-     * Get custom attributes for validator errors.
-     *
-     * @return array<string, string>
-     */
     public function attributes(): array
     {
         return [

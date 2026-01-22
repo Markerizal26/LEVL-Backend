@@ -29,15 +29,12 @@ enum OverrideType: string
         };
     }
 
-    /**
-     * Get a description of what this override type does.
-     */
     public function description(): string
     {
         return match ($this) {
-            self::Prerequisite => 'Allows student to bypass prerequisite requirements',
-            self::Deadline => 'Extends the assignment deadline for the student',
-            self::Attempts => 'Grants additional attempts beyond the maximum limit',
+            self::Prerequisite => __('enums.override_type_desc.prerequisite'),
+            self::Deadline => __('enums.override_type_desc.deadline'),
+            self::Attempts => __('enums.override_type_desc.attempts'),
         };
     }
 }

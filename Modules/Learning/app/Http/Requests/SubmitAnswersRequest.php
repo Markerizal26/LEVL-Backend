@@ -6,26 +6,12 @@ namespace Modules\Learning\Http\Requests;
 
 use Illuminate\Foundation\Http\FormRequest;
 
-/**
- * Request validation for submitting answers to a submission.
- *
- * Requirements: 6.3, 6.4
- */
 class SubmitAnswersRequest extends FormRequest
 {
-    /**
-     * Determine if the user is authorized to make this request.
-     */
     public function authorize(): bool
     {
-        return true; // Authorization handled by controller
+        return true; 
     }
-
-    /**
-     * Get the validation rules that apply to the request.
-     *
-     * @return array<string, \Illuminate\Contracts\Validation\ValidationRule|array<mixed>|string>
-     */
     public function rules(): array
     {
         return [
@@ -39,11 +25,6 @@ class SubmitAnswersRequest extends FormRequest
         ];
     }
 
-    /**
-     * Get custom attributes for validator errors.
-     *
-     * @return array<string, string>
-     */
     public function attributes(): array
     {
         return [
@@ -55,18 +36,13 @@ class SubmitAnswersRequest extends FormRequest
         ];
     }
 
-    /**
-     * Get custom messages for validator errors.
-     *
-     * @return array<string, string>
-     */
     public function messages(): array
     {
         return [
-            'answers.required' => 'You must provide answers to submit.',
-            'answers.array' => 'Answers must be provided as an array.',
-            'answers.*.question_id.required' => 'Each answer must specify a question ID.',
-            'answers.*.question_id.exists' => 'The specified question does not exist.',
+            'answers.required' => __('messages.validations.answers_required'),
+            'answers.array' => __('messages.validations.answers_array'),
+            'answers.*.question_id.required' => __('messages.validations.question_id_required'),
+            'answers.*.question_id.exists' => __('messages.validations.question_not_found'),
         ];
     }
 }

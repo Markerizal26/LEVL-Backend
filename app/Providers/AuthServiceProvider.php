@@ -14,6 +14,7 @@ class AuthServiceProvider extends ServiceProvider
         \Modules\Schemes\Models\Lesson::class => \App\Policies\LessonPolicy::class,
         \Modules\Schemes\Models\Tag::class => \App\Policies\TagPolicy::class,
         \Modules\Learning\Models\Assignment::class => \App\Policies\AssignmentPolicy::class,
+        \Modules\Learning\Models\Submission::class => \App\Policies\SubmissionPolicy::class,
         \Modules\Grading\Models\Grade::class => \App\Policies\GradePolicy::class,
         \Modules\Auth\Models\User::class => \Modules\Auth\Policies\UserPolicy::class,
     ];

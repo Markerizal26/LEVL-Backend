@@ -8,21 +8,10 @@ use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
 use Modules\Learning\Models\Override;
 
-/**
- * Resource for transforming Override models to API responses.
- *
- * @mixin Override
- */
 class OverrideResource extends JsonResource
 {
-    /**
-     * Transform the resource into an array.
-     *
-     * @return array<string, mixed>
-     */
     public function toArray(Request $request): array
     {
-        /** @var Override $override */
         $override = $this->resource;
 
         return [
@@ -39,7 +28,7 @@ class OverrideResource extends JsonResource
             'created_at' => $override->created_at?->toIso8601String(),
             'updated_at' => $override->updated_at?->toIso8601String(),
 
-            // Relationships
+            
             'student' => $this->whenLoaded('student', function () use ($override) {
                 return [
                     'id' => $override->student->id,

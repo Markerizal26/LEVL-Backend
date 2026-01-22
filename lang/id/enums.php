@@ -85,6 +85,39 @@ return [
     "mixed" => "Campuran",
   ],
 
+  "submission_state" => [
+    "in_progress" => "Sedang Dikerjakan",
+    "submitted" => "Dikumpulkan",
+    "auto_graded" => "Dinilai Otomatis",
+    "pending_manual_grading" => "Menunggu Penilaian Manual",
+    "graded" => "Dinilai",
+    "released" => "Dirilis",
+  ],
+
+  "override_type" => [
+    "prerequisite" => "Prasyarat",
+    "deadline" => "Tenggat Waktu",
+    "attempts" => "Percobaan",
+  ],
+
+  "override_type_desc" => [
+    "prerequisite" => "Memungkinkan siswa melewati persyaratan prasyarat",
+    "deadline" => "Memperpanjang tenggat waktu tugas untuk siswa",
+    "attempts" => "Memberikan percobaan tambahan melebihi batas maksimum",
+  ],
+
+  "randomization_type" => [
+    "static" => "Statis",
+    "random_order" => "Urutan Acak",
+    "bank" => "Bank Soal",
+  ],
+
+  "review_mode" => [
+    "immediate" => "Langsung",
+    "deferred" => "Ditunda",
+    "hidden" => "Disembunyikan",
+  ],
+
   // Content
   "content_status" => [
     "draft" => "Draf",
@@ -193,6 +226,7 @@ return [
   // Questions
   "question_type" => [
     "multiple_choice" => "Pilihan Ganda",
+    "checkbox" => "Kotak Centang",
     "essay" => "Esai",
     "file_upload" => "Unggah File",
     "true_false" => "Benar/Salah",

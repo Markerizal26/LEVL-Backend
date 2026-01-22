@@ -8,21 +8,10 @@ use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
 use Modules\Learning\Models\Assignment;
 
-/**
- * Resource for transforming Assignment models to API responses.
- *
- * @mixin Assignment
- */
 class AssignmentResource extends JsonResource
 {
-    /**
-     * Transform the resource into an array.
-     *
-     * @return array<string, mixed>
-     */
     public function toArray(Request $request): array
     {
-        /** @var Assignment $assignment */
         $assignment = $this->resource;
 
         return [
@@ -50,7 +39,7 @@ class AssignmentResource extends JsonResource
             'created_at' => $assignment->created_at?->toIso8601String(),
             'updated_at' => $assignment->updated_at?->toIso8601String(),
 
-            // Relationships
+            
             'creator' => $this->whenLoaded('creator', function () use ($assignment) {
                 return [
                     'id' => $assignment->creator->id,
@@ -81,12 +70,6 @@ class AssignmentResource extends JsonResource
         ];
     }
 
-    /**
-     * Create a new resource instance.
-     *
-     * @param  mixed  ...$parameters
-     * @return static
-     */
     public static function make(...$parameters)
     {
         $resource = $parameters[0] ?? null;

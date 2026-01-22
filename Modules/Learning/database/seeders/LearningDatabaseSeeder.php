@@ -11,6 +11,6 @@ class LearningDatabaseSeeder extends Seeder
      */
     public function run(): void
     {
-        // $this->call([]);
+        
     }
 }

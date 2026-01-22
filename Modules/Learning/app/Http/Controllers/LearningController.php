@@ -15,37 +15,37 @@ class LearningController extends Controller
 
   public function __construct(private readonly LearningPageService $service) {}
 
-  public function index()
+  public function index(): mixed
   {
     return $this->service->render("index");
   }
 
-  public function create()
+  public function create(): mixed
   {
     return $this->service->render("create");
   }
 
-  public function store(Request $request)
+  public function store(Request $request): JsonResponse
   {
     return $this->error(__("messages.feature_unavailable"), 501);
   }
 
-  public function show(string $id)
+  public function show(string $id): mixed
   {
     return $this->service->render("show");
   }
 
-  public function edit(string $id)
+  public function edit(string $id): mixed
   {
     return $this->service->render("edit");
   }
 
-  public function update(Request $request, string $id)
+  public function update(Request $request, string $id): JsonResponse
   {
     return $this->error(__("messages.feature_unavailable"), 501);
   }
 
-  public function destroy(string $id)
+  public function destroy(string $id): JsonResponse
   {
     return $this->error(__("messages.feature_unavailable"), 501);
   }

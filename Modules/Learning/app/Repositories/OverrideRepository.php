@@ -17,32 +17,20 @@ class OverrideRepository extends BaseRepository implements OverrideRepositoryInt
         return Override::class;
     }
 
-    /**
-     * Default eager loading relationships for overrides.
-     * Prevents N+1 query problems when loading overrides with related data.
-     * Requirements: 28.5
-     */
-    protected const DEFAULT_EAGER_LOAD = [
+        protected const DEFAULT_EAGER_LOAD = [
         'student:id,name,email',
         'grantor:id,name,email',
         'assignment:id,title',
     ];
 
-    /**
-     * Create a new override with eager loading.
-     */
-    public function create(array $attributes): Override
+        public function create(array $attributes): Override
     {
         $override = Override::create($attributes);
 
         return $override->load(self::DEFAULT_EAGER_LOAD);
     }
 
-    /**
-     * Find an active override for a student on an assignment by type with eager loading.
-     * Requirements: 28.5
-     */
-    public function findActiveOverride(int $assignmentId, int $studentId, OverrideType $type): ?Override
+        public function findActiveOverride(int $assignmentId, int $studentId, OverrideType $type): ?Override
     {
         return Override::query()
             ->forAssignment($assignmentId)
@@ -53,11 +41,7 @@ class OverrideRepository extends BaseRepository implements OverrideRepositoryInt
             ->first();
     }
 
-    /**
-     * Find all active overrides for a student on an assignment with eager loading.
-     * Requirements: 28.5
-     */
-    public function findActiveOverridesForStudent(int $assignmentId, int $studentId): Collection
+        public function findActiveOverridesForStudent(int $assignmentId, int $studentId): Collection
     {
         return Override::query()
             ->forAssignment($assignmentId)
@@ -67,11 +51,7 @@ class OverrideRepository extends BaseRepository implements OverrideRepositoryInt
             ->get();
     }
 
-    /**
-     * Find all overrides for an assignment with eager loading.
-     * Requirements: 28.5
-     */
-    public function findByAssignment(int $assignmentId): Collection
+        public function findByAssignment(int $assignmentId): Collection
     {
         return Override::query()
             ->forAssignment($assignmentId)
@@ -89,10 +69,7 @@ class OverrideRepository extends BaseRepository implements OverrideRepositoryInt
             ->get();
     }
 
-    /**
-     * Check if a student has an active override of a specific type.
-     */
-    public function hasActiveOverride(int $assignmentId, int $studentId, OverrideType $type): bool
+        public function hasActiveOverride(int $assignmentId, int $studentId, OverrideType $type): bool
     {
         return Override::query()
             ->forAssignment($assignmentId)
@@ -102,11 +79,7 @@ class OverrideRepository extends BaseRepository implements OverrideRepositoryInt
             ->exists();
     }
 
-    /**
-     * Find all overrides for a student with eager loading.
-     * Requirements: 28.5
-     */
-    public function findByStudent(int $studentId): Collection
+        public function findByStudent(int $studentId): Collection
     {
         return Override::query()
             ->forStudent($studentId)
@@ -115,11 +88,7 @@ class OverrideRepository extends BaseRepository implements OverrideRepositoryInt
             ->get();
     }
 
-    /**
-     * Find all overrides granted by an instructor with eager loading.
-     * Requirements: 28.5
-     */
-    public function findByGrantor(int $grantorId): Collection
+        public function findByGrantor(int $grantorId): Collection
     {
         return Override::query()
             ->where('grantor_id', $grantorId)
@@ -128,11 +97,7 @@ class OverrideRepository extends BaseRepository implements OverrideRepositoryInt
             ->get();
     }
 
-    /**
-     * Find all active overrides with eager loading.
-     * Requirements: 28.5
-     */
-    public function findAllActive(): Collection
+        public function findAllActive(): Collection
     {
         return Override::query()
             ->active()
@@ -141,11 +106,7 @@ class OverrideRepository extends BaseRepository implements OverrideRepositoryInt
             ->get();
     }
 
-    /**
-     * Find expired overrides with eager loading.
-     * Requirements: 28.5
-     */
-    public function findExpired(): Collection
+        public function findExpired(): Collection
     {
         return Override::query()
             ->whereNotNull('expires_at')

@@ -8,24 +8,13 @@ use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
 use Modules\Learning\Enums\QuestionType;
 
-/**
- * Request validation for updating a question.
- */
 class UpdateQuestionRequest extends FormRequest
 {
-    /**
-     * Determine if the user is authorized to make this request.
-     */
     public function authorize(): bool
     {
-        return true; // Authorization handled by controller policy
+        return true; 
     }
 
-    /**
-     * Get the validation rules that apply to the request.
-     *
-     * @return array<string, \Illuminate\Contracts\Validation\ValidationRule|array<mixed>|string>
-     */
     public function rules(): array
     {
         return [
@@ -37,18 +26,13 @@ class UpdateQuestionRequest extends FormRequest
             'weight' => ['sometimes', 'numeric', 'gt:0'],
             'order' => ['nullable', 'integer', 'min:0'],
             'max_score' => ['nullable', 'numeric', 'gt:0'],
-            'max_file_size' => ['nullable', 'integer', 'min:1', 'max:104857600'], // Max 100MB
+            'max_file_size' => ['nullable', 'integer', 'min:1', 'max:104857600'], 
             'allowed_file_types' => ['nullable', 'array'],
             'allowed_file_types.*' => ['string', 'max:50'],
             'allow_multiple_files' => ['nullable', 'boolean'],
         ];
     }
 
-    /**
-     * Get custom attributes for validator errors.
-     *
-     * @return array<string, string>
-     */
     public function attributes(): array
     {
         return [

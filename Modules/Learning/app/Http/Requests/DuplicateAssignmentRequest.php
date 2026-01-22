@@ -10,28 +10,13 @@ use Modules\Learning\Enums\AssignmentStatus;
 use Modules\Learning\Enums\RandomizationType;
 use Modules\Learning\Enums\ReviewMode;
 
-/**
- * Request validation for duplicating an assignment.
- *
- * Requirements: 25.1, 25.3
- */
 class DuplicateAssignmentRequest extends FormRequest
 {
-    /**
-     * Determine if the user is authorized to make this request.
-     */
     public function authorize(): bool
     {
-        return true; // Authorization handled by controller policy
+        return true; 
     }
 
-    /**
-     * Get the validation rules that apply to the request.
-     *
-     * All fields are optional - they allow overriding the duplicated assignment's values.
-     *
-     * @return array<string, \Illuminate\Contracts\Validation\ValidationRule|array<mixed>|string>
-     */
     public function rules(): array
     {
         return [
@@ -51,11 +36,6 @@ class DuplicateAssignmentRequest extends FormRequest
         ];
     }
 
-    /**
-     * Get custom attributes for validator errors.
-     *
-     * @return array<string, string>
-     */
     public function attributes(): array
     {
         return [

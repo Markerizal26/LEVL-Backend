@@ -5,88 +5,34 @@ declare(strict_types=1);
 namespace Modules\Schemes\Contracts\Services;
 
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
+use Modules\Auth\Models\User;
+use Modules\Schemes\Contracts\Repositories\LessonRepositoryInterface;
+use Modules\Schemes\DTOs\CreateLessonDTO;
+use Modules\Schemes\DTOs\UpdateLessonDTO;
+use Modules\Schemes\Models\Course;
 use Modules\Schemes\Models\Lesson;
-use Modules\Schemes\Repositories\LessonRepository;
 
 interface LessonServiceInterface
 {
-    /**
-     * List lessons by unit with pagination.
-     *
-     * @param  int  $unitId  Unit ID
-     * @param  array  $params  Filter and pagination parameters
-     */
-    public function listByUnit(int $unitId, array $params): LengthAwarePaginator;
+    public function validateHierarchy(int $courseId, int $unitId, ?int $lessonId = null): void;
 
-    /**
-     * Show a specific lesson.
-     *
-     * @param  int  $unitId  Unit ID
-     * @param  int  $id  Lesson ID
-     */
-    public function show(int $unitId, int $id): ?Lesson;
+    public function paginate(int $unitId, array $filters = [], int $perPage = 15): LengthAwarePaginator;
 
-    /**
-     * Create a new lesson.
-     *
-     * @param  int  $unitId  Unit ID
-     * @param  array  $data  Lesson data
-     */
-    public function create(int $unitId, array $data): Lesson;
+    public function find(int $id): ?Lesson;
 
-    /**
-     * Update an existing lesson.
-     *
-     * @param  int  $unitId  Unit ID
-     * @param  int  $id  Lesson ID
-     * @param  array  $data  Updated lesson data
-     */
-    public function update(int $unitId, int $id, array $data): ?Lesson;
+    public function getLessonForUser(Lesson $lesson, Course $course, ?User $user): Lesson;
 
-    /**
-     * Delete a lesson.
-     *
-     * @param  int  $unitId  Unit ID
-     * @param  int  $id  Lesson ID
-     */
-    public function delete(int $unitId, int $id): bool;
+    public function findOrFail(int $id): Lesson;
 
-    /**
-     * Publish a lesson.
-     *
-     * @param  int  $unitId  Unit ID
-     * @param  int  $id  Lesson ID
-     */
-    public function publish(int $unitId, int $id): ?Lesson;
+    public function create(int $unitId, CreateLessonDTO|array $data): Lesson;
 
-    /**
-     * Unpublish a lesson.
-     *
-     * @param  int  $unitId  Unit ID
-     * @param  int  $id  Lesson ID
-     */
-    public function unpublish(int $unitId, int $id): ?Lesson;
+    public function update(int $id, UpdateLessonDTO|array $data): Lesson;
 
-    /**
-     * Mark a lesson as viewed for a user.
-     *
-     * @param  Lesson  $lesson  The lesson to mark as viewed
-     * @param  int  $userId  User ID
-     * @param  int  $enrollmentId  Enrollment ID
-     */
-    public function markViewed(Lesson $lesson, int $userId, int $enrollmentId): void;
+    public function delete(int $id): bool;
 
-    /**
-     * Mark a lesson as completed for a user.
-     *
-     * @param  Lesson  $lesson  The lesson to mark as completed
-     * @param  int  $userId  User ID
-     * @param  int  $enrollmentId  Enrollment ID
-     */
-    public function markCompleted(Lesson $lesson, int $userId, int $enrollmentId): void;
+    public function publish(int $id): Lesson;
 
-    /**
-     * Get the underlying repository.
-     */
-    public function getRepository(): LessonRepository;
+    public function unpublish(int $id): Lesson;
+
+    public function getRepository(): LessonRepositoryInterface;
 }

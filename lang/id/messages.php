@@ -415,6 +415,9 @@ return [
         'invalid_prerequisite_exemption' => 'Pengecualian prasyarat harus berupa array dari ID prasyarat',
         'invalid_prerequisite_id' => 'ID prasyarat :id bukan prasyarat yang valid untuk tugas ini',
         'not_actual_prerequisite' => 'ID prasyarat :id sebenarnya bukan prasyarat dari tugas ini',
+        'deadline_extension_required' => 'Deadline perpanjangan wajib diisi saat memberikan override deadline.',
+        'deadline_extension_invalid_format' => 'Deadline perpanjangan harus berupa format tanggal/waktu yang valid.',
+        'invalid_prerequisites_list' => 'ID prasyarat tidak valid: :ids',
     ],
 
     // Submissions Module
@@ -558,4 +561,17 @@ return [
     // Validation messages
     'invalid_input' => 'Input tidak valid.',
     'missing_required_field' => 'Field wajib tidak ada.',
+
+    'validations' => [
+        'override_attempts_required' => 'Tambahan percobaan diperlukan untuk override percobaan.',
+        'override_deadline_required' => 'Perpanjangan deadline diperlukan untuk override deadline.',
+        'question_options_required' => 'Opsi jawaban diperlukan untuk pertanyaan pilihan ganda dan kotak centang.',
+        'question_file_types_required' => 'Tipe file yang diizinkan diperlukan untuk pertanyaan unggah file.',
+        'answers_required' => 'Anda harus memberikan jawaban untuk mengirim.',
+        'answers_array' => 'Jawaban harus berupa array.',
+        'question_id_required' => 'Setiap jawaban harus memiliki ID pertanyaan.',
+        'question_not_found' => 'Pertanyaan yang dimaksud tidak ditemukan.',
+        'score_max_gte' => 'Skor maksimum harus lebih besar atau sama dengan skor minimum.',
+        'date_to_after_equal' => 'Tanggal akhir harus setelah atau sama dengan tanggal mulai.',
+    ],
 ];

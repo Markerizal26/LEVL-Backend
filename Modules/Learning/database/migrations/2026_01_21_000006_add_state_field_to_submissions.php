@@ -9,14 +9,14 @@ return new class extends Migration
     public function up(): void
     {
         Schema::table('submissions', function (Blueprint $table) {
-            // Add state field for new state machine
+            
             $table->string('state', 30)->nullable()->after('status');
 
-            // Index for state-based queries
+            
             $table->index('state', 'idx_submissions_state');
         });
 
-        // Migrate existing status values to new state field
+        
         DB::statement("
             UPDATE submissions 
             SET state = CASE 

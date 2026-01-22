@@ -16,7 +16,32 @@ class AssignmentPolicy
 
     public function view(?User $user, Assignment $assignment): bool
     {
-        return true;
+        if (!$user) {
+            return false;
+        }
+
+        if ($user->hasRole('Superadmin') || $user->hasRole('Admin')) {
+            return true;
+        }
+
+        $courseId = $assignment->getCourseId();
+        if (!$courseId) {
+            return false;
+        }
+
+        if ($user->hasRole('Instructor')) {
+            $assignment->loadMissing('lesson.unit.course');
+            return $assignment->lesson?->unit?->course?->instructor_id === $user->id;
+        }
+
+        if ($user->hasRole('Student')) {
+            return \Modules\Enrollments\Models\Enrollment::where('user_id', $user->id)
+                ->where('course_id', $courseId)
+                ->whereIn('status', ['active', 'completed'])
+                ->exists();
+        }
+
+        return false;
     }
 
     public function create(User $user): bool
@@ -26,11 +51,22 @@ class AssignmentPolicy
 
     public function update(User $user, Assignment $assignment): bool
     {
-        if ($user->hasRole('Superadmin') || $user->hasRole('Admin')) {
+        if ($user->hasRole('Superadmin')) {
             return true;
         }
 
-        return $user->hasRole('Instructor') && $assignment->lesson?->unit?->course?->instructor_id === $user->id;
+        $assignment->loadMissing('lesson.unit.course');
+        $course = $assignment->lesson?->unit?->course;
+        
+        if (!$course) {
+            return false;
+        }
+
+        if ($user->hasRole('Admin')) {
+            return $course->admins()->where('user_id', $user->id)->exists();
+        }
+
+        return $user->hasRole('Instructor') && $course->instructor_id === $user->id;
     }
 
     public function delete(User $user, Assignment $assignment): bool
@@ -39,7 +75,18 @@ class AssignmentPolicy
             return true;
         }
 
-        return $user->hasRole('Admin') || ($user->hasRole('Instructor') && $assignment->lesson?->unit?->course?->instructor_id === $user->id);
+        $assignment->loadMissing('lesson.unit.course');
+        $course = $assignment->lesson?->unit?->course;
+        
+        if (!$course) {
+            return false;
+        }
+
+        if ($user->hasRole('Admin')) {
+            return $course->admins()->where('user_id', $user->id)->exists();
+        }
+
+        return $user->hasRole('Instructor') && $course->instructor_id === $user->id;
     }
 
     public function publish(User $user, Assignment $assignment): bool
@@ -47,38 +94,48 @@ class AssignmentPolicy
         return $this->update($user, $assignment);
     }
 
-    /**
-     * Determine if the user can grant overrides for the assignment.
-     *
-     * Requirements: 24.1, 24.2, 24.3
-     */
     public function grantOverride(User $user, Assignment $assignment): bool
     {
-        // Only instructors, admins, and superadmins can grant overrides
-        if ($user->hasRole('Superadmin') || $user->hasRole('Admin')) {
+        if ($user->hasRole('Superadmin')) {
             return true;
         }
 
-        // Instructors can only grant overrides for their own courses
-        return $user->hasRole('Instructor') && $assignment->lesson?->unit?->course?->instructor_id === $user->id;
+        $assignment->loadMissing('lesson.unit.course');
+        $course = $assignment->lesson?->unit?->course;
+        
+        if (!$course) {
+            return false;
+        }
+
+        if ($user->hasRole('Admin')) {
+            return $course->admins()->where('user_id', $user->id)->exists();
+        }
+
+        return $user->hasRole('Instructor') && $course->instructor_id === $user->id;
     }
 
-    /**
-     * Determine if the user can view overrides for the assignment.
-     */
     public function viewOverrides(User $user, Assignment $assignment): bool
     {
         return $this->grantOverride($user, $assignment);
     }
 
-    /**
-     * Determine if the user can duplicate the assignment.
-     *
-     * Requirement: 25.1
-     */
     public function duplicate(User $user, Assignment $assignment): bool
     {
-        // Any instructor, admin, or superadmin can duplicate assignments
-        return $user->hasRole('Superadmin') || $user->hasRole('Admin') || $user->hasRole('Instructor');
+        if ($user->hasRole('Superadmin')) {
+            return true;
+        }
+
+        $assignment->loadMissing('lesson.unit.course');
+        $course = $assignment->lesson?->unit?->course;
+        
+        if (!$course) {
+            return false;
+        }
+
+        if ($user->hasRole('Admin')) {
+            return $course->admins()->where('user_id', $user->id)->exists();
+        }
+
+        return $user->hasRole('Instructor') && $course->instructor_id === $user->id;
     }
 }

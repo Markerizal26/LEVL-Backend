@@ -9,10 +9,6 @@ use Illuminate\Support\Facades\Log;
 use Modules\Grading\Contracts\Services\GradingServiceInterface;
 use Modules\Learning\Events\NewHighScoreAchieved;
 
-/**
- * Listener to recalculate course grade when a new high score is achieved.
- * Requirements: 22.4, 22.5
- */
 class RecalculateCourseGradeOnNewHighScore implements ShouldQueue
 {
     public function __construct(
@@ -31,7 +27,7 @@ class RecalculateCourseGradeOnNewHighScore implements ShouldQueue
             'new_high_score' => $event->newHighScore,
         ]);
 
-        // Recalculate course grade for the student
+        
         $this->gradingService->recalculateCourseGrade(
             $submission->user_id,
             $submission->assignment->getCourseId()

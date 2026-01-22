@@ -31,9 +31,6 @@ enum QuestionType: string
         };
     }
 
-    /**
-     * Check if this question type can be auto-graded.
-     */
     public function canAutoGrade(): bool
     {
         return match ($this) {
@@ -42,9 +39,6 @@ enum QuestionType: string
         };
     }
 
-    /**
-     * Check if this question type requires options.
-     */
     public function requiresOptions(): bool
     {
         return match ($this) {

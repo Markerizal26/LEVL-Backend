@@ -14,6 +14,43 @@ use Modules\Learning\Enums\RandomizationType;
 use Modules\Learning\Enums\ReviewMode;
 use Modules\Learning\Enums\SubmissionType;
 
+/**
+ * @property int $id
+ * @property int|null $lesson_id
+ * @property string|null $assignable_type
+ * @property int|null $assignable_id
+ * @property int $created_by
+ * @property string $title
+ * @property string|null $description
+ * @property string $type
+ * @property SubmissionType $submission_type
+ * @property float $max_score
+ * @property \Illuminate\Support\Carbon|null $available_from
+ * @property \Illuminate\Support\Carbon|null $deadline_at
+ * @property int $tolerance_minutes
+ * @property int|null $max_attempts
+ * @property int $cooldown_minutes
+ * @property bool $retake_enabled
+ * @property ReviewMode $review_mode
+ * @property RandomizationType $randomization_type
+ * @property int|null $question_bank_count
+ * @property AssignmentStatus $status
+ * @property bool $allow_resubmit
+ * @property int $late_penalty_percent
+ * @property \Illuminate\Support\Carbon|null $created_at
+ * @property \Illuminate\Support\Carbon|null $updated_at
+ * @property-read string|null $scope_type
+ * @property-read \Modules\Schemes\Models\Lesson|null $lesson
+ * @property-read \Modules\Auth\Models\User $creator
+ * @property-read \Illuminate\Database\Eloquent\Collection<int, Submission> $submissions
+ * @property-read \Illuminate\Database\Eloquent\Collection<int, Question> $questions
+ * @property-read \Illuminate\Database\Eloquent\Collection<int, Assignment> $prerequisites
+ * @property-read \Illuminate\Database\Eloquent\Collection<int, Assignment> $dependents
+ * @property-read \Illuminate\Database\Eloquent\Collection<int, Override> $overrides
+ * @property-read \Illuminate\Database\Eloquent\Collection<int, Override> $activeOverrides
+ * @property-read \Modules\Schemes\Models\Lesson|\Modules\Schemes\Models\Unit|\Modules\Schemes\Models\Course|null $assignable
+ */
+
 class Assignment extends Model
 {
     protected $fillable = [
@@ -56,52 +93,32 @@ class Assignment extends Model
         'late_penalty_percent' => 'integer',
     ];
 
-    /**
-     * Polymorphic relationship to the assignable scope (Lesson, Unit, or Course).
-     */
-    public function assignable(): MorphTo
+        public function assignable(): MorphTo
     {
         return $this->morphTo();
     }
 
-    /**
-     * Legacy relationship to lesson (for backward compatibility).
-     *
-     * @deprecated Use assignable() instead
-     */
-    public function lesson(): BelongsTo
+        public function lesson(): BelongsTo
     {
         return $this->belongsTo(\Modules\Schemes\Models\Lesson::class);
     }
 
-    /**
-     * Get the creator of the assignment.
-     */
-    public function creator(): BelongsTo
+        public function creator(): BelongsTo
     {
         return $this->belongsTo(\Modules\Auth\Models\User::class, 'created_by');
     }
 
-    /**
-     * Get all submissions for this assignment.
-     */
-    public function submissions(): HasMany
+        public function submissions(): HasMany
     {
         return $this->hasMany(Submission::class);
     }
 
-    /**
-     * Get all questions for this assignment.
-     */
-    public function questions(): HasMany
+        public function questions(): HasMany
     {
         return $this->hasMany(Question::class)->ordered();
     }
 
-    /**
-     * Get prerequisites for this assignment.
-     */
-    public function prerequisites(): BelongsToMany
+        public function prerequisites(): BelongsToMany
     {
         return $this->belongsToMany(
             Assignment::class,
@@ -111,10 +128,7 @@ class Assignment extends Model
         )->withTimestamps();
     }
 
-    /**
-     * Get assignments that depend on this assignment.
-     */
-    public function dependents(): BelongsToMany
+        public function dependents(): BelongsToMany
     {
         return $this->belongsToMany(
             Assignment::class,
@@ -124,26 +138,17 @@ class Assignment extends Model
         )->withTimestamps();
     }
 
-    /**
-     * Get all overrides for this assignment.
-     */
-    public function overrides(): HasMany
+        public function overrides(): HasMany
     {
         return $this->hasMany(Override::class);
     }
 
-    /**
-     * Get active overrides for this assignment.
-     */
-    public function activeOverrides(): HasMany
+        public function activeOverrides(): HasMany
     {
         return $this->hasMany(Override::class)->active();
     }
 
-    /**
-     * Check if the assignment is currently available.
-     */
-    public function isAvailable(): bool
+        public function isAvailable(): bool
     {
         if ($this->status !== AssignmentStatus::Published) {
             return false;
@@ -157,10 +162,7 @@ class Assignment extends Model
         return true;
     }
 
-    /**
-     * Check if the deadline has passed.
-     */
-    public function isPastDeadline(): bool
+        public function isPastDeadline(): bool
     {
         if (! $this->deadline_at) {
             return false;
@@ -169,10 +171,7 @@ class Assignment extends Model
         return now()->gt($this->deadline_at);
     }
 
-    /**
-     * Check if submission is within tolerance window.
-     */
-    public function isWithinTolerance(): bool
+        public function isWithinTolerance(): bool
     {
         if (! $this->deadline_at) {
             return true;
@@ -183,10 +182,7 @@ class Assignment extends Model
         return now()->lte($toleranceEnd);
     }
 
-    /**
-     * Check if submission is past tolerance window.
-     */
-    public function isPastTolerance(): bool
+        public function isPastTolerance(): bool
     {
         if (! $this->deadline_at) {
             return false;
@@ -197,10 +193,7 @@ class Assignment extends Model
         return now()->gt($toleranceEnd);
     }
 
-    /**
-     * Get the scope type (lesson, unit, or course).
-     */
-    public function getScopeTypeAttribute(): ?string
+        public function getScopeTypeAttribute(): ?string
     {
         if ($this->assignable_type) {
             return match ($this->assignable_type) {
@@ -211,7 +204,7 @@ class Assignment extends Model
             };
         }
 
-        // Fallback for legacy lesson_id
+        
         if ($this->lesson_id) {
             return 'lesson';
         }
@@ -219,10 +212,7 @@ class Assignment extends Model
         return null;
     }
 
-    /**
-     * Scope to filter by assignable type.
-     */
-    public function scopeForLesson($query, int $lessonId)
+        public function scopeForLesson($query, int $lessonId)
     {
         return $query->where(function ($q) use ($lessonId) {
             $q->where('assignable_type', \Modules\Schemes\Models\Lesson::class)
@@ -230,36 +220,24 @@ class Assignment extends Model
         })->orWhere('lesson_id', $lessonId);
     }
 
-    /**
-     * Scope to filter by unit.
-     */
-    public function scopeForUnit($query, int $unitId)
+        public function scopeForUnit($query, int $unitId)
     {
         return $query->where('assignable_type', \Modules\Schemes\Models\Unit::class)
             ->where('assignable_id', $unitId);
     }
 
-    /**
-     * Scope to filter by course.
-     */
-    public function scopeForCourse($query, int $courseId)
+        public function scopeForCourse($query, int $courseId)
     {
         return $query->where('assignable_type', \Modules\Schemes\Models\Course::class)
             ->where('assignable_id', $courseId);
     }
 
-    /**
-     * Scope to filter published assignments.
-     */
-    public function scopePublished($query)
+        public function scopePublished($query)
     {
         return $query->where('status', AssignmentStatus::Published);
     }
 
-    /**
-     * Scope to filter available assignments.
-     */
-    public function scopeAvailable($query)
+        public function scopeAvailable($query)
     {
         return $query->published()
             ->where(function ($q) {
@@ -268,45 +246,37 @@ class Assignment extends Model
             });
     }
 
-    /**
-     * Validate that assignment has exactly one parent scope.
-     */
-    public function hasValidScope(): bool
+        public function hasValidScope(): bool
     {
         $hasPolymorphic = $this->assignable_type && $this->assignable_id;
         $hasLegacy = (bool) $this->lesson_id;
 
-        // Must have exactly one scope
+        
         return $hasPolymorphic xor $hasLegacy;
     }
 
-    /**
-     * Get the course ID for this assignment.
-     * Traverses the hierarchy to find the course.
-     * Requirements: 22.5
-     */
-    public function getCourseId(): ?int
+        public function getCourseId(): ?int
     {
-        // If directly attached to a course
+        
         if ($this->assignable_type === \Modules\Schemes\Models\Course::class) {
             return $this->assignable_id;
         }
 
-        // If attached to a unit, get the course from the unit
+        
         if ($this->assignable_type === \Modules\Schemes\Models\Unit::class) {
             $unit = $this->assignable;
 
             return $unit?->course_id;
         }
 
-        // If attached to a lesson, get the course through unit
+        
         if ($this->assignable_type === \Modules\Schemes\Models\Lesson::class) {
             $lesson = $this->assignable;
 
             return $lesson?->unit?->course_id;
         }
 
-        // Legacy: if using lesson_id
+        
         if ($this->lesson_id) {
             $this->loadMissing('lesson.unit');
 

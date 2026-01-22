@@ -7,26 +7,13 @@ namespace Modules\Learning\Http\Requests;
 use Illuminate\Foundation\Http\FormRequest;
 use Modules\Learning\Enums\SubmissionState;
 
-/**
- * Request validation for searching submissions.
- *
- * Requirements: 27.1, 27.2, 27.3, 27.4, 27.6
- */
 class SearchSubmissionsRequest extends FormRequest
 {
-    /**
-     * Determine if the user is authorized to make this request.
-     */
     public function authorize(): bool
     {
-        return true; // Authorization handled by controller
+        return true; 
     }
 
-    /**
-     * Get the validation rules that apply to the request.
-     *
-     * @return array<string, \Illuminate\Contracts\Validation\ValidationRule|array<mixed>|string>
-     */
     public function rules(): array
     {
         $validStates = array_map(fn ($state) => $state->value, SubmissionState::cases());
@@ -46,37 +33,27 @@ class SearchSubmissionsRequest extends FormRequest
         ];
     }
 
-    /**
-     * Get custom attributes for validator errors.
-     *
-     * @return array<string, string>
-     */
     public function attributes(): array
     {
         return [
-            'q' => 'search query',
-            'state' => 'submission state',
-            'score_min' => 'minimum score',
-            'score_max' => 'maximum score',
-            'date_from' => 'start date',
-            'date_to' => 'end date',
-            'assignment_id' => 'assignment',
-            'per_page' => 'items per page',
-            'sort_by' => 'sort field',
-            'sort_direction' => 'sort direction',
+            'q' => __('validation.attributes.search_query'),
+            'state' => __('validation.attributes.submission_state'),
+            'score_min' => __('validation.attributes.minimum_score'),
+            'score_max' => __('validation.attributes.maximum_score'),
+            'date_from' => __('validation.attributes.start_date'),
+            'date_to' => __('validation.attributes.end_date'),
+            'assignment_id' => __('validation.attributes.assignment'),
+            'per_page' => __('validation.attributes.items_per_page'),
+            'sort_by' => __('validation.attributes.sort_field'),
+            'sort_direction' => __('validation.attributes.sort_direction'),
         ];
     }
 
-    /**
-     * Get custom messages for validator errors.
-     *
-     * @return array<string, string>
-     */
     public function messages(): array
     {
         return [
-            'score_max.gte' => 'Maximum score must be greater than or equal to minimum score.',
-            'date_to.after_or_equal' => 'End date must be after or equal to start date.',
+            'score_max.gte' => __('messages.validations.score_max_gte'),
+            'date_to.after_or_equal' => __('messages.validations.date_to_after_equal'),
         ];
     }
 }
