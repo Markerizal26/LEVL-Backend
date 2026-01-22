@@ -17,6 +17,29 @@ return [
 
     /*
     |--------------------------------------------------------------------------
+    | Queue Names
+    |--------------------------------------------------------------------------
+    |
+    | Define the queue names used by the application. These queues can be
+    | processed by separate workers for better resource management.
+    |
+    | Queue Priority (high to low):
+    | 1. grading - Grade recalculation and bulk operations (user-facing)
+    | 2. notifications - Notification delivery
+    | 3. file-processing - File validation and storage
+    | 4. default - General background tasks
+    |
+    */
+
+    'queues' => [
+        'grading' => env('QUEUE_GRADING', 'grading'),
+        'notifications' => env('QUEUE_NOTIFICATIONS', 'notifications'),
+        'file-processing' => env('QUEUE_FILE_PROCESSING', 'file-processing'),
+        'default' => env('QUEUE_DEFAULT', 'default'),
+    ],
+
+    /*
+    |--------------------------------------------------------------------------
     | Queue Connections
     |--------------------------------------------------------------------------
     |

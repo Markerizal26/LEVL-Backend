@@ -36,17 +36,22 @@ class CommonServiceProvider extends ServiceProvider
             \Modules\Common\Contracts\Repositories\MasterDataRepositoryInterface::class,
             \Modules\Common\Repositories\MasterDataRepository::class
         );
+
+        // Audit logging bindings for assessment grading system
+        $this->app->bind(
+            \Modules\Common\Contracts\Repositories\AuditRepositoryInterface::class,
+            \Modules\Common\Repositories\AuditRepository::class
+        );
+
+        $this->app->bind(
+            \Modules\Common\Contracts\Services\AuditServiceInterface::class,
+            \Modules\Common\Services\AssessmentAuditService::class
+        );
     }
 
-    protected function registerCommands(): void
-    {
+    protected function registerCommands(): void {}
 
-    }
-
-    protected function registerCommandSchedules(): void
-    {
-
-    }
+    protected function registerCommandSchedules(): void {}
 
     public function registerTranslations(): void
     {
@@ -78,7 +83,7 @@ class CommonServiceProvider extends ServiceProvider
 
         $this->loadViewsFrom(array_merge($this->getPublishableViewPaths(), [$sourcePath]), $this->nameLower);
 
-        Blade::componentNamespace(config('modules.namespace').'\\' . $this->name . '\\View\\Components', $this->nameLower);
+        Blade::componentNamespace(config('modules.namespace').'\\'.$this->name.'\\View\\Components', $this->nameLower);
     }
 
     /**

@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Modules\Enrollments\Contracts\Repositories;
 
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
+use Illuminate\Database\Eloquent\Collection;
 use Modules\Enrollments\Models\Enrollment;
 
 interface EnrollmentRepositoryInterface
@@ -51,4 +52,36 @@ interface EnrollmentRepositoryInterface
      * Increment lesson progress attempt count or create new progress.
      */
     public function incrementLessonProgress(int $enrollmentId, int $lessonId): void;
+
+    /**
+     * Get the student roster (all active enrollments) for a course with caching.
+     * Returns a collection of active enrollments with user data.
+     * Requirements: 28.10
+     *
+     * @param  int  $courseId  The course ID
+     * @return Collection<int, Enrollment>
+     */
+    public function getStudentRoster(int $courseId): Collection;
+
+    /**
+     * Get student IDs enrolled in a course with caching.
+     * Useful for quick lookups without loading full enrollment data.
+     * Requirements: 28.10
+     *
+     * @param  int  $courseId  The course ID
+     * @return array<int>
+     */
+    public function getEnrolledStudentIds(int $courseId): array;
+
+    /**
+     * Invalidate enrollment cache for a specific user and course.
+     * Requirements: 28.10
+     */
+    public function invalidateEnrollmentCache(int $courseId, int $userId): void;
+
+    /**
+     * Invalidate roster cache for a course.
+     * Requirements: 28.10
+     */
+    public function invalidateRosterCache(int $courseId): void;
 }

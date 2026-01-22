@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Modules\Learning\Contracts\Services;
 
 interface LearningPageServiceInterface

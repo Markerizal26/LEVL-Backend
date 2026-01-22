@@ -28,6 +28,8 @@ class SubmissionFactory extends Factory
             'enrollment_id' => Enrollment::factory(),
             'answer_text' => fake()->paragraphs(3, true),
             'status' => 'submitted',
+            'score' => null,
+            'question_set' => null,
             'submitted_at' => now(),
             'attempt_number' => 1,
             'is_late' => false,
@@ -37,7 +39,7 @@ class SubmissionFactory extends Factory
     }
 
     /**
-     * Indicate that the submission is a draft.
+     * Indicate that the submission is a draft (in progress).
      */
     public function draft(): static
     {
@@ -45,6 +47,14 @@ class SubmissionFactory extends Factory
             'status' => 'draft',
             'submitted_at' => null,
         ]);
+    }
+
+    /**
+     * Alias for draft - in progress state.
+     */
+    public function inProgress(): static
+    {
+        return $this->draft();
     }
 
     /**
@@ -87,6 +97,38 @@ class SubmissionFactory extends Factory
             'is_resubmission' => true,
             'previous_submission_id' => Submission::factory(),
             'attempt_number' => fake()->numberBetween(2, 5),
+        ]);
+    }
+
+    /**
+     * Set a specific score.
+     */
+    public function withScore(float $score): static
+    {
+        return $this->state(fn (array $attributes) => [
+            'score' => $score,
+            'status' => 'graded',
+        ]);
+    }
+
+    /**
+     * Set a specific question set.
+     */
+    public function withQuestionSet(array $questionIds): static
+    {
+        return $this->state(fn (array $attributes) => [
+            'question_set' => $questionIds,
+        ]);
+    }
+
+    /**
+     * Set a specific attempt number.
+     */
+    public function attempt(int $number): static
+    {
+        return $this->state(fn (array $attributes) => [
+            'attempt_number' => $number,
+            'is_resubmission' => $number > 1,
         ]);
     }
 }

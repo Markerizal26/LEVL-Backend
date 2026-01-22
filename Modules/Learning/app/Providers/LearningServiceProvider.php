@@ -1,20 +1,30 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Modules\Learning\Providers;
 
+use App\Support\Traits\RegistersModuleConfig;
 use Illuminate\Support\Facades\Blade;
 use Illuminate\Support\ServiceProvider;
 use Modules\Learning\Contracts\Repositories\AssignmentRepositoryInterface;
+use Modules\Learning\Contracts\Repositories\OverrideRepositoryInterface;
+use Modules\Learning\Contracts\Repositories\QuestionRepositoryInterface;
 use Modules\Learning\Contracts\Repositories\SubmissionRepositoryInterface;
 use Modules\Learning\Contracts\Services\AssignmentServiceInterface;
 use Modules\Learning\Contracts\Services\LearningPageServiceInterface;
+use Modules\Learning\Contracts\Services\QuestionServiceInterface;
+use Modules\Learning\Contracts\Services\ReviewModeServiceInterface;
 use Modules\Learning\Contracts\Services\SubmissionServiceInterface;
 use Modules\Learning\Repositories\AssignmentRepository;
+use Modules\Learning\Repositories\OverrideRepository;
+use Modules\Learning\Repositories\QuestionRepository;
 use Modules\Learning\Repositories\SubmissionRepository;
 use Modules\Learning\Services\AssignmentService;
 use Modules\Learning\Services\LearningPageService;
+use Modules\Learning\Services\QuestionService;
+use Modules\Learning\Services\ReviewModeService;
 use Modules\Learning\Services\SubmissionService;
-use App\Support\Traits\RegistersModuleConfig;
 use Nwidart\Modules\Traits\PathNamespace;
 
 class LearningServiceProvider extends ServiceProvider
@@ -25,9 +35,6 @@ class LearningServiceProvider extends ServiceProvider
 
     protected string $nameLower = 'learning';
 
-    /**
-     * Boot the application events.
-     */
     public function boot(): void
     {
         $this->registerCommands();
@@ -39,9 +46,6 @@ class LearningServiceProvider extends ServiceProvider
         $this->loadMigrationsFrom(module_path($this->name, 'database/migrations'));
     }
 
-    /**
-     * Register policies.
-     */
     protected function registerPolicies(): void
     {
         \Illuminate\Support\Facades\Gate::policy(
@@ -54,9 +58,6 @@ class LearningServiceProvider extends ServiceProvider
         );
     }
 
-    /**
-     * Register the service provider.
-     */
     public function register(): void
     {
         $this->app->register(EventServiceProvider::class);
@@ -64,19 +65,18 @@ class LearningServiceProvider extends ServiceProvider
         $this->registerBindings();
     }
 
-    /**
-     * Register interface bindings.
-     */
     protected function registerBindings(): void
     {
-        // Repository bindings
         $this->app->bind(AssignmentRepositoryInterface::class, AssignmentRepository::class);
         $this->app->bind(SubmissionRepositoryInterface::class, SubmissionRepository::class);
+        $this->app->bind(QuestionRepositoryInterface::class, QuestionRepository::class);
+        $this->app->bind(OverrideRepositoryInterface::class, OverrideRepository::class);
 
-        // Service bindings
         $this->app->bind(AssignmentServiceInterface::class, AssignmentService::class);
         $this->app->bind(SubmissionServiceInterface::class, SubmissionService::class);
         $this->app->bind(LearningPageServiceInterface::class, LearningPageService::class);
+        $this->app->bind(QuestionServiceInterface::class, QuestionService::class);
+        $this->app->bind(ReviewModeServiceInterface::class, ReviewModeService::class);
     }
 
     /**
@@ -84,7 +84,9 @@ class LearningServiceProvider extends ServiceProvider
      */
     protected function registerCommands(): void
     {
-        // $this->commands([]);
+        $this->commands([
+            \Modules\Learning\Console\Commands\CleanupExpiredFiles::class,
+        ]);
     }
 
     /**

@@ -5,11 +5,11 @@ declare(strict_types=1);
 namespace Modules\Enrollments\Services;
 
 use App\Contracts\EnrollmentKeyHasherInterface;
-use App\Support\Helpers\UrlHelper;
-use Illuminate\Support\Facades\DB;
 use App\Exceptions\BusinessException;
+use App\Support\Helpers\UrlHelper;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Carbon;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Mail;
 use Modules\Auth\Models\User;
 use Modules\Enrollments\Contracts\Repositories\EnrollmentRepositoryInterface;
@@ -22,7 +22,6 @@ use Modules\Enrollments\Mail\StudentEnrollmentApprovedMail;
 use Modules\Enrollments\Mail\StudentEnrollmentDeclinedMail;
 use Modules\Enrollments\Mail\StudentEnrollmentPendingMail;
 use Modules\Enrollments\Models\Enrollment;
-use Modules\Enrollments\Jobs\HandleEnrollmentCreatedJob;
 use Modules\Schemes\Models\Course;
 use Spatie\QueryBuilder\AllowedFilter;
 use Spatie\QueryBuilder\AllowedSort;
@@ -51,7 +50,7 @@ class EnrollmentService implements EnrollmentServiceInterface
 
         $prioritySort = AllowedSort::callback('priority', function ($query, $descending) {
             $query->orderByRaw("CASE WHEN status = 'pending' THEN 1 ELSE 2 END")
-                  ->orderBy('created_at', 'desc');
+                ->orderBy('created_at', 'desc');
         });
 
         return $builder
@@ -63,8 +62,8 @@ class EnrollmentService implements EnrollmentServiceInterface
             ])
             ->allowedIncludes(['user', 'course'])
             ->allowedSorts([
-                'enrolled_at', 
-                'completed_at', 
+                'enrolled_at',
+                'completed_at',
                 'created_at',
                 $prioritySort,
             ])
@@ -88,7 +87,7 @@ class EnrollmentService implements EnrollmentServiceInterface
 
         $prioritySort = AllowedSort::callback('priority', function ($query, $descending) {
             $query->orderByRaw("CASE WHEN status = 'pending' THEN 1 ELSE 2 END")
-                  ->orderBy('created_at', 'desc');
+                ->orderBy('created_at', 'desc');
         });
 
         return $builder
@@ -108,8 +107,8 @@ class EnrollmentService implements EnrollmentServiceInterface
             ])
             ->allowedIncludes(['user', 'course'])
             ->allowedSorts([
-                'enrolled_at', 
-                'completed_at', 
+                'enrolled_at',
+                'completed_at',
                 'created_at',
                 $prioritySort,
             ])
@@ -166,7 +165,7 @@ class EnrollmentService implements EnrollmentServiceInterface
 
         $prioritySort = AllowedSort::callback('priority', function ($query, $descending) {
             $query->orderByRaw("CASE WHEN status = 'pending' THEN 1 ELSE 2 END")
-                  ->orderBy('created_at', 'desc');
+                ->orderBy('created_at', 'desc');
         });
 
         return $builder
@@ -195,7 +194,6 @@ class EnrollmentService implements EnrollmentServiceInterface
             ->paginate($perPage);
     }
 
-    
     public function getManagedEnrollments(User $user, int $perPage = 15, ?string $courseSlug = null, array $filters = []): array
     {
         $courses = Course::query()
@@ -240,7 +238,6 @@ class EnrollmentService implements EnrollmentServiceInterface
         return $this->repository->findByCourseAndUser($courseId, $userId);
     }
 
-    
     public function cancel(Enrollment $enrollment): Enrollment
     {
         return DB::transaction(function () use ($enrollment) {
@@ -253,14 +250,16 @@ class EnrollmentService implements EnrollmentServiceInterface
 
             $enrollment->status = EnrollmentStatus::Cancelled;
             $enrollment->completed_at = null;
-            
+
             Enrollment::withoutSyncingToSearch(fn () => $enrollment->save());
+
+            // Invalidate enrollment cache (Requirements: 28.10)
+            $this->invalidateEnrollmentCache($enrollment);
 
             return $enrollment->fresh(['course:id,title,slug', 'user:id,name,email']);
         });
     }
 
-    
     public function withdraw(Enrollment $enrollment): Enrollment
     {
         return DB::transaction(function () use ($enrollment) {
@@ -273,14 +272,16 @@ class EnrollmentService implements EnrollmentServiceInterface
 
             $enrollment->status = EnrollmentStatus::Cancelled;
             $enrollment->completed_at = null;
-            
+
             Enrollment::withoutSyncingToSearch(fn () => $enrollment->save());
+
+            // Invalidate enrollment cache (Requirements: 28.10)
+            $this->invalidateEnrollmentCache($enrollment);
 
             return $enrollment->fresh(['course:id,title,slug', 'user:id,name,email']);
         });
     }
 
-    
     public function approve(Enrollment $enrollment): Enrollment
     {
         return DB::transaction(function () use ($enrollment) {
@@ -294,8 +295,11 @@ class EnrollmentService implements EnrollmentServiceInterface
             $enrollment->status = EnrollmentStatus::Active;
             $enrollment->enrolled_at = Carbon::now();
             $enrollment->completed_at = null;
-            
+
             Enrollment::withoutSyncingToSearch(fn () => $enrollment->save());
+
+            // Invalidate enrollment cache (Requirements: 28.10)
+            $this->invalidateEnrollmentCache($enrollment);
 
             $freshEnrollment = $enrollment->fresh(['course:id,title,slug,code', 'user:id,name,email']);
             $course = $freshEnrollment->course;
@@ -310,7 +314,6 @@ class EnrollmentService implements EnrollmentServiceInterface
         });
     }
 
-    
     public function decline(Enrollment $enrollment): Enrollment
     {
         return DB::transaction(function () use ($enrollment) {
@@ -323,8 +326,11 @@ class EnrollmentService implements EnrollmentServiceInterface
 
             $enrollment->status = EnrollmentStatus::Cancelled;
             $enrollment->completed_at = null;
-            
+
             Enrollment::withoutSyncingToSearch(fn () => $enrollment->save());
+
+            // Invalidate enrollment cache (Requirements: 28.10)
+            $this->invalidateEnrollmentCache($enrollment);
 
             $freshEnrollment = $enrollment->fresh(['course:id,title,slug,code', 'user:id,name,email']);
             $course = $freshEnrollment->course;
@@ -338,7 +344,6 @@ class EnrollmentService implements EnrollmentServiceInterface
         });
     }
 
-    
     public function remove(Enrollment $enrollment): Enrollment
     {
         return DB::transaction(function () use ($enrollment) {
@@ -351,8 +356,11 @@ class EnrollmentService implements EnrollmentServiceInterface
 
             $enrollment->status = EnrollmentStatus::Cancelled;
             $enrollment->completed_at = null;
-            
+
             Enrollment::withoutSyncingToSearch(fn () => $enrollment->save());
+
+            // Invalidate enrollment cache (Requirements: 28.10)
+            $this->invalidateEnrollmentCache($enrollment);
 
             return $enrollment->fresh(['course:id,title,slug', 'user:id,name,email']);
         });
@@ -384,7 +392,6 @@ class EnrollmentService implements EnrollmentServiceInterface
         }
     }
 
-    
     private function getCourseManagers(Course $course): array
     {
         $managers = [];
@@ -428,18 +435,17 @@ class EnrollmentService implements EnrollmentServiceInterface
         return $this->repository->getActiveEnrollment($userId, $courseId);
     }
 
-    
     public function listEnrollments(User $user, int $perPage, array $filters = []): LengthAwarePaginator
     {
         $courseSlug = $filters['filter']['course_slug'] ?? $filters['course_slug'] ?? null;
-        
+
         if ($user->hasRole('Superadmin')) {
             return $this->paginateAll($perPage, $filters);
         }
 
         if ($user->hasRole('Admin') || $user->hasRole('Instructor')) {
             $result = $this->getManagedEnrollments($user, $perPage, $courseSlug, $filters);
-            
+
             if (! $result['found']) {
                 throw new BusinessException(
                     __('messages.enrollments.course_not_managed'),
@@ -453,16 +459,15 @@ class EnrollmentService implements EnrollmentServiceInterface
         return $this->paginateByUser($user->id, $perPage, $filters);
     }
 
-    
     public function findEnrollmentForAction(Course $course, User $user, array $data): Enrollment
     {
-        $targetUserId = $user->hasRole('Superadmin') && isset($data['user_id']) 
-            ? (int) $data['user_id'] 
+        $targetUserId = $user->hasRole('Superadmin') && isset($data['user_id'])
+            ? (int) $data['user_id']
             : $user->id;
-            
+
         $enrollment = $this->findByCourseAndUser($course->id, $targetUserId);
 
-        if (!$enrollment) {
+        if (! $enrollment) {
             throw new BusinessException(
                 __('messages.enrollments.not_found'),
                 []
@@ -472,13 +477,12 @@ class EnrollmentService implements EnrollmentServiceInterface
         return $enrollment;
     }
 
-    
     public function getEnrollmentStatus(Course $course, User $user, array $data): array
     {
         $targetUserId = $user->hasRole('Superadmin') && isset($data['user_id'])
             ? (int) $data['user_id']
             : $user->id;
-            
+
         $enrollment = $this->findByCourseAndUser($course->id, $targetUserId);
 
         if ($enrollment) {
@@ -491,12 +495,10 @@ class EnrollmentService implements EnrollmentServiceInterface
         ];
     }
 
-    
     public function enroll(User $user, Course $course, array $data): array
     {
         $enrollmentKey = $data['enrollment_key'] ?? null;
-        
-        
+
         if ($course->status !== \Modules\Schemes\Enums\CourseStatus::Published) {
             throw new BusinessException(
                 __('messages.enrollments.course_not_published'),
@@ -504,7 +506,6 @@ class EnrollmentService implements EnrollmentServiceInterface
             );
         }
 
-        
         if ($course->enrollment_type === \Modules\Schemes\Enums\EnrollmentType::KeyBased) {
             if (empty($enrollmentKey)) {
                 throw new BusinessException(
@@ -521,10 +522,8 @@ class EnrollmentService implements EnrollmentServiceInterface
             }
         }
 
-        
-        
         $existingEnrollment = $this->repository->findByCourseAndUser($course->id, $user->id);
-        
+
         if ($existingEnrollment) {
             if ($existingEnrollment->status === EnrollmentStatus::Active) {
                 throw new BusinessException(
@@ -538,27 +537,13 @@ class EnrollmentService implements EnrollmentServiceInterface
                     []
                 );
             }
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
+
         }
 
         return DB::transaction(function () use ($user, $course, $existingEnrollment) {
-            
+
             $initialStatus = match ($course->enrollment_type) {
-                \Modules\Schemes\Enums\EnrollmentType::AutoAccept, 
+                \Modules\Schemes\Enums\EnrollmentType::AutoAccept,
                 \Modules\Schemes\Enums\EnrollmentType::KeyBased => EnrollmentStatus::Active,
                 \Modules\Schemes\Enums\EnrollmentType::Approval => EnrollmentStatus::Pending,
                 default => EnrollmentStatus::Pending,
@@ -567,28 +552,29 @@ class EnrollmentService implements EnrollmentServiceInterface
             $enrolledAt = Carbon::now();
 
             if ($existingEnrollment) {
-                 $existingEnrollment->status = $initialStatus;
-                 $existingEnrollment->enrolled_at = $enrolledAt;
-                 $existingEnrollment->completed_at = null; 
-                 
-                 Enrollment::withoutSyncingToSearch(fn () => $existingEnrollment->save());
-                 $enrollment = $existingEnrollment;
+                $existingEnrollment->status = $initialStatus;
+                $existingEnrollment->enrolled_at = $enrolledAt;
+                $existingEnrollment->completed_at = null;
+
+                Enrollment::withoutSyncingToSearch(fn () => $existingEnrollment->save());
+                $enrollment = $existingEnrollment;
             } else {
-                $enrollment = new Enrollment();
+                $enrollment = new Enrollment;
                 $enrollment->user_id = $user->id;
                 $enrollment->course_id = $course->id;
                 $enrollment->status = $initialStatus;
                 $enrollment->enrolled_at = $enrolledAt;
-                
+
                 Enrollment::withoutSyncingToSearch(fn () => $enrollment->save());
             }
 
-            
+            // Invalidate enrollment cache (Requirements: 28.10)
+            $this->invalidateEnrollmentCache($enrollment);
+
             event(new EnrollmentCreated($enrollment));
 
             $freshEnrollment = $enrollment->fresh(['course:id,title,slug', 'user:id,name,email']);
-            
-            
+
             $message = $initialStatus === EnrollmentStatus::Pending
                 ? __('messages.enrollments.approval_sent')
                 : __('messages.enrollments.auto_accept_success');
@@ -598,5 +584,17 @@ class EnrollmentService implements EnrollmentServiceInterface
                 'message' => $message,
             ];
         });
+    }
+
+    /**
+     * Invalidate enrollment cache for a specific enrollment.
+     * Requirements: 28.10
+     */
+    private function invalidateEnrollmentCache(Enrollment $enrollment): void
+    {
+        if ($this->repository instanceof \Modules\Enrollments\Repositories\EnrollmentRepository) {
+            $this->repository->invalidateEnrollmentCache($enrollment->course_id, $enrollment->user_id);
+            $this->repository->invalidateRosterCache($enrollment->course_id);
+        }
     }
 }

@@ -6,11 +6,28 @@ namespace Modules\Enrollments\Repositories;
 
 use App\Repositories\BaseRepository;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
+use Illuminate\Support\Facades\Cache;
 use Modules\Enrollments\Contracts\Repositories\EnrollmentRepositoryInterface;
 use Modules\Enrollments\Models\Enrollment;
 
 class EnrollmentRepository extends BaseRepository implements EnrollmentRepositoryInterface
 {
+    /**
+     * Cache TTL for student rosters (30 minutes).
+     * Requirements: 28.10
+     */
+    protected const CACHE_TTL_ROSTER = 1800;
+
+    /**
+     * Cache key prefix for enrollment data.
+     */
+    protected const CACHE_PREFIX_ENROLLMENT = 'enrollment:';
+
+    /**
+     * Cache key prefix for roster data.
+     */
+    protected const CACHE_PREFIX_ROSTER = 'roster:';
+
     protected array $allowedFilters = [
         'status',
         'user_id',
@@ -136,40 +153,65 @@ class EnrollmentRepository extends BaseRepository implements EnrollmentRepositor
         );
     }
 
+    /**
+     * Find enrollment by course and user with caching.
+     * Requirements: 28.10
+     */
     public function findByCourseAndUser(int $courseId, int $userId): ?Enrollment
     {
-        return $this->query()
-            ->withoutEagerLoads() // PENTING: Jangan load relasi
-            ->where('course_id', $courseId)
-            ->where('user_id', $userId)
-            ->first();
+        $cacheKey = $this->getEnrollmentCacheKey($courseId, $userId);
+
+        return Cache::remember($cacheKey, self::CACHE_TTL_ROSTER, function () use ($courseId, $userId) {
+            return $this->query()
+                ->withoutEagerLoads() // PENTING: Jangan load relasi
+                ->where('course_id', $courseId)
+                ->where('user_id', $userId)
+                ->first();
+        });
     }
 
+    /**
+     * Check if user has an active or completed enrollment with caching.
+     * Requirements: 28.10
+     */
     public function hasActiveEnrollment(int $userId, int $courseId): bool
     {
-        return $this->query()
-            ->where('user_id', $userId)
-            ->where('course_id', $courseId)
-            ->whereIn('status', [\Modules\Enrollments\Enums\EnrollmentStatus::Active->value, \Modules\Enrollments\Enums\EnrollmentStatus::Completed->value])
-            ->exists();
+        $cacheKey = $this->getActiveEnrollmentCacheKey($userId, $courseId);
+
+        return Cache::remember($cacheKey, self::CACHE_TTL_ROSTER, function () use ($userId, $courseId) {
+            return $this->query()
+                ->where('user_id', $userId)
+                ->where('course_id', $courseId)
+                ->whereIn('status', [\Modules\Enrollments\Enums\EnrollmentStatus::Active->value, \Modules\Enrollments\Enums\EnrollmentStatus::Completed->value])
+                ->exists();
+        });
     }
 
+    /**
+     * Get active or completed enrollment for user and course with caching.
+     * Requirements: 28.10
+     */
     public function getActiveEnrollment(int $userId, int $courseId): ?Enrollment
     {
-        return $this->query()
-            ->where('user_id', $userId)
-            ->where('course_id', $courseId)
-            ->whereIn('status', [\Modules\Enrollments\Enums\EnrollmentStatus::Active->value, \Modules\Enrollments\Enums\EnrollmentStatus::Completed->value])
-            ->first();
+        $cacheKey = $this->getActiveEnrollmentDetailCacheKey($userId, $courseId);
+
+        return Cache::remember($cacheKey, self::CACHE_TTL_ROSTER, function () use ($userId, $courseId) {
+            return $this->query()
+                ->where('user_id', $userId)
+                ->where('course_id', $courseId)
+                ->whereIn('status', [\Modules\Enrollments\Enums\EnrollmentStatus::Active->value, \Modules\Enrollments\Enums\EnrollmentStatus::Completed->value])
+                ->first();
+        });
     }
 
+    /**
+     * Find active or completed enrollment by user and course ID with caching.
+     * Requirements: 28.10
+     */
     public function findActiveByUserAndCourse(int $userId, int $courseId): ?Enrollment
     {
-        return $this->query()
-            ->where('user_id', $userId)
-            ->where('course_id', $courseId)
-            ->whereIn('status', [\Modules\Enrollments\Enums\EnrollmentStatus::Active->value, \Modules\Enrollments\Enums\EnrollmentStatus::Completed->value])
-            ->first();
+        // Reuse the same cache as getActiveEnrollment
+        return $this->getActiveEnrollment($userId, $courseId);
     }
 
     public function incrementLessonProgress(int $enrollmentId, int $lessonId): void
@@ -190,5 +232,139 @@ class EnrollmentRepository extends BaseRepository implements EnrollmentRepositor
                 'attempt_count' => 1,
             ]);
         }
+
+        // Invalidate enrollment cache after progress update
+        $enrollment = Enrollment::find($enrollmentId);
+        if ($enrollment) {
+            $this->invalidateEnrollmentCache($enrollment->course_id, $enrollment->user_id);
+        }
+    }
+
+    /**
+     * Generate cache key for enrollment by course and user.
+     * Requirements: 28.10
+     */
+    protected function getEnrollmentCacheKey(int $courseId, int $userId): string
+    {
+        return self::CACHE_PREFIX_ENROLLMENT."course:{$courseId}:user:{$userId}";
+    }
+
+    /**
+     * Generate cache key for active enrollment check.
+     * Requirements: 28.10
+     */
+    protected function getActiveEnrollmentCacheKey(int $userId, int $courseId): string
+    {
+        return self::CACHE_PREFIX_ENROLLMENT."active:user:{$userId}:course:{$courseId}";
+    }
+
+    /**
+     * Generate cache key for active enrollment details.
+     * Requirements: 28.10
+     */
+    protected function getActiveEnrollmentDetailCacheKey(int $userId, int $courseId): string
+    {
+        return self::CACHE_PREFIX_ENROLLMENT."active_detail:user:{$userId}:course:{$courseId}";
+    }
+
+    /**
+     * Generate cache key for course roster.
+     * Requirements: 28.10
+     */
+    protected function getRosterCacheKey(int $courseId, string $suffix = ''): string
+    {
+        $key = self::CACHE_PREFIX_ROSTER."course:{$courseId}";
+
+        return $suffix ? "{$key}:{$suffix}" : $key;
+    }
+
+    /**
+     * Invalidate enrollment cache for a specific user and course.
+     * Requirements: 28.10
+     */
+    public function invalidateEnrollmentCache(int $courseId, int $userId): void
+    {
+        Cache::forget($this->getEnrollmentCacheKey($courseId, $userId));
+        Cache::forget($this->getActiveEnrollmentCacheKey($userId, $courseId));
+        Cache::forget($this->getActiveEnrollmentDetailCacheKey($userId, $courseId));
+    }
+
+    /**
+     * Invalidate roster cache for a course.
+     * Requirements: 28.10
+     */
+    public function invalidateRosterCache(int $courseId): void
+    {
+        Cache::forget($this->getRosterCacheKey($courseId));
+        Cache::forget($this->getRosterCacheKey($courseId, 'students'));
+        Cache::forget($this->getRosterCacheKey($courseId, 'student_ids'));
+        // Note: For production with Redis, use cache tags for more efficient invalidation
+    }
+
+    /**
+     * Invalidate all caches for a user's enrollments.
+     * Useful when user data changes.
+     * Requirements: 28.10
+     */
+    public function invalidateUserEnrollmentCaches(int $userId): void
+    {
+        // Get all enrollments for the user and invalidate their caches
+        $enrollments = $this->query()
+            ->where('user_id', $userId)
+            ->select(['id', 'course_id', 'user_id'])
+            ->get();
+
+        foreach ($enrollments as $enrollment) {
+            $this->invalidateEnrollmentCache($enrollment->course_id, $userId);
+        }
+    }
+
+    /**
+     * Get the student roster (all active enrollments) for a course with caching.
+     * Returns a collection of active enrollments with user data.
+     * Requirements: 28.10
+     *
+     * @param  int  $courseId  The course ID
+     * @return \Illuminate\Database\Eloquent\Collection<int, Enrollment>
+     */
+    public function getStudentRoster(int $courseId): \Illuminate\Database\Eloquent\Collection
+    {
+        $cacheKey = $this->getRosterCacheKey($courseId, 'students');
+
+        return Cache::remember($cacheKey, self::CACHE_TTL_ROSTER, function () use ($courseId) {
+            return $this->query()
+                ->where('course_id', $courseId)
+                ->whereIn('status', [
+                    \Modules\Enrollments\Enums\EnrollmentStatus::Active->value,
+                    \Modules\Enrollments\Enums\EnrollmentStatus::Completed->value,
+                ])
+                ->with(['user:id,name,email'])
+                ->orderBy('enrolled_at', 'asc')
+                ->get();
+        });
+    }
+
+    /**
+     * Get student IDs enrolled in a course with caching.
+     * Useful for quick lookups without loading full enrollment data.
+     * Requirements: 28.10
+     *
+     * @param  int  $courseId  The course ID
+     * @return array<int>
+     */
+    public function getEnrolledStudentIds(int $courseId): array
+    {
+        $cacheKey = $this->getRosterCacheKey($courseId, 'student_ids');
+
+        return Cache::remember($cacheKey, self::CACHE_TTL_ROSTER, function () use ($courseId) {
+            return $this->query()
+                ->where('course_id', $courseId)
+                ->whereIn('status', [
+                    \Modules\Enrollments\Enums\EnrollmentStatus::Active->value,
+                    \Modules\Enrollments\Enums\EnrollmentStatus::Completed->value,
+                ])
+                ->pluck('user_id')
+                ->toArray();
+        });
     }
 }

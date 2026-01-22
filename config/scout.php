@@ -257,6 +257,33 @@ return [
                     'label',
                 ],
             ],
+            'submissions_index' => [
+                'filterableAttributes' => [
+                    'assignment_id',
+                    'user_id',
+                    'enrollment_id',
+                    'state',
+                    'score',
+                    'submitted_at',
+                    'attempt_number',
+                    'is_late',
+                    'created_at',
+                ],
+                'sortableAttributes' => [
+                    'submitted_at',
+                    'score',
+                    'created_at',
+                    'attempt_number',
+                    'student_name',
+                    'assignment_title',
+                ],
+                'searchableAttributes' => [
+                    'student_name',
+                    'student_email',
+                    'assignment_title',
+                    'state',
+                ],
+            ],
         ],
     ],
 

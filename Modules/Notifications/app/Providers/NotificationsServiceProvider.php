@@ -2,8 +2,8 @@
 
 namespace Modules\Notifications\Providers;
 
-use Illuminate\Support\Facades\Blade;
 use App\Support\Traits\RegistersModuleConfig;
+use Illuminate\Support\Facades\Blade;
 use Illuminate\Support\ServiceProvider;
 use Nwidart\Modules\Traits\PathNamespace;
 
@@ -40,6 +40,11 @@ class NotificationsServiceProvider extends ServiceProvider
         $this->app->bind(
             \Modules\Notifications\Contracts\Services\NotificationPreferenceServiceInterface::class,
             \Modules\Notifications\Services\NotificationPreferenceService::class
+        );
+
+        $this->app->bind(
+            \Modules\Notifications\Contracts\Services\GradingNotificationServiceInterface::class,
+            \Modules\Notifications\Services\GradingNotificationService::class
         );
     }
 
