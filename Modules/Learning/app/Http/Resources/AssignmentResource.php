@@ -18,7 +18,6 @@ class AssignmentResource extends JsonResource
             'id' => $assignment->id,
             'title' => $assignment->title,
             'description' => $assignment->description,
-            'type' => $assignment->type,
             'submission_type' => $assignment->submission_type?->value ?? $assignment->submission_type,
             'max_score' => $assignment->max_score,
             'available_from' => $assignment->available_from?->toIso8601String(),
@@ -33,7 +32,11 @@ class AssignmentResource extends JsonResource
             'status' => $assignment->status?->value ?? $assignment->status,
             'allow_resubmit' => $assignment->allow_resubmit,
             'late_penalty_percent' => $assignment->late_penalty_percent,
-            'scope_type' => $assignment->scope_type,
+            'scope_type' => class_basename($assignment->assignable_type),
+            'assignable_slug' => $assignment->assignable?->slug,
+            'lesson_slug' => $this->getLessonSlug(),
+            'unit_slug' => $this->getUnitSlug(),
+            'course_slug' => $this->getCourseSlug(),
             'is_available' => $assignment->isAvailable(),
             'is_past_deadline' => $assignment->isPastDeadline(),
             'created_at' => $assignment->created_at?->toIso8601String(),
@@ -45,13 +48,6 @@ class AssignmentResource extends JsonResource
                     'id' => $assignment->creator->id,
                     'name' => $assignment->creator->name,
                     'email' => $assignment->creator->email,
-                ];
-            }),
-            'lesson' => $this->whenLoaded('lesson', function () use ($assignment) {
-                return [
-                    'id' => $assignment->lesson->id,
-                    'title' => $assignment->lesson->title,
-                    'slug' => $assignment->lesson->slug,
                 ];
             }),
             'questions' => QuestionResource::collection($this->whenLoaded('questions')),
@@ -67,7 +63,17 @@ class AssignmentResource extends JsonResource
                     ];
                 });
             }),
+            'attachments' => $assignment->getMedia('attachments')->map(function ($media) {
+                return [
+                    'id' => $media->id,
+                    'url' => $media->getUrl(),
+                    'file_name' => $media->file_name,
+                    'mime_type' => $media->mime_type,
+                    'size' => $media->size,
+                ];
+            }),
         ];
+
     }
 
     public static function make(...$parameters)
@@ -75,9 +81,48 @@ class AssignmentResource extends JsonResource
         $resource = $parameters[0] ?? null;
 
         if ($resource instanceof Assignment) {
-            $resource->loadMissing(['creator:id,name,email', 'lesson:id,title,slug']);
+            $resource->loadMissing(['creator:id,name,email', 'assignable']);
         }
 
         return parent::make(...$parameters);
+    }
+
+    private function getLessonSlug(): ?string
+    {
+        $resource = $this->resource;
+        $type = class_basename($resource->assignable_type);
+        
+        return $type === 'Lesson' ? $resource->assignable?->slug : null;
+    }
+
+    private function getUnitSlug(): ?string
+    {
+        $resource = $this->resource;
+        $type = class_basename($resource->assignable_type);
+        
+        if ($type === 'Unit') {
+            return $resource->assignable?->slug;
+        }
+        if ($type === 'Lesson') {
+             return $resource->assignable?->unit?->slug; 
+        }
+        return null;
+    }
+
+    private function getCourseSlug(): ?string
+    {
+        $resource = $this->resource;
+        $type = class_basename($resource->assignable_type);
+        
+        if ($type === 'Course') {
+             return $resource->assignable?->slug;
+        }
+        if ($type === 'Unit') {
+             return $resource->assignable?->course?->slug;
+        }
+        if ($type === 'Lesson') {
+             return $resource->assignable?->unit?->course?->slug;
+        }
+        return null;
     }
 }

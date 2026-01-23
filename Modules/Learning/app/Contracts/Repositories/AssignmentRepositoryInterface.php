@@ -9,7 +9,7 @@ use Modules\Schemes\Models\Lesson;
 
 interface AssignmentRepositoryInterface
 {
-    public function listForLesson(Lesson $lesson, array $filters = []): Collection;
+
 
     public function create(array $attributes): Assignment;
 

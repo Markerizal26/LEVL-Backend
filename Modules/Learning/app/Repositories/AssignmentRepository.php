@@ -35,30 +35,7 @@ class AssignmentRepository extends BaseRepository implements AssignmentRepositor
         'assignable',
     ];
 
-        public function listForLesson(Lesson $lesson, array $filters = []): Collection
-    {
-        $cacheKey = $this->getListCacheKey('lesson', $lesson->id, $filters);
 
-        return Cache::remember($cacheKey, self::CACHE_TTL_ASSIGNMENT, function () use ($lesson, $filters) {
-            $query = Assignment::query()
-                ->where('lesson_id', $lesson->id)
-                ->with([
-                    'creator:id,name,email',
-                    'lesson:id,title,slug',
-                    'questions:id,assignment_id,type,content,weight,order',
-                ]);
-
-            $status = $filters['status'] ?? ($filters['filter']['status'] ?? null);
-            if ($status) {
-                $query->where('status', $status);
-            }
-
-            
-            $limit = $filters['limit'] ?? 100;
-
-            return $query->orderBy('created_at', 'desc')->limit($limit)->get();
-        });
-    }
 
     public function create(array $attributes): Assignment
     {
@@ -112,7 +89,9 @@ class AssignmentRepository extends BaseRepository implements AssignmentRepositor
 
         $this->invalidateAssignmentCache($model->id);
 
-        $this->invalidateListCache('lesson', $model->lesson_id);
+        if ($model->lesson_id) {
+            $this->invalidateListCache('lesson', $model->lesson_id);
+        }
 
         if ($model->assignable_type && $model->assignable_id) {
             $this->invalidateListCache('scope', $model->assignable_id, $model->assignable_type);
@@ -137,7 +116,9 @@ class AssignmentRepository extends BaseRepository implements AssignmentRepositor
             $this->invalidateAssignmentCache($assignmentId);
 
             
-            $this->invalidateListCache('lesson', $lessonId);
+            if ($lessonId) {
+                $this->invalidateListCache('lesson', $lessonId);
+            }
 
             
             if ($assignableType && $assignableId) {

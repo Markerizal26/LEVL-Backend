@@ -82,6 +82,33 @@ class CoursePolicy
         return $user->hasRole('Instructor') && $course->instructor_id === $user->id;
     }
 
+    public function viewAssignments(User $user, Course $course): bool
+    {
+        if ($user->hasRole('Superadmin')) {
+            return true;
+        }
+
+        if ($user->hasRole('Admin')) {
+            if ($course->relationLoaded('admins')) {
+                return $course->admins->contains('id', $user->id);
+            }
+            return $course->admins()->where('user_id', $user->id)->exists();
+        }
+
+        if ($user->hasRole('Instructor')) {
+            return $course->instructor_id === $user->id;
+        }
+
+        if ($user->hasRole('Student')) {
+            return \Modules\Enrollments\Models\Enrollment::where('user_id', $user->id)
+                ->where('course_id', $course->id)
+                ->whereIn('status', ['active', 'completed'])
+                ->exists();
+        }
+
+        return false;
+    }
+
     public function manageContent(User $user, Course $course): bool
     {
         return $this->update($user, $course);

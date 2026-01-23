@@ -1625,7 +1625,7 @@
                   "variable": [
                     {
                       "key": "enrollmentId",
-                      "value": "3"
+                      "value": "4"
                     }
                   ]
                 }
@@ -3479,7 +3479,7 @@
                     },
                     {
                       "key": "lessonSlug",
-                      "value": "laravel-routing"
+                      "value": "introduction-to-laravel"
                     }
                   ]
                 }
@@ -3753,7 +3753,7 @@
             "method": "GET",
             "header": [],
             "url": {
-              "raw": "{{url}}/courses",
+              "raw": "{{url}}/courses?include=units",
               "host": [
                 "{{url}}"
               ],
@@ -3798,10 +3798,9 @@
                 },
                 {
                   "key": "include",
-                  "value": "nisa",
+                  "value": "units",
                   "description": "tags, tagsCount, tagsExists, category, categoryCount, categoryExists, instructor, instructorCount, instructorExists, units, unitsCount, unitsExists, admins, adminsCount, adminsExists",
-                  "type": "text",
-                  "disabled": true
+                  "type": "text"
                 },
                 {
                   "key": "sort",
@@ -4926,99 +4925,1013 @@
           "item": [
             {
               "name": "Semua Tugas",
-              "id": "232ec38f-eb55-4a49-b13f-568993344de9",
-              "protocolProfileBehavior": {
-                "disableBodyPruning": true
-              },
+              "id": "ae10343f-f7af-4926-88a1-d8e8da6d0449",
               "request": {
                 "auth": {
                   "type": "bearer",
                   "bearer": [
                     {
                       "key": "token",
-                      "value": "{{access_token_superadmin}}",
+                      "value": "{{access_token_student}}",
                       "type": "string"
                     }
                   ]
                 },
                 "method": "GET",
-                "header": [
-                  {
-                    "key": "Accept",
-                    "value": "application/json",
-                    "type": "text"
-                  }
-                ],
-                "body": {
-                  "mode": "raw",
-                  "raw": "{\n    \"code\": \"JWP-01211\",\n    // \"slug\" : \"mengenal-html\", \\\\Opsional\n    \"title\": \"Mengenal HTML/CSS\",\n    \"description\": \"Disini adik adik akan belajar HTML/CSS\",\n    // \"order\": 2, //optional auto inc\n    \"status\": \"draft\" // opsional draft/publish\n}"
-                },
+                "header": [],
                 "url": {
-                  "raw": "{{url}}/courses/:slug/units/:unitSlug/lessons/:lessonSlug/assignments",
+                  "raw": "{{url}}/courses/:courseSlug/assignments",
                   "host": [
                     "{{url}}"
                   ],
                   "path": [
                     "courses",
-                    ":slug",
-                    "units",
-                    ":unitSlug",
-                    "lessons",
-                    ":lessonSlug",
+                    ":courseSlug",
                     "assignments"
                   ],
                   "query": [
                     {
-                      "key": "include",
-                      "value": "blocks",
-                      "description": "unit, unitCount, unitExists, blocks, blocksCount, blocksExists, assignments, assignmentsCount, assignmentsExists",
-                      "uuid": "d924843c-8ecd-4b50-b042-4606274a0e83",
+                      "key": "unit_slug",
+                      "value": "mengenal-htmlcss1",
+                      "uuid": "71f47ef4-9f44-43b0-b029-bdc59e1aee5c",
                       "disabled": true
                     },
                     {
-                      "key": "filter[content_type]",
-                      "value": null,
-                      "description": "markdown, video, link",
-                      "disabled": true
-                    },
-                    {
-                      "key": "filter[status]",
-                      "value": null,
-                      "description": "draft, published",
-                      "disabled": true
-                    },
-                    {
-                      "key": "sort",
-                      "value": null,
-                      "description": "order, title, created_at ",
-                      "disabled": true
-                    },
-                    {
-                      "key": "page",
-                      "value": null,
-                      "uuid": "c8f619ce-ab54-4308-88c7-20e316a28793",
+                      "key": "lesson_slug",
+                      "value": "laravel-routing",
+                      "uuid": "dfca064e-34df-45b1-8a95-2aec577ef59f",
                       "disabled": true
                     },
                     {
                       "key": "per_page",
                       "value": null,
-                      "uuid": "858f41e1-9d42-4f57-94a4-66f15253f955",
+                      "description": "15-100",
+                      "uuid": "e953660c-093a-43e4-bc9b-27307d0f630d",
+                      "disabled": true
+                    },
+                    {
+                      "key": "page",
+                      "value": null,
+                      "uuid": "f23e86f1-f946-48e0-9c35-1ebdf42f8a63",
+                      "disabled": true
+                    },
+                    {
+                      "key": "search",
+                      "value": null,
+                      "uuid": "7e09592a-ccc9-4181-a21c-b97dcfddc9c1",
+                      "disabled": true
+                    },
+                    {
+                      "key": "filter[status]",
+                      "value": "",
+                      "description": "draft, published, archieved",
+                      "uuid": "e3227d88-42a6-4962-92f4-7c8d658c345a",
+                      "disabled": true
+                    },
+                    {
+                      "key": "filter[submission_type]",
+                      "value": null,
+                      "description": "text, file, mixed",
+                      "type": "text",
+                      "uuid": "db5f3d7d-e0ae-484e-b742-9e1eff1b15bf",
+                      "disabled": true
+                    },
+                    {
+                      "key": "sort",
+                      "value": null,
+                      "description": "id, title, created_at, updated_at, deadline_at, available_from",
+                      "type": "text",
+                      "uuid": "f6247495-1532-4c5c-a049-e13e4c416cba",
+                      "disabled": true
+                    },
+                    {
+                      "key": "include",
+                      "value": "",
+                      "description": "questions, questionsCount, questionsExists, prerequisites, prerequisitesCount, prerequisitesExists, overrides, overridesCount, overridesExists, creator, creatorCount, creatorExists, lesson, lessonCount, lessonExists",
+                      "type": "text",
+                      "uuid": "c1fd3a75-d70e-4888-8794-369391a4b64a",
                       "disabled": true
                     }
                   ],
                   "variable": [
                     {
-                      "key": "slug",
+                      "key": "courseSlug",
                       "value": "junior-web-programmer"
+                    }
+                  ]
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "Lihat Detail Tugas",
+              "id": "12d5c630-8130-47c6-87f3-f2b0e5f06db9",
+              "request": {
+                "auth": {
+                  "type": "bearer",
+                  "bearer": [
+                    {
+                      "key": "token",
+                      "value": "{{access_token_student}}",
+                      "type": "string"
+                    }
+                  ]
+                },
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{url}}/assignments/:assignmentId",
+                  "host": [
+                    "{{url}}"
+                  ],
+                  "path": [
+                    "assignments",
+                    ":assignmentId"
+                  ],
+                  "query": [
+                    {
+                      "key": "unit_slug",
+                      "value": "mengenal-htmlcss1",
+                      "uuid": "71f47ef4-9f44-43b0-b029-bdc59e1aee5c",
+                      "disabled": true
                     },
                     {
-                      "key": "unitSlug",
-                      "value": "mengenal-htmlcss1"
-                    },
-                    {
-                      "key": "lessonSlug",
+                      "key": "lesson_slug",
                       "value": "laravel-routing",
-                      "uuid": "aeb303e7-b713-448f-b1e3-36d11609b325"
+                      "uuid": "dfca064e-34df-45b1-8a95-2aec577ef59f",
+                      "disabled": true
+                    },
+                    {
+                      "key": "per_page",
+                      "value": null,
+                      "description": "15-100",
+                      "uuid": "e953660c-093a-43e4-bc9b-27307d0f630d",
+                      "disabled": true
+                    },
+                    {
+                      "key": "page",
+                      "value": null,
+                      "uuid": "f23e86f1-f946-48e0-9c35-1ebdf42f8a63",
+                      "disabled": true
+                    },
+                    {
+                      "key": "search",
+                      "value": null,
+                      "uuid": "7e09592a-ccc9-4181-a21c-b97dcfddc9c1",
+                      "disabled": true
+                    },
+                    {
+                      "key": "filter[status]",
+                      "value": "",
+                      "description": "draft, published, archieved",
+                      "uuid": "e3227d88-42a6-4962-92f4-7c8d658c345a",
+                      "disabled": true
+                    },
+                    {
+                      "key": "filter[submission_type]",
+                      "value": null,
+                      "description": "text, file, mixed",
+                      "type": "text",
+                      "uuid": "db5f3d7d-e0ae-484e-b742-9e1eff1b15bf",
+                      "disabled": true
+                    },
+                    {
+                      "key": "sort",
+                      "value": null,
+                      "description": "id, title, created_at, updated_at, deadline_at, available_from",
+                      "type": "text",
+                      "uuid": "f6247495-1532-4c5c-a049-e13e4c416cba",
+                      "disabled": true
+                    },
+                    {
+                      "key": "include",
+                      "value": "",
+                      "description": "questions, questionsCount, questionsExists, prerequisites, prerequisitesCount, prerequisitesExists, overrides, overridesCount, overridesExists, creator, creatorCount, creatorExists, lesson, lessonCount, lessonExists",
+                      "type": "text",
+                      "uuid": "c1fd3a75-d70e-4888-8794-369391a4b64a",
+                      "disabled": true
+                    }
+                  ],
+                  "variable": [
+                    {
+                      "key": "assignmentId",
+                      "value": "24",
+                      "uuid": "5d3c7871-a2f2-4c9a-afe1-7a02b62cd866"
+                    }
+                  ]
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "Buat Assignment",
+              "id": "b954a324-9dbb-45c2-99a1-27e14ffd3fe9",
+              "request": {
+                "auth": {
+                  "type": "bearer",
+                  "bearer": [
+                    {
+                      "key": "token",
+                      "value": "{{access_token_admin}}",
+                      "type": "string"
+                    }
+                  ]
+                },
+                "method": "POST",
+                "header": [],
+                "body": {
+                  "mode": "formdata",
+                  "formdata": [
+                    {
+                      "key": "title",
+                      "value": "Refleksi Konsep Dasar Laravel",
+                      "type": "text",
+                      "uuid": "1b270e20-3124-4d49-9a49-30274790e8ac"
+                    },
+                    {
+                      "key": "description",
+                      "value": "Tuliskan pemahaman Anda tentang apa itu Laravel, kelebihan Laravel, dan kapan framework ini digunakan.",
+                      "type": "text",
+                      "uuid": "9f89ccbb-6ea4-4b6c-bf4c-a9c0c058646b"
+                    },
+                    {
+                      "key": "assignable_type",
+                      "value": "Lesson",
+                      "description": "Course, Unit, Lesson",
+                      "type": "text",
+                      "uuid": "c1bd509a-46bc-423d-955c-8461e1641c25"
+                    },
+                    {
+                      "key": "assignable_slug",
+                      "value": "introduction-to-laravel",
+                      "description": "Slug sesuai assignable typenya",
+                      "type": "text",
+                      "uuid": "81d040d6-6a6c-42fd-bebc-86f49f60c9a4"
+                    },
+                    {
+                      "key": "submission_type",
+                      "value": "text",
+                      "description": "text, file, mixed",
+                      "type": "text",
+                      "uuid": "4d295310-17e4-4a7d-ab65-7c8b4293aa1a"
+                    },
+                    {
+                      "key": "max_score",
+                      "value": "100",
+                      "description": "opsional | default 100",
+                      "type": "text",
+                      "uuid": "9c74d292-8a12-463e-8b62-f681706d56e0"
+                    },
+                    {
+                      "key": "available_from",
+                      "value": "",
+                      "description": "opsional | ISO 8601",
+                      "type": "text",
+                      "uuid": "1c9a7c2d-76df-4c79-a99c-bfd5fcad273b"
+                    },
+                    {
+                      "key": "deadline",
+                      "value": "",
+                      "description": "opsional | ISO 8601",
+                      "type": "text",
+                      "uuid": "0f898bf8-566f-4598-9a4e-8db716ee788e"
+                    },
+                    {
+                      "key": "tolerance_minute",
+                      "value": "",
+                      "description": "opsional | menit",
+                      "type": "text",
+                      "uuid": "cbcd14ea-c0ef-4651-96f6-178298e83160"
+                    },
+                    {
+                      "key": "late_penalty_percent",
+                      "value": "",
+                      "description": "opsional | persen",
+                      "type": "text",
+                      "uuid": "d36416bc-e55f-4df2-977d-5641a4609b7e"
+                    },
+                    {
+                      "key": "max_attempts",
+                      "value": "",
+                      "description": "opsional | null = tidak terbatas",
+                      "type": "text",
+                      "uuid": "0809fb2b-bad7-43fa-8085-4cbfa56e8037"
+                    },
+                    {
+                      "key": "cooldown_minutes",
+                      "value": "",
+                      "description": "opsional | menit",
+                      "type": "text",
+                      "uuid": "3b97a81b-bfcd-495e-9507-931224298f76"
+                    },
+                    {
+                      "key": "retake_enabled",
+                      "value": "",
+                      "description": "opsional | true/false",
+                      "type": "text",
+                      "uuid": "1c37738a-5b49-4825-a7ea-51e45592672b"
+                    },
+                    {
+                      "key": "review_mode",
+                      "value": "",
+                      "description": "opsional | immediate (langsung tampil), deferred (tampil setelah deadline) | hidden (tidak tampil otomatis)",
+                      "type": "text",
+                      "uuid": "049f3e47-5d31-4a70-909e-c812bc4c389d"
+                    },
+                    {
+                      "key": "randomization_type",
+                      "value": "",
+                      "description": "optional | statis (urutan tetep), random_order (acak), bank (subset acak)",
+                      "type": "text",
+                      "uuid": "de0203a8-2e7d-45e0-b408-b5bdb4168ff2"
+                    },
+                    {
+                      "key": "question_bank_count",
+                      "value": "",
+                      "description": "wajib jika randomization type = bank | Harus ≤ total soal di assignment",
+                      "type": "text",
+                      "uuid": "79afbd70-4fca-4fc0-a32c-b06d15465eaf"
+                    },
+                    {
+                      "key": "status",
+                      "value": "",
+                      "description": "opsional | draft/published",
+                      "type": "text",
+                      "uuid": "0a501c75-c8a7-40b3-ad6d-d0ebfacba2e8"
+                    },
+                    {
+                      "key": "attachments[0]",
+                      "description": "opsional",
+                      "type": "file",
+                      "uuid": "ff232d95-182e-47af-9dc5-9695a985ee7d",
+                      "src": [
+                        "/Users/darrielmarkerizal/Downloads/Get_Started_With_Smallpdf.pdf"
+                      ]
+                    },
+                    {
+                      "key": "attachments[1]",
+                      "description": "opsional",
+                      "type": "file",
+                      "uuid": "ec53dbdd-72d6-442c-a48e-5dcd8ff6f67e",
+                      "src": [
+                        "/Users/darrielmarkerizal/Downloads/dummy-pdf_2.pdf"
+                      ]
+                    },
+                    {
+                      "key": "attachments[2]",
+                      "description": "opsional",
+                      "type": "file",
+                      "uuid": "3f06a311-85e0-4119-87a6-1b002df00880",
+                      "src": []
+                    },
+                    {
+                      "key": "attachments[3]",
+                      "description": "opsional",
+                      "type": "file",
+                      "uuid": "3cb1f232-be8a-458f-af89-169b7ee4ca7b",
+                      "src": []
+                    },
+                    {
+                      "key": "attachments[4]",
+                      "description": "opsional",
+                      "type": "file",
+                      "uuid": "848b57ee-436f-4aaf-ba60-504e4c380cf9",
+                      "src": []
+                    }
+                  ],
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                },
+                "url": {
+                  "raw": "{{url}}/assignments",
+                  "host": [
+                    "{{url}}"
+                  ],
+                  "path": [
+                    "assignments"
+                  ],
+                  "query": [
+                    {
+                      "key": "unit_slug",
+                      "value": "mengenal-htmlcss1",
+                      "uuid": "71f47ef4-9f44-43b0-b029-bdc59e1aee5c",
+                      "disabled": true
+                    },
+                    {
+                      "key": "lesson_slug",
+                      "value": "laravel-routing",
+                      "uuid": "dfca064e-34df-45b1-8a95-2aec577ef59f",
+                      "disabled": true
+                    },
+                    {
+                      "key": "filter[status]",
+                      "value": "",
+                      "description": "draft, published, archieved",
+                      "uuid": "e3227d88-42a6-4962-92f4-7c8d658c345a",
+                      "disabled": true
+                    },
+                    {
+                      "key": "filter[submission_type]",
+                      "value": null,
+                      "description": "text, file, mixed",
+                      "type": "text",
+                      "uuid": "db5f3d7d-e0ae-484e-b742-9e1eff1b15bf",
+                      "disabled": true
+                    },
+                    {
+                      "key": "sort",
+                      "value": null,
+                      "description": "id, title, created_at, updated_at, deadline_at, available_from",
+                      "type": "text",
+                      "uuid": "f6247495-1532-4c5c-a049-e13e4c416cba",
+                      "disabled": true
+                    },
+                    {
+                      "key": "include",
+                      "value": "",
+                      "description": "questions, questionsCount, questionsExists, prerequisites, prerequisitesCount, prerequisitesExists, overrides, overridesCount, overridesExists, creator, creatorCount, creatorExists, lesson, lessonCount, lessonExists",
+                      "type": "text",
+                      "uuid": "c1fd3a75-d70e-4888-8794-369391a4b64a",
+                      "disabled": true
+                    }
+                  ]
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "Perbarui Tugas",
+              "id": "a8f83e89-a9cd-43d0-b8a5-85c7379b69c6",
+              "request": {
+                "auth": {
+                  "type": "bearer",
+                  "bearer": [
+                    {
+                      "key": "token",
+                      "value": "{{access_token_admin}}",
+                      "type": "string"
+                    }
+                  ]
+                },
+                "method": "PUT",
+                "header": [],
+                "body": {
+                  "mode": "formdata",
+                  "formdata": [
+                    {
+                      "key": "title",
+                      "value": " Refleksi Konsep Dasar Laravel (Updated)",
+                      "type": "text",
+                      "uuid": "1b270e20-3124-4d49-9a49-30274790e8ac"
+                    },
+                    {
+                      "key": "description",
+                      "value": " Tuliskan pemahaman Anda tentang Laravel, kelebihan, dan use case-nya. Minimal 200 kata.",
+                      "type": "text",
+                      "uuid": "9f89ccbb-6ea4-4b6c-bf4c-a9c0c058646b"
+                    },
+                    {
+                      "key": "submission_type",
+                      "value": " text",
+                      "type": "text",
+                      "uuid": "4d295310-17e4-4a7d-ab65-7c8b4293aa1a"
+                    },
+                    {
+                      "key": "max_score",
+                      "value": " 100",
+                      "type": "text",
+                      "uuid": "9c74d292-8a12-463e-8b62-f681706d56e0"
+                    },
+                    {
+                      "key": "available_from",
+                      "value": " 2026-01-25 08:00:00",
+                      "type": "text",
+                      "uuid": "1c9a7c2d-76df-4c79-a99c-bfd5fcad273b"
+                    },
+                    {
+                      "key": "deadline_at",
+                      "value": " 2026-02-01 23:59:59",
+                      "type": "text"
+                    },
+                    {
+                      "key": "tolerance_minutes",
+                      "value": " 30",
+                      "type": "text"
+                    },
+                    {
+                      "key": "late_penalty_percent",
+                      "value": " 10",
+                      "type": "text",
+                      "uuid": "d36416bc-e55f-4df2-977d-5641a4609b7e"
+                    },
+                    {
+                      "key": "max_attempts",
+                      "value": " 2",
+                      "type": "text",
+                      "uuid": "0809fb2b-bad7-43fa-8085-4cbfa56e8037"
+                    },
+                    {
+                      "key": "cooldown_minutes",
+                      "value": " 0",
+                      "type": "text",
+                      "uuid": "3b97a81b-bfcd-495e-9507-931224298f76"
+                    },
+                    {
+                      "key": "retake_enabled",
+                      "value": " true",
+                      "type": "text",
+                      "uuid": "1c37738a-5b49-4825-a7ea-51e45592672b"
+                    },
+                    {
+                      "key": "review_mode",
+                      "value": " immediate",
+                      "type": "text",
+                      "uuid": "049f3e47-5d31-4a70-909e-c812bc4c389d"
+                    },
+                    {
+                      "key": "randomization_type",
+                      "value": " static",
+                      "type": "text",
+                      "uuid": "de0203a8-2e7d-45e0-b408-b5bdb4168ff2"
+                    },
+                    {
+                      "key": "question_bank_count",
+                      "value": " ",
+                      "type": "text",
+                      "uuid": "79afbd70-4fca-4fc0-a32c-b06d15465eaf"
+                    },
+                    {
+                      "key": "status",
+                      "value": " published",
+                      "type": "text",
+                      "uuid": "0a501c75-c8a7-40b3-ad6d-d0ebfacba2e8"
+                    },
+                    {
+                      "key": "allow_resubmit",
+                      "value": " true",
+                      "type": "text"
+                    },
+                    {
+                      "key": "attachments[0]",
+                      "description": "opsional",
+                      "type": "file",
+                      "uuid": "ff232d95-182e-47af-9dc5-9695a985ee7d",
+                      "src": []
+                    },
+                    {
+                      "key": "attachments[1]",
+                      "description": "opsional",
+                      "type": "file",
+                      "uuid": "ec53dbdd-72d6-442c-a48e-5dcd8ff6f67e",
+                      "src": []
+                    },
+                    {
+                      "key": "attachments[2]",
+                      "description": "opsional",
+                      "type": "file",
+                      "uuid": "3f06a311-85e0-4119-87a6-1b002df00880",
+                      "src": []
+                    },
+                    {
+                      "key": "attachments[3]",
+                      "description": "opsional",
+                      "type": "file",
+                      "uuid": "3cb1f232-be8a-458f-af89-169b7ee4ca7b",
+                      "src": []
+                    },
+                    {
+                      "key": "attachments[4]",
+                      "description": "opsional",
+                      "type": "file",
+                      "uuid": "848b57ee-436f-4aaf-ba60-504e4c380cf9",
+                      "src": []
+                    },
+                    {
+                      "key": "delete_attachments[0]",
+                      "value": "14",
+                      "type": "text",
+                      "uuid": "13bd1db9-8d9b-4cee-8e90-dfc52124a37d"
+                    },
+                    {
+                      "key": "delete_attachments[1]",
+                      "value": "",
+                      "type": "text",
+                      "uuid": "a128abac-30aa-410a-9a4f-8e95abf8b953"
+                    },
+                    {
+                      "key": "delete_attachments[2]",
+                      "value": "",
+                      "type": "text",
+                      "uuid": "9c99423d-f845-4eda-9a72-fe1c583c670f"
+                    },
+                    {
+                      "key": "delete_attachments[3]",
+                      "value": "",
+                      "type": "text",
+                      "uuid": "d3070468-f41d-4302-9ff1-66b000356d33"
+                    },
+                    {
+                      "key": "delete_attachments[4]",
+                      "value": "",
+                      "type": "text",
+                      "uuid": "9bac4ad5-3d30-4789-b249-5936a3931505"
+                    }
+                  ],
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                },
+                "url": {
+                  "raw": "{{url}}/assignments/:assignmentId",
+                  "host": [
+                    "{{url}}"
+                  ],
+                  "path": [
+                    "assignments",
+                    ":assignmentId"
+                  ],
+                  "query": [
+                    {
+                      "key": "unit_slug",
+                      "value": "mengenal-htmlcss1",
+                      "uuid": "71f47ef4-9f44-43b0-b029-bdc59e1aee5c",
+                      "disabled": true
+                    },
+                    {
+                      "key": "lesson_slug",
+                      "value": "laravel-routing",
+                      "uuid": "dfca064e-34df-45b1-8a95-2aec577ef59f",
+                      "disabled": true
+                    },
+                    {
+                      "key": "filter[status]",
+                      "value": "",
+                      "description": "draft, published, archieved",
+                      "uuid": "e3227d88-42a6-4962-92f4-7c8d658c345a",
+                      "disabled": true
+                    },
+                    {
+                      "key": "filter[submission_type]",
+                      "value": null,
+                      "description": "text, file, mixed",
+                      "type": "text",
+                      "uuid": "db5f3d7d-e0ae-484e-b742-9e1eff1b15bf",
+                      "disabled": true
+                    },
+                    {
+                      "key": "sort",
+                      "value": null,
+                      "description": "id, title, created_at, updated_at, deadline_at, available_from",
+                      "type": "text",
+                      "uuid": "f6247495-1532-4c5c-a049-e13e4c416cba",
+                      "disabled": true
+                    },
+                    {
+                      "key": "include",
+                      "value": "",
+                      "description": "questions, questionsCount, questionsExists, prerequisites, prerequisitesCount, prerequisitesExists, overrides, overridesCount, overridesExists, creator, creatorCount, creatorExists, lesson, lessonCount, lessonExists",
+                      "type": "text",
+                      "uuid": "c1fd3a75-d70e-4888-8794-369391a4b64a",
+                      "disabled": true
+                    }
+                  ],
+                  "variable": [
+                    {
+                      "key": "assignmentId",
+                      "value": "27",
+                      "uuid": "369ce4be-acc2-4669-ae1c-c6d2490c550f"
+                    }
+                  ]
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "Publish Tugas",
+              "id": "22640bb2-2dfa-4832-a587-dee3aaf38a72",
+              "request": {
+                "auth": {
+                  "type": "bearer",
+                  "bearer": [
+                    {
+                      "key": "token",
+                      "value": "{{access_token_admin}}",
+                      "type": "string"
+                    }
+                  ]
+                },
+                "method": "PUT",
+                "header": [],
+                "url": {
+                  "raw": "{{url}}/assignments/:assignmentId/publish",
+                  "host": [
+                    "{{url}}"
+                  ],
+                  "path": [
+                    "assignments",
+                    ":assignmentId",
+                    "publish"
+                  ],
+                  "query": [
+                    {
+                      "key": "unit_slug",
+                      "value": "mengenal-htmlcss1",
+                      "uuid": "71f47ef4-9f44-43b0-b029-bdc59e1aee5c",
+                      "disabled": true
+                    },
+                    {
+                      "key": "lesson_slug",
+                      "value": "laravel-routing",
+                      "uuid": "dfca064e-34df-45b1-8a95-2aec577ef59f",
+                      "disabled": true
+                    },
+                    {
+                      "key": "filter[status]",
+                      "value": "",
+                      "description": "draft, published, archieved",
+                      "uuid": "e3227d88-42a6-4962-92f4-7c8d658c345a",
+                      "disabled": true
+                    },
+                    {
+                      "key": "filter[submission_type]",
+                      "value": null,
+                      "description": "text, file, mixed",
+                      "type": "text",
+                      "uuid": "db5f3d7d-e0ae-484e-b742-9e1eff1b15bf",
+                      "disabled": true
+                    },
+                    {
+                      "key": "sort",
+                      "value": null,
+                      "description": "id, title, created_at, updated_at, deadline_at, available_from",
+                      "type": "text",
+                      "uuid": "f6247495-1532-4c5c-a049-e13e4c416cba",
+                      "disabled": true
+                    },
+                    {
+                      "key": "include",
+                      "value": "",
+                      "description": "questions, questionsCount, questionsExists, prerequisites, prerequisitesCount, prerequisitesExists, overrides, overridesCount, overridesExists, creator, creatorCount, creatorExists, lesson, lessonCount, lessonExists",
+                      "type": "text",
+                      "uuid": "c1fd3a75-d70e-4888-8794-369391a4b64a",
+                      "disabled": true
+                    }
+                  ],
+                  "variable": [
+                    {
+                      "key": "assignmentId",
+                      "value": "27",
+                      "uuid": "b97709b5-7ff0-434b-ac67-e5d36c46177e"
+                    }
+                  ]
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "Unpublish Tugas",
+              "id": "0a29f878-3475-46dd-95d6-996c4c7eb98e",
+              "request": {
+                "auth": {
+                  "type": "bearer",
+                  "bearer": [
+                    {
+                      "key": "token",
+                      "value": "{{access_token_admin}}",
+                      "type": "string"
+                    }
+                  ]
+                },
+                "method": "PUT",
+                "header": [],
+                "url": {
+                  "raw": "{{url}}/assignments/:assignmentId/unpublish",
+                  "host": [
+                    "{{url}}"
+                  ],
+                  "path": [
+                    "assignments",
+                    ":assignmentId",
+                    "unpublish"
+                  ],
+                  "query": [
+                    {
+                      "key": "unit_slug",
+                      "value": "mengenal-htmlcss1",
+                      "uuid": "71f47ef4-9f44-43b0-b029-bdc59e1aee5c",
+                      "disabled": true
+                    },
+                    {
+                      "key": "lesson_slug",
+                      "value": "laravel-routing",
+                      "uuid": "dfca064e-34df-45b1-8a95-2aec577ef59f",
+                      "disabled": true
+                    },
+                    {
+                      "key": "filter[status]",
+                      "value": "",
+                      "description": "draft, published, archieved",
+                      "uuid": "e3227d88-42a6-4962-92f4-7c8d658c345a",
+                      "disabled": true
+                    },
+                    {
+                      "key": "filter[submission_type]",
+                      "value": null,
+                      "description": "text, file, mixed",
+                      "type": "text",
+                      "uuid": "db5f3d7d-e0ae-484e-b742-9e1eff1b15bf",
+                      "disabled": true
+                    },
+                    {
+                      "key": "sort",
+                      "value": null,
+                      "description": "id, title, created_at, updated_at, deadline_at, available_from",
+                      "type": "text",
+                      "uuid": "f6247495-1532-4c5c-a049-e13e4c416cba",
+                      "disabled": true
+                    },
+                    {
+                      "key": "include",
+                      "value": "",
+                      "description": "questions, questionsCount, questionsExists, prerequisites, prerequisitesCount, prerequisitesExists, overrides, overridesCount, overridesExists, creator, creatorCount, creatorExists, lesson, lessonCount, lessonExists",
+                      "type": "text",
+                      "uuid": "c1fd3a75-d70e-4888-8794-369391a4b64a",
+                      "disabled": true
+                    }
+                  ],
+                  "variable": [
+                    {
+                      "key": "assignmentId",
+                      "value": "27",
+                      "uuid": "b97709b5-7ff0-434b-ac67-e5d36c46177e"
+                    }
+                  ]
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "Arsipkan Tugas",
+              "id": "04d6ca07-6794-4166-9355-77f8c05f4525",
+              "request": {
+                "auth": {
+                  "type": "bearer",
+                  "bearer": [
+                    {
+                      "key": "token",
+                      "value": "{{access_token_admin}}",
+                      "type": "string"
+                    }
+                  ]
+                },
+                "method": "PUT",
+                "header": [],
+                "url": {
+                  "raw": "{{url}}/assignments/:assignmentId/archived",
+                  "host": [
+                    "{{url}}"
+                  ],
+                  "path": [
+                    "assignments",
+                    ":assignmentId",
+                    "archived"
+                  ],
+                  "query": [
+                    {
+                      "key": "unit_slug",
+                      "value": "mengenal-htmlcss1",
+                      "uuid": "71f47ef4-9f44-43b0-b029-bdc59e1aee5c",
+                      "disabled": true
+                    },
+                    {
+                      "key": "lesson_slug",
+                      "value": "laravel-routing",
+                      "uuid": "dfca064e-34df-45b1-8a95-2aec577ef59f",
+                      "disabled": true
+                    },
+                    {
+                      "key": "filter[status]",
+                      "value": "",
+                      "description": "draft, published, archieved",
+                      "uuid": "e3227d88-42a6-4962-92f4-7c8d658c345a",
+                      "disabled": true
+                    },
+                    {
+                      "key": "filter[submission_type]",
+                      "value": null,
+                      "description": "text, file, mixed",
+                      "type": "text",
+                      "uuid": "db5f3d7d-e0ae-484e-b742-9e1eff1b15bf",
+                      "disabled": true
+                    },
+                    {
+                      "key": "sort",
+                      "value": null,
+                      "description": "id, title, created_at, updated_at, deadline_at, available_from",
+                      "type": "text",
+                      "uuid": "f6247495-1532-4c5c-a049-e13e4c416cba",
+                      "disabled": true
+                    },
+                    {
+                      "key": "include",
+                      "value": "",
+                      "description": "questions, questionsCount, questionsExists, prerequisites, prerequisitesCount, prerequisitesExists, overrides, overridesCount, overridesExists, creator, creatorCount, creatorExists, lesson, lessonCount, lessonExists",
+                      "type": "text",
+                      "uuid": "c1fd3a75-d70e-4888-8794-369391a4b64a",
+                      "disabled": true
+                    }
+                  ],
+                  "variable": [
+                    {
+                      "key": "assignmentId",
+                      "value": "27",
+                      "uuid": "b97709b5-7ff0-434b-ac67-e5d36c46177e"
+                    }
+                  ]
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "Hapus Tugas",
+              "id": "b3c8d18d-6a48-4e96-86b5-6280f8aa5c0a",
+              "request": {
+                "auth": {
+                  "type": "bearer",
+                  "bearer": [
+                    {
+                      "key": "token",
+                      "value": "{{access_token_admin}}",
+                      "type": "string"
+                    }
+                  ]
+                },
+                "method": "DELETE",
+                "header": [],
+                "url": {
+                  "raw": "{{url}}/assignments/:assignmentId",
+                  "host": [
+                    "{{url}}"
+                  ],
+                  "path": [
+                    "assignments",
+                    ":assignmentId"
+                  ],
+                  "query": [
+                    {
+                      "key": "unit_slug",
+                      "value": "mengenal-htmlcss1",
+                      "uuid": "71f47ef4-9f44-43b0-b029-bdc59e1aee5c",
+                      "disabled": true
+                    },
+                    {
+                      "key": "lesson_slug",
+                      "value": "laravel-routing",
+                      "uuid": "dfca064e-34df-45b1-8a95-2aec577ef59f",
+                      "disabled": true
+                    },
+                    {
+                      "key": "filter[status]",
+                      "value": "",
+                      "description": "draft, published, archieved",
+                      "uuid": "e3227d88-42a6-4962-92f4-7c8d658c345a",
+                      "disabled": true
+                    },
+                    {
+                      "key": "filter[submission_type]",
+                      "value": null,
+                      "description": "text, file, mixed",
+                      "type": "text",
+                      "uuid": "db5f3d7d-e0ae-484e-b742-9e1eff1b15bf",
+                      "disabled": true
+                    },
+                    {
+                      "key": "sort",
+                      "value": null,
+                      "description": "id, title, created_at, updated_at, deadline_at, available_from",
+                      "type": "text",
+                      "uuid": "f6247495-1532-4c5c-a049-e13e4c416cba",
+                      "disabled": true
+                    },
+                    {
+                      "key": "include",
+                      "value": "",
+                      "description": "questions, questionsCount, questionsExists, prerequisites, prerequisitesCount, prerequisitesExists, overrides, overridesCount, overridesExists, creator, creatorCount, creatorExists, lesson, lessonCount, lessonExists",
+                      "type": "text",
+                      "uuid": "c1fd3a75-d70e-4888-8794-369391a4b64a",
+                      "disabled": true
+                    }
+                  ],
+                  "variable": [
+                    {
+                      "key": "assignmentId",
+                      "value": "26",
+                      "uuid": "b97709b5-7ff0-434b-ac67-e5d36c46177e"
                     }
                   ]
                 }
@@ -5030,7 +5943,35 @@
         },
         {
           "name": "Pertanyaan",
-          "item": [],
+          "item": [
+            {
+              "name": "New Request",
+              "id": "456a6774-5f58-4d49-a89f-540ac4873cb3",
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{url}}/assignments/:assignmentId/questions",
+                  "host": [
+                    "{{url}}"
+                  ],
+                  "path": [
+                    "assignments",
+                    ":assignmentId",
+                    "questions"
+                  ],
+                  "variable": [
+                    {
+                      "key": "assignmentId",
+                      "value": "",
+                      "uuid": "e7fc08eb-ab5b-4bd9-804d-e8ddfabb8a04"
+                    }
+                  ]
+                }
+              },
+              "response": []
+            }
+          ],
           "id": "29de851a-511b-4e50-b0c3-1c083f8816d4"
         },
         {

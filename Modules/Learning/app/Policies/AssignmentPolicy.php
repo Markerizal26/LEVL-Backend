@@ -44,9 +44,17 @@ class AssignmentPolicy
         return false;
     }
 
-    public function create(User $user): bool
+    public function create(User $user, \Modules\Schemes\Models\Course $course): bool
     {
-        return $user->hasRole('Superadmin') || $user->hasRole('Admin') || $user->hasRole('Instructor');
+        if ($user->hasRole('Superadmin')) {
+            return true;
+        }
+
+        if ($user->hasRole('Admin')) {
+            return $course->admins()->where('user_id', $user->id)->exists();
+        }
+
+        return $user->hasRole('Instructor') && $course->instructor_id === $user->id;
     }
 
     public function update(User $user, Assignment $assignment): bool
@@ -55,8 +63,13 @@ class AssignmentPolicy
             return true;
         }
 
-        $assignment->loadMissing('lesson.unit.course');
-        $course = $assignment->lesson?->unit?->course;
+        $courseId = $assignment->getCourseId();
+        
+        if (!$courseId) {
+            return false;
+        }
+
+        $course = \Modules\Schemes\Models\Course::find($courseId);
         
         if (!$course) {
             return false;
@@ -75,8 +88,13 @@ class AssignmentPolicy
             return true;
         }
 
-        $assignment->loadMissing('lesson.unit.course');
-        $course = $assignment->lesson?->unit?->course;
+        $courseId = $assignment->getCourseId();
+        
+        if (!$courseId) {
+            return false;
+        }
+
+        $course = \Modules\Schemes\Models\Course::find($courseId);
         
         if (!$course) {
             return false;
@@ -100,8 +118,13 @@ class AssignmentPolicy
             return true;
         }
 
-        $assignment->loadMissing('lesson.unit.course');
-        $course = $assignment->lesson?->unit?->course;
+        $courseId = $assignment->getCourseId();
+        
+        if (!$courseId) {
+            return false;
+        }
+
+        $course = \Modules\Schemes\Models\Course::find($courseId);
         
         if (!$course) {
             return false;
@@ -125,8 +148,13 @@ class AssignmentPolicy
             return true;
         }
 
-        $assignment->loadMissing('lesson.unit.course');
-        $course = $assignment->lesson?->unit?->course;
+        $courseId = $assignment->getCourseId();
+        
+        if (!$courseId) {
+            return false;
+        }
+
+        $course = \Modules\Schemes\Models\Course::find($courseId);
         
         if (!$course) {
             return false;

@@ -8,7 +8,7 @@ return new class extends Migration
 {
     public function up(): void
     {
-        Schema::create('questions', function (Blueprint $table) {
+        Schema::create('assignment_questions', function (Blueprint $table) {
             $table->id();
             $table->foreignId('assignment_id')->constrained()->onDelete('cascade');
 
@@ -41,14 +41,14 @@ return new class extends Migration
             $table->timestamps();
 
             
-            $table->index('assignment_id', 'idx_questions_assignment');
-            $table->index('type', 'idx_questions_type');
-            $table->index('order', 'idx_questions_order');
+            $table->index('assignment_id', 'idx_assignment_questions_assignment');
+            $table->index('type', 'idx_assignment_questions_type');
+            $table->index('order', 'idx_assignment_questions_order');
         });
     }
 
     public function down(): void
     {
-        Schema::dropIfExists('questions');
+        Schema::dropIfExists('assignment_questions');
     }
 };

@@ -43,7 +43,9 @@ Route::prefix('v1')->scopeBindings()->group(function () {
     // Authenticated unit routes
     Route::middleware(['auth:api'])->group(function () {
         Route::get('courses/{course:slug}/units', [UnitController::class, 'index'])->name('courses.units.index');
-        Route::get('courses/{course:slug}/units/{unit:slug}', [UnitController::class, 'show'])->name('courses.units.show');
+        Route::get('courses/{course:slug}/units/{unit:slug}', [UnitController::class, 'show'])
+            ->middleware('can:view,unit')
+            ->name('courses.units.show');
     });
 
     // Unit management routes (Admin, Instructor)
@@ -67,6 +69,7 @@ Route::prefix('v1')->scopeBindings()->group(function () {
         Route::get('courses/{course:slug}/units/{unit:slug}/lessons', [LessonController::class, 'index'])
             ->name('courses.units.lessons.index');
         Route::get('courses/{course:slug}/units/{unit:slug}/lessons/{lesson:slug}', [LessonController::class, 'show'])
+            ->middleware('can:view,lesson')
             ->name('courses.units.lessons.show');
         Route::get('courses/{course:slug}/progress', [ProgressController::class, 'show'])
             ->name('courses.progress.show');

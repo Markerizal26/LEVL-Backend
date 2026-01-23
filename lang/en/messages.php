@@ -425,6 +425,26 @@ return [
         'invalid_prerequisite_exemption' => 'Prerequisite exemption must be an array of prerequisite IDs',
         'invalid_prerequisite_id' => 'Prerequisite ID :id is not a valid prerequisite for this assignment',
         'not_actual_prerequisite' => 'Prerequisite ID :id is not actually a prerequisite of this assignment',
+        'deadline_extension_required' => 'Deadline extension is required.',
+        'deadline_extension_invalid_format' => 'Invalid deadline extension format.',
+        'invalid_prerequisites_list' => 'The following prerequisite IDs are invalid for this assignment: :ids',
+        'list_retrieved' => 'Assignment list retrieved successfully.',
+        'created' => 'Assignment created successfully.',
+        'updated' => 'Assignment updated successfully.',
+        'deleted' => 'Assignment deleted successfully.',
+        'published' => 'Assignment published successfully.',
+        'unpublished' => 'Assignment unpublished successfully.',
+        'duplicated' => 'Assignment duplicated successfully.',
+        'archived' => 'Assignment archived successfully.',
+        'invalid_scope' => 'Invalid assignment scope.',
+        'lesson_required' => 'Lesson is required.',
+        'course_slug_required' => 'Course slug is required.',
+        'invalid_scope_hierarchy' => 'The provided scope does not belong to the parent context (e.g., Lesson not in Course).',
+    ],
+
+    // Questions Module
+    'questions' => [
+        'reordered' => 'Questions reordered successfully.',
     ],
 
     // Submissions Module

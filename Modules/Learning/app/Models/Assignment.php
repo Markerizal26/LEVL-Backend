@@ -13,6 +13,7 @@ use Modules\Learning\Enums\AssignmentStatus;
 use Modules\Learning\Enums\RandomizationType;
 use Modules\Learning\Enums\ReviewMode;
 use Modules\Learning\Enums\SubmissionType;
+use Laravel\Scout\Searchable;
 
 /**
  * @property int $id
@@ -51,8 +52,33 @@ use Modules\Learning\Enums\SubmissionType;
  * @property-read \Modules\Schemes\Models\Lesson|\Modules\Schemes\Models\Unit|\Modules\Schemes\Models\Course|null $assignable
  */
 
-class Assignment extends Model
+use Spatie\MediaLibrary\HasMedia;
+use Spatie\MediaLibrary\InteractsWithMedia;
+use Spatie\MediaLibrary\MediaCollections\Models\Media;
+
+class Assignment extends Model implements HasMedia
 {
+    use Searchable, InteractsWithMedia;
+
+    public function registerMediaCollections(): void
+    {
+        $this->addMediaCollection('attachments')
+            ->useDisk('do')
+            ->acceptsMimeTypes([
+                'application/pdf',
+                'application/msword',
+                'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+                'application/vnd.ms-excel',
+                'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+                'application/vnd.ms-powerpoint',
+                'application/vnd.openxmlformats-officedocument.presentationml.presentation',
+                'application/zip',
+                'image/jpeg',
+                'image/png',
+                'image/webp'
+            ]);
+    }
+
     protected $fillable = [
         'lesson_id',
         'assignable_type',
@@ -222,14 +248,41 @@ class Assignment extends Model
 
         public function scopeForUnit($query, int $unitId)
     {
-        return $query->where('assignable_type', \Modules\Schemes\Models\Unit::class)
-            ->where('assignable_id', $unitId);
+        $lessonIds = \Modules\Schemes\Models\Lesson::where('unit_id', $unitId)->pluck('id')->toArray();
+
+        return $query->where(function ($q) use ($unitId, $lessonIds) {
+            $q->where(function ($subQ) use ($unitId) {
+                $subQ->where('assignable_type', \Modules\Schemes\Models\Unit::class)
+                    ->where('assignable_id', $unitId);
+            })
+            ->orWhere(function ($subQ) use ($lessonIds) {
+                $subQ->where('assignable_type', \Modules\Schemes\Models\Lesson::class)
+                    ->whereIn('assignable_id', $lessonIds);
+            })
+            ->orWhereIn('lesson_id', $lessonIds);
+        });
     }
 
         public function scopeForCourse($query, int $courseId)
     {
-        return $query->where('assignable_type', \Modules\Schemes\Models\Course::class)
-            ->where('assignable_id', $courseId);
+        $unitIds = \Modules\Schemes\Models\Unit::where('course_id', $courseId)->pluck('id')->toArray();
+        $lessonIds = \Modules\Schemes\Models\Lesson::whereIn('unit_id', $unitIds)->pluck('id')->toArray();
+
+        return $query->where(function ($q) use ($courseId, $unitIds, $lessonIds) {
+            $q->where(function ($subQ) use ($courseId) {
+                $subQ->where('assignable_type', \Modules\Schemes\Models\Course::class)
+                    ->where('assignable_id', $courseId);
+            })
+            ->orWhere(function ($subQ) use ($unitIds) {
+                $subQ->where('assignable_type', \Modules\Schemes\Models\Unit::class)
+                    ->whereIn('assignable_id', $unitIds);
+            })
+            ->orWhere(function ($subQ) use ($lessonIds) {
+                $subQ->where('assignable_type', \Modules\Schemes\Models\Lesson::class)
+                    ->whereIn('assignable_id', $lessonIds);
+            })
+            ->orWhereIn('lesson_id', $lessonIds);
+        });
     }
 
         public function scopePublished($query)

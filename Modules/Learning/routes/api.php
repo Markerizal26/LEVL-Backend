@@ -5,9 +5,9 @@ use Modules\Learning\Http\Controllers\AssignmentController;
 use Modules\Learning\Http\Controllers\SubmissionController;
 
 Route::middleware(['auth:api'])->prefix('v1')->scopeBindings()->group(function () {
-    // Assignment routes - authenticated users with enrollment checks via policy
-    Route::get('courses/{course:slug}/units/{unit:slug}/lessons/{lesson:slug}/assignments', [AssignmentController::class, 'index'])
-        ->name('lessons.assignments.index');
+    Route::get('courses/{course:slug}/assignments', [AssignmentController::class, 'index'])
+        ->middleware('can:viewAssignments,course')
+        ->name('courses.assignments.index');
 
     Route::get('assignments/{assignment}', [AssignmentController::class, 'show'])
         ->middleware('can:view,assignment')
@@ -17,25 +17,25 @@ Route::middleware(['auth:api'])->prefix('v1')->scopeBindings()->group(function (
         ->middleware('can:view,assignment')
         ->name('assignments.questions.index');
 
-    Route::get('assignments/{assignment}/check-prerequisites', [AssignmentController::class, 'checkPrerequisites'])
-        ->name('assignments.check-prerequisites');
+    Route::get('assignments/{assignment}/prerequisites/check', [AssignmentController::class, 'checkPrerequisites'])
+        ->name('assignments.prerequisites.check');
 
-    Route::get('assignments/{assignment}/check-deadline', [SubmissionController::class, 'checkDeadline'])
-        ->name('assignments.check-deadline');
+    Route::get('assignments/{assignment}/deadline/check', [SubmissionController::class, 'checkDeadline'])
+        ->name('assignments.deadline.check');
 
-    Route::get('assignments/{assignment}/check-attempts', [SubmissionController::class, 'checkAttempts'])
-        ->name('assignments.check-attempts');
+    Route::get('assignments/{assignment}/attempts/check', [SubmissionController::class, 'checkAttempts'])
+        ->name('assignments.attempts.check');
 
-    Route::get('assignments/{assignment}/my-submissions', [SubmissionController::class, 'mySubmissions'])
-        ->name('assignments.my-submissions');
+    Route::get('assignments/{assignment}/submissions/me', [SubmissionController::class, 'mySubmissions'])
+        ->name('assignments.submissions.me');
 
-    Route::get('assignments/{assignment}/highest-submission', [SubmissionController::class, 'highestSubmission'])
-        ->name('assignments.highest-submission');
+    Route::get('assignments/{assignment}/submissions/highest', [SubmissionController::class, 'highestSubmission'])
+        ->name('assignments.submissions.highest');
 
     // Assignment management routes (Admin, Instructor, Superadmin only)
     Route::middleware(['role:Superadmin|Admin|Instructor'])->group(function () {
-        Route::post('courses/{course:slug}/units/{unit:slug}/lessons/{lesson:slug}/assignments', [AssignmentController::class, 'store'])
-            ->name('lessons.assignments.store');
+        Route::post('assignments', [AssignmentController::class, 'store'])
+            ->name('assignments.store');
 
         Route::put('assignments/{assignment}', [AssignmentController::class, 'update'])
             ->middleware('can:update,assignment')
@@ -53,6 +53,10 @@ Route::middleware(['auth:api'])->prefix('v1')->scopeBindings()->group(function (
             ->middleware('can:update,assignment')
             ->name('assignments.unpublish');
 
+        Route::put('assignments/{assignment}/archived', [AssignmentController::class, 'archive'])
+            ->middleware('can:update,assignment')
+            ->name('assignments.archive');
+
         Route::post('assignments/{assignment}/questions', [AssignmentController::class, 'addQuestion'])
             ->middleware('can:update,assignment')
             ->name('assignments.questions.store');
@@ -64,6 +68,10 @@ Route::middleware(['auth:api'])->prefix('v1')->scopeBindings()->group(function (
         Route::delete('assignments/{assignment}/questions/{question}', [AssignmentController::class, 'deleteQuestion'])
             ->middleware('can:update,assignment')
             ->name('assignments.questions.destroy');
+
+        Route::post('assignments/{assignment}/questions/reorder', [AssignmentController::class, 'reorderQuestions'])
+            ->middleware('can:update,assignment')
+            ->name('assignments.questions.reorder');
 
         Route::get('assignments/{assignment}/overrides', [AssignmentController::class, 'listOverrides'])
             ->middleware('can:viewOverrides,assignment')

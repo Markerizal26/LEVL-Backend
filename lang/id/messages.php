@@ -415,9 +415,26 @@ return [
         'invalid_prerequisite_exemption' => 'Pengecualian prasyarat harus berupa array dari ID prasyarat',
         'invalid_prerequisite_id' => 'ID prasyarat :id bukan prasyarat yang valid untuk tugas ini',
         'not_actual_prerequisite' => 'ID prasyarat :id sebenarnya bukan prasyarat dari tugas ini',
-        'deadline_extension_required' => 'Deadline perpanjangan wajib diisi saat memberikan override deadline.',
-        'deadline_extension_invalid_format' => 'Deadline perpanjangan harus berupa format tanggal/waktu yang valid.',
-        'invalid_prerequisites_list' => 'ID prasyarat tidak valid: :ids',
+        'deadline_extension_required' => 'Perpanjangan batas waktu diperlukan.',
+        'deadline_extension_invalid_format' => 'Format perpanjangan batas waktu tidak valid.',
+        'invalid_prerequisites_list' => 'ID prasyarat berikut tidak valid untuk tugas ini: :ids',
+        'list_retrieved' => 'Daftar tugas berhasil diambil.',
+        'created' => 'Tugas berhasil dibuat.',
+        'updated' => 'Tugas berhasil diperbarui.',
+        'deleted' => 'Tugas berhasil dihapus.',
+        'published' => 'Tugas berhasil dipublikasikan.',
+        'unpublished' => 'Tugas berhasil dibatalkan publikasinya.',
+        'duplicated' => 'Tugas berhasil diduplikasi.',
+        'archived' => 'Tugas berhasil diarsipkan.',
+        'invalid_scope' => 'Scope assignment tidak valid.',
+        'lesson_required' => 'Lesson wajib diisi.',
+        'course_slug_required' => 'Slug course wajib diisi.',
+        'invalid_scope_hierarchy' => 'Scope yang diberikan tidak sesuai dengan parent-nya (misal: Lesson tidak ada di Course tersebut).',
+    ],
+
+    // Questions Module
+    'questions' => [
+        'reordered' => 'Pertanyaan berhasil diurutkan ulang.',
     ],
 
     // Submissions Module

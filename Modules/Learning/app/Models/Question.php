@@ -11,6 +11,7 @@ use Modules\Learning\Enums\QuestionType;
 
 class Question extends Model
 {
+    protected $table = 'assignment_questions';
     protected $fillable = [
         'assignment_id',
         'type',
