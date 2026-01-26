@@ -64,6 +64,14 @@ class GradeAndAppealSeeder extends Seeder
 
                     $instructorId = $instructorIds[array_rand($instructorIds)];
 
+                    // ✅ Determine grade status randomly to include all possible statuses
+                    $statusRandom = rand(1, 100);
+                    $gradeStatus = match (true) {
+                        $statusRandom <= 60 => GradeStatus::Graded->value,      // 60% of grades are 'graded'
+                        $statusRandom <= 80 => GradeStatus::Pending->value,    // 20% of grades are 'pending'
+                        default => GradeStatus::Reviewed->value,               // 20% of grades are 'reviewed'
+                    };
+
                     // ✅ Build grade data
                     $grades[] = [
                         'source_id' => $assignment->id,
@@ -71,12 +79,12 @@ class GradeAndAppealSeeder extends Seeder
                         'user_id' => $submission->user_id,
                         'submission_id' => $submission->id,
                         'graded_by' => $instructorId,
-                        'score' => rand(0, $assignment->max_score),
+                        'score' => $gradeStatus === GradeStatus::Pending->value ? 0 : rand(0, $assignment->max_score), // Use 0 instead of null for pending grades
                         'max_score' => $assignment->max_score,
-                        'feedback' => fake()->paragraph(),
-                        'status' => GradeStatus::Graded->value,
-                        'graded_at' => now()->subDays(rand(1, 20)),
-                        'released_at' => now()->subDays(rand(1, 15)),
+                        'feedback' => $gradeStatus === GradeStatus::Pending->value ? null : fake()->paragraph(),
+                        'status' => $gradeStatus,
+                        'graded_at' => $gradeStatus === GradeStatus::Pending->value ? null : now()->subDays(rand(1, 20)),
+                        'released_at' => $gradeStatus === GradeStatus::Pending->value ? null : now()->subDays(rand(1, 15)),
                         'created_at' => now(),
                         'updated_at' => now(),
                     ];

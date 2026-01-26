@@ -397,7 +397,7 @@ class SubmissionService implements SubmissionServiceInterface
 
     public function submitAnswers(int $submissionId, array $answers): Submission
     {
-        return DB::transaction(function () use ($submissionId, $answers) {
+        $submission = DB::transaction(function () use ($submissionId, $answers) {
             $submission = Submission::findOrFail($submissionId);
             $assignment = $submission->assignment;
             $studentId = $submission->user_id;
@@ -469,6 +469,7 @@ class SubmissionService implements SubmissionServiceInterface
             return $submission->fresh(['assignment', 'user', 'answers']);
         });
 
+        // Auto-grade the submission after the transaction completes
         if ($submission->state === SubmissionState::Submitted || $submission->state === SubmissionState::PendingManualGrading) {
             try {
                 $this->gradingService->autoGrade($submission->id);

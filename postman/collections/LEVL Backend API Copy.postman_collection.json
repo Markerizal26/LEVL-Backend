@@ -4943,7 +4943,7 @@
                 "method": "GET",
                 "header": [],
                 "url": {
-                  "raw": "{{url}}/courses/:courseSlug/assignments",
+                  "raw": "{{url}}/courses/:courseSlug/assignments?include=questions",
                   "host": [
                     "{{url}}"
                   ],
@@ -5009,17 +5009,15 @@
                     },
                     {
                       "key": "include",
-                      "value": "",
+                      "value": "questions",
                       "description": "questions, questionsCount, questionsExists, prerequisites, prerequisitesCount, prerequisitesExists, overrides, overridesCount, overridesExists, creator, creatorCount, creatorExists, lesson, lessonCount, lessonExists",
-                      "type": "text",
-                      "uuid": "c1fd3a75-d70e-4888-8794-369391a4b64a",
-                      "disabled": true
+                      "uuid": "c1fd3a75-d70e-4888-8794-369391a4b64a"
                     }
                   ],
                   "variable": [
                     {
                       "key": "courseSlug",
-                      "value": "eius-nemo-totam-nihil-nulla"
+                      "value": "tenetur-porro-et-qui-et\""
                     }
                   ]
                 }
@@ -5035,7 +5033,7 @@
                   "bearer": [
                     {
                       "key": "token",
-                      "value": "{{access_token_student}}",
+                      "value": "{{access_token_superadmin}}",
                       "type": "string"
                     }
                   ]
@@ -5118,7 +5116,7 @@
                   "variable": [
                     {
                       "key": "assignmentId",
-                      "value": "24"
+                      "value": "5510"
                     }
                   ]
                 }
