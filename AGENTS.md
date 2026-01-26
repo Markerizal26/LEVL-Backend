@@ -2037,3 +2037,46 @@ activity()
     ->withProperties(['id' => $model->id, 'title' => $model->title])
     ->log(__('messages.assignments.created'));
 ```
+
+# Redis Usage & Chunking
+
+## Redis Key Management
+- **Prefixing**: All Redis keys MUST use a consistent prefix per module or feature (e.g., `course:{id}:enrollments`).
+- **Expiration**: All cache keys MUST have an expiration time (TTL) to prevent memory leaks, unless explicitly designed as persistent.
+- **Key Scanning**: NEVER use `keys *` command which blocks the single-threaded Redis instance. Use `SCAN` cursor-based iteration instead.
+
+## Redis Chunking Rules (MANDATORY)
+- **Large Datasets**: When retrieving large datasets (e.g., thousands of items) from Redis, you **MUST use chunking**.
+- **Scan Chunking**: Use `scan` with a `count` hint (e.g., 100-1000) to retrieve keys incrementally.
+- **Pipeline Implementation**: When performing multiple operations (e.g., fetching values for scanning keys), use **Redis Pipelines** (`Redis::pipeline()`) to batch commands and reduce network round-trips.
+- **Memory Protection**: Processing loops MUST process data in chunks to avoid identifying all keys and loading all values into PHP memory at once.
+
+### Example of Redis Chunking
+```php
+// ✅ CORRECT - Using Scan with Chunking
+$cursor = null;
+do {
+    // Scan for keys matching pattern with count hint
+    // This assumes using a Redis client facade that supports scan, or raw command
+    [$cursor, $keys] = Redis::scan($cursor, ['MATCH' => 'user:*:activity', 'COUNT' => 100]);
+    
+    if (!empty($keys)) {
+        // Pipeline the GET commands for this batch of keys
+        $values = Redis::pipeline(function ($pipe) use ($keys) {
+            foreach ($keys as $key) {
+                $pipe->get($key);
+            }
+        });
+        
+        // Process this batch
+        foreach ($values as $value) {
+            $this->processActivity(json_decode($value, true));
+        }
+    }
+} while ($cursor > 0);
+```
+
+### Forbidden Practices
+- ❌ `Redis::keys('pattern:*')` - Blocking operation on large datasets.
+- ❌ Loading 10,000+ items into a single PHP array from Redis without pagination/chunking.
+- ❌ Using Redis as a primary persistent store without DB backup (Cache-Aside pattern preferred).

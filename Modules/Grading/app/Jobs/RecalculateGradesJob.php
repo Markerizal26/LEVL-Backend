@@ -51,46 +51,54 @@ class RecalculateGradesJob implements ShouldQueue
             return;
         }
 
-        $answers = Answer::where('question_id', $this->questionId)
+        $strategy = GradingStrategyFactory::make($question->type);
+        $affectedSubmissionIds = collect();
+        $processedCount = 0;
+
+        Answer::where('question_id', $this->questionId)
             ->where('is_auto_graded', true)
             ->with('submission')
-            ->get();
+            ->chunkById(100, function ($answers) use ($question, $strategy, &$affectedSubmissionIds, &$processedCount) {
+                foreach ($answers as $answer) {
+                    if (! $answer->submission) {
+                        continue;
+                    }
 
-        if ($answers->isEmpty()) {
+                    $oldScore = $answer->score;
+                    $newScore = $strategy->grade($question, $answer);
+
+                    if ($oldScore != $newScore) {
+                        $answer->update(['score' => $newScore]);
+                        $affectedSubmissionIds->push($answer->submission_id);
+                    }
+                    $processedCount++;
+                }
+            });
+
+        if ($processedCount === 0) {
             Log::info('RecalculateGradesJob: No auto-graded answers found', [
                 'question_id' => $this->questionId,
             ]);
-
             return;
         }
 
-        $strategy = GradingStrategyFactory::make($question->type);
-        $affectedSubmissions = collect();
+        $uniqueSubmissionIds = $affectedSubmissionIds->unique();
 
-        foreach ($answers as $answer) {
-            if (! $answer->submission) {
-                continue;
-            }
-
-            $oldScore = $answer->score;
-            $newScore = $strategy->grade($question, $answer);
-
-            if ($oldScore != $newScore) {
-                $answer->update(['score' => $newScore]);
-                $affectedSubmissions->push($answer->submission);
-            }
-        }
-
-        $uniqueSubmissions = $affectedSubmissions->unique('id');
-
-        foreach ($uniqueSubmissions as $submission) {
-            $this->recalculateSubmissionScore($submission);
+        // Process affected submissions in chunks as well to avoid memory issues
+        // Since we only need to trigger recalculation, we can find them by ID
+        if ($uniqueSubmissionIds->isNotEmpty()) {
+            \Modules\Learning\Models\Submission::whereIn('id', $uniqueSubmissionIds)
+                ->chunkById(100, function ($submissions) {
+                    foreach ($submissions as $submission) {
+                        $this->recalculateSubmissionScore($submission);
+                    }
+                });
         }
 
         Log::info('RecalculateGradesJob: Completed recalculation', [
             'question_id' => $this->questionId,
-            'affected_answers' => $answers->count(),
-            'affected_submissions' => $uniqueSubmissions->count(),
+            'affected_answers' => $processedCount,
+            'affected_submissions' => $uniqueSubmissionIds->count(),
         ]);
     }
 

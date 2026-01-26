@@ -24,40 +24,56 @@ class GradingRepository implements GradingRepositoryInterface
         'grader:id,name,email',
     ];
 
+    protected const CACHE_TTL = 3600;
+
     public function __construct(private readonly Grade $model) {}
 
     public function findById(int $id): ?Grade
     {
-        return $this->model
-            ->with(self::DEFAULT_EAGER_LOAD)
-            ->find($id);
+        return \Illuminate\Support\Facades\Cache::tags(['grades'])
+            ->remember("grade:{$id}", self::CACHE_TTL, function () use ($id) {
+                return $this->model
+                    ->with(self::DEFAULT_EAGER_LOAD)
+                    ->find($id);
+            });
     }
 
     public function findByIdWithDetails(int $id): ?Grade
     {
-        return $this->model
-            ->with(self::DETAILED_EAGER_LOAD)
-            ->find($id);
+        return \Illuminate\Support\Facades\Cache::tags(['grades'])
+            ->remember("grade:{$id}:details", self::CACHE_TTL, function () use ($id) {
+                return $this->model
+                    ->with(self::DETAILED_EAGER_LOAD)
+                    ->find($id);
+            });
     }
 
     public function findBySubmission(int $submissionId): ?Grade
     {
-        return $this->model
-            ->where('submission_id', $submissionId)
-            ->with(self::DEFAULT_EAGER_LOAD)
-            ->first();
+        return \Illuminate\Support\Facades\Cache::tags(['grades'])
+            ->remember("grade:submission:{$submissionId}", self::CACHE_TTL, function () use ($submissionId) {
+                return $this->model
+                    ->where('submission_id', $submissionId)
+                    ->with(self::DEFAULT_EAGER_LOAD)
+                    ->first();
+            });
     }
 
     public function findBySubmissionWithDetails(int $submissionId): ?Grade
     {
-        return $this->model
-            ->where('submission_id', $submissionId)
-            ->with(self::DETAILED_EAGER_LOAD)
-            ->first();
+        return \Illuminate\Support\Facades\Cache::tags(['grades'])
+            ->remember("grade:submission:{$submissionId}:details", self::CACHE_TTL, function () use ($submissionId) {
+                return $this->model
+                    ->where('submission_id', $submissionId)
+                    ->with(self::DETAILED_EAGER_LOAD)
+                    ->first();
+            });
     }
 
     public function paginate(int $perPage = 15): LengthAwarePaginator
     {
+        // Pagination is hard to cache effectively per page without stale data, skipping for now
+        // or short TTL if needed.
         return $this->model
             ->with(self::DEFAULT_EAGER_LOAD)
             ->orderByDesc('graded_at')
@@ -67,22 +83,30 @@ class GradingRepository implements GradingRepositoryInterface
     public function create(array $data): Grade
     {
         $grade = $this->model->create($data);
+        
+        $this->invalidateCache($grade);
+
         return $grade->load(self::DEFAULT_EAGER_LOAD);
     }
 
     public function update(Grade $grade, array $data): Grade
     {
         $grade->update($data);
+        
+        $this->invalidateCache($grade);
+
         return $grade->fresh()->load(self::DEFAULT_EAGER_LOAD);
     }
 
     public function delete(Grade $grade): bool
     {
+        $this->invalidateCache($grade);
         return $grade->delete();
     }
 
     public function findPendingManualGrading(array $filters = []): Collection
     {
+        // Complex query with filters, keeping live for now or short cache
         return \Spatie\QueryBuilder\QueryBuilder::for($this->model, new \Illuminate\Http\Request($filters))
             ->whereHas('submission', function ($q) {
                 $q->where('state', 'pending_manual_grading');
@@ -121,21 +145,26 @@ class GradingRepository implements GradingRepositoryInterface
 
         if ($grade) {
             $grade->update(array_merge($data, ['is_draft' => true]));
+            $this->invalidateCache($grade);
         } else {
-            $this->model->create(array_merge($data, [
+            $grade = $this->model->create(array_merge($data, [
                 'submission_id' => $submissionId,
                 'is_draft' => true,
             ]));
+            $this->invalidateCache($grade);
         }
     }
 
     public function findByUser(int $userId): Collection
     {
-        return $this->model
-            ->where('user_id', $userId)
-            ->with(self::DEFAULT_EAGER_LOAD)
-            ->orderByDesc('graded_at')
-            ->get();
+        return \Illuminate\Support\Facades\Cache::tags(['grades'])
+            ->remember("grades:user:{$userId}", self::CACHE_TTL, function () use ($userId) {
+                return $this->model
+                    ->where('user_id', $userId)
+                    ->with(self::DEFAULT_EAGER_LOAD)
+                    ->orderByDesc('graded_at')
+                    ->get();
+            });
     }
 
     public function findByGrader(int $graderId): Collection
@@ -173,5 +202,28 @@ class GradingRepository implements GradingRepositoryInterface
             ->with(self::DEFAULT_EAGER_LOAD)
             ->orderByDesc('graded_at')
             ->get();
+    }
+
+    /**
+     * Invalidate all relevant caches for a grade.
+     */
+    protected function invalidateCache(Grade $grade): void
+    {
+        $cache = \Illuminate\Support\Facades\Cache::tags(['grades']);
+
+        $cache->forget("grade:{$grade->id}");
+        $cache->forget("grade:{$grade->id}:details");
+        
+        if ($grade->submission_id) {
+            $cache->forget("grade:submission:{$grade->submission_id}");
+            $cache->forget("grade:submission:{$grade->submission_id}:details");
+        }
+        
+        if ($grade->user_id) {
+            $cache->forget("grades:user:{$grade->user_id}");
+        } elseif ($grade->submission) {
+            // Try to load relation if not set on model
+             $cache->forget("grades:user:{$grade->submission->user_id}");
+        }
     }
 }

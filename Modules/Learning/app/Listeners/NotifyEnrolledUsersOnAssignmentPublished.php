@@ -10,8 +10,16 @@ use Modules\Enrollments\Models\Enrollment;
 use Modules\Learning\Events\AssignmentPublished;
 use Modules\Learning\Mail\AssignmentPublishedMail;
 
-class NotifyEnrolledUsersOnAssignmentPublished
+use Illuminate\Contracts\Queue\ShouldQueue;
+use Illuminate\Queue\InteractsWithQueue;
+use Illuminate\Bus\Queueable;
+use Illuminate\Foundation\Bus\Dispatchable;
+use Illuminate\Queue\SerializesModels;
+
+class NotifyEnrolledUsersOnAssignmentPublished implements ShouldQueue
 {
+    use InteractsWithQueue, Queueable, SerializesModels;
+
     public function handle(AssignmentPublished $event): void
     {
         $assignment = $event->assignment->fresh(['lesson.unit.course']);
@@ -30,7 +38,7 @@ class NotifyEnrolledUsersOnAssignmentPublished
             ->where('course_id', $course->id)
             ->where('status', EnrollmentStatus::Active->value)
             ->with(['user:id,name,email'])
-            ->chunk(100, function ($enrollments) use ($course, $assignment, $courseUrl, $assignmentUrl) {
+            ->chunkById(100, function ($enrollments) use ($course, $assignment, $courseUrl, $assignmentUrl) {
                 foreach ($enrollments as $enrollment) {
                     if ($enrollment->user && $enrollment->user->email) {
                         

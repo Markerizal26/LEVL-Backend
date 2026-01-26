@@ -161,13 +161,14 @@ class EnrollmentRepository extends BaseRepository implements EnrollmentRepositor
     {
         $cacheKey = $this->getEnrollmentCacheKey($courseId, $userId);
 
-        return Cache::remember($cacheKey, self::CACHE_TTL_ROSTER, function () use ($courseId, $userId) {
-            return $this->query()
-                ->withoutEagerLoads() // PENTING: Jangan load relasi
-                ->where('course_id', $courseId)
-                ->where('user_id', $userId)
-                ->first();
-        });
+        return Cache::tags(['enrollments', "course:{$courseId}"])
+            ->remember($cacheKey, self::CACHE_TTL_ROSTER, function () use ($courseId, $userId) {
+                return $this->query()
+                    ->withoutEagerLoads() // PENTING: Jangan load relasi
+                    ->where('course_id', $courseId)
+                    ->where('user_id', $userId)
+                    ->first();
+            });
     }
 
     /**
@@ -178,13 +179,14 @@ class EnrollmentRepository extends BaseRepository implements EnrollmentRepositor
     {
         $cacheKey = $this->getActiveEnrollmentCacheKey($userId, $courseId);
 
-        return Cache::remember($cacheKey, self::CACHE_TTL_ROSTER, function () use ($userId, $courseId) {
-            return $this->query()
-                ->where('user_id', $userId)
-                ->where('course_id', $courseId)
-                ->whereIn('status', [\Modules\Enrollments\Enums\EnrollmentStatus::Active->value, \Modules\Enrollments\Enums\EnrollmentStatus::Completed->value])
-                ->exists();
-        });
+        return Cache::tags(['enrollments', "course:{$courseId}"])
+            ->remember($cacheKey, self::CACHE_TTL_ROSTER, function () use ($userId, $courseId) {
+                return $this->query()
+                    ->where('user_id', $userId)
+                    ->where('course_id', $courseId)
+                    ->whereIn('status', [\Modules\Enrollments\Enums\EnrollmentStatus::Active->value, \Modules\Enrollments\Enums\EnrollmentStatus::Completed->value])
+                    ->exists();
+            });
     }
 
     /**
@@ -195,13 +197,14 @@ class EnrollmentRepository extends BaseRepository implements EnrollmentRepositor
     {
         $cacheKey = $this->getActiveEnrollmentDetailCacheKey($userId, $courseId);
 
-        return Cache::remember($cacheKey, self::CACHE_TTL_ROSTER, function () use ($userId, $courseId) {
-            return $this->query()
-                ->where('user_id', $userId)
-                ->where('course_id', $courseId)
-                ->whereIn('status', [\Modules\Enrollments\Enums\EnrollmentStatus::Active->value, \Modules\Enrollments\Enums\EnrollmentStatus::Completed->value])
-                ->first();
-        });
+        return Cache::tags(['enrollments', "course:{$courseId}"])
+            ->remember($cacheKey, self::CACHE_TTL_ROSTER, function () use ($userId, $courseId) {
+                return $this->query()
+                    ->where('user_id', $userId)
+                    ->where('course_id', $courseId)
+                    ->whereIn('status', [\Modules\Enrollments\Enums\EnrollmentStatus::Active->value, \Modules\Enrollments\Enums\EnrollmentStatus::Completed->value])
+                    ->first();
+            });
     }
 
     /**
@@ -237,7 +240,32 @@ class EnrollmentRepository extends BaseRepository implements EnrollmentRepositor
         $enrollment = Enrollment::find($enrollmentId);
         if ($enrollment) {
             $this->invalidateEnrollmentCache($enrollment->course_id, $enrollment->user_id);
+            // Also invalidate specific progress cache
+            Cache::tags(['enrollments', 'progress'])->forget($this->getProgressCacheKey($enrollmentId));
         }
+    }
+
+    /**
+     * Get course progress percent with caching.
+     * Requirements: 28.10
+     */
+    public function getCourseProgress(int $enrollmentId): float
+    {
+        $cacheKey = $this->getProgressCacheKey($enrollmentId);
+
+        return Cache::tags(['enrollments', 'progress'])
+            ->remember($cacheKey, self::CACHE_TTL_ROSTER, function () use ($enrollmentId) {
+                // Try to get from CourseProgress model first
+                $progress = \Modules\Enrollments\Models\CourseProgress::where('enrollment_id', $enrollmentId)
+                    ->value('progress_percent');
+                
+                return (float) ($progress ?? 0);
+            });
+    }
+
+    protected function getProgressCacheKey(int $enrollmentId): string
+    {
+        return self::CACHE_PREFIX_ENROLLMENT."progress:{$enrollmentId}";
     }
 
     /**
@@ -284,9 +312,14 @@ class EnrollmentRepository extends BaseRepository implements EnrollmentRepositor
      */
     public function invalidateEnrollmentCache(int $courseId, int $userId): void
     {
-        Cache::forget($this->getEnrollmentCacheKey($courseId, $userId));
-        Cache::forget($this->getActiveEnrollmentCacheKey($userId, $courseId));
-        Cache::forget($this->getActiveEnrollmentDetailCacheKey($userId, $courseId));
+        Cache::tags(['enrollments', "course:{$courseId}"])
+            ->forget($this->getEnrollmentCacheKey($courseId, $userId));
+        
+        Cache::tags(['enrollments', "course:{$courseId}"])
+            ->forget($this->getActiveEnrollmentCacheKey($userId, $courseId));
+            
+        Cache::tags(['enrollments', "course:{$courseId}"])
+            ->forget($this->getActiveEnrollmentDetailCacheKey($userId, $courseId));
     }
 
     /**
@@ -295,10 +328,7 @@ class EnrollmentRepository extends BaseRepository implements EnrollmentRepositor
      */
     public function invalidateRosterCache(int $courseId): void
     {
-        Cache::forget($this->getRosterCacheKey($courseId));
-        Cache::forget($this->getRosterCacheKey($courseId, 'students'));
-        Cache::forget($this->getRosterCacheKey($courseId, 'student_ids'));
-        // Note: For production with Redis, use cache tags for more efficient invalidation
+        Cache::tags(['roster', "course:{$courseId}"])->flush();
     }
 
     /**
@@ -331,17 +361,18 @@ class EnrollmentRepository extends BaseRepository implements EnrollmentRepositor
     {
         $cacheKey = $this->getRosterCacheKey($courseId, 'students');
 
-        return Cache::remember($cacheKey, self::CACHE_TTL_ROSTER, function () use ($courseId) {
-            return $this->query()
-                ->where('course_id', $courseId)
-                ->whereIn('status', [
-                    \Modules\Enrollments\Enums\EnrollmentStatus::Active->value,
-                    \Modules\Enrollments\Enums\EnrollmentStatus::Completed->value,
-                ])
-                ->with(['user:id,name,email'])
-                ->orderBy('enrolled_at', 'asc')
-                ->get();
-        });
+        return Cache::tags(['roster', "course:{$courseId}"])
+            ->remember($cacheKey, self::CACHE_TTL_ROSTER, function () use ($courseId) {
+                return $this->query()
+                    ->where('course_id', $courseId)
+                    ->whereIn('status', [
+                        \Modules\Enrollments\Enums\EnrollmentStatus::Active->value,
+                        \Modules\Enrollments\Enums\EnrollmentStatus::Completed->value,
+                    ])
+                    ->with(['user:id,name,email'])
+                    ->orderBy('enrolled_at', 'asc')
+                    ->get();
+            });
     }
 
     /**
@@ -356,15 +387,16 @@ class EnrollmentRepository extends BaseRepository implements EnrollmentRepositor
     {
         $cacheKey = $this->getRosterCacheKey($courseId, 'student_ids');
 
-        return Cache::remember($cacheKey, self::CACHE_TTL_ROSTER, function () use ($courseId) {
-            return $this->query()
-                ->where('course_id', $courseId)
-                ->whereIn('status', [
-                    \Modules\Enrollments\Enums\EnrollmentStatus::Active->value,
-                    \Modules\Enrollments\Enums\EnrollmentStatus::Completed->value,
-                ])
-                ->pluck('user_id')
-                ->toArray();
-        });
+        return Cache::tags(['roster', "course:{$courseId}"])
+            ->remember($cacheKey, self::CACHE_TTL_ROSTER, function () use ($courseId) {
+                return $this->query()
+                    ->where('course_id', $courseId)
+                    ->whereIn('status', [
+                        \Modules\Enrollments\Enums\EnrollmentStatus::Active->value,
+                        \Modules\Enrollments\Enums\EnrollmentStatus::Completed->value,
+                    ])
+                    ->pluck('user_id')
+                    ->toArray();
+            });
     }
 }

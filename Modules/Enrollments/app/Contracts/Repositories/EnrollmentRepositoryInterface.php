@@ -84,4 +84,10 @@ interface EnrollmentRepositoryInterface
      * Requirements: 28.10
      */
     public function invalidateRosterCache(int $courseId): void;
+
+    /**
+     * Get course progress percent with caching.
+     * Requirements: 28.10
+     */
+    public function getCourseProgress(int $enrollmentId): float;
 }

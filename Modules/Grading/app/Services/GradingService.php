@@ -448,39 +448,43 @@ class GradingService implements GradingServiceInterface
             throw new InvalidArgumentException(__('messages.grading.bulk_validation_failed', ['errors' => implode('; ', $validation['errors'])]));
         }
 
-        $submissions = Submission::with('grade')->whereIn('id', $submissionIds)->get();
-
         $successCount = 0;
         $failedCount = 0;
         $errors = [];
         $releasedSubmissions = collect();
+        $foundIds = [];
 
-        foreach ($submissions as $submission) {
-            if (! $submission->grade) {
-                $failedCount++;
-                $errors[] = "Submission {$submission->id} has no grade to release";
-                continue;
-            }
+        Submission::with('grade')
+            ->whereIn('id', $submissionIds)
+            ->chunkById(100, function ($submissions) use (&$successCount, &$failedCount, &$errors, &$releasedSubmissions, &$foundIds) {
+                foreach ($submissions as $submission) {
+                    $foundIds[] = $submission->id;
+                    
+                    if (! $submission->grade) {
+                        $failedCount++;
+                        $errors[] = "Submission {$submission->id} has no grade to release";
+                        continue;
+                    }
 
-            if ($submission->grade->is_draft) {
-                $failedCount++;
-                $errors[] = "Submission {$submission->id} has a draft grade that cannot be released";
-                continue;
-            }
+                    if ($submission->grade->is_draft) {
+                        $failedCount++;
+                        $errors[] = "Submission {$submission->id} has a draft grade that cannot be released";
+                        continue;
+                    }
 
-            if ($submission->state === SubmissionState::Released) {
-                $failedCount++;
-                $errors[] = "Submission {$submission->id} is already released";
-                continue;
-            }
+                    if ($submission->state === SubmissionState::Released) {
+                        $failedCount++;
+                        $errors[] = "Submission {$submission->id} is already released";
+                        continue;
+                    }
 
-            $submission->grade->release();
-            $submission->transitionTo(SubmissionState::Released, (int) auth('api')->id());
-            $releasedSubmissions->push($submission);
-            $successCount++;
-        }
+                    $submission->grade->release();
+                    $submission->transitionTo(SubmissionState::Released, (int) auth('api')->id());
+                    $releasedSubmissions->push($submission);
+                    $successCount++;
+                }
+            });
 
-        $foundIds = $submissions->pluck('id')->toArray();
         $missingIds = array_diff($submissionIds, $foundIds);
         foreach ($missingIds as $missingId) {
             $failedCount++;
@@ -552,35 +556,39 @@ class GradingService implements GradingServiceInterface
             throw new InvalidArgumentException(__('messages.grading.bulk_validation_failed', ['errors' => implode('; ', $validation['errors'])]));
         }
 
-        $submissions = Submission::with('grade')->whereIn('id', $submissionIds)->get();
-
         $successCount = 0;
         $failedCount = 0;
         $errors = [];
         $updatedSubmissions = collect();
+        $foundIds = [];
 
-        foreach ($submissions as $submission) {
-            if ($submission->state === SubmissionState::InProgress) {
-                $failedCount++;
-                $errors[] = "Submission {$submission->id} is still in progress and cannot receive feedback";
-                continue;
-            }
+        Submission::with('grade')
+            ->whereIn('id', $submissionIds)
+            ->chunkById(100, function ($submissions) use (&$successCount, &$failedCount, &$errors, &$updatedSubmissions, &$foundIds, $feedback) {
+                foreach ($submissions as $submission) {
+                    $foundIds[] = $submission->id;
 
-            Grade::updateOrCreate(
-                ['submission_id' => $submission->id],
-                [
-                    'source_type' => 'assignment',
-                    'source_id' => $submission->assignment_id,
-                    'user_id' => $submission->user_id,
-                    'feedback' => $feedback,
-                ]
-            );
+                    if ($submission->state === SubmissionState::InProgress) {
+                        $failedCount++;
+                        $errors[] = "Submission {$submission->id} is still in progress and cannot receive feedback";
+                        continue;
+                    }
 
-            $updatedSubmissions->push($submission);
-            $successCount++;
-        }
+                    Grade::updateOrCreate(
+                        ['submission_id' => $submission->id],
+                        [
+                            'source_type' => 'assignment',
+                            'source_id' => $submission->assignment_id,
+                            'user_id' => $submission->user_id,
+                            'feedback' => $feedback,
+                        ]
+                    );
 
-        $foundIds = $submissions->pluck('id')->toArray();
+                    $updatedSubmissions->push($submission);
+                    $successCount++;
+                }
+            });
+
         $missingIds = array_diff($submissionIds, $foundIds);
         foreach ($missingIds as $missingId) {
             $failedCount++;
