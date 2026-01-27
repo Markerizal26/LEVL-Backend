@@ -183,7 +183,7 @@ return [
             'log_file' => storage_path('logs/swoole_http.log'),
 
             // LOW LATENCY OPTIMIZATIONS
-            'reactor_num' => swoole_cpu_num(), // Match reactor threads to CPU cores
+            'reactor_num' => function_exists('swoole_cpu_num') ? swoole_cpu_num() : 4, // Match reactor threads to CPU cores
             'dispatch_mode' => 2, // Packet dispatch mode for consistent load balancing
             'enable_coroutine' => true,
             'coroutine' => [
