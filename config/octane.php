@@ -188,7 +188,7 @@ return [
             'enable_coroutine' => true,
             'coroutine' => [
                 'enable_preemptive_scheduler' => false, // Disable for more predictable behavior
-                'hook_flags' => SWOOLE_HOOK_ALL,
+                'hook_flags' => defined('SWOOLE_HOOK_ALL') ? SWOOLE_HOOK_ALL : 0,
             ],
 
             // BALANCED MEMORY AND BUFFER OPTIMIZATIONS
