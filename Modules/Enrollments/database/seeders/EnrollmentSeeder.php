@@ -13,7 +13,7 @@ class EnrollmentSeeder extends Seeder
 {
     public function run(): void
     {
-        echo "Seeding enrollments and progress...\n";
+        $this->command->info("Seeding enrollments and progress...");
 
         $students = User::whereHas('roles', function ($q) {
             $q->where('name', 'Student');
@@ -26,22 +26,30 @@ class EnrollmentSeeder extends Seeder
             return;
         }
 
-        echo "Creating 500-800 enrollments...\n";
+        $this->command->info("Creating 500-800 enrollments...");
 
         $enrollments = [];
         $courseProgressData = [];
         $unitProgressData = [];
         $lessonProgressData = [];
 
+        // Pre-fetch existing enrollments to avoid N+1 checks
+        $existingPairs = \Illuminate\Support\Facades\DB::table('enrollments')
+            ->select(['user_id', 'course_id'])
+            ->get()
+            ->map(fn($r) => $r->user_id . ':' . $r->course_id)
+            ->flip()
+            ->all();
+
+        $processedStudents = 0;
         foreach ($students as $student) {
             $enrollmentCount = rand(3, 8);
             $randomCourses = $courses->random(min($enrollmentCount, $courses->count()));
             // ... (rest of loop)
 
             foreach ($randomCourses as $course) {
-                if (Enrollment::where('user_id', $student->id)
-                    ->where('course_id', $course->id)
-                    ->exists()) {
+                $pairKey = $student->id . ':' . $course->id;
+                if (isset($existingPairs[$pairKey])) {
                     continue;
                 }
 
@@ -103,11 +111,14 @@ class EnrollmentSeeder extends Seeder
         }
 
         if (!empty($enrollments)) {
-            \Illuminate\Support\Facades\DB::table('enrollments')->insertOrIgnore($enrollments);
+            foreach (array_chunk($enrollments, 1000) as $chunk) {
+                \Illuminate\Support\Facades\DB::table('enrollments')->insertOrIgnore($chunk);
+                $this->command->info("  ✅ Inserted " . count($chunk) . " enrollments");
+            }
             $this->insertProgressData($enrollments, $courseProgressData, $unitProgressData, $lessonProgressData);
         }
 
-        echo "✅ Enrollment seeding completed!\n";
+        $this->command->info("✅ Enrollment seeding completed!");
     }
 
     private function insertProgressData(array $enrollments, array $courseProgressData, array $unitProgressData, array $lessonProgressData): void

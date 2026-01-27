@@ -272,7 +272,7 @@
             "header": [],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"login\": \"admin\",\n  \"password\": \"password\"\n}",
+              "raw": "{\n  \"login\": \"superadmin\",\n  \"password\": \"password\"\n}",
               "options": {
                 "raw": {
                   "language": "json"

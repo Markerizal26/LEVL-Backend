@@ -6,19 +6,29 @@ use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\File;
 
 /**
- * Auth Module Comprehensive Seeder
+ * Auth Module Comprehensive Seeder (Enhanced)
  * 
- * This seeder provides comprehensive test data for the Auth module.
- * It creates 1000+ users with various roles, statuses, and activity patterns.
+ * Creates comprehensive, realistic test data for the Auth module.
+ * Uses faker-provider-collection for realistic names, roles, and data.
  * 
  * Usage:
- *   php artisan db:seed --class="Modules\Auth\Database\Seeders\AuthDatabaseSeeder"
+ *   php artisan db:seed --class="Modules\Auth\Database\Seeders\AuthComprehensiveDataSeeder"
  * 
- * Demo Credentials:
- *   - Superadmin: superadmin / password
- *   - Admin: admin / password
- *   - Instructor: instructor / password
- *   - Student: student / password
+ * Demo Credentials (password: password):
+ *   - Superadmin: superadmin.demo@test.com
+ *   - Admin: admin.demo@test.com
+ *   - Instructor: instructor.demo@test.com
+ *   - Student: student.demo@test.com
+ * 
+ * Special Test Users (password: password):
+ *   - unverified.student@test.com - Email not verified
+ *   - no.password.student@test.com - Social login, no password set
+ *   - inactive.student@test.com - Inactive account
+ *   - banned.student@test.com - Banned account
+ *   - email.change.student@test.com - Pending email change
+ *   - deletion.pending@test.com - Pending account deletion
+ *   - password.reset.student@test.com - Active password reset token
+ *   - soft.deleted.student@test.com - Soft deleted (recoverable)
  * 
  * Data Distribution:
  *   Roles:
@@ -26,31 +36,35 @@ use Illuminate\Support\Facades\File;
  *   - 100 Admin users
  *   - 200 Instructor users
  *   - 650 Student users
- *   Total: 1000 users
+ *   Total: 1000+ users
  * 
  *   User Status Distribution (per role):
- *   - 70% Active
- *   - 15% Pending
- *   - 10% Inactive
- *   - 5% Banned
+ *   - 70% Active (verified email, can login)
+ *   - 15% Pending (unverified email)
+ *   - 10% Inactive (account disabled)
+ *   - 5% Banned (account banned)
  * 
  * Related Data Created:
  *   - Privacy settings for all users
- *   - Login activities (2,500+ records)
- *   - User activities (5,000+ records)
- *   - JWT refresh tokens (2,000+ records)
- *   - OTP codes for verification flows
- *   - Password reset tokens
- *   - Profile audit logs (3,000+ records)
+ *   - User activities (10-30 per active user)
+ *   - OTP codes for various purposes:
+ *     * Email verification (all pending users)
+ *     * Password reset (5% of active users)
+ *     * Email change verification (3% of active users)
+ *     * Account deletion (1% of active users)
+ *   - Password reset tokens (valid and expired)
+ *   - Profile audit logs
  * 
- * @see UserSeeder
- * @see JwtRefreshTokenSeeder
- * @see OtpCodeSeeder
- * @see PasswordResetTokenSeeder
- * @see ProfileAuditLogSeeder
- * @see ProfilePrivacySettingSeeder
- * @see ProfileSeeder
- * @see RolePermissionSeeder
+ * Performance:
+ *   - Batch inserts to prevent N+1 queries
+ *   - Chunked processing (100 users per chunk)
+ *   - Progress output for monitoring
+ *   - Completes in < 60 seconds for 1000 users
+ * 
+ * @see UserSeederEnhanced - Creates users with realistic data
+ * @see OtpCodeSeeder - Creates OTP codes for various flows
+ * @see PasswordResetTokenSeeder - Creates password reset tokens
+ * @see RolePermissionSeeder - Creates roles and permissions
  */
 class AuthComprehensiveDataSeeder extends Seeder
 {
@@ -59,16 +73,18 @@ class AuthComprehensiveDataSeeder extends Seeder
      */
     public function run(): void
     {
-        $this->command->info('');
-        $this->command->info('╔════════════════════════════════════════════╗');
-        $this->command->info('║  Auth Module Comprehensive Data Seeding     ║');
-        $this->command->info('╚════════════════════════════════════════════╝');
-        $this->command->info('');
+        $this->command->newLine();
+        $this->command->info('╔════════════════════════════════════════════════════════════╗');
+        $this->command->info('║     Auth Module Comprehensive Data Seeding                ║');
+        $this->command->info('║     Creating 1000+ users with realistic test data         ║');
+        $this->command->info('╚════════════════════════════════════════════════════════════╝');
+        $this->command->newLine();
 
-        // Call all seeders in order
+        $startTime = microtime(true);
+
         $this->call([
             RolePermissionSeeder::class,
-            UserSeeder::class,
+            UserSeederEnhanced::class,
             ProfilePrivacySettingSeeder::class,
             ProfileSeeder::class,
             JwtRefreshTokenSeeder::class,
@@ -77,13 +93,17 @@ class AuthComprehensiveDataSeeder extends Seeder
             ProfileAuditLogSeeder::class,
         ]);
 
-        $this->command->info('');
-        $this->command->info('╔════════════════════════════════════════════╗');
-        $this->command->info('║  ✅ Seeding Completed Successfully!         ║');
-        $this->command->info('╚════════════════════════════════════════════╝');
-        $this->command->info('');
+        $endTime = microtime(true);
+        $duration = round($endTime - $startTime, 2);
+
+        $this->command->newLine();
+        $this->command->info('╔════════════════════════════════════════════════════════════╗');
+        $this->command->info('║  ✅ Seeding Completed Successfully!                       ║');
+        $this->command->info("║  ⏱️  Time taken: {$duration} seconds                      ║");
+        $this->command->info('╚════════════════════════════════════════════════════════════╝');
+        $this->command->newLine();
         $this->printSummary();
-        $this->command->info('');
+        $this->command->newLine();
     }
 
     /**
@@ -92,33 +112,51 @@ class AuthComprehensiveDataSeeder extends Seeder
     private function printSummary(): void
     {
         $this->command->info('📊 Data Summary:');
-        $this->command->info('  • Total Users: 1,000+');
-        $this->command->info('  • Demo Accounts: 6');
-        $this->command->info('  • Privacy Settings: 1,000+');
-        $this->command->info('  • Login Activities: 2,500+');
-        $this->command->info('  • User Activities: 5,000+');
-        $this->command->info('  • JWT Refresh Tokens: 2,000+');
-        $this->command->info('  • OTP Codes: 100+');
-        $this->command->info('  • Password Reset Tokens: 15+');
-        $this->command->info('  • Profile Audit Logs: 3,000+');
-        $this->command->info('');
-        $this->command->info('🔐 Demo Credentials:');
-        $this->command->info('  Email          | Username    | Password');
-        $this->command->info('  ───────────────┼─────────────┼─────────');
-        $this->command->info('  superadmin@... | superadmin  | password');
-        $this->command->info('  admin@test.com | admin       | password');
-        $this->command->info('  instructor@... | instructor  | password');
-        $this->command->info('  student@test.. | student     | password');
-        $this->command->info('');
-        $this->command->info('🧪 Testing Scenarios:');
-        $this->command->info('  ✓ Login with active users');
+        $this->command->info('  • Total Users: ' . \Modules\Auth\Models\User::count());
+        $this->command->info('  • Demo Accounts: 4');
+        $this->command->info('  • Special Test Users: 8');
+        $this->command->info('  • Privacy Settings: ' . \Illuminate\Support\Facades\DB::table('profile_privacy_settings')->count());
+        $this->command->info('  • OTP Codes: ' . \Modules\Auth\Models\OtpCode::count());
+        $this->command->info('  • Password Reset Tokens: ' . \Illuminate\Support\Facades\DB::table('password_reset_tokens')->count());
+        
+        $activityCount = \Illuminate\Support\Facades\DB::getSchemaBuilder()->hasTable('user_activities') 
+            ? \Illuminate\Support\Facades\DB::table('user_activities')->count() 
+            : 0;
+        $this->command->info('  • User Activities: ' . $activityCount);
+        $this->command->newLine();
+        
+        $this->command->info('🔐 Demo Credentials (password: password):');
+        $this->command->info('  Email                        | Username         | Role       | Status');
+        $this->command->info('  ─────────────────────────────┼──────────────────┼────────────┼────────');
+        $this->command->info('  superadmin.demo@test.com     | superadmin_demo  | Superadmin | Active');
+        $this->command->info('  admin.demo@test.com          | admin_demo       | Admin      | Active');
+        $this->command->info('  instructor.demo@test.com     | instructor_demo  | Instructor | Active');
+        $this->command->info('  student.demo@test.com        | student_demo     | Student    | Active');
+        $this->command->newLine();
+        
+        $this->command->info('🎯 Special Test Users (password: password):');
+        $this->command->info('  • unverified.student@test.com       - Unverified email (pending verification)');
+        $this->command->info('  • no.password.student@test.com      - No password set (social login)');
+        $this->command->info('  • inactive.student@test.com         - Inactive account');
+        $this->command->info('  • banned.student@test.com           - Banned account');
+        $this->command->info('  • email.change.student@test.com     - Pending email change request');
+        $this->command->info('  • deletion.pending@test.com         - Pending account deletion');
+        $this->command->info('  • password.reset.student@test.com   - Has active password reset token');
+        $this->command->info('  • soft.deleted.student@test.com     - Soft deleted (can be restored)');
+        $this->command->newLine();
+        
+        $this->command->info('🧪 Testing Scenarios Covered:');
+        $this->command->info('  ✓ Login with various user roles and statuses');
         $this->command->info('  ✓ Email verification flow (pending users)');
-        $this->command->info('  ✓ Password reset flow');
+        $this->command->info('  ✓ Password reset flow (expired and valid tokens)');
+        $this->command->info('  ✓ Email change verification');
         $this->command->info('  ✓ Account deletion flow');
         $this->command->info('  ✓ Multi-device token management');
-        $this->command->info('  ✓ Role-based access control');
+        $this->command->info('  ✓ Role-based access control (RBAC)');
         $this->command->info('  ✓ Privacy settings filtering');
         $this->command->info('  ✓ Activity tracking and history');
-        $this->command->info('');
+        $this->command->info('  ✓ Social login scenarios (no password)');
+        $this->command->info('  ✓ Soft delete and account recovery');
+        $this->command->newLine();
     }
 }

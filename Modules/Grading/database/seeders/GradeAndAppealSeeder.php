@@ -23,121 +23,142 @@ class GradeAndAppealSeeder extends Seeder
      */
     public function run(): void
     {
-        echo "Seeding grades and appeals...\n";
+        echo "\n📋 Seeding grades and appeals...\n";
 
-        // ✅ Pre-fetch all instructors (don't query per grade)
-        $instructorIds = User::whereHas('roles', function ($q) {
-            $q->whereIn('name', ['Instructor', 'Admin']);
-        })->pluck('id')->toArray();
-
-        // Check if any submissions exist to start with
-        if (!Submission::whereIn('status', ['submitted', 'graded'])->exists()) {
-             echo "⚠️  No submissions found. Skipping grading seeding.\n";
-             return;
-        }
+        // ✅ Get instructors using raw SQL for speed
+        $instructorIds = \DB::table('users')
+            ->join('model_has_roles', 'users.id', '=', 'model_has_roles.model_id')
+            ->join('roles', 'model_has_roles.role_id', '=', 'roles.id')
+            ->whereIn('roles.name', ['Instructor', 'Admin'])
+            ->distinct()
+            ->pluck('users.id')
+            ->toArray();
 
         if (empty($instructorIds)) {
             echo "⚠️  No instructors found. Skipping grading seeding.\n";
             return;
         }
 
+        // Count submissions efficiently
+        $totalSubmissions = \DB::table('submissions')
+            ->whereIn('status', ['submitted', 'graded'])
+            ->count();
+
+        if ($totalSubmissions === 0) {
+            echo "⚠️  No submissions found. Skipping grading seeding.\n";
+            return;
+        }
+
+        echo "   📝 Processing $totalSubmissions submissions...\n";
+        echo "   👥 Using " . count($instructorIds) . " instructors\n\n";
+
         $gradeCount = 0;
         $appealCount = 0;
+        $chunkNum = 0;
+        $chunkSize = 2000;
+        $offset = 0;
 
-        // ✅ Process submissions in chunks to save memory
-        Submission::whereIn('status', ['submitted', 'graded'])
-            ->with(['assignment', 'user']) // Eager load
-            ->chunkById(1000, function ($submissions) use ($instructorIds, &$gradeCount, &$appealCount) {
-                $grades = [];
-                $appeals = [];
+        // ✅ Use raw SQL for better performance on large datasets
+        while (true) {
+            $submissions = \DB::table('submissions')
+                ->select('submissions.id', 'submissions.user_id', 'submissions.assignment_id')
+                ->join('assignments', 'submissions.assignment_id', '=', 'assignments.id')
+                ->whereIn('submissions.status', ['submitted', 'graded'])
+                ->select('submissions.id', 'submissions.user_id', 'submissions.assignment_id', 'assignments.max_score')
+                ->limit($chunkSize)
+                ->offset($offset)
+                ->orderBy('submissions.id')
+                ->get();
 
-                foreach ($submissions as $submission) {
-                    // ✅ 70-80% of submissions get graded
-                    if (rand(1, 100) > 80) {
-                        continue;
-                    }
+            if ($submissions->isEmpty()) {
+                break;
+            }
 
-                    $assignment = $submission->assignment;
-                    
-                    // Skip if assignment missing (defensive)
-                    if (!$assignment) continue;
+            $chunkNum++;
+            $grades = [];
+            $appeals = [];
+            $chunkSubmissions = 0;
 
-                    $instructorId = $instructorIds[array_rand($instructorIds)];
+            foreach ($submissions as $submission) {
+                $chunkSubmissions++;
 
-                    // ✅ Determine grade status randomly to include all possible statuses
+                // ✅ 70-80% of submissions get graded
+                if (rand(1, 100) > 80) {
+                    continue;
+                }
+
+                $instructorId = $instructorIds[array_rand($instructorIds)];
+
+                // ✅ Determine grade status randomly
+                $statusRandom = rand(1, 100);
+                $gradeStatus = match (true) {
+                    $statusRandom <= 60 => 'graded',
+                    $statusRandom <= 80 => 'pending',
+                    default => 'reviewed',
+                };
+
+                // ✅ Build grade data
+                $grades[] = [
+                    'source_id' => $submission->assignment_id,
+                    'source_type' => 'assignment',
+                    'user_id' => $submission->user_id,
+                    'submission_id' => $submission->id,
+                    'graded_by' => $instructorId,
+                    'score' => $gradeStatus === 'pending' ? 0 : rand(0, $submission->max_score),
+                    'max_score' => $submission->max_score,
+                    'feedback' => $gradeStatus === 'pending' ? null : fake()->paragraph(),
+                    'status' => $gradeStatus,
+                    'graded_at' => $gradeStatus === 'pending' ? null : now()->subDays(rand(1, 20)),
+                    'released_at' => $gradeStatus === 'pending' ? null : now()->subDays(rand(1, 15)),
+                    'created_at' => now(),
+                    'updated_at' => now(),
+                ];
+                $gradeCount++;
+
+                // ✅ 5-10% of graded submissions have appeals
+                if (rand(1, 100) <= 8) {
                     $statusRandom = rand(1, 100);
-                    $gradeStatus = match (true) {
-                        $statusRandom <= 60 => GradeStatus::Graded->value,      // 60% of grades are 'graded'
-                        $statusRandom <= 80 => GradeStatus::Pending->value,    // 20% of grades are 'pending'
-                        default => GradeStatus::Reviewed->value,               // 20% of grades are 'reviewed'
+                    $status = match (true) {
+                        $statusRandom <= 40 => 'pending',
+                        $statusRandom <= 70 => 'approved',
+                        default => 'denied',
                     };
 
-                    // ✅ Build grade data
-                    $grades[] = [
-                        'source_id' => $assignment->id,
-                        'source_type' => 'assignment',
-                        'user_id' => $submission->user_id,
+                    $reviewerId = $status !== 'pending' ? $instructorIds[array_rand($instructorIds)] : null;
+
+                    $appeals[] = [
                         'submission_id' => $submission->id,
-                        'graded_by' => $instructorId,
-                        'score' => $gradeStatus === GradeStatus::Pending->value ? 0 : rand(0, $assignment->max_score), // Use 0 instead of null for pending grades
-                        'max_score' => $assignment->max_score,
-                        'feedback' => $gradeStatus === GradeStatus::Pending->value ? null : fake()->paragraph(),
-                        'status' => $gradeStatus,
-                        'graded_at' => $gradeStatus === GradeStatus::Pending->value ? null : now()->subDays(rand(1, 20)),
-                        'released_at' => $gradeStatus === GradeStatus::Pending->value ? null : now()->subDays(rand(1, 15)),
+                        'student_id' => $submission->user_id,
+                        'reviewer_id' => $reviewerId,
+                        'reason' => fake()->paragraph(),
+                        'status' => $status,
+                        'submitted_at' => now()->subDays(rand(1, 10)),
+                        'decision_reason' => $status !== 'pending' ? fake()->paragraph() : null,
+                        'decided_at' => $status !== 'pending' ? now()->subDays(rand(1, 5)) : null,
+                        'supporting_documents' => null,
                         'created_at' => now(),
                         'updated_at' => now(),
                     ];
-                    $gradeCount++;
-
-                    // ✅ 5-10% of graded submissions have appeals
-                    if (rand(1, 100) <= 8) {
-                        $statusRandom = rand(1, 100);
-                        $status = match (true) {
-                            $statusRandom <= 40 => AppealStatus::Pending->value,
-                            $statusRandom <= 70 => AppealStatus::Approved->value,
-                            default => AppealStatus::Denied->value,
-                        };
-
-                        $reviewerId = $status !== AppealStatus::Pending->value 
-                            ? $instructorIds[array_rand($instructorIds)] 
-                            : null;
-
-                        $appeals[] = [
-                            'submission_id' => $submission->id,
-                            'student_id' => $submission->user_id,
-                            'reviewer_id' => $reviewerId,
-                            'reason' => fake()->paragraph(),
-                            'status' => $status,
-                            'submitted_at' => now()->subDays(rand(1, 10)),
-                            'decision_reason' => $status !== AppealStatus::Pending->value ? fake()->paragraph() : null,
-                            'decided_at' => $status !== AppealStatus::Pending->value ? now()->subDays(rand(1, 5)) : null,
-                            'supporting_documents' => null,
-                            'created_at' => now(),
-                            'updated_at' => now(),
-                        ];
-                        $appealCount++;
-                    }
+                    $appealCount++;
                 }
+            }
 
-                // ✅ Batch insert grades
-                if (!empty($grades)) {
-                    \Illuminate\Support\Facades\DB::table('grades')->insertOrIgnore($grades);
-                }
+            // ✅ Batch insert grades
+            if (!empty($grades)) {
+                \DB::table('grades')->insertOrIgnore($grades);
+            }
 
-                // ✅ Batch insert appeals
-                if (!empty($appeals)) {
-                    \Illuminate\Support\Facades\DB::table('appeals')->insertOrIgnore($appeals);
-                }
-                
-                // Explicitly clear arrays to free memory (though partial in loop scope)
-                unset($grades);
-                unset($appeals);
-                
-                echo "Processed chunk. Grades: $gradeCount, Appeals: $appealCount\n";
-            });
+            // ✅ Batch insert appeals
+            if (!empty($appeals)) {
+                \DB::table('appeals')->insertOrIgnore($appeals);
+            }
 
-        echo "✅ Grading and appeal seeding completed!\n";
-        echo "Created $gradeCount grades with $appealCount appeals\n";
+            echo "      ✓ Chunk $chunkNum: $chunkSubmissions submissions | Created Grades: " . count($grades) . " | Appeals: " . count($appeals) . "\n";
+
+            $offset += $chunkSize;
+        }
+        echo "\n✅ Grading and appeal seeding completed!\n";
+        echo "   📊 Total grades created: $gradeCount\n";
+        echo "   📊 Total appeals created: $appealCount\n";
     }
 }

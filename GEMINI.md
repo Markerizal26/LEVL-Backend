@@ -1,0 +1,2193 @@
+# GEMINI Project Context: TA PREP LSP - Backend API
+
+This document provides a comprehensive overview of the `ta-prep-lsp-be` project, a modular backend API for a Learning Management System (LMS). It is intended to be used as a primary context file for AI-assisted development.
+
+## 1. Project Overview
+
+This is the backend API for a gamified Learning Management System designed for professional certification preparation (Lembaga Sertifikasi Profesi - LSP).
+
+- **Framework**: Laravel 11.x (PHP 8.2+)
+- **Architecture**:
+    - **Modular**: Utilizes `nwidart/laravel-modules` to separate features into distinct domains (e.g., `Auth`, `Learning`, `Gamification`).
+    - **Design Patterns**: Employs the Repository Pattern, a Service Layer, and Data Transfer Objects (DTOs) via `spatie/laravel-data`.
+- **Key Technologies**:
+    - **Database**: PostgreSQL
+    - **Authentication**: JWT (`tymon/jwt-auth`)
+    - **High Performance**: Runs on Laravel Octane for enhanced performance.
+    - **API Documentation**: Automatically generates OpenAPI specs using `dedoc/scramble` with an interactive UI via `scalar/laravel`.
+    - **Search**: Implements full-text search using Laravel Scout with a Meilisearch driver.
+    - **File Handling**: Manages media and file uploads with `spatie/laravel-medialibrary`.
+    - **Frontend Tooling**: Uses Vite for asset bundling.
+
+## 2. Building and Running the Project
+
+### Initial Setup
+
+1.  **Clone the repository**:
+    ```bash
+    git clone <repository-url>
+    cd ta-prep-lsp-be
+    ```
+2.  **Install dependencies**:
+    ```bash
+    composer install
+    npm install
+    ```
+3.  **Configure Environment**:
+    - Copy the example environment file:
+      ```bash
+      cp .env.example .env
+      ```
+    - Edit the `.env` file to set your database credentials and application URL.
+4.  **Generate Keys**:
+    ```bash
+    php artisan key:generate
+    php artisan jwt:secret
+    ```
+5.  **Run Database Migrations and Seeders**:
+    ```bash
+    php artisan migrate --seed
+    ```
+
+### Running the Application
+
+-   **Standard Development**:
+    -   Start the Laravel server: `php artisan serve`
+    -   Start the Vite dev server for frontend assets: `npm run dev`
+
+-   **High-Performance (Octane)**:
+    -   Start the Octane server: `php artisan octane:start`
+
+### API Documentation
+
+-   **Interactive API Docs**: Available at `/scalar`
+-   **OpenAPI JSON Spec**: Available at `/api-docs/openapi.json`
+-   **Generate/Update Docs**:
+    ```bash
+    php artisan openapi:generate
+    ```
+
+## 3. Development Conventions
+
+### Testing
+
+-   **Framework**: PHPUnit and Pest are used for testing.
+-   **Test Suites**:
+    -   `tests/Unit`: Core application unit tests.
+    -   `tests/Feature`: Core application feature/API tests.
+    -   `Modules/*/tests/`: Tests for individual modules.
+-   **Running Tests**:
+    ```bash
+    # Run all test suites
+    composer test
+
+    # Alternatively
+    php artisan test
+    ```
+
+### Code Quality & Formatting
+
+-   **Static Analysis**: PHPStan is used for static analysis.
+    ```bash
+    # Run PHPStan analysis
+    composer phpstan
+    ```
+-   **Code Formatting**: Prettier is used for consistent code style across PHP, Blade, and JS/JSON files.
+    ```bash
+    # Check formatting
+    npm run format:check
+
+    # Apply formatting fixes
+    npm run format
+    ```
+
+### Modular Architecture
+
+-   All business logic is organized into modules within the `Modules/` directory.
+-   When adding new features, consider which module it belongs to or if a new module should be created.
+-   Each module is a self-contained unit with its own routes, controllers, models, repositories, and tests.
+-   The PSR-4 autoloading for modules is configured in `composer.json`.
+
+---
+# AGENTS
+
+## PROJECT RULESET — LLM-OPTIMIZED VERSION
+
+## Tech Stack
+- Laravel 10/11
+- PHP 8.2+
+- PostgreSQL
+- Laravel Modules (nWidart)
+- Spatie Permission
+- Pest PHP (Testing Framework)
+- Spatie Query Builder (Filtering/Sorting)
+- Spatie Media Library (Media Management)
+- Meilisearch (via Laravel Scout)
+
+## Comment Policy
+- No new comments (PHPDoc, inline `//`, or block `/* */`) may be added.
+- If existing comments are encountered during edits, remove them as part of the change.
+- Favor clear naming and small functions over explanatory comments.
+
+---
+
+# Architectural Guidelines
+
+## Modular Monolith
+- All new features MUST be inside `Modules/`
+- Cross-module communication ONLY via Public Service + Contract
+- No direct Model/DB access across modules
+- Use Contract/Interface for cross-module communication
+
+## Service Pattern
+- Business logic MUST NOT be in Controller
+- One Service per domain entity/aggregate (e.g., CourseService, UserService)
+- Service can have multiple public methods for related operations
+- Service receives Array or DTO (NOT Request)
+- **Service receives uploaded files (array) if needed, NOT Request object**
+- Service handles transaction management
+- **Service handles ALL media/file operations**
+- Side effects (email, notification, webhook, audit) via Event + Listener
+- Controller should inject ONE service interface and call methods directly
+- Example: `$this->courseService->create($data)`, `$this->courseService->publish($id)`
+
+**Rationale**: While single-method services (Command Pattern) provide maximum separation,
+multiple-method services are more pragmatic for CRUD operations and reduce boilerplate.
+The key is keeping services focused on ONE domain entity.
+
+## Repository Pattern
+- Complex queries + reusable queries → Repository
+- Repository MUST extend `App\Repositories\BaseRepository`
+- Service calls Repository, NOT Model directly
+- No business logic in Repository
+- Query methods must be pure (no side effects)
+
+## Dependency Injection
+- ✅ REQUIRED: Service injection via constructor
+- ✅ REQUIRED: Use `readonly` keyword for injected dependencies
+- ✅ REQUIRED: Inject Service Interface, NOT concrete implementation
+- ❌ FORBIDDEN: Inject Repository directly into Controller
+- ❌ FORBIDDEN: Inject Model directly into Controller
+- All dependencies MUST be injected (for testability/mockability)
+
+```php
+// ✅ CORRECT
+public function __construct(
+    private readonly CourseServiceInterface $service,
+) {}
+```
+
+## Strict Types
+- `declare(strict_types=1);` REQUIRED for all files
+- Full type hints REQUIRED for all parameters and return types
+
+---
+
+# Controller Discipline (STRICT)
+
+## Controller Responsibilities (ONLY)
+Controllers are THIN coordinators. They MUST ONLY:
+1. **Authorize**: Check permissions via `$this->authorize()` or Policy
+2. **Validate**: Accept validated data from FormRequest
+3. **Extract**: Extract primitive data from Request (pagination params, filters)
+4. **Delegate**: Call ONE service method with primitives/DTO/array
+5. **Transform**: Transform service result using JsonResource
+6. **Respond**: Return standardized response via ApiResponse trait
+
+## Controller FORBIDDEN Actions
+Controllers MUST NOT contain any of the following:
+
+### Business Logic FORBIDDEN
+- ❌ Conditional business logic (if/else for business rules)
+- ❌ Data transformation/manipulation
+- ❌ Calculations or computations
+- ❌ State transitions (status changes, workflow logic)
+- ❌ Domain validation beyond FormRequest
+- ❌ Decision making based on domain state
+
+**Example of FORBIDDEN logic:**
+```php
+// ❌ FORBIDDEN - Business logic in controller
+if ($validated['enrollment_type'] === 'key_based' && empty($validated['enrollment_key'])) {
+    $plainKey = $this->service->generateEnrollmentKey(12);
+    $validated['enrollment_key'] = $plainKey;
+}
+```
+
+**Correct approach:**
+```php
+// ✅ CORRECT - Delegate to service
+$result = $this->service->updateEnrollmentSettings($course->id, $validated);
+```
+
+### Data Access FORBIDDEN
+- ❌ Direct Model access (create, update, delete, query)
+- ❌ Direct Repository calls
+- ❌ Direct Query Builder usage
+- ❌ Raw SQL queries
+- ❌ Database transaction management
+
+### File/Media Handling FORBIDDEN
+- ❌ File upload processing
+- ❌ Media library operations
+- ❌ File validation beyond FormRequest
+- ❌ File storage operations
+- ❌ Image manipulation
+
+**Example of FORBIDDEN media handling:**
+```php
+// ❌ FORBIDDEN - Media handling in controller
+$this->uploadMedia($course, $request, [
+    'thumbnail' => 'thumbnail',
+    'banner' => 'banner',
+]);
+```
+
+**Correct approach:**
+```php
+// ✅ CORRECT - Pass files to service
+$course = $this->service->create($validated, $actor, $request->allFiles());
+```
+
+### Error Handling Logic FORBIDDEN
+- ❌ Complex try-catch with business logic
+- ❌ Error message construction/parsing
+- ❌ Exception type checking with conditional logic
+- ❌ Database constraint violation parsing
+
+**Example of FORBIDDEN error handling:**
+```php
+// ❌ FORBIDDEN - Error parsing in controller
+private function handleCourseUniqueConstraint(QueryException $e)
+{
+    $message = $e->getMessage();
+    $errors = [];
+    if (str_contains($message, 'courses_code_unique')) {
+        $errors['code'][] = __('messages.courses.code_exists');
+    }
+    // ...
+}
+```
+
+**Correct approach:**
+```php
+// ✅ CORRECT - Service throws proper exception
+// Controller just catches and returns response
+try {
+    $course = $this->service->create($validated, $actor);
+} catch (DuplicateCourseException $e) {
+    return $this->validationError($e->getErrors());
+}
+```
+
+### Query/Filter Logic FORBIDDEN
+- ❌ Filter parameter interpretation
+- ❌ Conditional query building
+- ❌ Search parameter processing
+- ❌ Sort parameter handling
+- ❌ Pagination logic beyond extracting `per_page`
+
+**Example of FORBIDDEN filter logic:**
+```php
+// ❌ FORBIDDEN - Filter logic in controller
+$status = $request->input('filter.status');
+$paginator = $status === 'published'
+    ? $this->service->listPublic($perPage)
+    : $this->service->list($perPage);
+```
+
+**Correct approach:**
+```php
+// ✅ CORRECT - Service handles filter interpretation
+$paginator = $this->service->list(
+    $request->input('filter', []),
+    $perPage
+);
+```
+
+## Controller Method Structure (ENFORCED)
+
+Every controller method MUST follow this EXACT structure:
+
+```php
+public function methodName(FormRequest $request, ?Model $model = null)
+{
+    // Step 1: Authorization (if needed)
+    $this->authorize('action', $model);
+    
+    // Step 2: Extract primitives ONLY (no logic)
+    $data = $request->validated();
+    $perPage = (int) $request->query('per_page', 15);
+    $actor = auth('api')->user();
+    
+    // Step 3: Single service call (no conditional, no try-catch with logic)
+    $result = $this->service->methodName($data, $actor);
+    
+    // Step 4: Transform & respond
+    // ✅ REQUIRED: transform collection manually to avoid type mismatch in setCollection()
+    $paginator->getCollection()->transform(fn($item) => new Resource($item));
+    return $this->paginateResponse($paginator, 'messages.key');
+}
+```
+
+**Maximum lines per controller method: 10 lines** (excluding PHPDoc)
+**If exceeding 10 lines: Logic MUST move to Service**
+
+## Response Format STRICT
+- ❌ FORBIDDEN: Return Model directly
+- ❌ FORBIDDEN: Return array with raw Model
+- ✅ REQUIRED: Always use JsonResource for data responses
+- ✅ REQUIRED: Use ApiResponse trait methods
+
+**Example of FORBIDDEN response:**
+```php
+// ❌ FORBIDDEN
+return $this->success(['course' => $course]);
+return $this->success(['course' => $course->load('tags')]);
+```
+
+**Correct response:**
+```php
+// ✅ CORRECT
+return $this->success(new CourseResource($course));
+return $this->success(CourseResource::collection($courses));
+```
+
+## Private Methods in Controller
+- ❌ FORBIDDEN: Private helper methods with business logic
+- ❌ FORBIDDEN: Private methods for data manipulation
+- ⚠️ ALLOWED (with caution): Private methods for response formatting ONLY
+- ✅ PREFERRED: Move logic to Service instead of private methods
+
+**If you need a private method in Controller → You're doing it WRONG**
+
+## Controller Traits
+- ✅ ALLOWED: `ApiResponse` (response formatting)
+- ✅ ALLOWED: `AuthorizesRequests` (authorization)
+- ❌ FORBIDDEN: `HandlesMediaUploads` (business logic belongs in Service)
+- ❌ FORBIDDEN: `ValidatesRequests` (use FormRequest instead)
+- ❌ FORBIDDEN: Any custom trait with business logic
+
+---
+
+# Service Pattern (ENHANCED)
+
+## Service Responsibilities
+Services MUST handle ALL business logic including:
+- ✅ Data validation (business rules, not HTTP validation)
+- ✅ Data transformation/manipulation
+- ✅ State transitions and workflows
+- ✅ Database transactions
+- ✅ Model CRUD operations (via Repository)
+- ✅ **Media/File operations (upload, delete, conversion)**
+- ✅ Complex query orchestration
+- ✅ Cross-entity coordination
+- ✅ Business rule enforcement
+- ✅ **Exception handling and throwing custom exceptions**
+- ✅ Event dispatching (for side effects)
+
+## Service Method Signature
+- ✅ REQUIRED: Accept primitives, arrays, or DTOs (NOT Request)
+- ✅ REQUIRED: Accept uploaded files as array parameter if needed
+- ✅ REQUIRED: Return Model, Collection, or primitive types
+- ✅ REQUIRED: Throw custom exceptions for business errors
+
+```php
+// ✅ CORRECT - Service method signature
+public function create(
+    array $data, 
+    User $actor, 
+    array $files = []
+): Course;
+
+public function updateEnrollmentSettings(
+    int $courseId, 
+    array $settings
+): array; // Returns ['course' => Course, 'enrollment_key' => string|null]
+
+// ❌ FORBIDDEN
+public function create(Request $request): Course;  // No Request object
+public function create(array $data): Course;       // Missing $files parameter if needed
+```
+
+## Media/File Handling in Service
+- ✅ Service MUST handle ALL media operations
+- ✅ Service receives files as array from Controller
+- ✅ Service uses Spatie Media Library directly
+- ✅ Service handles media cleanup via Events
+
+```php
+// ✅ CORRECT - Media handling in Service
+public function create(array $data, User $actor, array $files = []): Course
+{
+    return DB::transaction(function () use ($data, $actor, $files) {
+        $course = $this->repository->create($data);
+        
+        if (!empty($files['thumbnail'])) {
+            $course->addMedia($files['thumbnail'])
+                ->toMediaCollection('thumbnail');
+        }
+        
+        if (!empty($files['banner'])) {
+            $course->addMedia($files['banner'])
+                ->toMediaCollection('banner');
+        }
+        
+        event(new CourseCreated($course, $actor));
+        
+        return $course->fresh();
+    });
+}
+```
+
+## Exception Handling in Service
+- ✅ Service MUST catch database exceptions
+- ✅ Service MUST throw domain-specific custom exceptions
+- ✅ Custom exceptions contain structured error data
+- ❌ Controller MUST NOT parse exception messages
+
+```php
+// ✅ CORRECT - Service throws custom exception
+public function create(array $data, User $actor, array $files = []): Course
+{
+    try {
+        return DB::transaction(function () use ($data, $actor, $files) {
+            // ... business logic
+        });
+    } catch (UniqueConstraintViolationException $e) {
+        throw new DuplicateCourseException(
+            $this->parseDuplicateConstraint($e)
+        );
+    }
+}
+
+private function parseDuplicateConstraint(QueryException $e): array
+{
+    $message = $e->getMessage();
+    $errors = [];
+    
+    if (str_contains($message, 'courses_code_unique')) {
+        $errors['code'] = [__('messages.courses.code_exists')];
+    }
+    if (str_contains($message, 'courses_slug_unique')) {
+        $errors['slug'] = [__('messages.courses.slug_exists')];
+    }
+    
+    return $errors ?: ['general' => [__('messages.courses.duplicate_data')]];
+}
+```
+
+---
+
+# Domain Rules
+
+## Single Responsibility
+- One Service per domain entity/aggregate (NOT one method per service)
+- Service should handle all operations for its entity (CRUD + business logic)
+- Avoid God-Service: Don't mix unrelated entities in one service
+- Separate Command and Query if service becomes too complex (CQRS-lite)
+- One class = one clear responsibility
+
+## Boundaries
+- Cross-module direct Model/DB access FORBIDDEN
+- Cross-module communication ONLY via Contract Public Service
+- Module boundaries must be respected
+
+## Contracts (Interfaces)
+- Public Service MUST expose Contract/Interface
+- Use Provider for binding implementation
+- **Interface Consistency Rule**: Implementation MUST match Interface 1:1
+- **Contract First**: Update interface FIRST, then implementation
+- Cross-module dependencies MUST use interfaces
+
+---
+
+# Database Transaction Rules
+
+## Transaction Management
+- Multi-table write operations MUST use DB Transaction
+- Transaction boundary: Service layer (NOT Repository)
+- Rollback strategy: Exception handling MUST perform rollback correctly
+- Nested transactions: Avoid nested transactions. Use transaction callback if needed
+
+## Transaction Correctness
+- All operations involving multiple table writes MUST use DB Transaction
+- Transaction MUST be in Service layer, not Repository
+- Exception handling MUST ensure proper rollback
+- Use transaction callbacks instead of nested transactions
+
+---
+
+# Migration Discipline
+
+## Naming Convention
+- Format: `{YYYY}_{MM}_{DD}_{HHMMSS}_{description}.php`
+- Use snake_case for description
+- Prefix with action: `create_`, `add_`, `modify_`, `drop_`
+- Examples:
+  - `2025_12_19_020755_create_users_table.php`
+  - `2025_12_19_030000_add_email_verified_at_to_users_table.php`
+  - `2025_12_19_040000_modify_users_table_add_role_id.php`
+
+## No Destructive Migration Without Guard
+- **Destructive operations FORBIDDEN** without explicit guard/check
+- Destructive operations include: `dropTable()`, `dropColumn()`, `dropIndex()`, `dropForeign()`
+- Before destructive operation, MUST check if table/column/index exists
+- Use environment guard for production: `if (app()->environment('production')) { throw new Exception(...) }`
+- OR use config flag: `if (config('app.allow_destructive_migrations')) { ... }`
+- Migration MUST be reversible (proper `down()` method)
+
+## Zero-Downtime Migration
+- For production deployments, migrations MUST be zero-downtime compatible
+- **Additive first**: Add new columns as nullable FIRST, then backfill data, then make required
+- **Split migrations**: Split complex migrations into multiple steps
+- **Index creation**: Create indexes CONCURRENTLY in PostgreSQL (use raw SQL if needed)
+- **Foreign key**: Add foreign keys AFTER data migration, use `deferrable` if possible
+- **Column removal**: Mark column as deprecated first, remove in separate migration after deployment
+
+## Foreign Key Naming Rule
+- Format: `{table}_{column}_foreign`
+- Examples:
+  - `users_role_id_foreign` (table: users, column: role_id)
+  - `courses_category_id_foreign` (table: courses, column: category_id)
+- Use explicit naming in migration: `$table->foreign('role_id')->references('id')->on('roles')->name('users_role_id_foreign');`
+- Consistent naming makes rollback and schema management easier
+
+## Seeder Separation
+- **Development seeders**: `database/seeders/Dev/` - Seed fake data for development
+- **Test seeders**: `database/seeders/Test/` - Seed minimal data for testing
+- **Production seeders**: `database/seeders/Prod/` - Seed only essential reference data (roles, permissions, etc.)
+- NEVER run dev/test seeders in production
+- Use environment check: `if (app()->environment('production')) { return; }`
+- Module seeders: `Modules/{Module}/database/seeders/`
+
+---
+
+# Rollback Policy
+
+## Production Deployment
+- **Rollback strategy REQUIRED**: Every migration MUST have working `down()` method
+- **Test rollback**: Test migration rollback in staging environment before production
+- **Backup before migration**: Database backup MUST be taken before production migration
+- **Reversible migrations**: All migrations MUST be reversible (data loss acceptable only for new tables)
+- **Rollback order**: Rollbacks MUST be executed in reverse order
+- **Documentation**: Document any irreversible operations and migration order
+
+## Rollback Execution
+- Use `php artisan migrate:rollback --step={n}` for controlled rollback
+- Verify application functionality after rollback
+- Monitor database state after rollback
+- Document rollback procedure for each deployment
+
+## Irreversible Operations
+- Data deletion migrations SHOULD be avoided (prefer soft deletes)
+- If data deletion is necessary, document clearly and require approval
+- Use separate "cleanup" migrations that can be run independently
+- Never mix schema changes with data deletion
+
+---
+
+# Security Rules
+
+## Authentication & Authorization
+
+### RBAC Architecture (CRITICAL)
+Laravel provides two authorization mechanisms that MUST be used correctly:
+
+**1. Route Middleware (`role:` / `permission:`)** - For role-based access control
+- Use for **role checking** at route level
+- Syntax: `middleware(['role:Admin,Superadmin'])` or `middleware(['permission:users.view'])`
+- Example: Only Admin/Superadmin can access user management routes
+
+**2. Policy Classes** - For resource-level authorization
+- Use for **resource access control** (ownership, enrollment, membership)
+- MUST be registered in `app/Providers/AuthServiceProvider.php` `$policies` array
+- Called via `$this->authorize('action', $model)` in Controller
+- Example: Student can only view courses they are enrolled in
+
+### RBAC Implementation Rules (ENFORCED)
+
+#### ✅ CORRECT: Policy-Based Authorization
+```php
+// Route: Middleware for authentication only
+Route::middleware(['auth:api'])->group(function () {
+    Route::get('courses/{course}/units', [UnitController::class, 'index']);
+});
+
+// Controller: Authorize via Policy
+public function index(Course $course) {
+    $this->authorize('view', $course); // ← Policy called
+    // ...
+}
+
+// Policy: Resource-level authorization
+public function view(User $user, Course $course): bool {
+    if ($user->hasRole('Student')) {
+        return Enrollment::where('user_id', $user->id)
+            ->where('course_id', $course->id)
+            ->whereIn('status', ['active', 'completed'])
+            ->exists();
+    }
+    return true; // Admin/Instructor allowed
+}
+```
+
+#### ❌ FORBIDDEN: Service-Based Authorization
+```php
+// ❌ FORBIDDEN - Authorization logic in Service
+public function listUsers(User $authUser) {
+    if ($authUser->hasRole('Admin') && !$authUser->hasRole('Superadmin')) {
+        // Complex authorization logic here...
+    }
+}
+```
+
+**Why forbidden?**
+- Violates Single Responsibility Principle
+- Authorization logic mixed with business logic
+- Cannot be reused from other contexts (Blade, API, etc.)
+- Difficult to test in isolation
+
+### Policy Best Practices
+
+#### Policy Method Naming
+- `viewAny()` - Can user view list of resources?
+- `view($model)` - Can user view this specific resource?
+- `create()` - Can user create new resource?
+- `update($model)` - Can user update this resource?
+- `delete($model)` - Can user delete this resource?
+
+#### Policy Structure
+```php
+class CoursePolicy
+{
+    public function view(User $user, Course $course): bool
+    {
+        // Check enrollment for Students
+        if ($user->hasRole('Student')) {
+            return Enrollment::where('user_id', $user->id)
+                ->where('course_id', $course->id)
+                ->whereIn('status', ['active', 'completed'])
+                ->exists();
+        }
+        
+        // Admin/Instructor allowed (role check done by Gate::before)
+        return true;
+    }
+}
+```
+
+#### Gate::before() for Superadmin Bypass
+```php
+// app/Providers/AuthServiceProvider.php
+Gate::before(function (User $user) {
+    if ($user->hasRole('Superadmin')) {
+        return true; // Bypass all policy checks
+    }
+    return null; // Continue to policy
+});
+```
+
+### Service Layer Rules
+- Service MUST NOT contain authorization logic
+- Service receives authenticated user as parameter
+- Service assumes user is already authorized (checked by Controller/Policy)
+- Service focuses on business logic only
+
+```php
+// ✅ CORRECT
+public function listUsers(User $authUser, int $perPage): LengthAwarePaginator
+{
+    // Authorization already done by Controller via Policy
+    // Service only handles query filtering based on user role
+    
+    $query = User::query();
+    
+    if ($authUser->hasRole('Admin') && !$authUser->hasRole('Superadmin')) {
+        // Filter to managed users (business logic, not authorization)
+        $query->whereHas('enrollments', function($q) use ($authUser) {
+            $q->whereIn('course_id', $this->getManagedCourseIds($authUser));
+        });
+    }
+    
+    return $query->paginate($perPage);
+}
+```
+
+### When to Use Middleware vs Policy
+
+| Scenario | Use Middleware | Use Policy |
+|----------|---------------|------------|
+| Role-based access (any Admin) | ✅ `role:Admin` | ❌ |
+| Resource ownership (my course) | ❌ | ✅ Policy |
+| Enrollment status | ❌ | ✅ Policy |
+| Permission-based | ✅ `permission:users.view` | ❌ |
+| Complex resource rules | ❌ | ✅ Policy |
+
+### Authorization Flow
+1. **Route Middleware** → Check authentication (`auth:api`)
+2. **Route Middleware** → Check role if needed (`role:Admin`)
+3. **Controller** → Call `$this->authorize('action', $model)`
+4. **Gate::before()`** → Superadmin bypass
+5. **Policy** → Resource-level authorization
+6. **Service** → Business logic (no authorization)
+
+### Common Patterns
+
+#### Pattern 1: Public View, Restricted Modify
+```php
+// Route
+Route::get('courses/{course}', [CourseController::class, 'show']); // Public
+Route::middleware(['auth:api', 'role:Admin'])->group(function () {
+    Route::put('courses/{course}', [CourseController::class, 'update']);
+});
+
+// Policy
+public function view(?User $user, Course $course): bool {
+    return true; // Public
+}
+
+public function update(User $user, Course $course): bool {
+    return $course->instructor_id === $user->id; // Only instructor
+}
+```
+
+#### Pattern 2: Enrollment-Based Access
+```php
+// Policy
+public function view(User $user, Unit $unit): bool {
+    if ($user->hasRole('Student')) {
+        return Enrollment::where('user_id', $user->id)
+            ->where('course_id', $unit->course_id)
+            ->whereIn('status', ['active', 'completed'])
+            ->exists();
+    }
+    return true;
+}
+```
+
+#### Pattern 3: Hierarchical Access
+```php
+// Policy
+public function view(User $user, User $targetUser): bool {
+    // Superadmin handled by Gate::before()
+    
+    if ($user->hasRole('Admin')) {
+        // Admin can view other Admins and managed Instructors/Students
+        if ($targetUser->hasRole('Admin')) {
+            return true;
+        }
+        
+        return $this->isInManagedCourses($user, $targetUser);
+    }
+    
+    return false;
+}
+```
+
+### Security Checklist
+- ✅ All routes requiring auth use `auth:api` middleware
+- ✅ Role-based routes use `role:` middleware
+- ✅ Resource access uses Policy (`$this->authorize()`)
+- ✅ Policies registered in `AuthServiceProvider::$policies`
+- ✅ `Gate::before()` handles Superadmin bypass
+- ✅ Services do NOT contain authorization logic
+- ✅ Controllers are thin (only authorize + delegate)
+
+## Input Security
+- CSRF protection: Web routes MUST use CSRF protection
+- XSS prevention: All user input MUST be sanitized before display
+- SQL injection prevention: Use Eloquent/Query Builder, FORBIDDEN raw SQL without binding
+- Mass assignment protection: `$fillable`/`$guarded` MUST be strict. No wildcard assignment
+
+## Resource Leakage Prevention
+- Model leakage: Cross-module FORBIDDEN to expose Model directly. ONLY via Contract/Interface
+- Database leakage: Complex cross-module queries ONLY via Repository Contract
+- Response leakage: API responses MUST NOT expose internal fields (use JsonResource)
+
+## Rate Limiting
+- Sensitive endpoints: Login, register, reset password MUST have rate limiting
+- API endpoints: All API endpoints MUST have rate limiting (default: 60 requests/minute)
+- Custom limits: Heavy operation endpoints (search, export) can have stricter limits
+- Rate limiting MUST be configured in route middleware
+
+## Audit & Logging
+- Sensitive actions MUST be audited
+- Audit MUST be via Event, NOT inline logic
+- Use activity log for tracking sensitive operations
+
+---
+
+## Implementation Requirements
+- Models with media MUST implement `HasMedia` and use `InteractsWithMedia`
+- MUST define `registerMediaCollections()` for each model
+- Use `singleFile()` for avatar or single profile image collections
+- Use `registerMediaConversions()` for image transformations
+
+## Upload Handling
+- Media operations (upload, delete, conversion) MUST be in Service layer
+- Controller extracts files using `$request->allFiles()` or similar and passes to Service
+- Media cleanup MUST be handled via Events/Listeners or directly in Service transaction
+
+---
+
+# API Resource & Exposure Rules
+
+## Response Format
+- API responses MUST use `JsonResource`
+- FORBIDDEN to return Model directly
+- Resource handles formatting, type casting, and exposure control
+- Response structure: `{success, message, data, meta, errors}`
+- **Error Response Cleanup**: If `success` is `false`, the `data` and `meta` fields MUST be omitted if they are `null`.
+
+## Resource Serialization
+- All data responses MUST use JsonResource
+- Resource MUST control field exposure
+- Resource MUST handle type casting
+- Resource MUST format dates, numbers, etc.
+
+---
+
+# Internationalization (i18n)
+
+## Translation Keys
+- **MUST use translation keys** for all API messages and responses
+- Format: Use dot notation (e.g., `messages.success`, `messages.validation_failed`)
+- Translation keys MUST be organized by domain (e.g., `users.*`, `courses.*`)
+- Translation files location: `lang/{locale}/` (e.g., `lang/en/messages.php`, `lang/id/messages.php`)
+
+## Supported Locales
+- Default locales: `en` (English), `id` (Indonesian)
+- Locale detection: Via `lang` query parameter or `Accept-Language` header
+- Priority: Query parameter > Accept-Language header > Default locale
+
+## Usage in Code
+- Use `ApiResponse` trait methods with translation keys
+- Example: `$this->success($data, 'messages.resource_created', ['resource' => 'User'])`
+- Use `__('messages.key', $params)` for custom messages
+- Exception messages MUST use translation keys: `throw new ResourceNotFoundException(__('messages.not_found'))`
+
+## Translation File Structure
+- Organize by domain: `users.php`, `courses.php`, `messages.php`
+- Use descriptive keys: `user_created_successfully` (NOT `msg1`)
+- Use parameters for dynamic content: `'user_created' => 'User :name created successfully'`
+- All locales MUST have same keys structure
+
+## Translation Best Practices
+- NEVER hardcode messages in controllers/services
+- Use parameter substitution for dynamic content
+- Keep translation keys consistent across locales
+- Test with different locales
+- Clear cache after translation updates: `php artisan config:cache`
+
+---
+
+# API Consumability
+
+## Client Support
+- API MUST support web clients (Next.js) and mobile apps (iOS/Android)
+- API MUST be stateless (use token-based authentication)
+- API MUST follow RESTful conventions
+
+## Response Consistency
+- Response format MUST be consistent across all endpoints
+- Structure: `{success: boolean, message: string, data: mixed, meta: object|null, errors: object|null}`
+- Status codes MUST follow HTTP standards (200, 201, 400, 401, 403, 404, 422, 500)
+
+## Pagination
+- Pagination format: Use `meta.pagination` structure from `ApiResponse` trait
+- Pagination MUST include: `current_page`, `per_page`, `total`, `last_page`, `from`, `to`, `has_next`, `has_prev`
+- Default page size: Configurable (recommended: 15-50 items per page)
+
+## Error Handling
+- Error responses MUST follow consistent format
+- Validation errors: Use `errors` object with field-level errors
+- Error messages MUST be user-friendly and actionable
+- Error messages MUST use translation keys (i18n support)
+
+## Versioning
+- API versioning: All routes MUST use version prefix (`api/v1`)
+- Breaking changes: Create new version (`api/v2`)
+- Version negotiation: Via URL path (NOT header)
+- Deprecation: Deprecate old versions before removal
+
+## Data Format
+- Dates: ISO 8601 format (e.g., `2025-12-19T10:30:00Z`)
+- Numbers: Use consistent precision
+- Nullable fields: MUST be `null` (NOT omitted or empty string)
+- Boolean: Use `true`/`false` (NOT `1`/`0` or "true"/"false")
+
+## Mobile Optimization
+- Minimize payload size (use pagination, sparse fieldsets if needed)
+- Support conditional requests (ETag, If-Modified-Since) for caching
+- Batch operations: Support batch endpoints where applicable
+- Offline support: Design with eventual consistency in mind
+
+## Documentation
+- API documentation MUST be available (Swagger/OpenAPI recommended)
+- Examples MUST be provided for all endpoints
+- Error responses MUST be documented
+- Authentication flow MUST be documented
+
+---
+
+# Laravel Octane Stateful Safety Rules
+
+## Critical Understanding: Stateful vs Stateless
+
+Laravel Octane (FrankenPHP/RoadRunner/Swoole) keeps your application **in memory** between requests. This is fundamentally different from traditional PHP-FPM where each request starts fresh.
+
+**Key Implications:**
+- Application boots ONCE and stays alive for thousands of requests
+- Global variables, static properties, and singletons persist across requests
+- Memory leaks accumulate over time if not properly managed
+- State from one request can leak into another request if not cleaned up
+
+## FORBIDDEN Patterns (State Leakage)
+
+### ❌ FORBIDDEN: Mutable Static Properties
+
+```php
+// ❌ FORBIDDEN - State persists across requests
+class UserService {
+    private static array $cache = [];
+    
+    public function getUser(int $id): User {
+        if (!isset(self::$cache[$id])) {
+            self::$cache[$id] = User::find($id);
+        }
+        return self::$cache[$id]; // ← User A might see User B's data!
+    }
+}
+```
+
+**Why forbidden?** Static properties are shared across ALL requests. User A's data will be visible to User B.
+
+### ❌ FORBIDDEN: Global State Accumulation
+
+```php
+// ❌ FORBIDDEN - Global state persists
+class LogService {
+    private array $logs = [];
+    
+    public function log(string $message): void {
+        $this->logs[] = $message; // ← Grows unbounded!
+    }
+}
+```
+
+**Why forbidden?** If this service is a singleton, `$logs` will grow infinitely and cause memory exhaustion.
+
+### ❌ FORBIDDEN: Request-Specific Data in Singleton
+
+```php
+// ❌ FORBIDDEN - Request data in singleton
+class AuthService {
+    private ?User $currentUser = null;
+    
+    public function setCurrentUser(User $user): void {
+        $this->currentUser = $user; // ← Leaks to next request!
+    }
+}
+```
+
+**Why forbidden?** If `AuthService` is a singleton, User A's session will leak to User B.
+
+### ❌ FORBIDDEN: Unguarded Static Counters
+
+```php
+// ❌ FORBIDDEN - Counter persists across requests
+class RateLimiter {
+    private static int $requestCount = 0;
+    
+    public function increment(): void {
+        self::$requestCount++; // ← Never resets!
+    }
+}
+```
+
+**Why forbidden?** Counter will keep growing across all requests, giving incorrect rate limit data.
+
+## ✅ CORRECT Patterns (Stateless/Safe)
+
+### ✅ CORRECT: Use Request-Scoped Services
+
+```php
+// ✅ CORRECT - No mutable state
+class UserService {
+    public function __construct(
+        private readonly UserRepository $repository,
+        private readonly CacheInterface $cache,
+    ) {}
+    
+    public function getUser(int $id): User {
+        return $this->cache->remember("user:{$id}", 3600, function() use ($id) {
+            return $this->repository->find($id);
+        });
+    }
+}
+```
+
+**Why correct?** Uses Laravel's cache (which is properly managed by Octane) instead of static properties.
+
+### ✅ CORRECT: Stateless Singletons
+
+```php
+// ✅ CORRECT - Singleton with NO mutable state
+class HashService {
+    public function hash(string $value): string {
+        return bcrypt($value); // Pure function, no state
+    }
+}
+```
+
+**Why correct?** No mutable properties. Each method call is independent.
+
+### ✅ CORRECT: Use Container for Request-Scoped Data
+
+```php
+// ✅ CORRECT - Request-scoped binding
+// In AppServiceProvider
+app()->bind(CurrentUser::class, function () {
+    return new CurrentUser(auth()->user());
+});
+
+// In Service
+public function __construct(
+    private readonly CurrentUser $currentUser,
+) {}
+```
+
+**Why correct?** Laravel's container is properly flushed by Octane between requests.
+
+### ✅ CORRECT: Cleanup via Octane Listeners
+
+```php
+// ✅ CORRECT - Custom cleanup listener
+class FlushCustomCache {
+    public function handle(RequestTerminated $event): void {
+        CustomCache::flush(); // Cleanup after each request
+    }
+}
+
+// Register in config/octane.php
+'listeners' => [
+    RequestTerminated::class => [
+        FlushCustomCache::class,
+    ],
+],
+```
+
+**Why correct?** Explicitly cleans up state after each request.
+
+## Service Layer Rules (Octane-Safe)
+
+### Service MUST Be Stateless
+- ✅ Services MUST NOT store request-specific data in properties
+- ✅ Services MUST receive all data via method parameters
+- ✅ Services MUST NOT use static properties for caching
+- ✅ Services MUST use Laravel's cache or database for persistence
+
+```php
+// ✅ CORRECT - Stateless service
+class CourseService {
+    public function __construct(
+        private readonly CourseRepository $repository,
+    ) {}
+    
+    public function create(array $data, User $actor): Course {
+        // All data comes from parameters, no instance state
+        return DB::transaction(function () use ($data, $actor) {
+            return $this->repository->create($data);
+        });
+    }
+}
+```
+
+### Repository MUST Be Stateless
+- ✅ Repositories MUST NOT cache query results in properties
+- ✅ Repositories MUST NOT store filters/parameters in properties
+- ✅ All query parameters MUST be method arguments
+
+```php
+// ❌ FORBIDDEN
+class CourseRepository {
+    private array $filters = []; // ← State persists!
+    
+    public function setFilters(array $filters): self {
+        $this->filters = $filters;
+        return $this;
+    }
+}
+
+// ✅ CORRECT
+class CourseRepository {
+    public function list(array $filters, int $perPage): LengthAwarePaginator {
+        // Filters passed as parameter, not stored
+        return Course::query()
+            ->when($filters['status'] ?? null, fn($q, $status) => $q->where('status', $status))
+            ->paginate($perPage);
+    }
+}
+```
+
+## Memory Leak Prevention
+
+### Cleanup Requirements
+- ✅ Database connections MUST be disconnected after each request (via `DisconnectFromDatabases` listener)
+- ✅ Uploaded files MUST be flushed (via `FlushUploadedFiles` listener)
+- ✅ Temporary container instances MUST be flushed (via `FlushTemporaryContainerInstances` listener)
+- ✅ Garbage collection MUST run periodically (via `CollectGarbage` listener)
+
+### Monitoring Memory Usage
+```bash
+# Check Octane worker memory usage
+php artisan octane:status
+
+# Reload workers if memory grows too high
+php artisan octane:reload
+```
+
+## Testing for State Leakage
+
+### Test Pattern: Concurrent Request Isolation
+```php
+// Test that User A's data doesn't leak to User B
+test('user data does not leak between requests', function () {
+    $userA = User::factory()->create(['name' => 'Alice']);
+    $userB = User::factory()->create(['name' => 'Bob']);
+    
+    // Simulate Request 1 (User A)
+    actingAs($userA)->get('/api/profile');
+    
+    // Simulate Request 2 (User B)
+    $response = actingAs($userB)->get('/api/profile');
+    
+    // User B should see their own data, not User A's
+    expect($response->json('data.name'))->toBe('Bob');
+});
+```
+
+### Test Pattern: Memory Leak Detection
+```php
+// Test that service doesn't accumulate state
+test('service does not accumulate state', function () {
+    $service = app(CourseService::class);
+    
+    $memoryBefore = memory_get_usage();
+    
+    // Simulate 100 requests
+    for ($i = 0; $i < 100; $i++) {
+        $service->create(['title' => "Course {$i}"], auth()->user());
+    }
+    
+    $memoryAfter = memory_get_usage();
+    $memoryGrowth = $memoryAfter - $memoryBefore;
+    
+    // Memory growth should be minimal (< 1MB for 100 operations)
+    expect($memoryGrowth)->toBeLessThan(1024 * 1024);
+});
+```
+
+## Octane Configuration Checklist
+
+Verify `config/octane.php` has these listeners enabled:
+
+```php
+'listeners' => [
+    RequestTerminated::class => [
+        FlushUploadedFiles::class, // ← REQUIRED
+    ],
+    
+    OperationTerminated::class => [
+        FlushOnce::class, // ← REQUIRED
+        FlushTemporaryContainerInstances::class, // ← REQUIRED
+        DisconnectFromDatabases::class, // ← REQUIRED (prevent connection leaks)
+        CollectGarbage::class, // ← REQUIRED (prevent memory leaks)
+    ],
+],
+```
+
+## Common Pitfalls
+
+### Pitfall 1: Eloquent Model Caching
+```php
+// ❌ FORBIDDEN
+class CourseService {
+    private ?Course $currentCourse = null;
+    
+    public function getCourse(int $id): Course {
+        if (!$this->currentCourse || $this->currentCourse->id !== $id) {
+            $this->currentCourse = Course::find($id);
+        }
+        return $this->currentCourse; // ← Stale data!
+    }
+}
+```
+
+**Problem:** Model data becomes stale. If another request updates the course, this service will return old data.
+
+### Pitfall 2: Event Listener State
+```php
+// ❌ FORBIDDEN
+class CourseCreatedListener {
+    private array $processedCourses = [];
+    
+    public function handle(CourseCreated $event): void {
+        if (in_array($event->course->id, $this->processedCourses)) {
+            return; // Skip duplicate
+        }
+        $this->processedCourses[] = $event->course->id; // ← Grows unbounded!
+    }
+}
+```
+
+**Problem:** `$processedCourses` will grow infinitely across all requests.
+
+### Pitfall 3: Middleware State
+```php
+// ❌ FORBIDDEN
+class TrackRequestMiddleware {
+    private int $requestCount = 0;
+    
+    public function handle(Request $request, Closure $next) {
+        $this->requestCount++; // ← Persists across requests!
+        Log::info("Request #{$this->requestCount}");
+        return $next($request);
+    }
+}
+```
+
+**Problem:** Counter will be incorrect across multiple requests.
+
+## Safe Patterns Summary
+
+| Pattern | Safe? | Reason |
+|---------|-------|--------|
+| Static properties (immutable) | ✅ | Read-only, no state change |
+| Static properties (mutable) | ❌ | State persists across requests |
+| Instance properties (in singleton) | ❌ | Singleton persists across requests |
+| Instance properties (in scoped service) | ✅ | Service is recreated per request |
+| Laravel Cache | ✅ | Properly managed by Octane |
+| Database queries | ✅ | Stateless, connections cleaned up |
+| Global variables | ❌ | Persists across requests |
+| `$GLOBALS` usage | ❌ | Persists across requests |
+
+---
+
+# Laravel Octane / FrankenPHP State Management (CRITICAL)
+
+## Overview
+This application uses **Laravel Octane with FrankenPHP** for high performance. Unlike traditional PHP-FPM, Octane keeps the application in memory between requests, which means **state can leak between requests** if not handled properly.
+
+## CRITICAL RULES - State Management
+
+### ❌ ABSOLUTELY FORBIDDEN
+
+#### 1. Static Properties with Mutable State
+```php
+// ❌ FORBIDDEN - State leaks between requests
+class UserController {
+    protected static $currentUser;  // DANGER!
+    protected static $cache = [];   // DANGER!
+    
+    public function index() {
+        self::$currentUser = auth()->user(); // Leaks to next request!
+    }
+}
+```
+
+#### 2. Global Variables
+```php
+// ❌ FORBIDDEN
+global $userData;
+$userData = auth()->user(); // Persists across requests!
+
+function setCurrentUser($user) {
+    global $currentUser;
+    $currentUser = $user; // DANGER!
+}
+```
+
+#### 3. Singleton Services with Mutable State
+```php
+// ❌ FORBIDDEN
+class CacheService {
+    protected $cachedData = [];  // Persists across requests!
+    
+    public function cache($key, $value) {
+        $this->cachedData[$key] = $value; // DANGER!
+    }
+}
+
+// In ServiceProvider
+$this->app->singleton(CacheService::class); // DANGER with mutable state!
+```
+
+#### 4. Class-Level Caching
+```php
+// ❌ FORBIDDEN
+class ProductRepository {
+    protected $products;  // Cached forever!
+    
+    public function all() {
+        if (!$this->products) {
+            $this->products = Product::all(); // Stale data!
+        }
+        return $this->products;
+    }
+}
+```
+
+#### 5. Instance Properties in Controllers/Middleware
+```php
+// ❌ FORBIDDEN
+class UserController {
+    protected $currentUser;  // Persists across requests!
+    
+    public function index() {
+        $this->currentUser = auth()->user(); // DANGER!
+    }
+}
+
+class TrackRequestMiddleware {
+    private int $requestCount = 0;  // Grows infinitely!
+    
+    public function handle(Request $request, Closure $next) {
+        $this->requestCount++; // DANGER!
+        return $next($request);
+    }
+}
+```
+
+### ✅ SAFE PATTERNS
+
+#### 1. Use Request-Scoped Services
+```php
+// ✅ CORRECT - Scoped to request
+// In ServiceProvider
+$this->app->scoped(UserService::class, function ($app) {
+    return new UserService($app['auth']->user());
+});
+```
+
+#### 2. Use Dependency Injection (No State)
+```php
+// ✅ CORRECT - Stateless service
+class UserManagementService {
+    public function __construct(
+        private readonly UserRepository $repository
+    ) {}
+    
+    public function listUsers(User $authUser, int $perPage) {
+        // All data from parameters, no class properties
+        return $this->repository->paginate($perPage);
+    }
+}
+```
+
+#### 3. Use Laravel Cache (Redis/Database)
+```php
+// ✅ CORRECT - Uses Redis/Database cache
+class ProductRepository {
+    public function all() {
+        return Cache::remember('products', 3600, function () {
+            return Product::all();
+        });
+    }
+}
+```
+
+#### 4. Stateless Controllers
+```php
+// ✅ CORRECT - No instance properties
+class UserController {
+    public function __construct(
+        private readonly UserService $userService
+    ) {}
+    
+    public function index(Request $request) {
+        $user = $request->user(); // Fresh per request
+        return $this->userService->list($user);
+    }
+}
+```
+
+## Octane Configuration (REQUIRED)
+
+### Cleanup Listeners
+Verify these are active in `config/octane.php`:
+
+```php
+OperationTerminated::class => [
+    FlushOnce::class,                      // ✅ Flushes one-time bindings
+    FlushTemporaryContainerInstances::class, // ✅ Clears temp instances
+    DisconnectFromDatabases::class,        // ✅ Closes DB connections
+    CollectGarbage::class,                 // ✅ Runs garbage collection
+],
+```
+
+### Services to Flush
+If you have services that need per-request reset:
+
+```php
+'flush' => [
+    \App\Services\YourStatefulService::class,
+],
+```
+
+## Code Review Checklist
+
+When reviewing PRs, check for:
+- [ ] No `static $` properties storing request data
+- [ ] No `global $` variables
+- [ ] Singletons are stateless or use `scoped()`
+- [ ] No class-level caching (use Laravel Cache)
+- [ ] Services use dependency injection
+- [ ] Controllers don't store state in properties
+- [ ] Middleware doesn't accumulate state
+- [ ] Event listeners don't cache data
+
+## Testing for State Leakage
+
+```php
+// Test concurrent requests with different users
+public function test_no_state_leakage_between_requests()
+{
+    // Request 1: User A
+    $response1 = $this->actingAs($userA)
+        ->getJson('/api/v1/users');
+    
+    // Request 2: User B
+    $response2 = $this->actingAs($userB)
+        ->getJson('/api/v1/users');
+    
+    // Verify no data from request 1 in request 2
+    $this->assertNotEquals(
+        $response1->json('data'),
+        $response2->json('data')
+    );
+}
+```
+
+## Development vs Production
+
+### Development (with --watch)
+```bash
+php artisan octane:start --watch --server=frankenphp
+```
+- Auto-reloads on code changes
+- Monitors: app/, Modules/, config/, routes/, .env
+
+### Production
+```bash
+php artisan octane:start --server=frankenphp
+```
+- No --watch (performance overhead)
+- Manual reload after deployment: `php artisan octane:reload`
+
+## Memory Monitoring
+
+Add to `AppServiceProvider` for development:
+
+```php
+if (app()->environment('local')) {
+    app('events')->listen(RequestHandled::class, function ($event) {
+        $memory = memory_get_usage(true) / 1024 / 1024;
+        if ($memory > 50) { // Alert if > 50MB
+            logger()->warning("High memory usage: {$memory}MB");
+        }
+    });
+}
+```
+
+## Summary - Octane Safety Rules
+
+1. ✅ **Use dependency injection** - No static/global state
+2. ✅ **Prefer `scoped()` over `singleton()`** - For request-dependent services
+3. ✅ **Use Laravel Cache** - Instead of class properties
+4. ✅ **Stateless services** - All data from parameters
+5. ✅ **Test concurrently** - Verify no state leakage
+6. ✅ **Monitor memory** - Watch for memory leaks
+
+**REMEMBER**: With Octane, your code runs once and serves thousands of requests. Any mutable state will leak between requests!
+
+---
+
+# Caching Rules
+
+
+## Cache Layer
+- Caching ONLY in Service/Repository layer (NOT Controller)
+- Cache key format: `{module}:{entity}:{id}` or `{module}:{entity}:{operation}:{params_hash}`
+- Cache invalidation: MUST have invalidation strategy (tag-based, event-based, or TTL)
+- Cache tags: Use cache tags for group invalidation if possible
+
+## Cache Strategy
+- Cache frequently accessed data
+- Cache expensive queries/operations
+- Cache invalidation MUST be handled properly
+- Use cache tags for related data invalidation
+
+---
+
+# Queue Discipline
+
+## Async Operations
+- Heavy operations (email, export, notification) MUST be via Queue
+- Job naming: `{Action}{Entity}Job` (e.g., `SendWelcomeEmailJob`)
+- Job failure: Every Job MUST have failure handling (retry strategy or log)
+- Queue priority: Define queue priority for important vs background jobs
+
+## Job Implementation
+- Jobs MUST be idempotent (safe to retry)
+- Jobs MUST handle failures gracefully
+- Jobs MUST log important operations
+- Jobs MUST use proper queue connection/driver
+
+## Scout/Search Queue
+- **Async Indexing REQUIRED**: `SCOUT_QUEUE=true` MUST be enabled in `.env` or config.
+- **Synchronous Indexing FORBIDDEN**: In production, synchronous indexing performance is unacceptable.
+- **Queue Worker**: Ensure a worker is running for the default or configured Scout queue.
+
+---
+
+# Search / Filter / Sort / Pagination
+
+## Search Implementation (CRITICAL)
+- Use `Spatie\QueryBuilder\QueryBuilder` for filtering/sorting
+- **Search**: MUST use Meilisearch via Laravel Scout (`Model::search()`) for all text search features
+- Search parameter: Use `search` directly (top-level), NOT `filter[search]`
+- **No LIKE Queries**: FORBIDDEN to use `where('field', 'like', '%...%')` for user-facing search (use Scout instead)
+- **No Raw SQL Search**: FORBIDDEN `MATCH/AGAINST` full-text search (use Scout)
+
+## Filter Implementation (STRICT)
+- MUST define `allowedFilters` explicitly (strict validation)
+- FORBIDDEN: Manual `if isset($filters['field'])` logic in Repository/Service
+- Use Spatie `AllowedFilter` types:
+  - `AllowedFilter::exact('field')` - Exact match
+  - `AllowedFilter::partial('field')` - LIKE wildcard search
+  - `AllowedFilter::callback('field', fn ($q, $v) => ...)` - Custom logic (date ranges, computed fields)
+  - `AllowedFilter::scope('field')` - Model query scope
+- Filter validation: Wrap filters in Request object for strict validation: `QueryBuilder::for(Model::class, new Request(['filter' => $filters]))`
+- **Strict Filtering Enforcement**: Unknown filters MUST trigger `InvalidFilterQuery` exception
+
+## Sort Implementation
+- MUST define `allowedSorts` explicitly
+- MUST define `defaultSort` explicitly
+- Sort format: `-field` for DESC, `field` for ASC
+- Complex sorting: Use Model scopes, NOT raw SQL
+
+## Pagination Implementation
+- MUST use QueryBuilder `paginate()` (NOT `get()` + manual pagination)
+- MUST use `paginateResponse()` helper from `ApiResponse` trait
+- Response format: `meta.pagination` with standard structure (current_page, per_page, total, last_page, from, to, has_next, has_prev)
+- MUST append filters to pagination links: `.appends($filters)`
+
+## Service/Repository Pattern
+- Service layers MUST use QueryBuilder for all listing operations
+- Repositories with complex queries MUST use QueryBuilder
+- FORBIDDEN: Manual filter logic in Service/Repository (use AllowedFilter instead)
+- All pagination operations MUST return `LengthAwarePaginator` (NOT Collection)
+
+## Query Builder Configuration (REQUIRED)
+```php
+QueryBuilder::for(Model::class, new Request(['filter' => $filters]))
+    ->allowedFilters([...])
+    ->allowedSorts([...])
+    ->defaultSort('-created_at')
+    ->paginate($perPage)
+    ->appends($filters);
+```
+
+---
+
+# Indexing & Performance
+
+## Database Indexes
+- Foreign keys MUST have indexes
+- Search fields MUST have indexes
+- Sort fields MUST have indexes
+- Review query performance using EXPLAIN
+
+## Query Optimization
+- Use eager loading for required relationships (avoid N+1 queries)
+- Complex queries MUST be reviewed for performance
+- Use EXPLAIN to analyze query performance
+- Search MUST use Meilisearch/Scout, NOT LIKE queries for user-facing search
+
+---
+
+# Error Handling Strategy
+
+## Exception Hierarchy
+- Domain errors → Custom Exception (extends `BusinessException`)
+- Validation errors → `ValidationException`
+- FORBIDDEN to return error arrays manually
+- Global handler maps errors to standard response format
+- **Laravel 11 Exception Registration**: For projects using Laravel 11 structure, API exception rendering MUST be registered in `bootstrap/app.php` using `$exceptions->render()`. Ensure `api/*` and `v1/*` routes always return JSON.
+
+## Exception Design
+- Custom exceptions MUST extend appropriate base exception
+- Exception messages MUST use translation keys (`messages.xxx`)
+- Exception response format MUST follow `ApiResponse` trait standard
+- Exception hierarchy MUST be consistent
+
+---
+
+# API Versioning
+
+## Version Management
+- All API routes MUST use version prefix (`api/v1`)
+- Breaking changes → create new version (`api/v2`)
+- Version negotiation via URL path
+- Deprecation policy MUST be documented
+
+---
+
+# Modular Path Enforcement
+
+## Path Structure
+- Controller: `Modules/{Module}/app/Http/Controllers`
+- Request/DTO: `Modules/{Module}/app/Http/Requests`
+- Service: `Modules/{Module}/app/Services`
+- Repository: `Modules/{Module}/app/Repositories`
+- Contract: `Modules/{Module}/app/Contracts`
+- Query: `Modules/{Module}/app/Queries`
+- Provider: `Modules/{Module}/app/Providers`
+- Policy: `Modules/{Module}/app/Policies`
+- Resource: `Modules/{Module}/app/Http/Resources`
+
+---
+
+# Refactor & Safety Rules
+
+## Code Quality
+- **Duplicate method FORBIDDEN**: No duplicate method declarations in one file
+- **Import Hygiene**: Unused imports FORBIDDEN. Sort imports logically (Laravel, Module, Vendor)
+- **Namespace consistency**: Namespace MUST follow PSR-4 folder structure
+- Cross-module direct Model access FORBIDDEN
+
+## Code Standards
+- Follow PSR-12 coding standards
+- One class per file
+- File name = Class name
+- No duplicate methods in class
+
+---
+
+# Error Prevention
+
+## Type Safety
+- **Type Hinting**: REQUIRED for all parameters and return types
+- **Null Safety**: Avoid `null` as much as possible. Use `Optional` or default values
+- **Immutable Objects**: Use DTO/Value Objects that are immutable to prevent unwanted side effects
+
+## Code Safety
+- Full type hints for all methods/functions
+- Null safety considerations
+- Immutable DTOs (using Spatie Laravel Data)
+
+---
+
+# Testing Strategy
+
+## Service Tests (Unit)
+- MUST test: Positive & Negative cases
+- MUST test: Business validation & Exception cases
+- Dependencies MUST be MOCKED
+- Service tests = unit tests (dependencies MOCKED)
+
+## Repository Tests (Integration)
+- MUST test: Filter, Sort, Search, Pagination
+- MUST test: Soft-delete & Eager loading
+- Repository tests = integration tests (real database, no mocking)
+
+## Controller Tests (Feature)
+- MUST test: HTTP Response & JSON format
+- MUST test: Validation errors & Auth/Permission guard
+- Controller tests = feature tests (full HTTP request/response cycle)
+
+## Validation Tests
+- MUST test: Required, Type, Format
+- MUST test: Boundary & Forbidden values
+- MUST test: Conflict domain values (e.g., duplicate)
+
+## Custom Exception Tests
+- Minimum 1 case for mapping & throw
+- Test exception message and status code
+
+## Resource/API Contract Tests
+- Test JsonResource to ensure response format matches contract
+- Test API response structure (success, message, data, meta format)
+- Verify response schema consistency for same endpoint
+
+## Domain Invariants Tests
+- Test domain invariants/business rules in Service tests
+- Test to ensure model state is always valid (no invalid state)
+- Test boundary conditions (min/max values, edge cases)
+
+## Factories & Seeders Discipline
+- **Factory REQUIRED**: Every Model MUST have Factory for testing
+- **Factory States**: Use factory states for various scenarios (active, inactive, etc.)
+- **Seeder Organization**: Seeders MUST be organized per module
+- **Test Data**: Tests use factories, NOT seeders (faster, isolated)
+
+## Coverage Expectation
+- Service: 100% behavior coverage (all branches, all exceptions)
+- Repository: 100% query behavior coverage (all filters, sorts, pagination, search)
+- Controller: Major flow coverage (happy path + error cases)
+- Resource: 100% transformation coverage (all fields, all relations)
+- Policy: All authorization rules covered
+
+## Testability as Design Constraint
+- Dependency Injection: All dependencies MUST be injected (for mockability)
+- Interface Segregation: Use interfaces for dependencies to be mocked
+- No Static Calls: Minimize static calls that are hard to mock (prefer DI)
+- Testable Architecture: Design code for testability (loose coupling, high cohesion)
+
+## CI Enforcement
+- Merge to `main/master` FORBIDDEN if tests fail
+- All tests MUST pass before merge
+- Coverage thresholds MUST be maintained
+
+---
+
+# Agent Strict Rules (Anti-Hallucination & Code Generation)
+
+## Controller Generation Rules
+When generating Controller code, ENFORCE:
+
+1. **Line Count Check**: If controller method > 10 lines → STOP and refactor to Service
+2. **Logic Check**: If method contains `if/else/switch` for business rules → MOVE to Service
+3. **Model Check**: If method uses Model directly → MOVE to Service via Repository
+4. **Media Check**: If method handles files/media → MOVE to Service
+5. **Error Check**: If method parses exceptions → MOVE to Service and throw custom exception
+6. **Resource Check**: If method returns raw Model → USE JsonResource
+
+## Generation Checklist
+Before delivering Controller code, verify:
+- [ ] No business logic (no if/else for domain rules)
+- [ ] No direct Model/Repository access
+- [ ] No media/file handling
+- [ ] No exception message parsing
+- [ ] No filter/query interpretation
+- [ ] All responses use JsonResource
+- [ ] Service injection uses `readonly`
+- [ ] Method ≤ 10 lines
+- [ ] Only ApiResponse trait (no HandlesMediaUploads)
+
+## Auto-Refactor Triggers
+If generated code contains ANY of these → AUTO-REFACTOR to Service:
+- `if ($data['field'] === 'value')` (business conditional)
+- `Model::create()` or `Model::where()` (direct Model access)
+- `$this->uploadMedia()` (media handling)
+- `str_contains($e->getMessage())` (exception parsing)
+- `$request->input('filter.status')` (filter logic)
+- Try-catch with conditional logic inside catch block
+
+## Format Enforcement
+- **Must Compile**: All generated code MUST compile without errors
+- **No Pseudo Code**: FORBIDDEN to create pseudo-code, placeholders, or unclear TODOs
+- **Deterministic Formatting**: Use PSR-12 for PHP formatting. Consistent with existing style
+- **Complete Implementation**: If creating method/class, implementation MUST be complete, NOT stub
+
+## Code Completeness
+- **Never Invent Details**: If unsure about domain/business rule, MUST query/search codebase first
+- **Domain Query Required**: Before creating new feature, MUST search to understand existing patterns
+- **No Assumptions**: Do NOT assume implementation details. Look at existing examples in codebase
+- **Full Type Hints**: All methods/functions MUST have complete type hints (parameters + return type)
+
+## Execution Priority
+- **Read Before Write**: Always read file to be modified first
+- **Context Awareness**: Understand module/domain context before generating code
+- **Incremental Changes**: Make small verifiable changes, NOT large changes at once
+- **Verify Compatibility**: Ensure new code is compatible with existing code (no breaking changes unless required)
+
+## Delivery Mode Rules
+- **Direct Implementation**: Implement directly, NOT just suggest
+- **Test After Implementation**: After implementation, verify with linter/tests if available
+- **Error Handling First**: Ensure error handling is handled from the start, NOT added later
+
+---
+
+# Enterprise Quality Rules
+
+## Exception Design & Error Contract
+- Custom exceptions: Domain errors use Custom Exception (extends `BusinessException`)
+- Exception hierarchy: Exceptions MUST follow existing hierarchy (`BusinessException`, `ValidationException`, etc.)
+- Error response format: All error responses follow standard format from `ApiResponse` trait
+- Exception message: Exception messages use translation keys (`messages.xxx`)
+
+## Response Format Strict
+- JSON Structure: All API responses follow format: `{success, message, data, meta, errors}`
+- Status Code: Use appropriate HTTP status codes (200, 201, 400, 401, 403, 404, 422, 500)
+- Pagination Format: Pagination uses `meta.pagination` format from `ApiResponse` trait
+- Resource Serialization: Data responses MUST use JsonResource, NOT Model directly
+
+---
+
+# Machine Optimization (LLM-Friendly)
+
+## Code Structure
+- **PSR-4 Compliance**: Namespace MUST follow PSR-4 structure
+- **File Organization**: One class per file. File name = Class name
+- **Import Organization**: Sort imports: Laravel core → Module classes → Vendor packages
+- **No Duplicate Methods**: FORBIDDEN to have duplicate methods in one class
+
+## Deterministic Behavior
+- **No Side Effects in Queries**: Query methods must NOT have side effects (pure functions)
+- **Immutable DTOs**: DTOs use Spatie Laravel Data (immutable by default)
+- **Idempotent Operations**: Operations that can be retried must be idempotent
+- **Predictable Naming**: Naming convention consistent (camelCase for methods, PascalCase for classes)
+
+## Documentation & Clarity
+- **PHPDoc Required**: Public methods MUST have PHPDoc with @param and @return
+- **Type Information**: Type information must be explicit (type hints + PHPDoc)
+- **No Magic Values**: No magic numbers/strings. Use constants or config
+
+---
+
+# Operational Addenda
+
+## Binding & Providers (Octane-Safe)
+- Contract-first: Define interfaces in `Modules/{Module}/app/Contracts`, bind in `Providers`.
+- Use `scoped()` for request-dependent services; allow `singleton()` only for stateless services.
+- Example (Module Provider):
+
+```php
+declare(strict_types=1);
+
+namespace Modules\Learning\app\Providers;
+
+use Illuminate\Support\ServiceProvider;
+use Modules\Learning\app\Contracts\AssignmentServiceInterface;
+use Modules\Learning\app\Services\AssignmentService;
+
+class LearningServiceProvider extends ServiceProvider
+{
+    public function register(): void
+    {
+        $this->app->scoped(AssignmentServiceInterface::class, function ($app) {
+            return new AssignmentService(
+                $app->make(\Modules\Learning\app\Repositories\AssignmentRepository::class)
+            );
+        });
+    }
+}
+```
+
+## DTO / Spatie Data Conventions
+- Location: `Modules/{Module}/app/Data`.
+- DTOs are immutable; use typed constructor props; add rules/casts where needed.
+- Map FormRequest `validated()` → DTO inside Controller (extraction step only), then pass DTO to Service.
+
+```php
+declare(strict_types=1);
+
+namespace Modules\Learning\app\Data;
+
+use Spatie\LaravelData\Data;
+use Spatie\LaravelData\Attributes\Validation\Required;
+use Spatie\LaravelData\Attributes\Validation\StringType;
+use Spatie\LaravelData\Attributes\Validation\Min;
+
+class CreateAssignmentData extends Data
+{
+    public function __construct(
+        #[Required, StringType, Min(3)] public string $title,
+        #[Required] public int $course_id,
+        public ?string $description,
+        public ?\DateTimeImmutable $due_at,
+    ) {}
+}
+```
+
+Usage in Controller (≤10 lines):
+
+```php
+declare(strict_types=1);
+
+use Modules\Learning\app\Data\CreateAssignmentData;
+
+public function store(CreateAssignmentRequest $request)
+{
+    $this->authorize('create', Assignment::class);
+    $data = CreateAssignmentData::from($request->validated());
+    $actor = auth('api')->user();
+    $assignment = $this->service->create($data, $actor, $request->allFiles());
+    return $this->success(new AssignmentResource($assignment));
+}
+```
+
+## Cache Details
+- Key format: `{module}:{entity}:{operation}:{params_hash}`.
+- Tags: Use `{module}`, `{entity}` tags to enable grouped invalidation.
+- TTL defaults: 3600s unless specified.
+- Invalidation: Dispatch events on create/update/delete; listeners flush tags.
+
+```php
+// Read with tags
+$value = cache()->tags(['learning', 'assignment'])
+    ->remember('learning:assignment:list:'.md5(json_encode($filters)), 3600, function () use ($filters) {
+        return \Modules\Learning\app\Repositories\AssignmentRepository::list($filters);
+    });
+
+// Invalidate on mutation
+event(new AssignmentMutated($assignmentId));
+
+// Listener
+cache()->tags(['learning', 'assignment'])->flush();
+```
+
+## Search / Indexing (Meilisearch)
+- Models using Scout define `toSearchableArray()`; specify index settings (filterable/sortable/synonyms, ranking rules).
+- Ensure `SCOUT_QUEUE=true` and a queue worker is running.
+- Reindex on relevant mutations via events/listeners.
+
+```php
+declare(strict_types=1);
+
+namespace Modules\Learning\app\Models;
+
+use Laravel\Scout\Searchable;
+
+class Assignment extends Model
+{
+    use Searchable;
+
+    public function toSearchableArray(): array
+    {
+        return [
+            'id' => $this->id,
+            'title' => $this->title,
+            'course_id' => $this->course_id,
+            'description' => $this->description,
+            'due_at' => optional($this->due_at)?->toAtomString(),
+        ];
+    }
+}
+```
+
+Index settings (executed in a service/setup script):
+
+```php
+meilisearch()->index('assignments')->updateSettings([
+    'filterableAttributes' => ['course_id', 'due_at'],
+    'sortableAttributes' => ['due_at', 'created_at'],
+    'synonyms' => ['task' => ['assignment']],
+    'rankingRules' => ['words','typo','proximity','attribute','sort','exactness'],
+]);
+```
+
+## Media Standards (Spatie Media Library)
+- Collections: `thumbnail`, `banner`, `avatar`.
+- Disk: `do` (DigitalOcean Spaces) as configured.
+- Conversions: JPEG/WEBP; sizes: thumbnail 320x180, banner 1280x720, avatar 256x256.
+
+```php
+declare(strict_types=1);
+
+namespace Modules\Learning\app\Models;
+
+use Spatie\MediaLibrary\HasMedia;
+use Spatie\MediaLibrary\InteractsWithMedia;
+
+class Assignment extends Model implements HasMedia
+{
+    use InteractsWithMedia;
+
+    public function registerMediaCollections(): void
+    {
+        $this->addMediaCollection('thumbnail')->useDisk('do');
+        $this->addMediaCollection('banner')->useDisk('do');
+        $this->addMediaCollection('avatar')->singleFile()->useDisk('do');
+    }
+
+    public function registerMediaConversions(?\Spatie\MediaLibrary\MediaCollections\Models\Media $media = null): void
+    {
+        $this->addMediaConversion('thumb')
+            ->format('webp')->width(320)->height(180)->quality(85);
+        $this->addMediaConversion('banner')
+            ->format('webp')->width(1280)->height(720)->quality(85);
+        $this->addMediaConversion('avatar')
+            ->format('webp')->width(256)->height(256)->quality(85);
+    }
+}
+```
+
+## Rate Limiting (Specific)
+- Define named limiters per category in `config/rate-limiting.php` and reference via `throttle:{name}`.
+- Categories: `auth` (e.g., 5/min per IP), `search` (60/min per IP), `export` (10/min per user).
+
+```php
+use Illuminate\Cache\RateLimiting\Limit;
+use Illuminate\Support\Facades\RateLimiter;
+
+RateLimiter::for('auth', fn($request) => Limit::perMinute(5)->by($request->ip()));
+RateLimiter::for('search', fn($request) => Limit::perMinute(60)->by($request->ip()));
+RateLimiter::for('export', fn($request) => Limit::perMinute(10)->by(optional($request->user())->id ?? $request->ip()));
+```
+
+Usage in routes:
+
+```php
+Route::post('auth/login', [AuthController::class, 'login'])->middleware('throttle:auth');
+Route::get('search', [SearchController::class, 'index'])->middleware('throttle:search');
+Route::post('export', [ExportController::class, 'store'])->middleware('throttle:export');
+```
+
+## Error Rendering (Laravel 11)
+- Register JSON error rendering in `bootstrap/app.php` to enforce ApiResponse format.
+
+```php
+$app->withExceptions(function ($exceptions) {
+    $exceptions->render(function (\Throwable $e, $request) {
+        $message = __('messages.server_error');
+        $status = 500;
+
+        if ($e instanceof \App\Exceptions\BusinessException) {
+            $message = $e->getMessage();
+            $status = $e->getCode() ?: 422;
+            return response()->json([
+                'success' => false,
+                'message' => $message,
+                'errors' => $e->getErrors(),
+            ], $status);
+        }
+
+        return response()->json([
+            'success' => false,
+            'message' => $message,
+            'errors' => null,
+        ], $status);
+    });
+});
+```
+
+## Cross-Module Contract Example
+- Caller module injects another module's public service interface; no direct Model/DB cross-access.
+
+```php
+declare(strict_types=1);
+
+namespace Modules\Learning\app\Services;
+
+use Modules\Enrollments\app\Contracts\EnrollmentServiceInterface;
+
+class AssignmentService implements AssignmentServiceInterface
+{
+    public function __construct(
+        private readonly EnrollmentServiceInterface $enrollments,
+    ) {}
+
+    public function listForUser(int $courseId, int $userId): array
+    {
+        if (! $this->enrollments->isEnrolled($userId, $courseId)) {
+            throw new \App\Exceptions\BusinessException(__('messages.forbidden'), 403);
+        }
+        return [];
+    }
+}
+```
+
+## Resource Standards
+- Base resource handles ISO 8601 dates, numeric casting, booleans, and nullability.
+
+```php
+declare(strict_types=1);
+
+namespace Modules\Common\app\Http\Resources;
+
+use Illuminate\Http\Resources\Json\JsonResource;
+
+class BaseJsonResource extends JsonResource
+{
+    public function formatDate(?\DateTimeInterface $date): ?string
+    {
+        return $date ? $date->format(DATE_ATOM) : null;
+    }
+
+    public function toArray($request): array
+    {
+        return [
+            // Implement per child resource
+        ];
+    }
+}
+```
+
+Example child resource:
+
+```php
+class AssignmentResource extends BaseJsonResource
+{
+    public function toArray($request): array
+    {
+        return [
+            'id' => (int) $this->id,
+            'title' => (string) $this->title,
+            'course_id' => (int) $this->course_id,
+            'description' => $this->description ?: null,
+            'due_at' => $this->formatDate($this->due_at),
+            'published' => (bool) $this->published,
+        ];
+    }
+}
+```
+
+## Audit / Activity Log
+- Log sensitive actions (create/update/delete, enrollment changes, grading decisions).
+- Use events to decouple logging; listeners write to activity log.
+
+```php
+activity()
+    ->causedBy($actor)
+    ->performedOn($model)
+    ->event('assignment.created')
+    ->withProperties(['id' => $model->id, 'title' => $model->title])
+    ->log(__('messages.assignments.created'));
+```
+
+# Redis Usage & Chunking
+
+## Redis Key Management
+- **Prefixing**: All Redis keys MUST use a consistent prefix per module or feature (e.g., `course:{id}:enrollments`).
+- **Expiration**: All cache keys MUST have an expiration time (TTL) to prevent memory leaks, unless explicitly designed as persistent.
+- **Key Scanning**: NEVER use `keys *` command which blocks the single-threaded Redis instance. Use `SCAN` cursor-based iteration instead.
+
+## Redis Chunking Rules (MANDATORY)
+- **Large Datasets**: When retrieving large datasets (e.g., thousands of items) from Redis, you **MUST use chunking**.
+- **Scan Chunking**: Use `scan` with a `count` hint (e.g., 100-1000) to retrieve keys incrementally.
+- **Pipeline Implementation**: When performing multiple operations (e.g., fetching values for scanning keys), use **Redis Pipelines** (`Redis::pipeline()`) to batch commands and reduce network round-trips.
+- **Memory Protection**: Processing loops MUST process data in chunks to avoid identifying all keys and loading all values into PHP memory at once.
+
+### Example of Redis Chunking
+```php
+// ✅ CORRECT - Using Scan with Chunking
+$cursor = null;
+do {
+    // Scan for keys matching pattern with count hint
+    // This assumes using a Redis client facade that supports scan, or raw command
+    [$cursor, $keys] = Redis::scan($cursor, ['MATCH' => 'user:*:activity', 'COUNT' => 100]);
+    
+    if (!empty($keys)) {
+        // Pipeline the GET commands for this batch of keys
+        $values = Redis::pipeline(function ($pipe) use ($keys) {
+            foreach ($keys as $key) {
+                $pipe->get($key);
+            }
+        });
+        
+        // Process this batch
+        foreach ($values as $value) {
+            $this->processActivity(json_decode($value, true));
+        }
+    }
+} while ($cursor > 0);
+```
+
+### Forbidden Practices
+- ❌ `Redis::keys('pattern:*')` - Blocking operation on large datasets.
+- ❌ Loading 10,000+ items into a single PHP array from Redis without pagination/chunking.
+- ❌ Using Redis as a primary persistent store without DB backup (Cache-Aside pattern preferred).

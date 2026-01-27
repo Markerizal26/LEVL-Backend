@@ -19,10 +19,10 @@ class LearningDatabaseSeeder extends Seeder
     public function run(): void
     {
         $this->call([
-            AssignmentAndSubmissionSeeder::class,
+            AssignmentSeederEnhanced::class,
+            QuestionSeederEnhanced::class,
             AssignmentPrerequisitesSeeder::class,
             OverrideSeeder::class,
-            QuestionAndAnswerSeeder::class,
             QuestionOptionAnswerSubmissionSeeder::class,
             SubmissionFileSeeder::class,
         ]);

@@ -20,29 +20,44 @@ class SubmissionFileSeeder extends Seeder
     {
         echo "Seeding submission files...\n";
 
-        // Check if we have submissions to link to
-        $submissions = Submission::with('assignment.questions')->get();
+        // Get submission IDs that have file upload assignments
+        $fileUploadAssignmentIds = \DB::table('assignment_questions')
+            ->where('type', 'file_upload')
+            ->pluck('assignment_id')
+            ->unique()
+            ->toArray();
 
-        if ($submissions->isEmpty()) {
-            echo "⚠️  No submissions found. Skipping submission file seeding.\n";
+        if (empty($fileUploadAssignmentIds)) {
+            echo "⚠️  No assignments with file upload questions found. Skipping submission file seeding.\n";
             return;
         }
 
+        echo "   📁 Found " . count($fileUploadAssignmentIds) . " assignments with file upload questions\n";
+
+        // Get all submission IDs at once (more efficient than chunk)
+        $submissionIds = \DB::table('submissions')
+            ->whereIn('assignment_id', $fileUploadAssignmentIds)
+            ->pluck('id')
+            ->toArray();
+
+        if (empty($submissionIds)) {
+            echo "⚠️  No submissions found. Skipping.\n";
+            return;
+        }
+
+        echo "   📋 Processing " . count($submissionIds) . " submissions...\n";
+
         $fileCount = 0;
+        $filesToInsert = [];
+        $processed = 0;
 
-        foreach ($submissions as $submission) {
-            // Only create files for submissions that have file upload questions
-            $hasFileUpload = $submission->assignment->questions
-                ->contains(function ($question) {
-                    return $question->type->value === 'file_upload';
-                });
-
-            if (!$hasFileUpload) {
-                continue;
-            }
-
+        foreach ($submissionIds as $index => $submissionId) {
             // 60% of file upload submissions will have actual files
             if (rand(1, 100) > 60) {
+                $processed++;
+                if ($processed % 5000 === 0) {
+                    echo "      ✓ Processed $processed/" . count($submissionIds) . "\n";
+                }
                 continue;
             }
 
@@ -50,16 +65,32 @@ class SubmissionFileSeeder extends Seeder
             $numFiles = rand(1, 3);
 
             for ($i = 0; $i < $numFiles; $i++) {
-                SubmissionFile::create([
-                    'submission_id' => $submission->id,
+                $filesToInsert[] = [
+                    'submission_id' => $submissionId,
                     'created_at' => now(),
                     'updated_at' => now(),
-                ]);
+                ];
                 $fileCount++;
+
+                // Batch insert when we reach 500 records
+                if (count($filesToInsert) >= 500) {
+                    \DB::table('submission_files')->insertOrIgnore($filesToInsert);
+                    $filesToInsert = [];
+                }
+            }
+
+            $processed++;
+            if ($processed % 5000 === 0) {
+                echo "      ✓ Processed $processed/" . count($submissionIds) . " ($fileCount files created)\n";
             }
         }
 
+        // Insert any remaining records
+        if (!empty($filesToInsert)) {
+            \DB::table('submission_files')->insertOrIgnore($filesToInsert);
+        }
+
         echo "✅ Submission file seeding completed!\n";
-        echo "Created $fileCount submission files\n";
+        echo "   📊 Created $fileCount submission files\n";
     }
 }

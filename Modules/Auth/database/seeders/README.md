@@ -56,7 +56,7 @@ Banned:      5% (50 users)
 ### Demo Accounts Created
 | Email | Username | Role | Status | Password |
 |-------|----------|------|--------|----------|
-| superadmin@test.com | superadmin | Superadmin | Active | password |
+| superadmin@test.com | superadmin | Superadmin | Active |   |
 | admin@test.com | admin | Admin | Active | password |
 | instructor@test.com | instructor | Instructor | Active | password |
 | student@test.com | student | Student | Active | password |

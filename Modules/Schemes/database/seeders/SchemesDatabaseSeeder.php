@@ -16,8 +16,9 @@ class SchemesDatabaseSeeder extends Seeder
     public function run(): void
     {
         $this->call([
-            TagSeeder::class,
-            CourseSeeder::class,
+            TagSeederEnhanced::class,
+            CourseSeederEnhanced::class,
+            LearningContentSeeder::class,
         ]);
     }
 }

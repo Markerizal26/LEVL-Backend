@@ -11,23 +11,70 @@ class PendingManualGradingSeeder extends Seeder
     /**
      * Run the database seeds.
      *
-     * Updates some existing submissions to have state 'PendingManualGrading'
+     * Updates submissions to have state 'PendingManualGrading'
      * to ensure the /grading endpoint has data to display.
+     * Uses optimized raw SQL with chunking - no N+1 queries.
      */
     public function run(): void
     {
-        echo "Updating submissions to PendingManualGrading state...\n";
+        echo "\n📋 Seeding submissions with PendingManualGrading state...\n";
 
-        // Find submissions that are in 'submitted' state but don't have a grade yet
-        // and update them to 'pending_manual_grading' state
-        $count = Submission::where('state', 'submitted')
-            ->whereDoesntHave('grade')
-            ->limit(50) // Update only first 50 to avoid overloading
-            ->update([
-                'state' => SubmissionState::PendingManualGrading->value,
-                'status' => 'submitted' // Keep status as submitted
-            ]);
+        // Count submissions that need updating (using raw SQL for speed)
+        $totalToUpdate = \DB::table('submissions as s')
+            ->leftJoin('grades', 's.id', '=', 'grades.submission_id')
+            ->where('s.state', 'submitted')
+            ->whereNull('grades.id')
+            ->count();
 
-        echo "✅ Updated $count submissions to PendingManualGrading state\n";
+        if ($totalToUpdate === 0) {
+            echo "⚠️  No submissions found for PendingManualGrading state.\n";
+            return;
+        }
+
+        echo "   📝 Processing $totalToUpdate submissions...\n\n";
+
+        // ✅ Use raw SQL with chunking to update efficiently (no N+1)
+        $chunkSize = 2000;
+        $offset = 0;
+        $chunkNum = 0;
+        $totalUpdated = 0;
+
+        while (true) {
+            // Get submission IDs that need updating using raw SQL
+            $submissionIds = \DB::table('submissions as s')
+                ->leftJoin('grades', 's.id', '=', 'grades.submission_id')
+                ->where('s.state', 'submitted')
+                ->whereNull('grades.id')
+                ->select('s.id')
+                ->limit($chunkSize)
+                ->offset($offset)
+                ->orderBy('s.id')
+                ->pluck('id')
+                ->toArray();
+
+            if (empty($submissionIds)) {
+                break;
+            }
+
+            $chunkNum++;
+            $count = count($submissionIds);
+
+            // ✅ Batch update (no N+1)
+            \DB::table('submissions')
+                ->whereIn('id', $submissionIds)
+                ->update([
+                    'state' => SubmissionState::PendingManualGrading->value,
+                    'status' => 'submitted',
+                    'updated_at' => now(),
+                ]);
+
+            $totalUpdated += $count;
+
+            echo "      ✓ Chunk $chunkNum: Updated $count submissions (Total: $totalUpdated/$totalToUpdate)\n";
+
+            $offset += $chunkSize;
+        }
+
+        echo "\n✅ Completed! Updated $totalUpdated submissions to PendingManualGrading state\n";
     }
 }

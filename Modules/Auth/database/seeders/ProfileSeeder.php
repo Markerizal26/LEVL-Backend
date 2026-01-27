@@ -125,7 +125,6 @@ class ProfileSeeder extends Seeder
                         'related_type' => fake()->randomElement([null, 'Course', 'Lesson', 'Quiz', 'Assignment']),
                         'related_id' => fake()->boolean(60) ? fake()->numberBetween(1, 100) : null,
                         'created_at' => now()->subDays(rand(1, 90)),
-                        'updated_at' => now()->subDays(rand(1, 90)),
                     ];
                     $totalCount++;
                 }

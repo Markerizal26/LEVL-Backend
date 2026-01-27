@@ -23,38 +23,49 @@ class OverrideSeeder extends Seeder
         echo "Seeding overrides...\n";
 
         // Check if we have users and assignments to link to
-        $instructors = User::whereHas('roles', function ($q) {
+        $instructorIds = User::whereHas('roles', function ($q) {
             $q->whereIn('name', ['Instructor', 'Admin']);
-        })->get();
+        })->pluck('id');
 
-        $assignments = Assignment::all();
-        $students = User::role('Student')->get();
+        $assignmentIds = Assignment::pluck('id');
+        $studentIds = User::role('Student')->pluck('id');
 
-        if ($instructors->isEmpty()) {
+        if ($instructorIds->isEmpty()) {
             echo "⚠️  No instructors found. Skipping override seeding.\n";
             return;
         }
 
-        if ($assignments->isEmpty()) {
+        if ($assignmentIds->isEmpty()) {
             echo "⚠️  No assignments found. Skipping override seeding.\n";
             return;
         }
 
-        if ($students->isEmpty()) {
+        if ($studentIds->isEmpty()) {
             echo "⚠️  No students found. Skipping override seeding.\n";
             return;
         }
 
         $overrideCount = 0;
 
-        // Create overrides for a subset of assignments and students
-        foreach ($assignments->random(min(20, $assignments->count())) as $assignment) {
+        // Convert collections to arrays for easier random selection
+        $instructorIds = $instructorIds->toArray();
+        $assignmentIds = $assignmentIds->toArray();
+        $studentIds = $studentIds->toArray();
+
+        // Prepare overrides to be inserted
+        $overridesToInsert = [];
+
+        // Select a subset of assignments for overrides
+        $assignmentsForOverride = array_slice($assignmentIds, 0, min(20, count($assignmentIds)));
+
+        // Create overrides for selected assignments
+        foreach ($assignmentsForOverride as $assignmentId) {
             // Create 1-3 overrides per assignment
             $numOverrides = rand(1, 3);
 
             for ($i = 0; $i < $numOverrides; $i++) {
-                $student = $students->random();
-                $instructor = $instructors->random();
+                $studentId = $studentIds[array_rand($studentIds)];
+                $instructorId = $instructorIds[array_rand($instructorIds)];
 
                 // Randomly select override type
                 $overrideTypes = [
@@ -62,17 +73,18 @@ class OverrideSeeder extends Seeder
                     OverrideType::Attempts,
                     OverrideType::Prerequisite,
                 ];
-                
+
                 $type = $overrideTypes[array_rand($overrideTypes)];
 
                 // Prepare override data based on type
                 $overrideData = [
-                    'assignment_id' => $assignment->id,
-                    'student_id' => $student->id,
-                    'grantor_id' => $instructor->id,
+                    'assignment_id' => $assignmentId,
+                    'student_id' => $studentId,
+                    'grantor_id' => $instructorId,
                     'type' => $type,
                     'reason' => fake()->sentence(),
-                    'status' => 'active',
+                    'granted_at' => now(),
+                    'expires_at' => null, // Will be set based on type below
                     'created_at' => now(),
                     'updated_at' => now(),
                 ];
@@ -80,29 +92,36 @@ class OverrideSeeder extends Seeder
                 // Add type-specific values
                 switch ($type) {
                     case OverrideType::Deadline:
-                        $overrideData['value'] = [
+                        $overrideData['value'] = json_encode([
                             'extended_deadline' => now()->addDays(rand(1, 14))->toISOString(),
-                        ];
+                        ], JSON_UNESCAPED_SLASHES);
                         $overrideData['expires_at'] = now()->addDays(rand(15, 30));
                         break;
 
                     case OverrideType::Attempts:
-                        $overrideData['value'] = [
+                        $overrideData['value'] = json_encode([
                             'additional_attempts' => rand(1, 3),
-                        ];
+                        ], JSON_UNESCAPED_SLASHES);
                         $overrideData['expires_at'] = now()->addDays(rand(30, 60));
                         break;
 
                     case OverrideType::Prerequisite:
-                        $overrideData['value'] = [
+                        $overrideData['value'] = json_encode([
                             'bypassed_prerequisites' => [], // Will be filled later if needed
-                        ];
+                        ], JSON_UNESCAPED_SLASHES);
                         $overrideData['expires_at'] = now()->addDays(rand(7, 21));
                         break;
                 }
 
-                Override::create($overrideData);
+                $overridesToInsert[] = $overrideData;
                 $overrideCount++;
+            }
+        }
+
+        // Batch insert all overrides
+        if (!empty($overridesToInsert)) {
+            foreach (array_chunk($overridesToInsert, 1000) as $chunk) {
+                \DB::table('overrides')->insert($chunk);
             }
         }
 

@@ -19,50 +19,73 @@ class AssignmentPrerequisitesSeeder extends Seeder
         echo "Seeding assignment prerequisites...\n";
 
         // Check if assignments exist
-        $assignments = Assignment::all();
-        
-        if ($assignments->count() < 2) {
+        $assignmentIds = Assignment::pluck('id');
+
+        if ($assignmentIds->count() < 2) {
             echo "⚠️  Need at least 2 assignments to create prerequisites. Skipping.\n";
             return;
         }
 
         $prerequisiteCount = 0;
 
+        // Convert to array for easier manipulation
+        $assignmentIds = $assignmentIds->toArray();
+
+        // Prepare all prerequisite relationships to be inserted
+        $relationshipsToInsert = [];
+        $existingRelationships = [];
+
+        // Get all existing relationships to avoid duplicates
+        $existing = \DB::table('assignment_prerequisites')
+            ->select('assignment_id', 'prerequisite_id')
+            ->get();
+
+        foreach ($existing as $rel) {
+            $existingRelationships["{$rel->assignment_id}_{$rel->prerequisite_id}"] = true;
+        }
+
         // Create prerequisites for some assignments
-        foreach ($assignments as $assignment) {
+        foreach ($assignmentIds as $assignmentId) {
             // Skip 70% of assignments to avoid making everything dependent
             if (rand(1, 100) <= 70) {
                 continue;
             }
 
-            // Pick a random assignment as prerequisite (but not the same one)
-            $otherAssignments = $assignments->where('id', '!=', $assignment->id);
-            
-            if ($otherAssignments->isEmpty()) {
+            // Get other assignment IDs (excluding current assignment)
+            $otherAssignmentIds = array_filter($assignmentIds, function($id) use ($assignmentId) {
+                return $id != $assignmentId;
+            });
+
+            if (empty($otherAssignmentIds)) {
                 continue;
             }
 
             // Select 1-2 prerequisites for this assignment
-            $numPrerequisites = rand(1, min(2, $otherAssignments->count()));
-            $selectedPrerequisites = $otherAssignments->random($numPrerequisites);
+            $numPrerequisites = rand(1, min(2, count($otherAssignmentIds)));
+            shuffle($otherAssignmentIds);
+            $selectedPrerequisites = array_slice($otherAssignmentIds, 0, $numPrerequisites);
 
-            foreach ($selectedPrerequisites as $prerequisite) {
+            foreach ($selectedPrerequisites as $prerequisiteId) {
+                $relationshipKey = "{$assignmentId}_{$prerequisiteId}";
+
                 // Check if the relationship already exists
-                $exists = \DB::table('assignment_prerequisites')
-                    ->where('assignment_id', $assignment->id)
-                    ->where('prerequisite_id', $prerequisite->id)
-                    ->exists();
-
-                if (!$exists) {
-                    \DB::table('assignment_prerequisites')->insert([
-                        'assignment_id' => $assignment->id,
-                        'prerequisite_id' => $prerequisite->id,
+                if (!isset($existingRelationships[$relationshipKey])) {
+                    $relationshipsToInsert[] = [
+                        'assignment_id' => $assignmentId,
+                        'prerequisite_id' => $prerequisiteId,
                         'created_at' => now(),
                         'updated_at' => now(),
-                    ]);
-                    
+                    ];
+
                     $prerequisiteCount++;
                 }
+            }
+        }
+
+        // Batch insert all relationships
+        if (!empty($relationshipsToInsert)) {
+            foreach (array_chunk($relationshipsToInsert, 1000) as $chunk) {
+                \DB::table('assignment_prerequisites')->insert($chunk);
             }
         }
 
