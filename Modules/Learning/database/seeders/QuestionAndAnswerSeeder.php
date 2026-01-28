@@ -109,7 +109,7 @@ class QuestionAndAnswerSeeder extends Seeder
             // Batch insert questions in smaller chunks to avoid parameter limits
             if (!empty($questions)) {
                 foreach (array_chunk($questions, 1000) as $chunk) {
-                    \Illuminate\Support\Facades\DB::table('assignment_questions')->insert($chunk);
+                    \Illuminate\Support\Facades\DB::table('assignment_questions')->insertOrIgnore($chunk);
                 }
             }
 

@@ -123,7 +123,7 @@ class OverrideSeeder extends Seeder
         // Batch insert all overrides
         if (!empty($overridesToInsert)) {
             foreach (array_chunk($overridesToInsert, 1000) as $chunk) {
-                \DB::table('overrides')->insert($chunk);
+                \DB::table('overrides')->insertOrIgnore($chunk);
             }
         }
 

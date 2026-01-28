@@ -71,7 +71,7 @@ class AssignmentAndSubmissionSeeder extends Seeder
                 $assignmentCount++;
                 
                 if (count($assignments) >= $assignmentBatchSize) {
-                    \DB::table('assignments')->insert($assignments);
+                    \DB::table('assignments')->insertOrIgnore($assignments);
                     $assignments = null;
                     unset($assignments);
                     $assignments = [];
@@ -85,7 +85,7 @@ class AssignmentAndSubmissionSeeder extends Seeder
         }
 
         if (!empty($assignments)) {
-            \DB::table('assignments')->insert($assignments);
+            \DB::table('assignments')->insertOrIgnore($assignments);
             unset($assignments);
         }
 

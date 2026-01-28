@@ -87,7 +87,7 @@ class AssignmentPrerequisitesSeeder extends Seeder
         // Batch insert all relationships
         if (!empty($relationshipsToInsert)) {
             foreach (array_chunk($relationshipsToInsert, 1000) as $chunk) {
-                \DB::table('assignment_prerequisites')->insert($chunk);
+                \DB::table('assignment_prerequisites')->insertOrIgnore($chunk);
             }
         }
 
