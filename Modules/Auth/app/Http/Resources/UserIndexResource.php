@@ -31,15 +31,13 @@ class UserIndexResource extends JsonResource
 
     protected function getEmailVerifiedAt(): ?string
     {
-        if (isset($this['email_verified_at'])) {
-            return $this['email_verified_at'];
+        $val = $this['email_verified_at'] ?? (is_object($this->resource) ? $this->resource->email_verified_at : null);
+
+        if ($val instanceof \DateTimeInterface) {
+            return $val->format(\DateTimeInterface::ATOM);
         }
-        
-        if (is_object($this->resource)) {
-            return $this->resource->email_verified_at?->format(\DateTimeInterface::ATOM);
-        }
-        
-        return null;
+
+        return $val ? (string) $val : null;
     }
 
     protected function formatDate(mixed $date): ?string
