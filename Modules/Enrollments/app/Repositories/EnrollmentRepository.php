@@ -12,20 +12,10 @@ use Modules\Enrollments\Models\Enrollment;
 
 class EnrollmentRepository extends BaseRepository implements EnrollmentRepositoryInterface
 {
-    /**
-     * Cache TTL for student rosters (30 minutes).
-     * Requirements: 28.10
-     */
     protected const CACHE_TTL_ROSTER = 1800;
 
-    /**
-     * Cache key prefix for enrollment data.
-     */
     protected const CACHE_PREFIX_ENROLLMENT = 'enrollment:';
 
-    /**
-     * Cache key prefix for roster data.
-     */
     protected const CACHE_PREFIX_ROSTER = 'roster:';
 
     protected array $allowedFilters = [
@@ -153,10 +143,6 @@ class EnrollmentRepository extends BaseRepository implements EnrollmentRepositor
         );
     }
 
-    /**
-     * Find enrollment by course and user with caching.
-     * Requirements: 28.10
-     */
     public function findByCourseAndUser(int $courseId, int $userId): ?Enrollment
     {
         $cacheKey = $this->getEnrollmentCacheKey($courseId, $userId);
@@ -164,17 +150,13 @@ class EnrollmentRepository extends BaseRepository implements EnrollmentRepositor
         return Cache::tags(['enrollments', "course:{$courseId}"])
             ->remember($cacheKey, self::CACHE_TTL_ROSTER, function () use ($courseId, $userId) {
                 return $this->query()
-                    ->withoutEagerLoads() // PENTING: Jangan load relasi
+                    ->withoutEagerLoads()
                     ->where('course_id', $courseId)
                     ->where('user_id', $userId)
                     ->first();
             });
     }
 
-    /**
-     * Check if user has an active or completed enrollment with caching.
-     * Requirements: 28.10
-     */
     public function hasActiveEnrollment(int $userId, int $courseId): bool
     {
         $cacheKey = $this->getActiveEnrollmentCacheKey($userId, $courseId);
@@ -189,10 +171,6 @@ class EnrollmentRepository extends BaseRepository implements EnrollmentRepositor
             });
     }
 
-    /**
-     * Get active or completed enrollment for user and course with caching.
-     * Requirements: 28.10
-     */
     public function getActiveEnrollment(int $userId, int $courseId): ?Enrollment
     {
         $cacheKey = $this->getActiveEnrollmentDetailCacheKey($userId, $courseId);
@@ -207,13 +185,8 @@ class EnrollmentRepository extends BaseRepository implements EnrollmentRepositor
             });
     }
 
-    /**
-     * Find active or completed enrollment by user and course ID with caching.
-     * Requirements: 28.10
-     */
     public function findActiveByUserAndCourse(int $userId, int $courseId): ?Enrollment
     {
-        // Reuse the same cache as getActiveEnrollment
         return $this->getActiveEnrollment($userId, $courseId);
     }
 
@@ -236,29 +209,22 @@ class EnrollmentRepository extends BaseRepository implements EnrollmentRepositor
             ]);
         }
 
-        // Invalidate enrollment cache after progress update
         $enrollment = Enrollment::find($enrollmentId);
         if ($enrollment) {
             $this->invalidateEnrollmentCache($enrollment->course_id, $enrollment->user_id);
-            // Also invalidate specific progress cache
             Cache::tags(['enrollments', 'progress'])->forget($this->getProgressCacheKey($enrollmentId));
         }
     }
 
-    /**
-     * Get course progress percent with caching.
-     * Requirements: 28.10
-     */
     public function getCourseProgress(int $enrollmentId): float
     {
         $cacheKey = $this->getProgressCacheKey($enrollmentId);
 
         return Cache::tags(['enrollments', 'progress'])
             ->remember($cacheKey, self::CACHE_TTL_ROSTER, function () use ($enrollmentId) {
-                // Try to get from CourseProgress model first
                 $progress = \Modules\Enrollments\Models\CourseProgress::where('enrollment_id', $enrollmentId)
                     ->value('progress_percent');
-                
+
                 return (float) ($progress ?? 0);
             });
     }
@@ -268,37 +234,21 @@ class EnrollmentRepository extends BaseRepository implements EnrollmentRepositor
         return self::CACHE_PREFIX_ENROLLMENT."progress:{$enrollmentId}";
     }
 
-    /**
-     * Generate cache key for enrollment by course and user.
-     * Requirements: 28.10
-     */
     protected function getEnrollmentCacheKey(int $courseId, int $userId): string
     {
         return self::CACHE_PREFIX_ENROLLMENT."course:{$courseId}:user:{$userId}";
     }
 
-    /**
-     * Generate cache key for active enrollment check.
-     * Requirements: 28.10
-     */
     protected function getActiveEnrollmentCacheKey(int $userId, int $courseId): string
     {
         return self::CACHE_PREFIX_ENROLLMENT."active:user:{$userId}:course:{$courseId}";
     }
 
-    /**
-     * Generate cache key for active enrollment details.
-     * Requirements: 28.10
-     */
     protected function getActiveEnrollmentDetailCacheKey(int $userId, int $courseId): string
     {
         return self::CACHE_PREFIX_ENROLLMENT."active_detail:user:{$userId}:course:{$courseId}";
     }
 
-    /**
-     * Generate cache key for course roster.
-     * Requirements: 28.10
-     */
     protected function getRosterCacheKey(int $courseId, string $suffix = ''): string
     {
         $key = self::CACHE_PREFIX_ROSTER."course:{$courseId}";
@@ -306,39 +256,25 @@ class EnrollmentRepository extends BaseRepository implements EnrollmentRepositor
         return $suffix ? "{$key}:{$suffix}" : $key;
     }
 
-    /**
-     * Invalidate enrollment cache for a specific user and course.
-     * Requirements: 28.10
-     */
     public function invalidateEnrollmentCache(int $courseId, int $userId): void
     {
         Cache::tags(['enrollments', "course:{$courseId}"])
             ->forget($this->getEnrollmentCacheKey($courseId, $userId));
-        
+
         Cache::tags(['enrollments', "course:{$courseId}"])
             ->forget($this->getActiveEnrollmentCacheKey($userId, $courseId));
-            
+
         Cache::tags(['enrollments', "course:{$courseId}"])
             ->forget($this->getActiveEnrollmentDetailCacheKey($userId, $courseId));
     }
 
-    /**
-     * Invalidate roster cache for a course.
-     * Requirements: 28.10
-     */
     public function invalidateRosterCache(int $courseId): void
     {
         Cache::tags(['roster', "course:{$courseId}"])->flush();
     }
 
-    /**
-     * Invalidate all caches for a user's enrollments.
-     * Useful when user data changes.
-     * Requirements: 28.10
-     */
     public function invalidateUserEnrollmentCaches(int $userId): void
     {
-        // Get all enrollments for the user and invalidate their caches
         $enrollments = $this->query()
             ->where('user_id', $userId)
             ->select(['id', 'course_id', 'user_id'])
@@ -349,14 +285,6 @@ class EnrollmentRepository extends BaseRepository implements EnrollmentRepositor
         }
     }
 
-    /**
-     * Get the student roster (all active enrollments) for a course with caching.
-     * Returns a collection of active enrollments with user data.
-     * Requirements: 28.10
-     *
-     * @param  int  $courseId  The course ID
-     * @return \Illuminate\Database\Eloquent\Collection<int, Enrollment>
-     */
     public function getStudentRoster(int $courseId): \Illuminate\Database\Eloquent\Collection
     {
         $cacheKey = $this->getRosterCacheKey($courseId, 'students');
@@ -375,14 +303,6 @@ class EnrollmentRepository extends BaseRepository implements EnrollmentRepositor
             });
     }
 
-    /**
-     * Get student IDs enrolled in a course with caching.
-     * Useful for quick lookups without loading full enrollment data.
-     * Requirements: 28.10
-     *
-     * @param  int  $courseId  The course ID
-     * @return array<int>
-     */
     public function getEnrolledStudentIds(int $courseId): array
     {
         $cacheKey = $this->getRosterCacheKey($courseId, 'student_ids');

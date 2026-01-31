@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Modules\Enrollments\Providers;
 
 use App\Support\Traits\RegistersModuleConfig;
@@ -18,9 +20,6 @@ class EnrollmentsServiceProvider extends ServiceProvider
 
     protected string $nameLower = 'enrollments';
 
-    /**
-     * Boot the application events.
-     */
     public function boot(): void
     {
         $this->registerCommands();
@@ -32,9 +31,6 @@ class EnrollmentsServiceProvider extends ServiceProvider
         $this->loadMigrationsFrom(module_path($this->name, 'database/migrations'));
     }
 
-    /**
-     * Register policies.
-     */
     protected function registerPolicies(): void
     {
         \Illuminate\Support\Facades\Gate::policy(
@@ -43,9 +39,6 @@ class EnrollmentsServiceProvider extends ServiceProvider
         );
     }
 
-    /**
-     * Register the service provider.
-     */
     public function register(): void
     {
         $this->app->register(EventServiceProvider::class);
@@ -53,47 +46,28 @@ class EnrollmentsServiceProvider extends ServiceProvider
         $this->registerBindings();
     }
 
-    /**
-     * Register interface bindings.
-     */
     protected function registerBindings(): void
     {
-        // Repository bindings
-        $this->app->bind(EnrollmentRepositoryInterface::class, EnrollmentRepository::class);
+        $this->app->singleton(
+            EnrollmentRepositoryInterface::class,
+            EnrollmentRepository::class
+        );
 
-        // Service bindings
-        $this->app->bind(
+        $this->app->scoped(
             \Modules\Enrollments\Contracts\Services\EnrollmentServiceInterface::class,
             EnrollmentService::class
         );
-        $this->app->bind(
+
+        $this->app->scoped(
             \Modules\Enrollments\Contracts\Services\EnrollmentReportServiceInterface::class,
             \Modules\Enrollments\Services\EnrollmentReportService::class
         );
     }
 
-    /**
-     * Register commands in the format of Command::class
-     */
-    protected function registerCommands(): void
-    {
-        // $this->commands([]);
-    }
+    protected function registerCommands(): void {}
 
-    /**
-     * Register command Schedules.
-     */
-    protected function registerCommandSchedules(): void
-    {
-        // $this->app->booted(function () {
-        //     $schedule = $this->app->make(Schedule::class);
-        //     $schedule->command('inspire')->hourly();
-        // });
-    }
+    protected function registerCommandSchedules(): void {}
 
-    /**
-     * Register translations.
-     */
     public function registerTranslations(): void
     {
         $langPath = resource_path('lang/modules/'.$this->nameLower);
@@ -107,17 +81,11 @@ class EnrollmentsServiceProvider extends ServiceProvider
         }
     }
 
-    /**
-     * Register config.
-     */
     protected function registerConfig(): void
     {
         $this->registerModuleConfig();
     }
 
-    /**
-     * Register views.
-     */
     public function registerViews(): void
     {
         $viewPath = resource_path('views/modules/'.$this->nameLower);
@@ -130,9 +98,6 @@ class EnrollmentsServiceProvider extends ServiceProvider
         Blade::componentNamespace(config('modules.namespace').'\\'.$this->name.'\\View\\Components', $this->nameLower);
     }
 
-    /**
-     * Get the services provided by the provider.
-     */
     public function provides(): array
     {
         return [];

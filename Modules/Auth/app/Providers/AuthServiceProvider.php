@@ -112,6 +112,16 @@ class AuthServiceProvider extends ServiceProvider
             \Modules\Auth\Contracts\UserAccessPolicyInterface::class,
             \Modules\Auth\Policies\UserAccessPolicy::class,
         );
+
+        $this->app->singleton(
+            \Modules\Auth\Repositories\BenchmarkRepository::class,
+            \Modules\Auth\Repositories\BenchmarkRepository::class,
+        );
+
+        $this->app->scoped(
+            \Modules\Auth\Services\BenchmarkService::class,
+            \Modules\Auth\Services\BenchmarkService::class,
+        );
     }
 
     protected function registerCommands(): void {}

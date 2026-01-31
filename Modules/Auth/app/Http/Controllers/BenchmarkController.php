@@ -14,9 +14,6 @@ class BenchmarkController extends Controller
         private readonly BenchmarkService $service
     ) {}
 
-    /**
-     * READ Operation: Get 1000 users.
-     */
     public function index(): JsonResponse
     {
         $users = $this->service->getBenchmarkUsers();
@@ -27,9 +24,6 @@ class BenchmarkController extends Controller
         ]);
     }
 
-    /**
-     * CREATE Operation: Insert 1000 users.
-     */
     public function store(): JsonResponse
     {
         $this->service->createBenchmarkUsers();
@@ -40,9 +34,6 @@ class BenchmarkController extends Controller
         ], 201);
     }
 
-    /**
-     * CLEANUP Operation: Truncate users table.
-     */
     public function destroy(): JsonResponse
     {
         $this->service->cleanupDatabase();

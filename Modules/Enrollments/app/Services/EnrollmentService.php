@@ -443,7 +443,6 @@ class EnrollmentService implements EnrollmentServiceInterface
 
             Enrollment::withoutSyncingToSearch(fn () => $enrollment->save());
 
-            // Invalidate enrollment cache (Requirements: 28.10)
             $this->invalidateEnrollmentCache($enrollment);
 
             return $enrollment->fresh(['course:id,title,slug', 'user:id,name,email']);
@@ -465,7 +464,6 @@ class EnrollmentService implements EnrollmentServiceInterface
 
             Enrollment::withoutSyncingToSearch(fn () => $enrollment->save());
 
-            // Invalidate enrollment cache (Requirements: 28.10)
             $this->invalidateEnrollmentCache($enrollment);
 
             return $enrollment->fresh(['course:id,title,slug', 'user:id,name,email']);
@@ -488,7 +486,6 @@ class EnrollmentService implements EnrollmentServiceInterface
 
             Enrollment::withoutSyncingToSearch(fn () => $enrollment->save());
 
-            // Invalidate enrollment cache (Requirements: 28.10)
             $this->invalidateEnrollmentCache($enrollment);
 
             $freshEnrollment = $enrollment->fresh(['course:id,title,slug,code', 'user:id,name,email']);
@@ -519,7 +516,6 @@ class EnrollmentService implements EnrollmentServiceInterface
 
             Enrollment::withoutSyncingToSearch(fn () => $enrollment->save());
 
-            // Invalidate enrollment cache (Requirements: 28.10)
             $this->invalidateEnrollmentCache($enrollment);
 
             $freshEnrollment = $enrollment->fresh(['course:id,title,slug,code', 'user:id,name,email']);
@@ -549,7 +545,6 @@ class EnrollmentService implements EnrollmentServiceInterface
 
             Enrollment::withoutSyncingToSearch(fn () => $enrollment->save());
 
-            // Invalidate enrollment cache (Requirements: 28.10)
             $this->invalidateEnrollmentCache($enrollment);
 
             return $enrollment->fresh(['course:id,title,slug', 'user:id,name,email']);
@@ -782,7 +777,6 @@ class EnrollmentService implements EnrollmentServiceInterface
                 Enrollment::withoutSyncingToSearch(fn () => $enrollment->save());
             }
 
-            // Invalidate enrollment cache (Requirements: 28.10)
             $this->invalidateEnrollmentCache($enrollment);
 
             event(new EnrollmentCreated($enrollment));
