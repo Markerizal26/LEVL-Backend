@@ -73,18 +73,12 @@ class UserChallengeAssignment extends Model
             || $this->status === ChallengeAssignmentStatus::Claimed;
     }
 
-    /**
-     * Check if reward can be claimed.
-     */
     public function isClaimable(): bool
     {
         return $this->status === ChallengeAssignmentStatus::Completed
             && ! $this->reward_claimed;
     }
 
-    /**
-     * Get progress percentage.
-     */
     public function getProgressPercentage(): float
     {
         $target = $this->challenge?->criteria_target ?? 1;
@@ -95,9 +89,6 @@ class UserChallengeAssignment extends Model
         return min(100.0, ($this->current_progress / $target) * 100);
     }
 
-    /**
-     * Check if challenge criteria is met.
-     */
     public function isCriteriaMet(): bool
     {
         $target = $this->challenge?->criteria_target ?? 1;

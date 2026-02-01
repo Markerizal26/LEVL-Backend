@@ -28,17 +28,11 @@ class Milestone extends Model
         'is_active' => 'boolean',
     ];
 
-    /**
-     * Scope for active milestones
-     */
     public function scopeActive($query)
     {
         return $query->where('is_active', true);
     }
 
-    /**
-     * Scope for ordered milestones
-     */
     public function scopeOrdered($query)
     {
         return $query->orderBy('sort_order');

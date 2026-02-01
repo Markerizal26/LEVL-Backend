@@ -13,11 +13,11 @@ class UpdateLeaderboard extends Command
 
     public function handle(LeaderboardService $leaderboardService): int
     {
-        $this->info('Updating leaderboard rankings...');
+        $this->info(__('messages.gamification.updating_leaderboard'));
 
         $leaderboardService->updateRankings();
 
-        $this->info('Leaderboard rankings updated successfully.');
+        $this->info(__('messages.gamification.leaderboard_updated'));
 
         return self::SUCCESS;
     }

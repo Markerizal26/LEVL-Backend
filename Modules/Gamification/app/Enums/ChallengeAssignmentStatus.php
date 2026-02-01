@@ -10,25 +10,16 @@ enum ChallengeAssignmentStatus: string
     case Claimed = 'claimed';
     case Expired = 'expired';
 
-    /**
-     * Get all enum values as array.
-     */
     public static function values(): array
     {
         return array_column(self::cases(), 'value');
     }
 
-    /**
-     * Get enum for validation rules.
-     */
     public static function rule(): string
     {
         return 'in:'.implode(',', self::values());
     }
 
-    /**
-     * Get human-readable label.
-     */
     public function label(): string
     {
         return match ($this) {
@@ -40,17 +31,11 @@ enum ChallengeAssignmentStatus: string
         };
     }
 
-    /**
-     * Check if status is active (can still be worked on).
-     */
     public function isActive(): bool
     {
         return in_array($this, [self::Pending, self::InProgress]);
     }
 
-    /**
-     * Check if reward can be claimed.
-     */
     public function canClaimReward(): bool
     {
         return $this === self::Completed;

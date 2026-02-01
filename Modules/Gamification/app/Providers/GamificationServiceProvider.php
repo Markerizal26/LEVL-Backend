@@ -16,9 +16,6 @@ class GamificationServiceProvider extends ServiceProvider
 
     protected string $nameLower = 'gamification';
 
-    /**
-     * Boot the application events.
-     */
     public function boot(): void
     {
         $this->registerCommands();
@@ -30,9 +27,6 @@ class GamificationServiceProvider extends ServiceProvider
         $this->loadMigrationsFrom(module_path($this->name, 'database/migrations'));
     }
 
-    /**
-     * Register policies.
-     */
     protected function registerPolicies(): void
     {
         \Illuminate\Support\Facades\Gate::policy(
@@ -45,15 +39,11 @@ class GamificationServiceProvider extends ServiceProvider
         );
     }
 
-    /**
-     * Register the service provider.
-     */
     public function register(): void
     {
         $this->app->register(EventServiceProvider::class);
         $this->app->register(RouteServiceProvider::class);
 
-        // Register Repository bindings
         $this->app->bind(
             \Modules\Gamification\Contracts\Repositories\GamificationRepositoryInterface::class,
             \Modules\Gamification\Repositories\GamificationRepository::class
@@ -75,7 +65,6 @@ class GamificationServiceProvider extends ServiceProvider
             \Modules\Gamification\Repositories\PointRepository::class
         );
 
-        // Register Service bindings
         $this->app->singleton(
             \Modules\Gamification\Contracts\Services\GamificationServiceInterface::class,
             \Modules\Gamification\Services\GamificationService::class
@@ -89,15 +78,11 @@ class GamificationServiceProvider extends ServiceProvider
             \Modules\Gamification\Services\LeaderboardService::class
         );
 
-        // Keep backward compatibility
         $this->app->singleton(GamificationService::class, function () {
             return new GamificationService;
         });
     }
 
-    /**
-     * Register commands in the format of Command::class
-     */
     protected function registerCommands(): void
     {
         $this->commands([
@@ -108,9 +93,6 @@ class GamificationServiceProvider extends ServiceProvider
         ]);
     }
 
-    /**
-     * Register command Schedules.
-     */
     protected function registerCommandSchedules(): void
     {
         $this->app->booted(function () {
@@ -122,9 +104,6 @@ class GamificationServiceProvider extends ServiceProvider
         });
     }
 
-    /**
-     * Register translations.
-     */
     public function registerTranslations(): void
     {
         $langPath = resource_path('lang/modules/'.$this->nameLower);
@@ -138,17 +117,11 @@ class GamificationServiceProvider extends ServiceProvider
         }
     }
 
-    /**
-     * Register config.
-     */
     protected function registerConfig(): void
     {
         $this->registerModuleConfig();
     }
 
-    /**
-     * Register views.
-     */
     public function registerViews(): void
     {
         $viewPath = resource_path('views/modules/'.$this->nameLower);
@@ -161,9 +134,6 @@ class GamificationServiceProvider extends ServiceProvider
         Blade::componentNamespace(config('modules.namespace').'\\'.$this->name.'\\View\\Components', $this->nameLower);
     }
 
-    /**
-     * Get the services provided by the provider.
-     */
     public function provides(): array
     {
         return [];

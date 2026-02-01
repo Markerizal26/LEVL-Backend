@@ -7,10 +7,8 @@ use App\Support\ApiResponse;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Modules\Gamification\Services\LeaderboardService;
+use Modules\Gamification\Transformers\LeaderboardResource;
 
-/**
- * @tags Gamifikasi
- */
 class LeaderboardController extends Controller
 {
     use ApiResponse;
@@ -19,24 +17,6 @@ class LeaderboardController extends Controller
         private readonly LeaderboardService $leaderboardService
     ) {}
 
-    /**
-     * Mengambil leaderboard global
-     *
-     * Mengambil daftar peringkat user berdasarkan total XP dengan pagination. Maksimal 100 item per halaman.
-     *
-     *
-     * @summary Mengambil leaderboard global
-     * @queryParam per_page integer Jumlah item per halaman (max 100). Default: 10. Example: 10
-     * @queryParam page integer Nomor halaman. Default: 1. Example: 1
-     *
-     * @allowedSorts total_xp, global_level
-     *
-     * @queryParam sort string Field untuk sorting. Allowed: total_xp, global_level. Prefix dengan '-' untuk descending. Example: -created_at
-     *
-     * @response 200 scenario="Success" {"success": true, "data": {"leaderboard": [{"rank": 1, "user": {"id": 1, "name": "John Doe", "avatar_url": "https://example.com/avatar.jpg"}, "total_xp": 5000, "level": 15}], "meta": {"current_page": 1, "per_page": 10, "total": 100, "last_page": 10}}}
-     *
-     * @authenticated
-     */    
     public function index(Request $request): JsonResponse
     {
         $perPage = min($request->input('per_page', 10), 100);
@@ -44,44 +24,17 @@ class LeaderboardController extends Controller
 
         $leaderboard = $this->leaderboardService->getGlobalLeaderboard($perPage, $page);
 
-        // Transform data
-        $data = $leaderboard->getCollection()->map(function ($stat, $index) use ($leaderboard) {
+        // We need to attach rank manually because offset depends on page
+        $leaderboard->getCollection()->transform(function ($stat, $index) use ($leaderboard) {
             $rank = ($leaderboard->currentPage() - 1) * $leaderboard->perPage() + $index + 1;
-
-            return [
-                'rank' => $rank,
-                'user' => [
-                    'id' => $stat->user_id,
-                    'name' => $stat->user?->name ?? 'Unknown',
-                    'avatar_url' => $stat->user?->avatar_url ?? null,
-                ],
-                'total_xp' => $stat->total_xp,
-                'level' => $stat->global_level,
-            ];
+            // Attach temporary rank property for Resource to use
+            $stat->rank = $rank; 
+            return $stat;
         });
 
-        return $this->success([
-            'leaderboard' => $data,
-            'meta' => [
-                'current_page' => $leaderboard->currentPage(),
-                'per_page' => $leaderboard->perPage(),
-                'total' => $leaderboard->total(),
-                'last_page' => $leaderboard->lastPage(),
-            ],
-        ], __('gamification.leaderboard_retrieved'));
+        return $this->paginateResponse($leaderboard, __('gamification.leaderboard_retrieved'), LeaderboardResource::class);
     }
 
-    /**
-     * Mengambil ranking user saat ini
-     *
-     * Mengambil peringkat user yang sedang login beserta user di sekitarnya (surrounding).
-     *
-     *
-     * @summary Mengambil ranking user saat ini
-     * @response 200 scenario="Success" {"success": true, "data": {"rank": 25, "total_xp": 1500, "level": 5, "surrounding": [{"rank": 24, "user": {"id": 10, "name": "Jane"}, "total_xp": 1550}, {"rank": 25, "user": {"id": 1, "name": "You"}, "total_xp": 1500}, {"rank": 26, "user": {"id": 15, "name": "Bob"}, "total_xp": 1450}]}}
-     *
-     * @authenticated
-     */    
     public function myRank(Request $request): JsonResponse
     {
         $userId = $request->user()->id;

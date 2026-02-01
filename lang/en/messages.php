@@ -577,11 +577,19 @@ return [
         'retrieved' => 'Challenge retrieved successfully.',
         'completions_retrieved' => 'Challenge completions retrieved successfully.',
         'reward_claimed' => 'Reward successfully claimed!',
+        'assigning_daily' => 'Assigning daily challenges...',
+        'assigned_daily' => 'Assigned :count daily challenge(s) to users.',
+        'assigning_weekly' => 'Assigning weekly challenges...',
+        'assigned_weekly' => 'Assigned :count weekly challenge(s) to users.',
+        'expiring' => 'Expiring overdue challenges...',
+        'expired_count' => 'Expired :count overdue challenge(s).',
     ],
 
     // Gamification Module
     'gamification' => [
         'points_awarded' => 'Points awarded successfully.',
+        'leaderboard_updated' => 'Leaderboard rankings updated successfully.',
+        'updating_leaderboard' => 'Updating leaderboard...',
     ],
 
     // Forums Module

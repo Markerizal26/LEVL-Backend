@@ -13,11 +13,11 @@ class AssignDailyChallenges extends Command
 
     public function handle(ChallengeService $challengeService): int
     {
-        $this->info('Assigning daily challenges...');
+        $this->info(__('messages.challenges.assigning_daily'));
 
         $count = $challengeService->assignDailyChallenges();
 
-        $this->info("Assigned {$count} daily challenge(s) to users.");
+        $this->info(__('messages.challenges.assigned_daily', ['count' => $count]));
 
         return self::SUCCESS;
     }

@@ -18,7 +18,6 @@ class AwardBadgeForCourseCompleted
             return;
         }
 
-        // Award unique badge per course
         $badgeCode = sprintf('course_completion_%d', $course->id);
         $badgeName = sprintf('Menyelesaikan: %s', $course->title);
 
@@ -29,7 +28,6 @@ class AwardBadgeForCourseCompleted
             sprintf('Berhasil menyelesaikan course "%s"', $course->title)
         );
 
-        // Optional XP bonus for finishing a course (configurable)
         $completionXp = (int) \Modules\Common\Models\SystemSetting::get('gamification.points.course_complete', 50);
 
         if ($completionXp > 0) {

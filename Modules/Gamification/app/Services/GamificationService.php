@@ -1,22 +1,35 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Modules\Gamification\Services;
 
-use Carbon\Carbon;
+use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use Illuminate\Contracts\View\View;
-use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Collection;
+use Modules\Gamification\Contracts\Services\ChallengeServiceInterface;
 use Modules\Gamification\Contracts\Services\GamificationServiceInterface;
+use Modules\Gamification\Contracts\Services\LeaderboardServiceInterface;
 use Modules\Gamification\Models\Point;
 use Modules\Gamification\Models\UserBadge;
 use Modules\Gamification\Models\UserGamificationStat;
 use Modules\Gamification\Repositories\GamificationRepository;
+use Modules\Gamification\Services\Support\BadgeManager;
+use Modules\Gamification\Services\Support\LeaderboardManager;
+use Modules\Gamification\Services\Support\PointManager;
 
 class GamificationService implements GamificationServiceInterface
 {
     private readonly GamificationRepository $repository;
 
-    public function __construct(?GamificationRepository $repository = null)
-    {
+    public function __construct(
+        private readonly PointManager $pointManager,
+        private readonly BadgeManager $badgeManager,
+        private readonly LeaderboardManager $leaderboardManager,
+        private readonly ChallengeServiceInterface $challengeService,
+        private readonly LeaderboardServiceInterface $leaderboardService,
+        ?GamificationRepository $repository = null
+    ) {
         $this->repository = $repository ?? app(GamificationRepository::class);
     }
 
@@ -33,32 +46,7 @@ class GamificationService implements GamificationServiceInterface
         ?int $sourceId = null,
         array $options = []
     ): ?Point {
-        if ($points <= 0) {
-            return null;
-        }
-
-        $allowMultiple = (bool) ($options['allow_multiple'] ?? true);
-
-        return DB::transaction(function () use ($userId, $points, $reason, $sourceType, $sourceId, $options, $allowMultiple) {
-            if (! $allowMultiple && $this->repository->pointExists($userId, $sourceType, $sourceId, $reason)) {
-                return null;
-            }
-
-            $resolvedSourceType = $sourceType ?? 'system';
-
-            $point = $this->repository->createPoint([
-                'user_id' => $userId,
-                'points' => $points,
-                'reason' => $reason,
-                'source_type' => $resolvedSourceType,
-                'source_id' => $sourceId,
-                'description' => $options['description'] ?? null,
-            ]);
-
-            $this->updateUserGamificationStats($userId, $points);
-
-            return $point;
-        });
+        return $this->pointManager->awardXp($userId, $points, $reason, $sourceType, $sourceId, $options);
     }
 
     public function awardBadge(
@@ -67,67 +55,57 @@ class GamificationService implements GamificationServiceInterface
         string $name,
         ?string $description = null
     ): ?UserBadge {
-        return DB::transaction(function () use ($userId, $code, $name, $description) {
-            $badge = $this->repository->firstOrCreateBadge($code, [
-                'name' => $name,
-                'description' => $description,
-            ]);
-
-            $existing = $this->repository->findUserBadge($userId, $badge->id);
-            if ($existing) {
-                return null;
-            }
-
-            return $this->repository->createUserBadge([
-                'user_id' => $userId,
-                'badge_id' => $badge->id,
-                'awarded_at' => now(),
-                'description' => $description,
-            ]);
-        });
+        return $this->badgeManager->awardBadge($userId, $code, $name, $description);
     }
 
     public function updateGlobalLeaderboard(): void
     {
-        $stats = $this->repository->globalLeaderboardStats();
-
-        DB::transaction(function () use ($stats) {
-            $rank = 1;
-            $userIds = $stats->pluck('user_id')->toArray();
-
-            /** @var \Modules\Gamification\Models\UserGamificationStat $stat */
-            foreach ($stats as $stat) {
-                $this->repository->upsertLeaderboard(null, $stat->user_id, $rank++);
-            }
-
-            $this->repository->deleteGlobalLeaderboardExcept($userIds);
-        });
+        $this->leaderboardManager->updateGlobalLeaderboard();
     }
 
-    private function updateUserGamificationStats(int $userId, int $points): UserGamificationStat
+    public function getOrCreateStats(int $userId): UserGamificationStat
     {
-        $stats = $this->repository->getOrCreateStats($userId);
-        $stats->total_xp += $points;
-        $stats->global_level = $this->calculateLevelFromXp($stats->total_xp);
-        $stats->stats_updated_at = Carbon::now();
-        $stats->last_activity_date = Carbon::now()->startOfDay();
-
-        return $this->repository->saveStats($stats);
+        return $this->pointManager->getOrCreateStats($userId);
     }
 
-    private function calculateLevelFromXp(int $totalXp): int
+    public function getUserBadges(int $userId): Collection
     {
-        return $this->calculateLevelRecursive($totalXp, 0);
+        return $this->badgeManager->getUserBadges($userId);
     }
 
-    private function calculateLevelRecursive(int $remainingXp, int $level): int
+    public function countUserBadges(int $userId): int
     {
-        $xpRequired = (int) round(100 * pow(1.1, $level));
-        
-        if ($xpRequired <= 0 || $remainingXp < $xpRequired) {
-            return $level;
-        }
+        return $this->badgeManager->countUserBadges($userId);
+    }
 
-        return $this->calculateLevelRecursive($remainingXp - $xpRequired, $level + 1);
+    public function getPointsHistory(int $userId, int $perPage): LengthAwarePaginator
+    {
+        return $this->pointManager->getPointsHistory($userId, $perPage);
+    }
+
+    public function getAchievements(int $userId): array
+    {
+        $stats = $this->pointManager->getOrCreateStats($userId);
+        return $this->pointManager->getAchievements($stats->total_xp, $stats->global_level);
+    }
+
+    public function getSummary(int $userId): array
+    {
+        $stats = $this->pointManager->getOrCreateStats($userId);
+        $rankData = $this->leaderboardService->getUserRank($userId);
+        $activeChallenges = $this->challengeService->getUserChallenges($userId)->count();
+        $badgesCount = $this->badgeManager->countUserBadges($userId);
+
+        return [
+            'total_xp' => $stats->total_xp,
+            'level' => $stats->global_level,
+            'xp_to_next_level' => $stats->xp_to_next_level,
+            'progress_to_next_level' => $stats->progress_to_next_level,
+            'badges_count' => $badgesCount,
+            'current_streak' => $stats->current_streak,
+            'longest_streak' => $stats->longest_streak,
+            'rank' => $rankData['rank'],
+            'active_challenges' => $activeChallenges,
+        ];
     }
 }

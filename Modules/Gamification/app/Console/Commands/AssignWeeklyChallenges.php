@@ -13,11 +13,11 @@ class AssignWeeklyChallenges extends Command
 
     public function handle(ChallengeService $challengeService): int
     {
-        $this->info('Assigning weekly challenges...');
+        $this->info(__('messages.challenges.assigning_weekly'));
 
         $count = $challengeService->assignWeeklyChallenges();
 
-        $this->info("Assigned {$count} weekly challenge(s) to users.");
+        $this->info(__('messages.challenges.assigned_weekly', ['count' => $count]));
 
         return self::SUCCESS;
     }

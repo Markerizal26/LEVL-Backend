@@ -24,9 +24,6 @@ class Badge extends Model implements HasMedia
 
   protected $appends = ["icon_url"];
 
-  /**
-   * Register media collections for this model.
-   */
   public function registerMediaCollections(): void
   {
     $this->addMediaCollection("icon")
@@ -35,9 +32,6 @@ class Badge extends Model implements HasMedia
       ->acceptsMimeTypes(["image/jpeg", "image/png", "image/svg+xml", "image/webp"]);
   }
 
-  /**
-   * Register media conversions for this model.
-   */
   public function registerMediaConversions(?Media $media = null): void
   {
     $this->addMediaConversion("thumb")
@@ -46,7 +40,6 @@ class Badge extends Model implements HasMedia
       ->sharpen(10)
       ->performOnCollections("icon");
 
-    // Large icon for display
     $this->addMediaConversion("large")->width(128)->height(128)->performOnCollections("icon");
   }
 

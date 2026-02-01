@@ -10,12 +10,10 @@ use Modules\Gamification\Models\UserGamificationStat;
 
 class LeaderboardService implements LeaderboardServiceInterface
 {
-    /**
-     * Get global leaderboard with pagination.
-     */
+    
     public function getGlobalLeaderboard(int $perPage = 10, int $page = 1): LengthAwarePaginator
     {
-        $perPage = min($perPage, 100); // Max 100 per page
+        $perPage = min($perPage, 100); 
 
         return UserGamificationStat::with(['user:id,name', 'user.media'])
             ->orderByDesc('total_xp')
@@ -23,9 +21,6 @@ class LeaderboardService implements LeaderboardServiceInterface
             ->paginate($perPage, ['*'], 'page', $page);
     }
 
-    /**
-     * Get user's rank and surrounding users.
-     */
     public function getUserRank(int $userId): array
     {
         $userStats = UserGamificationStat::where('user_id', $userId)->first();
@@ -39,10 +34,8 @@ class LeaderboardService implements LeaderboardServiceInterface
             ];
         }
 
-        // Calculate rank
         $rank = UserGamificationStat::where('total_xp', '>', $userStats->total_xp)->count() + 1;
 
-        // Get surrounding users (2 above, 2 below)
         $surrounding = $this->getSurroundingUsers($userId, $userStats->total_xp, 2);
 
         return [
@@ -53,9 +46,6 @@ class LeaderboardService implements LeaderboardServiceInterface
         ];
     }
 
-    /**
-     * Update all rankings in leaderboard table.
-     */
     public function updateRankings(): void
     {
         $stats = UserGamificationStat::orderByDesc('total_xp')
@@ -76,7 +66,6 @@ class LeaderboardService implements LeaderboardServiceInterface
                 );
             }
 
-            // Remove users no longer in leaderboard
             if (! empty($userIds)) {
                 Leaderboard::whereNull('course_id')
                     ->whereNotIn('user_id', $userIds)
@@ -85,12 +74,9 @@ class LeaderboardService implements LeaderboardServiceInterface
         });
     }
 
-    /**
-     * Get surrounding users in leaderboard.
-     */
     private function getSurroundingUsers(int $userId, int $userXp, int $count = 2): array
     {
-        // Users above (higher XP)
+        
         $above = UserGamificationStat::with(['user:id,name', 'user.media'])
             ->where('total_xp', '>', $userXp)
             ->orderBy('total_xp')
@@ -99,14 +85,12 @@ class LeaderboardService implements LeaderboardServiceInterface
             ->reverse()
             ->values();
 
-        // Users below (lower XP)
         $below = UserGamificationStat::with(['user:id,name', 'user.media'])
             ->where('total_xp', '<', $userXp)
             ->orderByDesc('total_xp')
             ->limit($count)
             ->get();
 
-        // Current user
         $current = UserGamificationStat::with(['user:id,name', 'user.media'])
             ->where('user_id', $userId)
             ->first();
@@ -131,9 +115,6 @@ class LeaderboardService implements LeaderboardServiceInterface
         return $result;
     }
 
-    /**
-     * Format leaderboard entry.
-     */
     private function formatLeaderboardEntry(UserGamificationStat $stat, int $rank): array
     {
         return [

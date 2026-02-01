@@ -85,17 +85,11 @@ class Challenge extends Model
         return $started && $notEnded;
     }
 
-    /**
-     * Get the criteria type from the criteria JSON.
-     */
     public function getCriteriaTypeAttribute(): ?string
     {
         return $this->criteria['type'] ?? null;
     }
 
-    /**
-     * Get the criteria target from the criteria JSON.
-     */
     public function getCriteriaTargetAttribute(): int
     {
         return $this->criteria['target'] ?? $this->target_count;

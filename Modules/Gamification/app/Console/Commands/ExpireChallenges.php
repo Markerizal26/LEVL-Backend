@@ -13,11 +13,11 @@ class ExpireChallenges extends Command
 
     public function handle(ChallengeService $challengeService): int
     {
-        $this->info('Expiring overdue challenges...');
+        $this->info(__('messages.challenges.expiring'));
 
         $count = $challengeService->expireOverdueChallenges();
 
-        $this->info("Expired {$count} challenge(s).");
+        $this->info(__('messages.challenges.expired_count', ['count' => $count]));
 
         return self::SUCCESS;
     }
