@@ -8,7 +8,12 @@ use Carbon\Carbon;
 use Illuminate\Support\Facades\DB;
 use Modules\Gamification\Models\Point;
 use Modules\Gamification\Models\UserGamificationStat;
+use Modules\Gamification\Models\UserScopeStat;
 use Modules\Gamification\Repositories\GamificationRepository;
+use Modules\Schemes\Models\Course;
+use Modules\Schemes\Models\Lesson;
+use Modules\Schemes\Models\Unit;
+use Modules\Learning\Models\Assignment;
 
 class PointManager
 {
@@ -47,9 +52,110 @@ class PointManager
             ]);
 
             $this->updateUserGamificationStats($userId, $points);
+            $this->updateScopeStats($userId, $points, $sourceType, $sourceId);
 
             return $point;
         });
+    }
+
+    private function updateScopeStats(int $userId, int $points, ?string $sourceType, ?int $sourceId): void
+    {
+        if (! $sourceType || ! $sourceId) {
+            return;
+        }
+
+        $scopes = $this->resolveScopes($sourceType, $sourceId);
+
+        foreach ($scopes as $type => $id) {
+            if (! $id) {
+                continue;
+            }
+
+            $stat = UserScopeStat::firstOrCreate(
+                [
+                    'user_id' => $userId,
+                    'scope_type' => $type,
+                    'scope_id' => $id,
+                ],
+                [
+                    'total_xp' => 0,
+                    'current_level' => 1,
+                ]
+            );
+
+            $stat->total_xp += $points;
+            $stat->current_level = $this->calculateLevelFromXp($stat->total_xp);
+            $stat->save();
+        }
+    }
+
+    private function resolveScopes(string $sourceType, int $sourceId): array
+    {
+        $scopes = [
+            'course' => null,
+            'unit' => null,
+        ];
+
+        try {
+            switch ($sourceType) {
+                case 'lesson':
+                    $lesson = Lesson::find($sourceId);
+                    if ($lesson) {
+                        $scopes['unit'] = $lesson->unit_id;
+                        $scopes['course'] = $lesson->unit?->course_id;
+                    }
+                    break;
+
+                case 'assignment':
+                    $assignment = Assignment::find($sourceId);
+                    if ($assignment) {
+                        
+                        
+                        if ($assignment->assignable_type === Course::class) {
+                            $scopes['course'] = $assignment->assignable_id;
+                        } elseif ($assignment->assignable_type === Unit::class) {
+                            $scopes['unit'] = $assignment->assignable_id;
+                            $scopes['course'] = $assignment->assignable?->course_id;
+                        } elseif ($assignment->assignable_type === Lesson::class) {
+                            $scopes['unit'] = $assignment->assignable?->unit_id;
+                            $scopes['course'] = $assignment->assignable?->unit?->course_id;
+                        } elseif ($assignment->lesson_id) {
+                            $lesson = $assignment->lesson;
+                            $scopes['unit'] = $lesson?->unit_id;
+                            $scopes['course'] = $lesson?->unit?->course_id;
+                        }
+                    }
+                    break;
+                
+                case 'attempt':
+                     
+                     
+                     
+                     
+                     
+                     break;
+
+                case 'course':
+                    $scopes['course'] = $sourceId;
+                    break;
+
+                case 'grade':
+                    
+                    $grade = \Modules\Grading\Models\Grade::find($sourceId);
+                    if ($grade && $grade->source_type->value === 'assignment') {
+                        
+                        
+                         $assignmentResults = $this->resolveScopes('assignment', (int)$grade->source_id);
+                         $scopes['course'] = $assignmentResults['course'] ?? null;
+                         $scopes['unit'] = $assignmentResults['unit'] ?? null;
+                    }
+                    break;
+            }
+        } catch (\Throwable $e) {
+            
+        }
+
+        return $scopes;
     }
 
     private function updateUserGamificationStats(int $userId, int $points): UserGamificationStat

@@ -11,7 +11,7 @@ class ChallengeSeeder extends Seeder
     {
         \DB::connection()->disableQueryLog();
         
-        // Daily Challenges
+        
         $dailyChallenges = [
             [
                 'title' => 'Pejuang Harian',
@@ -48,7 +48,7 @@ class ChallengeSeeder extends Seeder
             ],
         ];
 
-        // Weekly Challenges
+        
         $weeklyChallenges = [
             [
                 'title' => 'Pembelajar Mingguan',

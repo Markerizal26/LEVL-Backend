@@ -19,6 +19,9 @@ class EventServiceProvider extends ServiceProvider
         \Modules\Schemes\Events\CourseCompleted::class => [
             \Modules\Gamification\Listeners\AwardBadgeForCourseCompleted::class,
         ],
+        \Modules\Grading\Events\GradesReleased::class => [
+            \Modules\Gamification\Listeners\AwardXpForGradeReleased::class,
+        ],
     ];
 
     protected static $shouldDiscoverEvents = false;

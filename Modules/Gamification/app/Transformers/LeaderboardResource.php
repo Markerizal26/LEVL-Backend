@@ -8,17 +8,17 @@ class LeaderboardResource extends JsonResource
 {
     public function toArray($request)
     {
-        // Rank is calculated and passed or attached, we need to handle both
-        // If passed as array context or property
+        
+        
         $rank = $this->resource['rank'] ?? $this->rank ?? null;
         $stat = $this->resource['stat'] ?? $this->resource;
         
-        // Handling direct UserGamificationStat model or array structure from Service
-        // LeaderboardController sends {stat, rank} via map, but here we can standardize.
-        // If the resource is the model:
+        
+        
+        
         if ($stat instanceof \Modules\Gamification\Models\UserGamificationStat) {
              return [
-                'rank' => $this->additional['rank'] ?? $rank, // Allow passing rank via additional
+                'rank' => $this->additional['rank'] ?? $rank, 
                 'user' => [
                     'id' => $stat->user_id,
                     'name' => $stat->user?->name ?? 'Unknown',
@@ -29,7 +29,7 @@ class LeaderboardResource extends JsonResource
             ];
         }
 
-        // Fallback for array if service returns array
+        
         return parent::toArray($request);
     }
 }

@@ -27,4 +27,18 @@ interface GamificationServiceInterface
     ): ?UserBadge;
 
     public function updateGlobalLeaderboard(): void;
+
+    public function getOrCreateStats(int $userId): \Modules\Gamification\Models\UserGamificationStat;
+
+    public function getUserBadges(int $userId): \Illuminate\Support\Collection;
+
+    public function countUserBadges(int $userId): int;
+
+    public function getPointsHistory(int $userId, int $perPage): \Illuminate\Contracts\Pagination\LengthAwarePaginator;
+
+    public function getAchievements(int $userId): array;
+
+    public function getSummary(int $userId): array;
+
+    public function getUnitLevels(int $userId, int $courseId): \Illuminate\Support\Collection;
 }

@@ -21,13 +21,14 @@ class LeaderboardController extends Controller
     {
         $perPage = min($request->input('per_page', 10), 100);
         $page = $request->input('page', 1);
+        $courseId = $request->input('course_id') ? (int) $request->input('course_id') : null;
 
-        $leaderboard = $this->leaderboardService->getGlobalLeaderboard($perPage, $page);
+        $leaderboard = $this->leaderboardService->getGlobalLeaderboard($perPage, $page, $courseId);
 
-        // We need to attach rank manually because offset depends on page
+        
         $leaderboard->getCollection()->transform(function ($stat, $index) use ($leaderboard) {
             $rank = ($leaderboard->currentPage() - 1) * $leaderboard->perPage() + $index + 1;
-            // Attach temporary rank property for Resource to use
+            
             $stat->rank = $rank; 
             return $stat;
         });

@@ -9,6 +9,7 @@ enum PointSourceType: string
     case Attempt = 'attempt';
     case Challenge = 'challenge';
     case System = 'system';
+    case Grade = 'grade';
 
     public static function values(): array
     {
@@ -28,6 +29,7 @@ enum PointSourceType: string
             self::Attempt => __('enums.point_source_type.attempt'),
             self::Challenge => __('enums.point_source_type.challenge'),
             self::System => __('enums.point_source_type.system'),
+            self::Grade => 'Grade Achievement',
         };
     }
 }

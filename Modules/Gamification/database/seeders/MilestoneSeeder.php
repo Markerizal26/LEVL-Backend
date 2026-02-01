@@ -7,9 +7,7 @@ use Modules\Gamification\Models\Milestone;
 
 class MilestoneSeeder extends Seeder
 {
-    /**
-     * Run the database seeds.
-     */
+    
     public function run(): void
     {
         $milestones = [

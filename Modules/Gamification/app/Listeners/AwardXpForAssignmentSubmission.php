@@ -27,8 +27,8 @@ class AwardXpForAssignmentSubmission
             'assignment',
             $submission->id,
             [
-                'description' => sprintf('Submitted assignment #%d', $submission->assignment_id),
-                'allow_multiple' => true,
+                'description' => sprintf('Participation: Submitted assignment #%d', $submission->assignment_id),
+                'allow_multiple' => true, 
             ]
         );
     }

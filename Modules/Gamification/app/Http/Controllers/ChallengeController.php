@@ -31,7 +31,7 @@ class ChallengeController extends Controller
         if ($userId) {
             $userChallenges = $this->challengeService->getUserChallenges($userId)->keyBy("challenge_id");
 
-            // Attach user progress to challenges for the Resource to consume
+            
             $challenges->getCollection()->transform(function ($challenge) use ($userChallenges) {
                 $challenge->user_progress = $userChallenges->get($challenge->id)
                     ? [
@@ -51,13 +51,13 @@ class ChallengeController extends Controller
 
     public function show(int $challengeId, Request $request): JsonResponse
     {
-        // Ideally this logic should be in the Service, but finding a single challenge 
-        // with optional user progress using a specific structure is borderline.
-        // We will keep it minimal here or move to service if strictness required.
-        // Given the prompt "no business logic", calculating progress IS business logic.
-        // So we should delegate "getChallengeWithProgress" to Service.
-        // However, to avoid creating new Service methods for every controller action if not needed:
-        // We can just use the Service's existing methods and simple resource mapping.
+        
+        
+        
+        
+        
+        
+        
         
         $challenge = $this->challengeService->getActiveChallenge($challengeId);
 
@@ -115,7 +115,7 @@ class ChallengeController extends Controller
 
         return $this->success([
             "message" => __("messages.challenges.reward_claimed"),
-            "rewards" => $rewards, // Could be RewardsResource if complex
+            "rewards" => $rewards, 
         ]);
     }
 }

@@ -7,18 +7,24 @@ use Illuminate\Support\Facades\DB;
 use Modules\Gamification\Contracts\Services\LeaderboardServiceInterface;
 use Modules\Gamification\Models\Leaderboard;
 use Modules\Gamification\Models\UserGamificationStat;
+use Modules\Gamification\Models\UserScopeStat;
 
 class LeaderboardService implements LeaderboardServiceInterface
 {
     
-    public function getGlobalLeaderboard(int $perPage = 10, int $page = 1): LengthAwarePaginator
+    public function getGlobalLeaderboard(int $perPage = 10, int $page = 1, ?int $courseId = null): LengthAwarePaginator
     {
         $perPage = min($perPage, 100); 
 
-        return UserGamificationStat::with(['user:id,name', 'user.media'])
-            ->orderByDesc('total_xp')
-            ->orderBy('user_id')
-            ->paginate($perPage, ['*'], 'page', $page);
+        $query = $courseId
+            ? \Modules\Gamification\Models\Leaderboard::with(['user:id,name', 'user.media'])
+                ->where('course_id', $courseId)
+                ->orderBy('rank', 'asc')
+            : UserGamificationStat::with(['user:id,name', 'user.media'])
+                ->orderByDesc('total_xp')
+                ->orderBy('user_id');
+
+        return $query->paginate($perPage, ['*'], 'page', $page);
     }
 
     public function getUserRank(int $userId): array
@@ -48,6 +54,7 @@ class LeaderboardService implements LeaderboardServiceInterface
 
     public function updateRankings(): void
     {
+        
         $stats = UserGamificationStat::orderByDesc('total_xp')
             ->orderBy('user_id')
             ->get();
@@ -71,7 +78,50 @@ class LeaderboardService implements LeaderboardServiceInterface
                     ->whereNotIn('user_id', $userIds)
                     ->delete();
             }
+
+            
+            $this->updateCourseRankings();
         });
+    }
+
+    private function updateCourseRankings(): void
+    {
+        
+        
+        
+        
+        
+        $courses = UserScopeStat::where('scope_type', 'course')
+            ->select('scope_id')
+            ->distinct()
+            ->pluck('scope_id');
+
+        foreach ($courses as $courseId) {
+            $courseStats = UserScopeStat::where('scope_type', 'course')
+                ->where('scope_id', $courseId)
+                ->orderByDesc('total_xp')
+                ->orderBy('user_id')
+                ->get();
+
+            $rank = 1;
+            $userIds = $courseStats->pluck('user_id')->toArray();
+
+            foreach ($courseStats as $stat) {
+                 Leaderboard::updateOrCreate(
+                    [
+                        'course_id' => $courseId,
+                        'user_id' => $stat->user_id,
+                    ],
+                    ['rank' => $rank++]
+                );
+            }
+
+            if (! empty($userIds)) {
+                Leaderboard::where('course_id', $courseId)
+                    ->whereNotIn('user_id', $userIds)
+                    ->delete();
+            }
+        }
     }
 
     private function getSurroundingUsers(int $userId, int $userXp, int $count = 2): array

@@ -53,4 +53,12 @@ class GamificationController extends Controller
 
         return $this->success($data, __('gamification.achievements_retrieved'));
     }
+
+    public function unitLevels(Request $request, int $courseId): JsonResponse
+    {
+        $userId = $request->user()->id;
+        $data = $this->gamificationService->getUnitLevels($userId, $courseId);
+
+        return $this->success(['unit_levels' => $data], __('gamification.levels_retrieved'));
+    }
 }

@@ -108,4 +108,24 @@ class GamificationService implements GamificationServiceInterface
             'active_challenges' => $activeChallenges,
         ];
     }
+
+    public function getUnitLevels(int $userId, int $courseId): Collection
+    {
+        return \Modules\Gamification\Models\UserScopeStat::where('user_id', $userId)
+            ->where('scope_type', 'unit')
+            ->whereIn('scope_id', function ($query) use ($courseId) {
+                $query->select('id')
+                    ->from('units')
+                    ->where('course_id', $courseId);
+            })
+            ->get()
+            ->map(function ($stat) {
+                return [
+                    'unit_id' => $stat->scope_id,
+                    'level' => $stat->current_level,
+                    'total_xp' => $stat->total_xp,
+                    'progress' => 0, 
+                ];
+            });
+    }
 }
