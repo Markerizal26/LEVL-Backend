@@ -25,7 +25,6 @@ class SubmissionRepository extends BaseRepository implements SubmissionRepositor
             'enrollment',
             'files',
             'previousSubmission',
-            'appeal',
     ];
 
         protected const DETAILED_EAGER_LOAD = [
@@ -33,7 +32,6 @@ class SubmissionRepository extends BaseRepository implements SubmissionRepositor
         'assignment:id,title,deadline_at,tolerance_minutes,review_mode',
         'answers.question',
         'grade.grader:id,name,email',
-        'appeal.reviewer:id,name,email',
     ];
 
     protected function model(): string

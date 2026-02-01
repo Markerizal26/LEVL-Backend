@@ -9,7 +9,7 @@ class GradingDatabaseSeeder extends Seeder
     public function run(): void
     {
         $this->call([
-            GradeAndAppealSeeder::class,
+            GradeSeeder::class,
             GradeReviewSeeder::class,
         ]);
     }

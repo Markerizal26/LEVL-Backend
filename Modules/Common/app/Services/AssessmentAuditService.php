@@ -9,7 +9,7 @@ use Modules\Auth\Models\User;
 use Modules\Common\Contracts\Repositories\AuditRepositoryInterface;
 use Modules\Common\Contracts\Services\AuditServiceInterface;
 use Modules\Common\Models\AuditLog;
-use Modules\Grading\Models\Appeal;
+
 use Modules\Grading\Models\Grade;
 use Modules\Learning\Models\Question;
 use Modules\Learning\Models\Submission;
@@ -37,7 +37,7 @@ class AssessmentAuditService implements AuditServiceInterface
 
     public const ACTION_GRADE_OVERRIDE = 'grade_override';
 
-    public const ACTION_APPEAL_DECISION = 'appeal_decision';
+
 
     public const ACTION_OVERRIDE_GRANT = 'override_grant';
 
@@ -186,36 +186,6 @@ class AssessmentAuditService implements AuditServiceInterface
                 'new_score' => $newScore,
                 'reason' => $reason,
                 'overridden_at' => now()->toIso8601String(),
-            ]
-        );
-    }
-
-    /**
-     * Log appeal decision.
-     *
-     * Requirements: 20.5
-     *
-     * @param  Appeal  $appeal  The appeal being decided
-     * @param  string  $decision  The decision (approved/denied)
-     * @param  int  $instructorId  The ID of the instructor making the decision
-     */
-    public function logAppealDecision(Appeal $appeal, string $decision, int $instructorId): void
-    {
-        $actor = $this->getActor($instructorId);
-
-        AuditLog::logAction(
-            action: self::ACTION_APPEAL_DECISION,
-            subject: $appeal,
-            actor: $actor,
-            context: [
-                'appeal_id' => $appeal->id,
-                'submission_id' => $appeal->submission_id,
-                'student_id' => $appeal->student_id,
-                'instructor_id' => $instructorId,
-                'decision' => $decision,
-                'decision_reason' => $appeal->decision_reason,
-                'appeal_reason' => $appeal->reason,
-                'decided_at' => $appeal->decided_at?->toIso8601String() ?? now()->toIso8601String(),
             ]
         );
     }

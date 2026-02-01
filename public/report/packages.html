@@ -1,0 +1,3817 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>PhpMetrics report</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" href="css/milligram.min.css?v=v2.9.1">
+    <link rel="stylesheet" href="css/style.css?v=v2.9.1">
+    <link rel="stylesheet" href="css/roboto.css?v=v2.9.1">
+    <link rel="stylesheet" href="css/normalize.css?v=v2.9.1">
+    <link rel="stylesheet" href="css/material-icons.css?v=v2.9.1">
+</head>
+<body>
+
+
+<header class="headerbar">
+    <div class="headerbarInner">
+        <div class="float-left navigation-title">
+            <a href="index.html">
+                <h1 class="title">PhpMetrics</h1>
+                <span class="subtitle">
+                Static analyzer for PHP
+            </span>
+            </a>
+        </div>
+        <ul class="navigation-list float-right">
+            <li class="navigation-item">
+                <a class="navigation-link" href="https://github.com/phpmetrics/phpmetrics">Support</a>
+                <a class="navigation-link" href="https://phpmetrics.github.io/website/">Documentation</a>
+            </li>
+        </ul>
+    </div>
+</header>
+
+<a class="hidden-xs github" href="https://github.com/phpmetrics/phpmetrics"
+   title="PhpMetrics on Github" target="blank">
+    <svg width="80" height="80" viewBox="0 0 250 250" class="github">
+        <path d="M0,0 L115,115 L130,115 L142,142 L250,250 L250,0 Z"></path>
+        <path
+            d="M128.3,109.0 C113.8,99.7 119.0,89.6 119.0,89.6 C122.0,82.7 120.5,78.6 120.5,78.6 C119.2,72.0 123.4,76.3 123.4,76.3 C127.3,80.9 125.5,87.3 125.5,87.3 C122.9,97.6 130.6,101.9 134.4,103.2"
+            fill="currentColor" style="transform-origin: 130px 106px;" class="octo-arm"></path>
+        <path
+            d="M115.0,115.0 C114.9,115.1 118.7,116.5 119.8,115.4 L133.7,101.6 C136.9,99.2 139.9,98.4 142.2,98.6 C133.8,88.0 127.5,74.4 143.8,58.0 C148.5,53.4 154.0,51.2 159.7,51.0 C160.3,49.4 163.2,43.6 171.4,40.1 C171.4,40.1 176.1,42.5 178.8,56.2 C183.1,58.6 187.2,61.8 190.9,65.4 C194.5,69.0 197.7,73.2 200.1,77.6 C213.8,80.2 216.3,84.9 216.3,84.9 C212.7,93.1 206.9,96.0 205.4,96.6 C205.1,102.4 203.0,107.8 198.3,112.5 C181.9,128.9 168.3,122.5 157.7,114.1 C157.9,116.9 156.7,120.9 152.7,124.9 L141.0,136.5 C139.8,137.7 141.6,141.9 141.8,141.8 Z"
+            fill="currentColor" class="octo-body"></path>
+    </svg>
+</a>
+
+
+<div class="page">
+    <div class="content content-first">
+        <div class="report-details">
+            Created at 2026-02-01 08:11:44        , with PHPMetrics v2.9.1 (<a href="https://twitter.com/Halleck45">Jean-François Lépine</a>).
+        </div>
+
+        
+    <div class="row">
+        <div class="column">
+            <div class="bloc">
+                <h4>Packages</h4>
+
+                <div id="distances" class="scattered-plot"></div>
+
+                <table class="js-sort-table" id="table-length">
+                    <thead>
+                    <tr>
+                        <th>Name</th>
+                        <th class="js-sort-number">Classes</th>
+                        <th class="js-sort-number">Abstraction</th>
+                        <th class="js-sort-number">Instability</th>
+                        <th class="js-sort-number">Distance</th>
+                        <th class="js-sort-number">Outgoing class dep.</th>
+                        <th class="js-sort-number">Outgoing package dep.</th>
+                        <th class="js-sort-number">Incoming class dep.</th>
+                        <th class="js-sort-number">Incoming package dep.</th>
+                    </tr>
+                    </thead>
+                                            <tr>
+                            <td><span class="path">global</span></td>
+                            <td>4</td>
+                            <td>0</td>
+                            <td>0.035</td>
+                            <td>0.965</td>
+                            <td>2</td>
+                            <td>2</td>
+                            <td>55</td>
+                            <td>32</td>
+                        </tr>
+                                            <tr>
+                            <td><span class="path">Modules\Forums\Database\Seeders</span></td>
+                            <td>2</td>
+                            <td>0</td>
+                            <td>1</td>
+                            <td>0</td>
+                            <td>6</td>
+                            <td>4</td>
+                            <td>0</td>
+                            <td>0</td>
+                        </tr>
+                                            <tr>
+                            <td><span class="path">Modules\Forums\Database\Factories</span></td>
+                            <td>3</td>
+                            <td>0</td>
+                            <td>0.667</td>
+                            <td>0.333</td>
+                            <td>6</td>
+                            <td>5</td>
+                            <td>3</td>
+                            <td>1</td>
+                        </tr>
+                                            <tr>
+                            <td><span class="path">Modules\Forums\Contracts\Repositories</span></td>
+                            <td>3</td>
+                            <td>1</td>
+                            <td>0.714</td>
+                            <td>0.714</td>
+                            <td>5</td>
+                            <td>3</td>
+                            <td>2</td>
+                            <td>2</td>
+                        </tr>
+                                            <tr>
+                            <td><span class="path">Modules\Forums\Contracts\Services</span></td>
+                            <td>2</td>
+                            <td>1</td>
+                            <td>0.5</td>
+                            <td>0.5</td>
+                            <td>4</td>
+                            <td>3</td>
+                            <td>4</td>
+                            <td>2</td>
+                        </tr>
+                                            <tr>
+                            <td><span class="path">Modules\Forums\Providers</span></td>
+                            <td>3</td>
+                            <td>0</td>
+                            <td>1</td>
+                            <td>0</td>
+                            <td>6</td>
+                            <td>3</td>
+                            <td>0</td>
+                            <td>0</td>
+                        </tr>
+                                            <tr>
+                            <td><span class="path">Modules\Forums\Repositories</span></td>
+                            <td>4</td>
+                            <td>0</td>
+                            <td>0.647</td>
+                            <td>0.353</td>
+                            <td>11</td>
+                            <td>7</td>
+                            <td>6</td>
+                            <td>3</td>
+                        </tr>
+                                            <tr>
+                            <td><span class="path">Modules\Forums\Models</span></td>
+                            <td>4</td>
+                            <td>0</td>
+                            <td>0.3</td>
+                            <td>0.7</td>
+                            <td>9</td>
+                            <td>4</td>
+                            <td>21</td>
+                            <td>9</td>
+                        </tr>
+                                            <tr>
+                            <td><span class="path">Modules\Forums\Policies</span></td>
+                            <td>2</td>
+                            <td>0</td>
+                            <td>1</td>
+                            <td>0</td>
+                            <td>5</td>
+                            <td>4</td>
+                            <td>0</td>
+                            <td>0</td>
+                        </tr>
+                                            <tr>
+                            <td><span class="path">Modules\Forums\DTOs</span></td>
+                            <td>4</td>
+                            <td>0</td>
+                            <td>1</td>
+                            <td>0</td>
+                            <td>1</td>
+                            <td>1</td>
+                            <td>0</td>
+                            <td>0</td>
+                        </tr>
+                                            <tr>
+                            <td><span class="path">Modules\Forums\Http\Middleware</span></td>
+                            <td>1</td>
+                            <td>0</td>
+                            <td>1</td>
+                            <td>0</td>
+                            <td>5</td>
+                            <td>5</td>
+                            <td>0</td>
+                            <td>0</td>
+                        </tr>
+                                            <tr>
+                            <td><span class="path">Modules\Forums\Http\Requests</span></td>
+                            <td>4</td>
+                            <td>0</td>
+                            <td>0.333</td>
+                            <td>0.667</td>
+                            <td>1</td>
+                            <td>1</td>
+                            <td>2</td>
+                            <td>1</td>
+                        </tr>
+                                            <tr>
+                            <td><span class="path">Modules\Forums\Http\Controllers</span></td>
+                            <td>4</td>
+                            <td>0</td>
+                            <td>1</td>
+                            <td>0</td>
+                            <td>18</td>
+                            <td>10</td>
+                            <td>0</td>
+                            <td>0</td>
+                        </tr>
+                                            <tr>
+                            <td><span class="path">Modules\Forums\Events</span></td>
+                            <td>4</td>
+                            <td>0</td>
+                            <td>0.3</td>
+                            <td>0.7</td>
+                            <td>3</td>
+                            <td>1</td>
+                            <td>7</td>
+                            <td>3</td>
+                        </tr>
+                                            <tr>
+                            <td><span class="path">Modules\Forums\Listeners</span></td>
+                            <td>5</td>
+                            <td>0</td>
+                            <td>1</td>
+                            <td>0</td>
+                            <td>8</td>
+                            <td>5</td>
+                            <td>0</td>
+                            <td>0</td>
+                        </tr>
+                                            <tr>
+                            <td><span class="path">Modules\Forums\Services</span></td>
+                            <td>23</td>
+                            <td>0</td>
+                            <td>0.913</td>
+                            <td>0.087</td>
+                            <td>21</td>
+                            <td>12</td>
+                            <td>2</td>
+                            <td>1</td>
+                        </tr>
+                                            <tr>
+                            <td><span class="path">Modules\Schemes\Database\Seeders</span></td>
+                            <td>6</td>
+                            <td>0</td>
+                            <td>1</td>
+                            <td>0</td>
+                            <td>11</td>
+                            <td>7</td>
+                            <td>0</td>
+                            <td>0</td>
+                        </tr>
+                                            <tr>
+                            <td><span class="path">Modules\Schemes\Database\Factories</span></td>
+                            <td>8</td>
+                            <td>0</td>
+                            <td>0.75</td>
+                            <td>0.25</td>
+                            <td>9</td>
+                            <td>5</td>
+                            <td>3</td>
+                            <td>1</td>
+                        </tr>
+                                            <tr>
+                            <td><span class="path">Modules\Schemes\Mail</span></td>
+                            <td>1</td>
+                            <td>0</td>
+                            <td>0.8</td>
+                            <td>0.2</td>
+                            <td>4</td>
+                            <td>4</td>
+                            <td>1</td>
+                            <td>1</td>
+                        </tr>
+                                            <tr>
+                            <td><span class="path">Modules\Schemes\Contracts\Repositories</span></td>
+                            <td>5</td>
+                            <td>1</td>
+                            <td>0.267</td>
+                            <td>0.267</td>
+                            <td>4</td>
+                            <td>3</td>
+                            <td>11</td>
+                            <td>3</td>
+                        </tr>
+                                            <tr>
+                            <td><span class="path">Modules\Schemes\Contracts\Services</span></td>
+                            <td>3</td>
+                            <td>1</td>
+                            <td>0.667</td>
+                            <td>0.667</td>
+                            <td>6</td>
+                            <td>4</td>
+                            <td>3</td>
+                            <td>2</td>
+                        </tr>
+                                            <tr>
+                            <td><span class="path">Modules\Schemes\Providers</span></td>
+                            <td>3</td>
+                            <td>0</td>
+                            <td>1</td>
+                            <td>0</td>
+                            <td>6</td>
+                            <td>3</td>
+                            <td>0</td>
+                            <td>0</td>
+                        </tr>
+                                            <tr>
+                            <td><span class="path">Modules\Schemes\Repositories</span></td>
+                            <td>5</td>
+                            <td>0</td>
+                            <td>0.938</td>
+                            <td>0.063</td>
+                            <td>15</td>
+                            <td>6</td>
+                            <td>1</td>
+                            <td>1</td>
+                        </tr>
+                                            <tr>
+                            <td><span class="path">Modules\Schemes\Models</span></td>
+                            <td>9</td>
+                            <td>0</td>
+                            <td>0.118</td>
+                            <td>0.882</td>
+                            <td>12</td>
+                            <td>8</td>
+                            <td>90</td>
+                            <td>39</td>
+                        </tr>
+                                            <tr>
+                            <td><span class="path">Modules\Schemes\Policies</span></td>
+                            <td>5</td>
+                            <td>0</td>
+                            <td>1</td>
+                            <td>0</td>
+                            <td>7</td>
+                            <td>3</td>
+                            <td>0</td>
+                            <td>0</td>
+                        </tr>
+                                            <tr>
+                            <td><span class="path">Modules\Schemes\DTOs</span></td>
+                            <td>6</td>
+                            <td>0</td>
+                            <td>1</td>
+                            <td>0</td>
+                            <td>1</td>
+                            <td>1</td>
+                            <td>0</td>
+                            <td>0</td>
+                        </tr>
+                                            <tr>
+                            <td><span class="path">Modules\Schemes\Http\Resources</span></td>
+                            <td>6</td>
+                            <td>0</td>
+                            <td>0.333</td>
+                            <td>0.667</td>
+                            <td>3</td>
+                            <td>3</td>
+                            <td>6</td>
+                            <td>1</td>
+                        </tr>
+                                            <tr>
+                            <td><span class="path">Modules\Schemes\Http\Requests</span></td>
+                            <td>7</td>
+                            <td>0</td>
+                            <td>0.5</td>
+                            <td>0.5</td>
+                            <td>5</td>
+                            <td>4</td>
+                            <td>5</td>
+                            <td>1</td>
+                        </tr>
+                                            <tr>
+                            <td><span class="path">Modules\Schemes\Http\Requests\Concerns</span></td>
+                            <td>1</td>
+                            <td>1</td>
+                            <td>1</td>
+                            <td>1</td>
+                            <td>2</td>
+                            <td>2</td>
+                            <td>0</td>
+                            <td>0</td>
+                        </tr>
+                                            <tr>
+                            <td><span class="path">Modules\Schemes\Http\Controllers</span></td>
+                            <td>6</td>
+                            <td>0</td>
+                            <td>1</td>
+                            <td>0</td>
+                            <td>27</td>
+                            <td>8</td>
+                            <td>0</td>
+                            <td>0</td>
+                        </tr>
+                                            <tr>
+                            <td><span class="path">Modules\Schemes\Events</span></td>
+                            <td>7</td>
+                            <td>0</td>
+                            <td>0.333</td>
+                            <td>0.667</td>
+                            <td>4</td>
+                            <td>2</td>
+                            <td>8</td>
+                            <td>4</td>
+                        </tr>
+                                            <tr>
+                            <td><span class="path">Modules\Schemes\Listeners</span></td>
+                            <td>3</td>
+                            <td>0</td>
+                            <td>1</td>
+                            <td>0</td>
+                            <td>7</td>
+                            <td>5</td>
+                            <td>0</td>
+                            <td>0</td>
+                        </tr>
+                                            <tr>
+                            <td><span class="path">Modules\Schemes\Services</span></td>
+                            <td>13</td>
+                            <td>0</td>
+                            <td>0.857</td>
+                            <td>0.143</td>
+                            <td>42</td>
+                            <td>19</td>
+                            <td>7</td>
+                            <td>2</td>
+                        </tr>
+                                            <tr>
+                            <td><span class="path">Modules\Enrollments\Database\Seeders</span></td>
+                            <td>3</td>
+                            <td>0</td>
+                            <td>1</td>
+                            <td>0</td>
+                            <td>7</td>
+                            <td>6</td>
+                            <td>0</td>
+                            <td>0</td>
+                        </tr>
+                                            <tr>
+                            <td><span class="path">Modules\Enrollments\Database\Factories</span></td>
+                            <td>3</td>
+                            <td>0</td>
+                            <td>0.857</td>
+                            <td>0.143</td>
+                            <td>6</td>
+                            <td>4</td>
+                            <td>1</td>
+                            <td>1</td>
+                        </tr>
+                                            <tr>
+                            <td><span class="path">Modules\Enrollments\Mail</span></td>
+                            <td>5</td>
+                            <td>0</td>
+                            <td>0.833</td>
+                            <td>0.167</td>
+                            <td>5</td>
+                            <td>5</td>
+                            <td>1</td>
+                            <td>1</td>
+                        </tr>
+                                            <tr>
+                            <td><span class="path">Modules\Enrollments\Contracts\Repositories</span></td>
+                            <td>1</td>
+                            <td>1</td>
+                            <td>0.4</td>
+                            <td>0.4</td>
+                            <td>2</td>
+                            <td>2</td>
+                            <td>3</td>
+                            <td>3</td>
+                        </tr>
+                                            <tr>
+                            <td><span class="path">Modules\Enrollments\Contracts\Services</span></td>
+                            <td>2</td>
+                            <td>1</td>
+                            <td>0.5</td>
+                            <td>0.5</td>
+                            <td>5</td>
+                            <td>5</td>
+                            <td>5</td>
+                            <td>3</td>
+                        </tr>
+                                            <tr>
+                            <td><span class="path">Modules\Enrollments\Providers</span></td>
+                            <td>3</td>
+                            <td>0</td>
+                            <td>1</td>
+                            <td>0</td>
+                            <td>6</td>
+                            <td>3</td>
+                            <td>0</td>
+                            <td>0</td>
+                        </tr>
+                                            <tr>
+                            <td><span class="path">Modules\Enrollments\Repositories</span></td>
+                            <td>1</td>
+                            <td>0</td>
+                            <td>1</td>
+                            <td>0</td>
+                            <td>8</td>
+                            <td>6</td>
+                            <td>0</td>
+                            <td>0</td>
+                        </tr>
+                                            <tr>
+                            <td><span class="path">Modules\Enrollments\Models</span></td>
+                            <td>4</td>
+                            <td>0</td>
+                            <td>0.108</td>
+                            <td>0.892</td>
+                            <td>4</td>
+                            <td>4</td>
+                            <td>33</td>
+                            <td>24</td>
+                        </tr>
+                                            <tr>
+                            <td><span class="path">Modules\Enrollments\Policies</span></td>
+                            <td>1</td>
+                            <td>0</td>
+                            <td>1</td>
+                            <td>0</td>
+                            <td>3</td>
+                            <td>3</td>
+                            <td>0</td>
+                            <td>0</td>
+                        </tr>
+                                            <tr>
+                            <td><span class="path">Modules\Enrollments\Exports</span></td>
+                            <td>1</td>
+                            <td>0</td>
+                            <td>0.833</td>
+                            <td>0.167</td>
+                            <td>5</td>
+                            <td>2</td>
+                            <td>1</td>
+                            <td>1</td>
+                        </tr>
+                                            <tr>
+                            <td><span class="path">Modules\Enrollments\DTOs</span></td>
+                            <td>2</td>
+                            <td>0</td>
+                            <td>1</td>
+                            <td>0</td>
+                            <td>2</td>
+                            <td>2</td>
+                            <td>0</td>
+                            <td>0</td>
+                        </tr>
+                                            <tr>
+                            <td><span class="path">Modules\Enrollments\Http\Resources</span></td>
+                            <td>2</td>
+                            <td>0</td>
+                            <td>0.667</td>
+                            <td>0.333</td>
+                            <td>2</td>
+                            <td>2</td>
+                            <td>1</td>
+                            <td>1</td>
+                        </tr>
+                                            <tr>
+                            <td><span class="path">Modules\Enrollments\Http\Requests</span></td>
+                            <td>1</td>
+                            <td>0</td>
+                            <td>1</td>
+                            <td>0</td>
+                            <td>1</td>
+                            <td>1</td>
+                            <td>0</td>
+                            <td>0</td>
+                        </tr>
+                                            <tr>
+                            <td><span class="path">Modules\Enrollments\Http\Controllers</span></td>
+                            <td>2</td>
+                            <td>0</td>
+                            <td>1</td>
+                            <td>0</td>
+                            <td>10</td>
+                            <td>8</td>
+                            <td>0</td>
+                            <td>0</td>
+                        </tr>
+                                            <tr>
+                            <td><span class="path">Modules\Enrollments\Jobs</span></td>
+                            <td>2</td>
+                            <td>0</td>
+                            <td>1</td>
+                            <td>0</td>
+                            <td>3</td>
+                            <td>3</td>
+                            <td>0</td>
+                            <td>0</td>
+                        </tr>
+                                            <tr>
+                            <td><span class="path">Modules\Enrollments\Events</span></td>
+                            <td>1</td>
+                            <td>0</td>
+                            <td>0.333</td>
+                            <td>0.667</td>
+                            <td>1</td>
+                            <td>1</td>
+                            <td>2</td>
+                            <td>2</td>
+                        </tr>
+                                            <tr>
+                            <td><span class="path">Modules\Enrollments\Listeners</span></td>
+                            <td>1</td>
+                            <td>0</td>
+                            <td>1</td>
+                            <td>0</td>
+                            <td>3</td>
+                            <td>3</td>
+                            <td>0</td>
+                            <td>0</td>
+                        </tr>
+                                            <tr>
+                            <td><span class="path">Modules\Enrollments\Services</span></td>
+                            <td>7</td>
+                            <td>0</td>
+                            <td>1</td>
+                            <td>0</td>
+                            <td>26</td>
+                            <td>16</td>
+                            <td>0</td>
+                            <td>0</td>
+                        </tr>
+                                            <tr>
+                            <td><span class="path">Modules\Grading\Database\Seeders</span></td>
+                            <td>3</td>
+                            <td>0</td>
+                            <td>1</td>
+                            <td>0</td>
+                            <td>3</td>
+                            <td>3</td>
+                            <td>0</td>
+                            <td>0</td>
+                        </tr>
+                                            <tr>
+                            <td><span class="path">Modules\Grading\Database\Factories</span></td>
+                            <td>2</td>
+                            <td>0</td>
+                            <td>0.8</td>
+                            <td>0.2</td>
+                            <td>4</td>
+                            <td>3</td>
+                            <td>1</td>
+                            <td>1</td>
+                        </tr>
+                                            <tr>
+                            <td><span class="path">Modules\Grading\Strategies</span></td>
+                            <td>4</td>
+                            <td>0</td>
+                            <td>0.667</td>
+                            <td>0.333</td>
+                            <td>4</td>
+                            <td>3</td>
+                            <td>2</td>
+                            <td>2</td>
+                        </tr>
+                                            <tr>
+                            <td><span class="path">Modules\Grading\Contracts</span></td>
+                            <td>1</td>
+                            <td>1</td>
+                            <td>0.333</td>
+                            <td>0.333</td>
+                            <td>2</td>
+                            <td>1</td>
+                            <td>4</td>
+                            <td>1</td>
+                        </tr>
+                                            <tr>
+                            <td><span class="path">Modules\Grading\Contracts\Repositories</span></td>
+                            <td>2</td>
+                            <td>1</td>
+                            <td>0.571</td>
+                            <td>0.571</td>
+                            <td>4</td>
+                            <td>3</td>
+                            <td>3</td>
+                            <td>2</td>
+                        </tr>
+                                            <tr>
+                            <td><span class="path">Modules\Grading\Contracts\Services</span></td>
+                            <td>2</td>
+                            <td>1</td>
+                            <td>0.333</td>
+                            <td>0.333</td>
+                            <td>4</td>
+                            <td>3</td>
+                            <td>8</td>
+                            <td>5</td>
+                        </tr>
+                                            <tr>
+                            <td><span class="path">Modules\Grading\Providers</span></td>
+                            <td>3</td>
+                            <td>0</td>
+                            <td>1</td>
+                            <td>0</td>
+                            <td>6</td>
+                            <td>3</td>
+                            <td>0</td>
+                            <td>0</td>
+                        </tr>
+                                            <tr>
+                            <td><span class="path">Modules\Grading\Repositories</span></td>
+                            <td>2</td>
+                            <td>0</td>
+                            <td>1</td>
+                            <td>0</td>
+                            <td>12</td>
+                            <td>9</td>
+                            <td>0</td>
+                            <td>0</td>
+                        </tr>
+                                            <tr>
+                            <td><span class="path">Modules\Grading\Models</span></td>
+                            <td>4</td>
+                            <td>0</td>
+                            <td>0.2</td>
+                            <td>0.8</td>
+                            <td>5</td>
+                            <td>4</td>
+                            <td>20</td>
+                            <td>12</td>
+                        </tr>
+                                            <tr>
+                            <td><span class="path">Modules\Grading\Policies</span></td>
+                            <td>1</td>
+                            <td>0</td>
+                            <td>1</td>
+                            <td>0</td>
+                            <td>2</td>
+                            <td>2</td>
+                            <td>0</td>
+                            <td>0</td>
+                        </tr>
+                                            <tr>
+                            <td><span class="path">Modules\Grading\DTOs</span></td>
+                            <td>2</td>
+                            <td>0</td>
+                            <td>1</td>
+                            <td>0</td>
+                            <td>1</td>
+                            <td>1</td>
+                            <td>0</td>
+                            <td>0</td>
+                        </tr>
+                                            <tr>
+                            <td><span class="path">Modules\Grading\Http\Resources</span></td>
+                            <td>4</td>
+                            <td>0</td>
+                            <td>0.5</td>
+                            <td>0.5</td>
+                            <td>2</td>
+                            <td>2</td>
+                            <td>2</td>
+                            <td>1</td>
+                        </tr>
+                                            <tr>
+                            <td><span class="path">Modules\Grading\Http\Requests</span></td>
+                            <td>8</td>
+                            <td>0</td>
+                            <td>0.333</td>
+                            <td>0.667</td>
+                            <td>1</td>
+                            <td>1</td>
+                            <td>2</td>
+                            <td>1</td>
+                        </tr>
+                                            <tr>
+                            <td><span class="path">Modules\Grading\Http\Controllers</span></td>
+                            <td>2</td>
+                            <td>0</td>
+                            <td>1</td>
+                            <td>0</td>
+                            <td>19</td>
+                            <td>7</td>
+                            <td>0</td>
+                            <td>0</td>
+                        </tr>
+                                            <tr>
+                            <td><span class="path">Modules\Grading\Jobs</span></td>
+                            <td>3</td>
+                            <td>0</td>
+                            <td>0.818</td>
+                            <td>0.182</td>
+                            <td>9</td>
+                            <td>7</td>
+                            <td>2</td>
+                            <td>2</td>
+                        </tr>
+                                            <tr>
+                            <td><span class="path">Modules\Grading\Events</span></td>
+                            <td>6</td>
+                            <td>0</td>
+                            <td>0.286</td>
+                            <td>0.714</td>
+                            <td>4</td>
+                            <td>3</td>
+                            <td>10</td>
+                            <td>4</td>
+                        </tr>
+                                            <tr>
+                            <td><span class="path">Modules\Grading\Services</span></td>
+                            <td>21</td>
+                            <td>0</td>
+                            <td>1</td>
+                            <td>0</td>
+                            <td>31</td>
+                            <td>19</td>
+                            <td>0</td>
+                            <td>0</td>
+                        </tr>
+                                            <tr>
+                            <td><span class="path">Modules\Auth\Database\Seeders</span></td>
+                            <td>11</td>
+                            <td>0</td>
+                            <td>1</td>
+                            <td>0</td>
+                            <td>13</td>
+                            <td>8</td>
+                            <td>0</td>
+                            <td>0</td>
+                        </tr>
+                                            <tr>
+                            <td><span class="path">Modules\Auth\Database\Factories</span></td>
+                            <td>8</td>
+                            <td>0</td>
+                            <td>1</td>
+                            <td>0</td>
+                            <td>4</td>
+                            <td>3</td>
+                            <td>0</td>
+                            <td>0</td>
+                        </tr>
+                                            <tr>
+                            <td><span class="path">Modules\Auth\Traits</span></td>
+                            <td>2</td>
+                            <td>1</td>
+                            <td>1</td>
+                            <td>1</td>
+                            <td>1</td>
+                            <td>1</td>
+                            <td>0</td>
+                            <td>0</td>
+                        </tr>
+                                            <tr>
+                            <td><span class="path">Modules\Auth\Mail</span></td>
+                            <td>5</td>
+                            <td>0</td>
+                            <td>0.333</td>
+                            <td>0.667</td>
+                            <td>2</td>
+                            <td>2</td>
+                            <td>4</td>
+                            <td>3</td>
+                        </tr>
+                                            <tr>
+                            <td><span class="path">Modules\Auth\Contracts</span></td>
+                            <td>1</td>
+                            <td>1</td>
+                            <td>0.333</td>
+                            <td>0.333</td>
+                            <td>1</td>
+                            <td>1</td>
+                            <td>2</td>
+                            <td>2</td>
+                        </tr>
+                                            <tr>
+                            <td><span class="path">Modules\Auth\Contracts\Repositories</span></td>
+                            <td>4</td>
+                            <td>1</td>
+                            <td>0.333</td>
+                            <td>0.333</td>
+                            <td>6</td>
+                            <td>3</td>
+                            <td>12</td>
+                            <td>3</td>
+                        </tr>
+                                            <tr>
+                            <td><span class="path">Modules\Auth\Contracts\Services</span></td>
+                            <td>9</td>
+                            <td>1</td>
+                            <td>0.278</td>
+                            <td>0.278</td>
+                            <td>5</td>
+                            <td>4</td>
+                            <td>13</td>
+                            <td>2</td>
+                        </tr>
+                                            <tr>
+                            <td><span class="path">Modules\Auth\Providers</span></td>
+                            <td>3</td>
+                            <td>0</td>
+                            <td>1</td>
+                            <td>0</td>
+                            <td>7</td>
+                            <td>5</td>
+                            <td>0</td>
+                            <td>0</td>
+                        </tr>
+                                            <tr>
+                            <td><span class="path">Modules\Auth\Repositories</span></td>
+                            <td>5</td>
+                            <td>0</td>
+                            <td>0.933</td>
+                            <td>0.067</td>
+                            <td>14</td>
+                            <td>7</td>
+                            <td>1</td>
+                            <td>1</td>
+                        </tr>
+                                            <tr>
+                            <td><span class="path">Modules\Auth\Models</span></td>
+                            <td>9</td>
+                            <td>0</td>
+                            <td>0.06</td>
+                            <td>0.94</td>
+                            <td>9</td>
+                            <td>7</td>
+                            <td>142</td>
+                            <td>60</td>
+                        </tr>
+                                            <tr>
+                            <td><span class="path">Modules\Auth\Policies</span></td>
+                            <td>2</td>
+                            <td>0</td>
+                            <td>1</td>
+                            <td>0</td>
+                            <td>4</td>
+                            <td>4</td>
+                            <td>0</td>
+                            <td>0</td>
+                        </tr>
+                                            <tr>
+                            <td><span class="path">Modules\Auth\Exports</span></td>
+                            <td>1</td>
+                            <td>0</td>
+                            <td>0.857</td>
+                            <td>0.143</td>
+                            <td>6</td>
+                            <td>3</td>
+                            <td>1</td>
+                            <td>1</td>
+                        </tr>
+                                            <tr>
+                            <td><span class="path">Modules\Auth\DTOs</span></td>
+                            <td>4</td>
+                            <td>0</td>
+                            <td>0.5</td>
+                            <td>0.5</td>
+                            <td>1</td>
+                            <td>1</td>
+                            <td>1</td>
+                            <td>1</td>
+                        </tr>
+                                            <tr>
+                            <td><span class="path">Modules\Auth\Support</span></td>
+                            <td>2</td>
+                            <td>0</td>
+                            <td>0.25</td>
+                            <td>0.75</td>
+                            <td>1</td>
+                            <td>1</td>
+                            <td>3</td>
+                            <td>2</td>
+                        </tr>
+                                            <tr>
+                            <td><span class="path">Modules\Auth\Http\Middleware</span></td>
+                            <td>2</td>
+                            <td>0</td>
+                            <td>1</td>
+                            <td>0</td>
+                            <td>3</td>
+                            <td>3</td>
+                            <td>0</td>
+                            <td>0</td>
+                        </tr>
+                                            <tr>
+                            <td><span class="path">Modules\Auth\Http\Resources</span></td>
+                            <td>8</td>
+                            <td>0</td>
+                            <td>0.2</td>
+                            <td>0.8</td>
+                            <td>2</td>
+                            <td>2</td>
+                            <td>8</td>
+                            <td>2</td>
+                        </tr>
+                                            <tr>
+                            <td><span class="path">Modules\Auth\Http\Requests</span></td>
+                            <td>26</td>
+                            <td>0</td>
+                            <td>0.429</td>
+                            <td>0.571</td>
+                            <td>6</td>
+                            <td>6</td>
+                            <td>8</td>
+                            <td>1</td>
+                        </tr>
+                                            <tr>
+                            <td><span class="path">Modules\Auth\Http\Requests\Concerns</span></td>
+                            <td>2</td>
+                            <td>1</td>
+                            <td>1</td>
+                            <td>1</td>
+                            <td>2</td>
+                            <td>2</td>
+                            <td>0</td>
+                            <td>0</td>
+                        </tr>
+                                            <tr>
+                            <td><span class="path">Modules\Auth\Http\Controllers</span></td>
+                            <td>12</td>
+                            <td>0</td>
+                            <td>1</td>
+                            <td>0</td>
+                            <td>53</td>
+                            <td>14</td>
+                            <td>0</td>
+                            <td>0</td>
+                        </tr>
+                                            <tr>
+                            <td><span class="path">Modules\Auth\Jobs</span></td>
+                            <td>1</td>
+                            <td>0</td>
+                            <td>0.857</td>
+                            <td>0.143</td>
+                            <td>6</td>
+                            <td>5</td>
+                            <td>1</td>
+                            <td>1</td>
+                        </tr>
+                                            <tr>
+                            <td><span class="path">Modules\Auth\Events</span></td>
+                            <td>7</td>
+                            <td>0</td>
+                            <td>0.2</td>
+                            <td>0.8</td>
+                            <td>1</td>
+                            <td>1</td>
+                            <td>4</td>
+                            <td>2</td>
+                        </tr>
+                                            <tr>
+                            <td><span class="path">Modules\Auth\Observers</span></td>
+                            <td>1</td>
+                            <td>0</td>
+                            <td>1</td>
+                            <td>0</td>
+                            <td>2</td>
+                            <td>1</td>
+                            <td>0</td>
+                            <td>0</td>
+                        </tr>
+                                            <tr>
+                            <td><span class="path">Modules\Auth\Services</span></td>
+                            <td>28</td>
+                            <td>0</td>
+                            <td>0.931</td>
+                            <td>0.069</td>
+                            <td>54</td>
+                            <td>28</td>
+                            <td>4</td>
+                            <td>1</td>
+                        </tr>
+                                            <tr>
+                            <td><span class="path">Modules\Gamification\Database\Seeders</span></td>
+                            <td>3</td>
+                            <td>0</td>
+                            <td>1</td>
+                            <td>0</td>
+                            <td>4</td>
+                            <td>3</td>
+                            <td>0</td>
+                            <td>0</td>
+                        </tr>
+                                            <tr>
+                            <td><span class="path">Modules\Gamification\Database\Factories</span></td>
+                            <td>1</td>
+                            <td>0</td>
+                            <td>1</td>
+                            <td>0</td>
+                            <td>2</td>
+                            <td>2</td>
+                            <td>0</td>
+                            <td>0</td>
+                        </tr>
+                                            <tr>
+                            <td><span class="path">Modules\Gamification\Contracts\Repositories</span></td>
+                            <td>5</td>
+                            <td>1</td>
+                            <td>0.571</td>
+                            <td>0.571</td>
+                            <td>8</td>
+                            <td>3</td>
+                            <td>6</td>
+                            <td>2</td>
+                        </tr>
+                                            <tr>
+                            <td><span class="path">Modules\Gamification\Contracts\Services</span></td>
+                            <td>3</td>
+                            <td>1</td>
+                            <td>0.571</td>
+                            <td>0.571</td>
+                            <td>4</td>
+                            <td>4</td>
+                            <td>3</td>
+                            <td>1</td>
+                        </tr>
+                                            <tr>
+                            <td><span class="path">Modules\Gamification\Providers</span></td>
+                            <td>3</td>
+                            <td>0</td>
+                            <td>1</td>
+                            <td>0</td>
+                            <td>7</td>
+                            <td>4</td>
+                            <td>0</td>
+                            <td>0</td>
+                        </tr>
+                                            <tr>
+                            <td><span class="path">Modules\Gamification\Repositories</span></td>
+                            <td>5</td>
+                            <td>0</td>
+                            <td>1</td>
+                            <td>0</td>
+                            <td>14</td>
+                            <td>5</td>
+                            <td>0</td>
+                            <td>0</td>
+                        </tr>
+                                            <tr>
+                            <td><span class="path">Modules\Gamification\Models</span></td>
+                            <td>11</td>
+                            <td>0</td>
+                            <td>0.182</td>
+                            <td>0.818</td>
+                            <td>4</td>
+                            <td>3</td>
+                            <td>18</td>
+                            <td>7</td>
+                        </tr>
+                                            <tr>
+                            <td><span class="path">Modules\Gamification\Policies</span></td>
+                            <td>2</td>
+                            <td>0</td>
+                            <td>1</td>
+                            <td>0</td>
+                            <td>3</td>
+                            <td>2</td>
+                            <td>0</td>
+                            <td>0</td>
+                        </tr>
+                                            <tr>
+                            <td><span class="path">Modules\Gamification\DTOs</span></td>
+                            <td>4</td>
+                            <td>0</td>
+                            <td>1</td>
+                            <td>0</td>
+                            <td>1</td>
+                            <td>1</td>
+                            <td>0</td>
+                            <td>0</td>
+                        </tr>
+                                            <tr>
+                            <td><span class="path">Modules\Gamification\Http\Controllers</span></td>
+                            <td>3</td>
+                            <td>0</td>
+                            <td>1</td>
+                            <td>0</td>
+                            <td>11</td>
+                            <td>5</td>
+                            <td>0</td>
+                            <td>0</td>
+                        </tr>
+                                            <tr>
+                            <td><span class="path">Modules\Gamification\Listeners</span></td>
+                            <td>5</td>
+                            <td>0</td>
+                            <td>1</td>
+                            <td>0</td>
+                            <td>6</td>
+                            <td>4</td>
+                            <td>0</td>
+                            <td>0</td>
+                        </tr>
+                                            <tr>
+                            <td><span class="path">Modules\Gamification\Services</span></td>
+                            <td>3</td>
+                            <td>0</td>
+                            <td>0.536</td>
+                            <td>0.464</td>
+                            <td>15</td>
+                            <td>9</td>
+                            <td>13</td>
+                            <td>4</td>
+                        </tr>
+                                            <tr>
+                            <td><span class="path">Modules\Gamification\Console\Commands</span></td>
+                            <td>21</td>
+                            <td>0</td>
+                            <td>1</td>
+                            <td>0</td>
+                            <td>6</td>
+                            <td>5</td>
+                            <td>0</td>
+                            <td>0</td>
+                        </tr>
+                                            <tr>
+                            <td><span class="path">Modules\Learning\Database\Seeders</span></td>
+                            <td>11</td>
+                            <td>0</td>
+                            <td>1</td>
+                            <td>0</td>
+                            <td>11</td>
+                            <td>10</td>
+                            <td>0</td>
+                            <td>0</td>
+                        </tr>
+                                            <tr>
+                            <td><span class="path">Modules\Learning\Database\Factories</span></td>
+                            <td>5</td>
+                            <td>0</td>
+                            <td>0.714</td>
+                            <td>0.286</td>
+                            <td>10</td>
+                            <td>6</td>
+                            <td>4</td>
+                            <td>1</td>
+                        </tr>
+                                            <tr>
+                            <td><span class="path">Modules\Learning\Mail</span></td>
+                            <td>1</td>
+                            <td>0</td>
+                            <td>0.833</td>
+                            <td>0.167</td>
+                            <td>5</td>
+                            <td>5</td>
+                            <td>1</td>
+                            <td>1</td>
+                        </tr>
+                                            <tr>
+                            <td><span class="path">Modules\Learning\Contracts\Repositories</span></td>
+                            <td>5</td>
+                            <td>1</td>
+                            <td>0.529</td>
+                            <td>0.529</td>
+                            <td>9</td>
+                            <td>5</td>
+                            <td>8</td>
+                            <td>2</td>
+                        </tr>
+                                            <tr>
+                            <td><span class="path">Modules\Learning\Contracts\Services</span></td>
+                            <td>5</td>
+                            <td>1</td>
+                            <td>0.65</td>
+                            <td>0.65</td>
+                            <td>13</td>
+                            <td>7</td>
+                            <td>7</td>
+                            <td>3</td>
+                        </tr>
+                                            <tr>
+                            <td><span class="path">Modules\Learning\Providers</span></td>
+                            <td>3</td>
+                            <td>0</td>
+                            <td>1</td>
+                            <td>0</td>
+                            <td>6</td>
+                            <td>3</td>
+                            <td>0</td>
+                            <td>0</td>
+                        </tr>
+                                            <tr>
+                            <td><span class="path">Modules\Learning\Repositories</span></td>
+                            <td>5</td>
+                            <td>0</td>
+                            <td>0.909</td>
+                            <td>0.091</td>
+                            <td>20</td>
+                            <td>10</td>
+                            <td>2</td>
+                            <td>1</td>
+                        </tr>
+                                            <tr>
+                            <td><span class="path">Modules\Learning\Models</span></td>
+                            <td>6</td>
+                            <td>0</td>
+                            <td>0.268</td>
+                            <td>0.732</td>
+                            <td>22</td>
+                            <td>11</td>
+                            <td>60</td>
+                            <td>26</td>
+                        </tr>
+                                            <tr>
+                            <td><span class="path">Modules\Learning\Exceptions</span></td>
+                            <td>3</td>
+                            <td>0</td>
+                            <td>0.333</td>
+                            <td>0.667</td>
+                            <td>2</td>
+                            <td>1</td>
+                            <td>4</td>
+                            <td>3</td>
+                        </tr>
+                                            <tr>
+                            <td><span class="path">Modules\Learning\Policies</span></td>
+                            <td>2</td>
+                            <td>0</td>
+                            <td>1</td>
+                            <td>0</td>
+                            <td>6</td>
+                            <td>5</td>
+                            <td>0</td>
+                            <td>0</td>
+                        </tr>
+                                            <tr>
+                            <td><span class="path">Modules\Learning\DTOs</span></td>
+                            <td>5</td>
+                            <td>0</td>
+                            <td>0.5</td>
+                            <td>0.5</td>
+                            <td>2</td>
+                            <td>2</td>
+                            <td>2</td>
+                            <td>2</td>
+                        </tr>
+                                            <tr>
+                            <td><span class="path">Modules\Learning\Http\Resources</span></td>
+                            <td>11</td>
+                            <td>0</td>
+                            <td>0.5</td>
+                            <td>0.5</td>
+                            <td>2</td>
+                            <td>2</td>
+                            <td>2</td>
+                            <td>1</td>
+                        </tr>
+                                            <tr>
+                            <td><span class="path">Modules\Learning\Http\Requests</span></td>
+                            <td>13</td>
+                            <td>0</td>
+                            <td>0.75</td>
+                            <td>0.25</td>
+                            <td>6</td>
+                            <td>5</td>
+                            <td>2</td>
+                            <td>1</td>
+                        </tr>
+                                            <tr>
+                            <td><span class="path">Modules\Learning\Http\Controllers</span></td>
+                            <td>3</td>
+                            <td>0</td>
+                            <td>1</td>
+                            <td>0</td>
+                            <td>35</td>
+                            <td>9</td>
+                            <td>0</td>
+                            <td>0</td>
+                        </tr>
+                                            <tr>
+                            <td><span class="path">Modules\Learning\Jobs</span></td>
+                            <td>2</td>
+                            <td>0</td>
+                            <td>1</td>
+                            <td>0</td>
+                            <td>7</td>
+                            <td>4</td>
+                            <td>0</td>
+                            <td>0</td>
+                        </tr>
+                                            <tr>
+                            <td><span class="path">Modules\Learning\Events</span></td>
+                            <td>6</td>
+                            <td>0</td>
+                            <td>0.263</td>
+                            <td>0.737</td>
+                            <td>5</td>
+                            <td>2</td>
+                            <td>14</td>
+                            <td>6</td>
+                        </tr>
+                                            <tr>
+                            <td><span class="path">Modules\Learning\Listeners</span></td>
+                            <td>3</td>
+                            <td>0</td>
+                            <td>1</td>
+                            <td>0</td>
+                            <td>10</td>
+                            <td>7</td>
+                            <td>0</td>
+                            <td>0</td>
+                        </tr>
+                                            <tr>
+                            <td><span class="path">Modules\Learning\Services</span></td>
+                            <td>5</td>
+                            <td>0</td>
+                            <td>0.978</td>
+                            <td>0.022</td>
+                            <td>45</td>
+                            <td>22</td>
+                            <td>1</td>
+                            <td>1</td>
+                        </tr>
+                                            <tr>
+                            <td><span class="path">Modules\Learning\Console\Commands</span></td>
+                            <td>10</td>
+                            <td>0</td>
+                            <td>1</td>
+                            <td>0</td>
+                            <td>5</td>
+                            <td>4</td>
+                            <td>0</td>
+                            <td>0</td>
+                        </tr>
+                                            <tr>
+                            <td><span class="path">Modules\Content\Database\Seeders</span></td>
+                            <td>2</td>
+                            <td>0</td>
+                            <td>1</td>
+                            <td>0</td>
+                            <td>6</td>
+                            <td>4</td>
+                            <td>0</td>
+                            <td>0</td>
+                        </tr>
+                                            <tr>
+                            <td><span class="path">Modules\Content\Database\Factories</span></td>
+                            <td>4</td>
+                            <td>0</td>
+                            <td>0.429</td>
+                            <td>0.571</td>
+                            <td>3</td>
+                            <td>3</td>
+                            <td>4</td>
+                            <td>1</td>
+                        </tr>
+                                            <tr>
+                            <td><span class="path">Modules\Content\Traits</span></td>
+                            <td>1</td>
+                            <td>1</td>
+                            <td>1</td>
+                            <td>1</td>
+                            <td>2</td>
+                            <td>2</td>
+                            <td>0</td>
+                            <td>0</td>
+                        </tr>
+                                            <tr>
+                            <td><span class="path">Modules\Content\Contracts\Repositories</span></td>
+                            <td>2</td>
+                            <td>1</td>
+                            <td>0.455</td>
+                            <td>0.455</td>
+                            <td>5</td>
+                            <td>4</td>
+                            <td>6</td>
+                            <td>3</td>
+                        </tr>
+                                            <tr>
+                            <td><span class="path">Modules\Content\Contracts\Services</span></td>
+                            <td>4</td>
+                            <td>1</td>
+                            <td>0.632</td>
+                            <td>0.632</td>
+                            <td>12</td>
+                            <td>7</td>
+                            <td>7</td>
+                            <td>2</td>
+                        </tr>
+                                            <tr>
+                            <td><span class="path">Modules\Content\Providers</span></td>
+                            <td>3</td>
+                            <td>0</td>
+                            <td>1</td>
+                            <td>0</td>
+                            <td>6</td>
+                            <td>3</td>
+                            <td>0</td>
+                            <td>0</td>
+                        </tr>
+                                            <tr>
+                            <td><span class="path">Modules\Content\Repositories</span></td>
+                            <td>3</td>
+                            <td>0</td>
+                            <td>0.765</td>
+                            <td>0.235</td>
+                            <td>13</td>
+                            <td>10</td>
+                            <td>4</td>
+                            <td>2</td>
+                        </tr>
+                                            <tr>
+                            <td><span class="path">Modules\Content\Models</span></td>
+                            <td>6</td>
+                            <td>0</td>
+                            <td>0.375</td>
+                            <td>0.625</td>
+                            <td>15</td>
+                            <td>8</td>
+                            <td>25</td>
+                            <td>10</td>
+                        </tr>
+                                            <tr>
+                            <td><span class="path">Modules\Content\Exceptions</span></td>
+                            <td>1</td>
+                            <td>0</td>
+                            <td>0.5</td>
+                            <td>0.5</td>
+                            <td>1</td>
+                            <td>1</td>
+                            <td>1</td>
+                            <td>1</td>
+                        </tr>
+                                            <tr>
+                            <td><span class="path">Modules\Content\Policies</span></td>
+                            <td>3</td>
+                            <td>0</td>
+                            <td>1</td>
+                            <td>0</td>
+                            <td>4</td>
+                            <td>3</td>
+                            <td>0</td>
+                            <td>0</td>
+                        </tr>
+                                            <tr>
+                            <td><span class="path">Modules\Content\DTOs</span></td>
+                            <td>4</td>
+                            <td>0</td>
+                            <td>0.167</td>
+                            <td>0.833</td>
+                            <td>1</td>
+                            <td>1</td>
+                            <td>5</td>
+                            <td>2</td>
+                        </tr>
+                                            <tr>
+                            <td><span class="path">Modules\Content\Http\Resources</span></td>
+                            <td>2</td>
+                            <td>0</td>
+                            <td>0.5</td>
+                            <td>0.5</td>
+                            <td>2</td>
+                            <td>2</td>
+                            <td>2</td>
+                            <td>1</td>
+                        </tr>
+                                            <tr>
+                            <td><span class="path">Modules\Content\Http\Requests</span></td>
+                            <td>4</td>
+                            <td>0</td>
+                            <td>0.4</td>
+                            <td>0.6</td>
+                            <td>2</td>
+                            <td>2</td>
+                            <td>3</td>
+                            <td>1</td>
+                        </tr>
+                                            <tr>
+                            <td><span class="path">Modules\Content\Http\Controllers</span></td>
+                            <td>6</td>
+                            <td>0</td>
+                            <td>1</td>
+                            <td>0</td>
+                            <td>22</td>
+                            <td>13</td>
+                            <td>0</td>
+                            <td>0</td>
+                        </tr>
+                                            <tr>
+                            <td><span class="path">Modules\Content\Jobs</span></td>
+                            <td>1</td>
+                            <td>0</td>
+                            <td>1</td>
+                            <td>0</td>
+                            <td>3</td>
+                            <td>3</td>
+                            <td>0</td>
+                            <td>0</td>
+                        </tr>
+                                            <tr>
+                            <td><span class="path">Modules\Content\Events</span></td>
+                            <td>7</td>
+                            <td>0</td>
+                            <td>0.286</td>
+                            <td>0.714</td>
+                            <td>4</td>
+                            <td>3</td>
+                            <td>10</td>
+                            <td>2</td>
+                        </tr>
+                                            <tr>
+                            <td><span class="path">Modules\Content\Listeners</span></td>
+                            <td>5</td>
+                            <td>0</td>
+                            <td>1</td>
+                            <td>0</td>
+                            <td>9</td>
+                            <td>5</td>
+                            <td>0</td>
+                            <td>0</td>
+                        </tr>
+                                            <tr>
+                            <td><span class="path">Modules\Content\Services</span></td>
+                            <td>10</td>
+                            <td>0</td>
+                            <td>0.93</td>
+                            <td>0.07</td>
+                            <td>40</td>
+                            <td>18</td>
+                            <td>3</td>
+                            <td>2</td>
+                        </tr>
+                                            <tr>
+                            <td><span class="path">Modules\Operations\Database\Seeders</span></td>
+                            <td>1</td>
+                            <td>0</td>
+                            <td>1</td>
+                            <td>0</td>
+                            <td>1</td>
+                            <td>1</td>
+                            <td>0</td>
+                            <td>0</td>
+                        </tr>
+                                            <tr>
+                            <td><span class="path">Modules\Operations\Providers</span></td>
+                            <td>3</td>
+                            <td>0</td>
+                            <td>1</td>
+                            <td>0</td>
+                            <td>5</td>
+                            <td>3</td>
+                            <td>0</td>
+                            <td>0</td>
+                        </tr>
+                                            <tr>
+                            <td><span class="path">Modules\Operations\Repositories</span></td>
+                            <td>1</td>
+                            <td>0</td>
+                            <td>0</td>
+                            <td>1</td>
+                            <td>0</td>
+                            <td>0</td>
+                            <td>1</td>
+                            <td>1</td>
+                        </tr>
+                                            <tr>
+                            <td><span class="path">Modules\Operations\Models</span></td>
+                            <td>3</td>
+                            <td>0</td>
+                            <td>1</td>
+                            <td>0</td>
+                            <td>2</td>
+                            <td>2</td>
+                            <td>0</td>
+                            <td>0</td>
+                        </tr>
+                                            <tr>
+                            <td><span class="path">Modules\Operations\Http\Middleware</span></td>
+                            <td>1</td>
+                            <td>0</td>
+                            <td>1</td>
+                            <td>0</td>
+                            <td>3</td>
+                            <td>3</td>
+                            <td>0</td>
+                            <td>0</td>
+                        </tr>
+                                            <tr>
+                            <td><span class="path">Modules\Operations\Http\Controllers</span></td>
+                            <td>1</td>
+                            <td>0</td>
+                            <td>1</td>
+                            <td>0</td>
+                            <td>3</td>
+                            <td>3</td>
+                            <td>0</td>
+                            <td>0</td>
+                        </tr>
+                                            <tr>
+                            <td><span class="path">Modules\Operations\Services</span></td>
+                            <td>2</td>
+                            <td>0</td>
+                            <td>0.8</td>
+                            <td>0.2</td>
+                            <td>4</td>
+                            <td>4</td>
+                            <td>1</td>
+                            <td>1</td>
+                        </tr>
+                                            <tr>
+                            <td><span class="path">Modules\Search\Database\Seeders</span></td>
+                            <td>1</td>
+                            <td>0</td>
+                            <td>1</td>
+                            <td>0</td>
+                            <td>1</td>
+                            <td>1</td>
+                            <td>0</td>
+                            <td>0</td>
+                        </tr>
+                                            <tr>
+                            <td><span class="path">Modules\Search\Contracts\Repositories</span></td>
+                            <td>1</td>
+                            <td>1</td>
+                            <td>0.4</td>
+                            <td>0.4</td>
+                            <td>2</td>
+                            <td>2</td>
+                            <td>3</td>
+                            <td>3</td>
+                        </tr>
+                                            <tr>
+                            <td><span class="path">Modules\Search\Contracts\Services</span></td>
+                            <td>1</td>
+                            <td>1</td>
+                            <td>0.5</td>
+                            <td>0.5</td>
+                            <td>2</td>
+                            <td>2</td>
+                            <td>2</td>
+                            <td>2</td>
+                        </tr>
+                                            <tr>
+                            <td><span class="path">Modules\Search\Providers</span></td>
+                            <td>3</td>
+                            <td>0</td>
+                            <td>1</td>
+                            <td>0</td>
+                            <td>5</td>
+                            <td>3</td>
+                            <td>0</td>
+                            <td>0</td>
+                        </tr>
+                                            <tr>
+                            <td><span class="path">Modules\Search\Repositories</span></td>
+                            <td>1</td>
+                            <td>0</td>
+                            <td>1</td>
+                            <td>0</td>
+                            <td>3</td>
+                            <td>3</td>
+                            <td>0</td>
+                            <td>0</td>
+                        </tr>
+                                            <tr>
+                            <td><span class="path">Modules\Search\Models</span></td>
+                            <td>1</td>
+                            <td>0</td>
+                            <td>0.5</td>
+                            <td>0.5</td>
+                            <td>2</td>
+                            <td>2</td>
+                            <td>2</td>
+                            <td>2</td>
+                        </tr>
+                                            <tr>
+                            <td><span class="path">Modules\Search\DTOs</span></td>
+                            <td>1</td>
+                            <td>0</td>
+                            <td>0.333</td>
+                            <td>0.667</td>
+                            <td>1</td>
+                            <td>1</td>
+                            <td>2</td>
+                            <td>2</td>
+                        </tr>
+                                            <tr>
+                            <td><span class="path">Modules\Search\Http\Controllers</span></td>
+                            <td>1</td>
+                            <td>0</td>
+                            <td>1</td>
+                            <td>0</td>
+                            <td>5</td>
+                            <td>4</td>
+                            <td>0</td>
+                            <td>0</td>
+                        </tr>
+                                            <tr>
+                            <td><span class="path">Modules\Search\Services</span></td>
+                            <td>7</td>
+                            <td>0</td>
+                            <td>1</td>
+                            <td>0</td>
+                            <td>7</td>
+                            <td>7</td>
+                            <td>0</td>
+                            <td>0</td>
+                        </tr>
+                                            <tr>
+                            <td><span class="path">Modules\Common\Database\Seeders</span></td>
+                            <td>4</td>
+                            <td>0</td>
+                            <td>1</td>
+                            <td>0</td>
+                            <td>5</td>
+                            <td>4</td>
+                            <td>0</td>
+                            <td>0</td>
+                        </tr>
+                                            <tr>
+                            <td><span class="path">Modules\Common\Contracts\Repositories</span></td>
+                            <td>2</td>
+                            <td>1</td>
+                            <td>0.625</td>
+                            <td>0.625</td>
+                            <td>5</td>
+                            <td>4</td>
+                            <td>3</td>
+                            <td>2</td>
+                        </tr>
+                                            <tr>
+                            <td><span class="path">Modules\Common\Contracts\Services</span></td>
+                            <td>1</td>
+                            <td>1</td>
+                            <td>0.357</td>
+                            <td>0.357</td>
+                            <td>5</td>
+                            <td>3</td>
+                            <td>9</td>
+                            <td>3</td>
+                        </tr>
+                                            <tr>
+                            <td><span class="path">Modules\Common\Providers</span></td>
+                            <td>3</td>
+                            <td>0</td>
+                            <td>1</td>
+                            <td>0</td>
+                            <td>5</td>
+                            <td>3</td>
+                            <td>0</td>
+                            <td>0</td>
+                        </tr>
+                                            <tr>
+                            <td><span class="path">Modules\Common\Repositories</span></td>
+                            <td>3</td>
+                            <td>0</td>
+                            <td>0.867</td>
+                            <td>0.133</td>
+                            <td>13</td>
+                            <td>8</td>
+                            <td>2</td>
+                            <td>1</td>
+                        </tr>
+                                            <tr>
+                            <td><span class="path">Modules\Common\Models</span></td>
+                            <td>5</td>
+                            <td>0</td>
+                            <td>0.303</td>
+                            <td>0.697</td>
+                            <td>10</td>
+                            <td>7</td>
+                            <td>23</td>
+                            <td>10</td>
+                        </tr>
+                                            <tr>
+                            <td><span class="path">Modules\Common\DTOs</span></td>
+                            <td>2</td>
+                            <td>0</td>
+                            <td>1</td>
+                            <td>0</td>
+                            <td>1</td>
+                            <td>1</td>
+                            <td>0</td>
+                            <td>0</td>
+                        </tr>
+                                            <tr>
+                            <td><span class="path">Modules\Common\Http\Resources</span></td>
+                            <td>3</td>
+                            <td>0</td>
+                            <td>0.4</td>
+                            <td>0.6</td>
+                            <td>2</td>
+                            <td>2</td>
+                            <td>3</td>
+                            <td>1</td>
+                        </tr>
+                                            <tr>
+                            <td><span class="path">Modules\Common\Http\Requests</span></td>
+                            <td>5</td>
+                            <td>0</td>
+                            <td>0.333</td>
+                            <td>0.667</td>
+                            <td>1</td>
+                            <td>1</td>
+                            <td>2</td>
+                            <td>1</td>
+                        </tr>
+                                            <tr>
+                            <td><span class="path">Modules\Common\Http\Requests\Concerns</span></td>
+                            <td>3</td>
+                            <td>1</td>
+                            <td>1</td>
+                            <td>1</td>
+                            <td>3</td>
+                            <td>3</td>
+                            <td>0</td>
+                            <td>0</td>
+                        </tr>
+                                            <tr>
+                            <td><span class="path">Modules\Common\Http\Controllers</span></td>
+                            <td>3</td>
+                            <td>0</td>
+                            <td>1</td>
+                            <td>0</td>
+                            <td>15</td>
+                            <td>9</td>
+                            <td>0</td>
+                            <td>0</td>
+                        </tr>
+                                            <tr>
+                            <td><span class="path">Modules\Common\Listeners</span></td>
+                            <td>7</td>
+                            <td>0</td>
+                            <td>1</td>
+                            <td>0</td>
+                            <td>9</td>
+                            <td>4</td>
+                            <td>0</td>
+                            <td>0</td>
+                        </tr>
+                                            <tr>
+                            <td><span class="path">Modules\Common\Services</span></td>
+                            <td>11</td>
+                            <td>0</td>
+                            <td>0.933</td>
+                            <td>0.067</td>
+                            <td>28</td>
+                            <td>16</td>
+                            <td>2</td>
+                            <td>1</td>
+                        </tr>
+                                            <tr>
+                            <td><span class="path">Modules\Notifications\Database\Seeders</span></td>
+                            <td>1</td>
+                            <td>0</td>
+                            <td>1</td>
+                            <td>0</td>
+                            <td>1</td>
+                            <td>1</td>
+                            <td>0</td>
+                            <td>0</td>
+                        </tr>
+                                            <tr>
+                            <td><span class="path">Modules\Notifications\Traits</span></td>
+                            <td>1</td>
+                            <td>1</td>
+                            <td>1</td>
+                            <td>1</td>
+                            <td>2</td>
+                            <td>2</td>
+                            <td>0</td>
+                            <td>0</td>
+                        </tr>
+                                            <tr>
+                            <td><span class="path">Modules\Notifications\Contracts\Services</span></td>
+                            <td>2</td>
+                            <td>1</td>
+                            <td>0.308</td>
+                            <td>0.308</td>
+                            <td>4</td>
+                            <td>4</td>
+                            <td>9</td>
+                            <td>3</td>
+                        </tr>
+                                            <tr>
+                            <td><span class="path">Modules\Notifications\Providers</span></td>
+                            <td>3</td>
+                            <td>0</td>
+                            <td>1</td>
+                            <td>0</td>
+                            <td>5</td>
+                            <td>3</td>
+                            <td>0</td>
+                            <td>0</td>
+                        </tr>
+                                            <tr>
+                            <td><span class="path">Modules\Notifications\Repositories</span></td>
+                            <td>1</td>
+                            <td>0</td>
+                            <td>0</td>
+                            <td>1</td>
+                            <td>0</td>
+                            <td>0</td>
+                            <td>1</td>
+                            <td>1</td>
+                        </tr>
+                                            <tr>
+                            <td><span class="path">Modules\Notifications\Models</span></td>
+                            <td>4</td>
+                            <td>0</td>
+                            <td>0.6</td>
+                            <td>0.4</td>
+                            <td>6</td>
+                            <td>4</td>
+                            <td>4</td>
+                            <td>3</td>
+                        </tr>
+                                            <tr>
+                            <td><span class="path">Modules\Notifications\DTOs</span></td>
+                            <td>4</td>
+                            <td>0</td>
+                            <td>0.667</td>
+                            <td>0.333</td>
+                            <td>2</td>
+                            <td>1</td>
+                            <td>1</td>
+                            <td>1</td>
+                        </tr>
+                                            <tr>
+                            <td><span class="path">Modules\Notifications\Http\Controllers</span></td>
+                            <td>2</td>
+                            <td>0</td>
+                            <td>1</td>
+                            <td>0</td>
+                            <td>6</td>
+                            <td>5</td>
+                            <td>0</td>
+                            <td>0</td>
+                        </tr>
+                                            <tr>
+                            <td><span class="path">Modules\Notifications\Jobs</span></td>
+                            <td>1</td>
+                            <td>0</td>
+                            <td>1</td>
+                            <td>0</td>
+                            <td>6</td>
+                            <td>4</td>
+                            <td>0</td>
+                            <td>0</td>
+                        </tr>
+                                            <tr>
+                            <td><span class="path">Modules\Notifications\Listeners</span></td>
+                            <td>6</td>
+                            <td>0</td>
+                            <td>1</td>
+                            <td>0</td>
+                            <td>8</td>
+                            <td>5</td>
+                            <td>0</td>
+                            <td>0</td>
+                        </tr>
+                                            <tr>
+                            <td><span class="path">Modules\Notifications\Notifications</span></td>
+                            <td>6</td>
+                            <td>0</td>
+                            <td>1</td>
+                            <td>0</td>
+                            <td>6</td>
+                            <td>5</td>
+                            <td>0</td>
+                            <td>0</td>
+                        </tr>
+                                            <tr>
+                            <td><span class="path">Modules\Notifications\Services</span></td>
+                            <td>6</td>
+                            <td>0</td>
+                            <td>0.684</td>
+                            <td>0.316</td>
+                            <td>13</td>
+                            <td>10</td>
+                            <td>6</td>
+                            <td>3</td>
+                        </tr>
+                                    </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Sidebar -->
+<div id="sidebar">
+    <div class="content">
+        <div class="logo">
+            <a href="index.html"><img src="images/phpmetrics-maintenability.png"
+                                                 alt="Logo PhpMetrics"></a>
+            <h1>PhpMetrics</h1>
+        </div>
+        <div class="links">
+            <ul>
+                <li>
+                    <a href="index.html">
+                        <svg fill="#FFFFFF" height="24" viewBox="0 0 24 24" width="24"
+                             xmlns="http://www.w3.org/2000/svg">
+                            <path d="M0 0h24v24H0z" fill="none">
+                            <path
+                                d="M12 4.5C7 4.5 2.73 7.61 1 12c1.73 4.39 6 7.5 11 7.5s9.27-3.11 11-7.5c-1.73-4.39-6-7.5-11-7.5zM12 17c-2.76 0-5-2.24-5-5s2.24-5 5-5 5 2.24 5 5-2.24 5-5 5zm0-8c-1.66 0-3 1.34-3 3s1.34 3 3 3 3-1.34 3-3-1.34-3-3-3z">
+                        </svg>
+                        Overview
+                    </a>
+                </li>
+                <li>
+                    <a href="violations.html">
+                        <svg fill="#FFFFFF" height="24" viewBox="0 0 24 24" width="24" xmlns="http://www.w3.org/2000/svg">
+                            <path d="M0 0h24v24H0z" fill="none">
+                            <path d="M20 8h-2.81c-.45-.78-1.07-1.45-1.82-1.96L17 4.41 15.59 3l-2.17 2.17C12.96 5.06 12.49 5 12 5c-.49 0-.96.06-1.41.17L8.41 3 7 4.41l1.62 1.63C7.88 6.55 7.26 7.22 6.81 8H4v2h2.09c-.05.33-.09.66-.09 1v1H4v2h2v1c0 .34.04.67.09 1H4v2h2.81c1.04 1.79 2.97 3 5.19 3s4.15-1.21 5.19-3H20v-2h-2.09c.05-.33.09-.66.09-1v-1h2v-2h-2v-1c0-.34-.04-.67-.09-1H20V8zm-6 8h-4v-2h4v2zm0-4h-4v-2h4v2z">
+                        </svg>
+                        Violations (230)
+                    </a>
+                </li>
+                                    <li>
+                        <a href="composer.html">
+                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="white" width="24px" height="24px"><path d="M0 0h24v24H0z" fill="none"><path d="M3.9 12c0-1.71 1.39-3.1 3.1-3.1h4V7H7c-2.76 0-5 2.24-5 5s2.24 5 5 5h4v-1.9H7c-1.71 0-3.1-1.39-3.1-3.1zM8 13h8v-2H8v2zm9-6h-4v1.9h4c1.71 0 3.1 1.39 3.1 3.1s-1.39 3.1-3.1 3.1h-4V17h4c2.76 0 5-2.24 5-5s-2.24-5-5-5z"></svg>
+                            Composer
+                        </a>
+                    </li>
+                                                <li>
+                    <a href="loc.html">
+                        <svg fill="#FFFFFF" height="24" viewBox="0 0 24 24" width="24"
+                             xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+                            <defs>
+                                <path d="M0 0h24v24H0z" id="a">
+                            </defs>
+                            <clipPath id="b">
+                                <use overflow="visible" xlink:href="#a">
+                            </clipPath>
+                            <path clip-path="url(#b)"
+                                  d="M11 5.08V2c-5 .5-9 4.81-9 10s4 9.5 9 10v-3.08c-3-.48-6-3.4-6-6.92s3-6.44 6-6.92zM18.97 11H22c-.47-5-4-8.53-9-9v3.08C16 5.51 18.54 8 18.97 11zM13 18.92V22c5-.47 8.53-4 9-9h-3.03c-.43 3-2.97 5.49-5.97 5.92z">
+                        </svg>
+                        Size &amp; volume
+                    </a>
+                </li>
+                <li>
+                    <a href="complexity.html">
+                        <svg fill="#FFFFFF" height="24" viewBox="0 0 24 24" width="24"
+                             xmlns="http://www.w3.org/2000/svg">
+                            <path d="M0 0h24v24H0V0z" fill="none">
+                            <path
+                                d="M19.07 4.93l-1.41 1.41C19.1 7.79 20 9.79 20 12c0 4.42-3.58 8-8 8s-8-3.58-8-8c0-4.08 3.05-7.44 7-7.93v2.02C8.16 6.57 6 9.03 6 12c0 3.31 2.69 6 6 6s6-2.69 6-6c0-1.66-.67-3.16-1.76-4.24l-1.41 1.41C15.55 9.9 16 10.9 16 12c0 2.21-1.79 4-4 4s-4-1.79-4-4c0-1.86 1.28-3.41 3-3.86v2.14c-.6.35-1 .98-1 1.72 0 1.1.9 2 2 2s2-.9 2-2c0-.74-.4-1.38-1-1.72V2h-1C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10c0-2.76-1.12-5.26-2.93-7.07z">
+                        </svg>
+                        Complexity &amp; defects
+                    </a>
+                </li>
+                <li>
+                    <a href="oop.html">
+                        <svg fill="#FFFFFF" height="24" viewBox="0 0 24 24" width="24"
+                             xmlns="http://www.w3.org/2000/svg">
+                            <path d="M0 0h24v24H0z" fill="none">
+                            <path
+                                d="M17 6c-3.31 0-6 2.69-6 6s2.69 6 6 6 6-2.69 6-6-2.69-6-6-6zM5 8c-2.21 0-4 1.79-4 4s1.79 4 4 4 4-1.79 4-4-1.79-4-4-4zm0 6c-1.1 0-2-.9-2-2s.9-2 2-2 2 .9 2 2-.9 2-2 2z">
+                        </svg>
+                        Object oriented metrics
+                    </a>
+                </li>
+                <li>
+                    <a href="relations.html">
+                        <svg fill="#FFFFFF" height="24" viewBox="0 0 24 24" width="24"
+                             xmlns="http://www.w3.org/2000/svg">
+                            <path d="M0 0h24v24H0z" fill="none">
+                            <path
+                                d="M14 4l2.29 2.29-2.88 2.88 1.42 1.42 2.88-2.88L20 10V4zm-4 0H4v6l2.29-2.29 4.71 4.7V20h2v-8.41l-5.29-5.3z">
+                        </svg>
+                        Object relations
+                    </a>
+                </li>
+                <li>
+                    <a href="coupling.html">
+                        <svg fill="#FFFFFF" height="24" viewBox="0 0 24 24" width="24"
+                             xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+                            <defs>
+                                <path d="M0 0h24v24H0V0z" id="a">
+                            </defs>
+                            <clipPath id="b">
+                                <use overflow="visible" xlink:href="#a">
+                            </clipPath>
+                            <path clip-path="url(#b)"
+                                  d="M9.01 14H2v2h7.01v3L13 15l-3.99-4v3zm5.98-1v-3H22V8h-7.01V5L11 9l3.99 4z">
+                        </svg>
+                        Coupling
+                    </a>
+                </li>
+                <li>
+                    <a href="packages.html">
+                        <svg fill="#FFFFFF" height="24" viewBox="0 0 24 24" width="24"
+                             xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+                            <path d="M11 9.16V2c-5 .5-9 4.79-9 10s4 9.5 9 10v-7.16c-1-.41-2-1.52-2-2.84s1-2.43 2-2.84zM14.86 11H22c-.48-4.75-4-8.53-9-9v7.16c1 .3 1.52.98 1.86 1.84zM13 14.84V22c5-.47 8.52-4.25 9-9h-7.14c-.34.86-.86 1.54-1.86 1.84z">
+                        </svg>
+                        Package oriented metrics
+                    </a>
+                </li>
+                <li>
+                    <a href="package_relations.html">
+                        <svg fill="#FFFFFF" height="24" viewBox="0 0 24 24" width="24"
+                             xmlns="http://www.w3.org/2000/svg">
+                            <path d="M17 20.41L18.41 19 15 15.59 13.59 17 17 20.41zM7.5 8H11v5.59L5.59 19 7 20.41l6-6V8h3.5L12 3.5 7.5 8z">
+                        </svg>
+                        Package relations
+                    </a>
+                </li>
+                                <!--<li>
+                    <a href="all.html">
+                        <svg fill="#FFFFFF" height="24" viewBox="0 0 24 24" width="24"
+                             xmlns="http://www.w3.org/2000/svg">
+                            <path d="M3 3v18h18V3H3zm8 16H5v-6h6v6zm0-8H5V5h6v6zm8 8h-6v-6h6v6zm0-8h-6V5h6v6z">
+                            <path d="M0 0h24v24H0z" fill="none">
+                        </svg>
+                        All metrics
+                    </a>
+                </li>-->
+                <!--                <li>-->
+                <!--                    <a href="#">-->
+                <!--                        <svg fill="#FFFFFF" height="24" viewBox="0 0 24 24" width="24"-->
+                <!--                             xmlns="http://www.w3.org/2000/svg">-->
+                <!--                            <path-->
+                <!--                                d="M12 1L3 5v6c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V5l-9-4zm0 10.99h7c-.53 4.12-3.28 7.79-7 8.94V12H5V6.3l7-3.11v8.8z">-->
+                <!--                            <path d="M0 0h24v24H0z" fill="none">-->
+                <!--                        </svg>-->
+                <!--                        Third party-->
+                <!--                    </a>-->
+                <!--                </li>-->
+                <!--<li class="sep">
+                    <a href="panel.html">
+                        <svg fill="#FFFFFF" height="24" viewBox="0 0 24 24" width="24" xmlns="http://www.w3.org/2000/svg">
+                            <path d="M0 0h24v24H0z" fill="none">
+                            <path d="M21 3H3c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h5v2h8v-2h5c1.1 0 1.99-.9 1.99-2L23 5c0-1.1-.9-2-2-2zm0 14H3V5h18v12z">
+                        </svg>
+                        TV Panel
+                    </a>
+                </li>-->
+            </ul>
+        </div>
+    </div>
+</div>
+</div>
+
+<script src="js/functions.js?v=v2.9.1"></script>
+<script src="js/d3.v3.js"></script>
+<script src="js/d3.hexbin.v0.js"></script>
+<script src="js/sort-table.min.js?v=v2.9.1"></script>
+<script src="js/graph-maintainability.js?v=v2.9.1"></script>
+<script src="js/graph-licenses.js?v=v2.9.1"></script>
+<script src="js/FileSaver.min.js?v=v2.9.1"></script>
+
+<script src="js/clusterize.min.js?v=v2.9.1"></script>
+<link rel="stylesheet" href="css/clusterize.css?v=v2.9.1">
+
+<script src="classes.js?v=v2.9.1"></script>
+
+<script>
+    var accessibilityEnabled = false;
+</script>
+
+</body>
+</html>
+<script>
+    /**
+     * Thx to http://bl.ocks.org/weiglemc/6185069
+     */
+    var margin = {top: 20, right: 20, bottom: 20, left: 20},
+        width = 500 - margin.left - margin.right,
+        height = 500 - margin.top - margin.bottom;
+
+    var spots = [
+    {
+        "name": "global",
+        "abstraction": 0,
+        "instability": 0.03508771929824561,
+        "distance": 0.6822960169343879,
+        "normalizedDistance": 0.9649122807017544,
+        "classCount": 4
+    },
+    {
+        "name": "Modules\\Forums\\Database\\Seeders",
+        "abstraction": 0,
+        "instability": 1,
+        "distance": 0,
+        "normalizedDistance": 0,
+        "classCount": 2
+    },
+    {
+        "name": "Modules\\Forums\\Database\\Factories",
+        "abstraction": 0,
+        "instability": 0.6666666666666666,
+        "distance": 0.23570226039551584,
+        "normalizedDistance": 0.33333333333333337,
+        "classCount": 3
+    },
+    {
+        "name": "Modules\\Forums\\Contracts\\Repositories",
+        "abstraction": 1,
+        "instability": 0.7142857142857143,
+        "distance": 0.5050762722761054,
+        "normalizedDistance": 0.7142857142857144,
+        "classCount": 3
+    },
+    {
+        "name": "Modules\\Forums\\Contracts\\Services",
+        "abstraction": 1,
+        "instability": 0.5,
+        "distance": 0.35355339059327373,
+        "normalizedDistance": 0.5,
+        "classCount": 2
+    },
+    {
+        "name": "Modules\\Forums\\Providers",
+        "abstraction": 0,
+        "instability": 1,
+        "distance": 0,
+        "normalizedDistance": 0,
+        "classCount": 3
+    },
+    {
+        "name": "Modules\\Forums\\Repositories",
+        "abstraction": 0,
+        "instability": 0.6470588235294118,
+        "distance": 0.24956709924231085,
+        "normalizedDistance": 0.3529411764705882,
+        "classCount": 4
+    },
+    {
+        "name": "Modules\\Forums\\Models",
+        "abstraction": 0,
+        "instability": 0.3,
+        "distance": 0.4949747468305832,
+        "normalizedDistance": 0.7,
+        "classCount": 4
+    },
+    {
+        "name": "Modules\\Forums\\Policies",
+        "abstraction": 0,
+        "instability": 1,
+        "distance": 0,
+        "normalizedDistance": 0,
+        "classCount": 2
+    },
+    {
+        "name": "Modules\\Forums\\DTOs",
+        "abstraction": 0,
+        "instability": 1,
+        "distance": 0,
+        "normalizedDistance": 0,
+        "classCount": 4
+    },
+    {
+        "name": "Modules\\Forums\\Http\\Middleware",
+        "abstraction": 0,
+        "instability": 1,
+        "distance": 0,
+        "normalizedDistance": 0,
+        "classCount": 1
+    },
+    {
+        "name": "Modules\\Forums\\Http\\Requests",
+        "abstraction": 0,
+        "instability": 0.3333333333333333,
+        "distance": 0.4714045207910317,
+        "normalizedDistance": 0.6666666666666667,
+        "classCount": 4
+    },
+    {
+        "name": "Modules\\Forums\\Http\\Controllers",
+        "abstraction": 0,
+        "instability": 1,
+        "distance": 0,
+        "normalizedDistance": 0,
+        "classCount": 4
+    },
+    {
+        "name": "Modules\\Forums\\Events",
+        "abstraction": 0,
+        "instability": 0.3,
+        "distance": 0.4949747468305832,
+        "normalizedDistance": 0.7,
+        "classCount": 4
+    },
+    {
+        "name": "Modules\\Forums\\Listeners",
+        "abstraction": 0,
+        "instability": 1,
+        "distance": 0,
+        "normalizedDistance": 0,
+        "classCount": 5
+    },
+    {
+        "name": "Modules\\Forums\\Services",
+        "abstraction": 0,
+        "instability": 0.9130434782608695,
+        "distance": 0.0614875461901346,
+        "normalizedDistance": 0.08695652173913049,
+        "classCount": 23
+    },
+    {
+        "name": "Modules\\Schemes\\Database\\Seeders",
+        "abstraction": 0,
+        "instability": 1,
+        "distance": 0,
+        "normalizedDistance": 0,
+        "classCount": 6
+    },
+    {
+        "name": "Modules\\Schemes\\Database\\Factories",
+        "abstraction": 0,
+        "instability": 0.75,
+        "distance": 0.17677669529663687,
+        "normalizedDistance": 0.25,
+        "classCount": 8
+    },
+    {
+        "name": "Modules\\Schemes\\Mail",
+        "abstraction": 0,
+        "instability": 0.8,
+        "distance": 0.14142135623730948,
+        "normalizedDistance": 0.19999999999999996,
+        "classCount": 1
+    },
+    {
+        "name": "Modules\\Schemes\\Contracts\\Repositories",
+        "abstraction": 1,
+        "instability": 0.26666666666666666,
+        "distance": 0.18856180831641262,
+        "normalizedDistance": 0.2666666666666666,
+        "classCount": 5
+    },
+    {
+        "name": "Modules\\Schemes\\Contracts\\Services",
+        "abstraction": 1,
+        "instability": 0.6666666666666666,
+        "distance": 0.47140452079103157,
+        "normalizedDistance": 0.6666666666666665,
+        "classCount": 3
+    },
+    {
+        "name": "Modules\\Schemes\\Providers",
+        "abstraction": 0,
+        "instability": 1,
+        "distance": 0,
+        "normalizedDistance": 0,
+        "classCount": 3
+    },
+    {
+        "name": "Modules\\Schemes\\Repositories",
+        "abstraction": 0,
+        "instability": 0.9375,
+        "distance": 0.044194173824159216,
+        "normalizedDistance": 0.0625,
+        "classCount": 5
+    },
+    {
+        "name": "Modules\\Schemes\\Models",
+        "abstraction": 0,
+        "instability": 0.11764705882352941,
+        "distance": 0.6239177481057772,
+        "normalizedDistance": 0.8823529411764706,
+        "classCount": 9
+    },
+    {
+        "name": "Modules\\Schemes\\Policies",
+        "abstraction": 0,
+        "instability": 1,
+        "distance": 0,
+        "normalizedDistance": 0,
+        "classCount": 5
+    },
+    {
+        "name": "Modules\\Schemes\\DTOs",
+        "abstraction": 0,
+        "instability": 1,
+        "distance": 0,
+        "normalizedDistance": 0,
+        "classCount": 6
+    },
+    {
+        "name": "Modules\\Schemes\\Http\\Resources",
+        "abstraction": 0,
+        "instability": 0.3333333333333333,
+        "distance": 0.4714045207910317,
+        "normalizedDistance": 0.6666666666666667,
+        "classCount": 6
+    },
+    {
+        "name": "Modules\\Schemes\\Http\\Requests",
+        "abstraction": 0,
+        "instability": 0.5,
+        "distance": 0.35355339059327373,
+        "normalizedDistance": 0.5,
+        "classCount": 7
+    },
+    {
+        "name": "Modules\\Schemes\\Http\\Requests\\Concerns",
+        "abstraction": 1,
+        "instability": 1,
+        "distance": 0.7071067811865475,
+        "normalizedDistance": 1,
+        "classCount": 1
+    },
+    {
+        "name": "Modules\\Schemes\\Http\\Controllers",
+        "abstraction": 0,
+        "instability": 1,
+        "distance": 0,
+        "normalizedDistance": 0,
+        "classCount": 6
+    },
+    {
+        "name": "Modules\\Schemes\\Events",
+        "abstraction": 0,
+        "instability": 0.3333333333333333,
+        "distance": 0.4714045207910317,
+        "normalizedDistance": 0.6666666666666667,
+        "classCount": 7
+    },
+    {
+        "name": "Modules\\Schemes\\Listeners",
+        "abstraction": 0,
+        "instability": 1,
+        "distance": 0,
+        "normalizedDistance": 0,
+        "classCount": 3
+    },
+    {
+        "name": "Modules\\Schemes\\Services",
+        "abstraction": 0,
+        "instability": 0.8571428571428571,
+        "distance": 0.1010152544552211,
+        "normalizedDistance": 0.1428571428571429,
+        "classCount": 13
+    },
+    {
+        "name": "Modules\\Enrollments\\Database\\Seeders",
+        "abstraction": 0,
+        "instability": 1,
+        "distance": 0,
+        "normalizedDistance": 0,
+        "classCount": 3
+    },
+    {
+        "name": "Modules\\Enrollments\\Database\\Factories",
+        "abstraction": 0,
+        "instability": 0.8571428571428571,
+        "distance": 0.1010152544552211,
+        "normalizedDistance": 0.1428571428571429,
+        "classCount": 3
+    },
+    {
+        "name": "Modules\\Enrollments\\Mail",
+        "abstraction": 0,
+        "instability": 0.8333333333333334,
+        "distance": 0.11785113019775789,
+        "normalizedDistance": 0.16666666666666663,
+        "classCount": 5
+    },
+    {
+        "name": "Modules\\Enrollments\\Contracts\\Repositories",
+        "abstraction": 1,
+        "instability": 0.4,
+        "distance": 0.28284271247461895,
+        "normalizedDistance": 0.3999999999999999,
+        "classCount": 1
+    },
+    {
+        "name": "Modules\\Enrollments\\Contracts\\Services",
+        "abstraction": 1,
+        "instability": 0.5,
+        "distance": 0.35355339059327373,
+        "normalizedDistance": 0.5,
+        "classCount": 2
+    },
+    {
+        "name": "Modules\\Enrollments\\Providers",
+        "abstraction": 0,
+        "instability": 1,
+        "distance": 0,
+        "normalizedDistance": 0,
+        "classCount": 3
+    },
+    {
+        "name": "Modules\\Enrollments\\Repositories",
+        "abstraction": 0,
+        "instability": 1,
+        "distance": 0,
+        "normalizedDistance": 0,
+        "classCount": 1
+    },
+    {
+        "name": "Modules\\Enrollments\\Models",
+        "abstraction": 0,
+        "instability": 0.10810810810810811,
+        "distance": 0.6306628048420558,
+        "normalizedDistance": 0.8918918918918919,
+        "classCount": 4
+    },
+    {
+        "name": "Modules\\Enrollments\\Policies",
+        "abstraction": 0,
+        "instability": 1,
+        "distance": 0,
+        "normalizedDistance": 0,
+        "classCount": 1
+    },
+    {
+        "name": "Modules\\Enrollments\\Exports",
+        "abstraction": 0,
+        "instability": 0.8333333333333334,
+        "distance": 0.11785113019775789,
+        "normalizedDistance": 0.16666666666666663,
+        "classCount": 1
+    },
+    {
+        "name": "Modules\\Enrollments\\DTOs",
+        "abstraction": 0,
+        "instability": 1,
+        "distance": 0,
+        "normalizedDistance": 0,
+        "classCount": 2
+    },
+    {
+        "name": "Modules\\Enrollments\\Http\\Resources",
+        "abstraction": 0,
+        "instability": 0.6666666666666666,
+        "distance": 0.23570226039551584,
+        "normalizedDistance": 0.33333333333333337,
+        "classCount": 2
+    },
+    {
+        "name": "Modules\\Enrollments\\Http\\Requests",
+        "abstraction": 0,
+        "instability": 1,
+        "distance": 0,
+        "normalizedDistance": 0,
+        "classCount": 1
+    },
+    {
+        "name": "Modules\\Enrollments\\Http\\Controllers",
+        "abstraction": 0,
+        "instability": 1,
+        "distance": 0,
+        "normalizedDistance": 0,
+        "classCount": 2
+    },
+    {
+        "name": "Modules\\Enrollments\\Jobs",
+        "abstraction": 0,
+        "instability": 1,
+        "distance": 0,
+        "normalizedDistance": 0,
+        "classCount": 2
+    },
+    {
+        "name": "Modules\\Enrollments\\Events",
+        "abstraction": 0,
+        "instability": 0.3333333333333333,
+        "distance": 0.4714045207910317,
+        "normalizedDistance": 0.6666666666666667,
+        "classCount": 1
+    },
+    {
+        "name": "Modules\\Enrollments\\Listeners",
+        "abstraction": 0,
+        "instability": 1,
+        "distance": 0,
+        "normalizedDistance": 0,
+        "classCount": 1
+    },
+    {
+        "name": "Modules\\Enrollments\\Services",
+        "abstraction": 0,
+        "instability": 1,
+        "distance": 0,
+        "normalizedDistance": 0,
+        "classCount": 7
+    },
+    {
+        "name": "Modules\\Grading\\Database\\Seeders",
+        "abstraction": 0,
+        "instability": 1,
+        "distance": 0,
+        "normalizedDistance": 0,
+        "classCount": 3
+    },
+    {
+        "name": "Modules\\Grading\\Database\\Factories",
+        "abstraction": 0,
+        "instability": 0.8,
+        "distance": 0.14142135623730948,
+        "normalizedDistance": 0.19999999999999996,
+        "classCount": 2
+    },
+    {
+        "name": "Modules\\Grading\\Strategies",
+        "abstraction": 0,
+        "instability": 0.6666666666666666,
+        "distance": 0.23570226039551584,
+        "normalizedDistance": 0.33333333333333337,
+        "classCount": 4
+    },
+    {
+        "name": "Modules\\Grading\\Contracts",
+        "abstraction": 1,
+        "instability": 0.3333333333333333,
+        "distance": 0.23570226039551578,
+        "normalizedDistance": 0.33333333333333326,
+        "classCount": 1
+    },
+    {
+        "name": "Modules\\Grading\\Contracts\\Repositories",
+        "abstraction": 1,
+        "instability": 0.5714285714285714,
+        "distance": 0.40406101782088427,
+        "normalizedDistance": 0.5714285714285714,
+        "classCount": 2
+    },
+    {
+        "name": "Modules\\Grading\\Contracts\\Services",
+        "abstraction": 1,
+        "instability": 0.3333333333333333,
+        "distance": 0.23570226039551578,
+        "normalizedDistance": 0.33333333333333326,
+        "classCount": 2
+    },
+    {
+        "name": "Modules\\Grading\\Providers",
+        "abstraction": 0,
+        "instability": 1,
+        "distance": 0,
+        "normalizedDistance": 0,
+        "classCount": 3
+    },
+    {
+        "name": "Modules\\Grading\\Repositories",
+        "abstraction": 0,
+        "instability": 1,
+        "distance": 0,
+        "normalizedDistance": 0,
+        "classCount": 2
+    },
+    {
+        "name": "Modules\\Grading\\Models",
+        "abstraction": 0,
+        "instability": 0.2,
+        "distance": 0.565685424949238,
+        "normalizedDistance": 0.8,
+        "classCount": 4
+    },
+    {
+        "name": "Modules\\Grading\\Policies",
+        "abstraction": 0,
+        "instability": 1,
+        "distance": 0,
+        "normalizedDistance": 0,
+        "classCount": 1
+    },
+    {
+        "name": "Modules\\Grading\\DTOs",
+        "abstraction": 0,
+        "instability": 1,
+        "distance": 0,
+        "normalizedDistance": 0,
+        "classCount": 2
+    },
+    {
+        "name": "Modules\\Grading\\Http\\Resources",
+        "abstraction": 0,
+        "instability": 0.5,
+        "distance": 0.35355339059327373,
+        "normalizedDistance": 0.5,
+        "classCount": 4
+    },
+    {
+        "name": "Modules\\Grading\\Http\\Requests",
+        "abstraction": 0,
+        "instability": 0.3333333333333333,
+        "distance": 0.4714045207910317,
+        "normalizedDistance": 0.6666666666666667,
+        "classCount": 8
+    },
+    {
+        "name": "Modules\\Grading\\Http\\Controllers",
+        "abstraction": 0,
+        "instability": 1,
+        "distance": 0,
+        "normalizedDistance": 0,
+        "classCount": 2
+    },
+    {
+        "name": "Modules\\Grading\\Jobs",
+        "abstraction": 0,
+        "instability": 0.8181818181818182,
+        "distance": 0.12856486930664496,
+        "normalizedDistance": 0.18181818181818177,
+        "classCount": 3
+    },
+    {
+        "name": "Modules\\Grading\\Events",
+        "abstraction": 0,
+        "instability": 0.2857142857142857,
+        "distance": 0.5050762722761053,
+        "normalizedDistance": 0.7142857142857143,
+        "classCount": 6
+    },
+    {
+        "name": "Modules\\Grading\\Services",
+        "abstraction": 0,
+        "instability": 1,
+        "distance": 0,
+        "normalizedDistance": 0,
+        "classCount": 21
+    },
+    {
+        "name": "Modules\\Auth\\Database\\Seeders",
+        "abstraction": 0,
+        "instability": 1,
+        "distance": 0,
+        "normalizedDistance": 0,
+        "classCount": 11
+    },
+    {
+        "name": "Modules\\Auth\\Database\\Factories",
+        "abstraction": 0,
+        "instability": 1,
+        "distance": 0,
+        "normalizedDistance": 0,
+        "classCount": 8
+    },
+    {
+        "name": "Modules\\Auth\\Traits",
+        "abstraction": 1,
+        "instability": 1,
+        "distance": 0.7071067811865475,
+        "normalizedDistance": 1,
+        "classCount": 2
+    },
+    {
+        "name": "Modules\\Auth\\Mail",
+        "abstraction": 0,
+        "instability": 0.3333333333333333,
+        "distance": 0.4714045207910317,
+        "normalizedDistance": 0.6666666666666667,
+        "classCount": 5
+    },
+    {
+        "name": "Modules\\Auth\\Contracts",
+        "abstraction": 1,
+        "instability": 0.3333333333333333,
+        "distance": 0.23570226039551578,
+        "normalizedDistance": 0.33333333333333326,
+        "classCount": 1
+    },
+    {
+        "name": "Modules\\Auth\\Contracts\\Repositories",
+        "abstraction": 1,
+        "instability": 0.3333333333333333,
+        "distance": 0.23570226039551578,
+        "normalizedDistance": 0.33333333333333326,
+        "classCount": 4
+    },
+    {
+        "name": "Modules\\Auth\\Contracts\\Services",
+        "abstraction": 1,
+        "instability": 0.2777777777777778,
+        "distance": 0.19641855032959646,
+        "normalizedDistance": 0.2777777777777777,
+        "classCount": 9
+    },
+    {
+        "name": "Modules\\Auth\\Providers",
+        "abstraction": 0,
+        "instability": 1,
+        "distance": 0,
+        "normalizedDistance": 0,
+        "classCount": 3
+    },
+    {
+        "name": "Modules\\Auth\\Repositories",
+        "abstraction": 0,
+        "instability": 0.9333333333333333,
+        "distance": 0.047140452079103154,
+        "normalizedDistance": 0.06666666666666665,
+        "classCount": 5
+    },
+    {
+        "name": "Modules\\Auth\\Models",
+        "abstraction": 0,
+        "instability": 0.059602649006622516,
+        "distance": 0.6649613438972831,
+        "normalizedDistance": 0.9403973509933775,
+        "classCount": 9
+    },
+    {
+        "name": "Modules\\Auth\\Policies",
+        "abstraction": 0,
+        "instability": 1,
+        "distance": 0,
+        "normalizedDistance": 0,
+        "classCount": 2
+    },
+    {
+        "name": "Modules\\Auth\\Exports",
+        "abstraction": 0,
+        "instability": 0.8571428571428571,
+        "distance": 0.1010152544552211,
+        "normalizedDistance": 0.1428571428571429,
+        "classCount": 1
+    },
+    {
+        "name": "Modules\\Auth\\DTOs",
+        "abstraction": 0,
+        "instability": 0.5,
+        "distance": 0.35355339059327373,
+        "normalizedDistance": 0.5,
+        "classCount": 4
+    },
+    {
+        "name": "Modules\\Auth\\Support",
+        "abstraction": 0,
+        "instability": 0.25,
+        "distance": 0.5303300858899106,
+        "normalizedDistance": 0.75,
+        "classCount": 2
+    },
+    {
+        "name": "Modules\\Auth\\Http\\Middleware",
+        "abstraction": 0,
+        "instability": 1,
+        "distance": 0,
+        "normalizedDistance": 0,
+        "classCount": 2
+    },
+    {
+        "name": "Modules\\Auth\\Http\\Resources",
+        "abstraction": 0,
+        "instability": 0.2,
+        "distance": 0.565685424949238,
+        "normalizedDistance": 0.8,
+        "classCount": 8
+    },
+    {
+        "name": "Modules\\Auth\\Http\\Requests",
+        "abstraction": 0,
+        "instability": 0.42857142857142855,
+        "distance": 0.40406101782088427,
+        "normalizedDistance": 0.5714285714285714,
+        "classCount": 26
+    },
+    {
+        "name": "Modules\\Auth\\Http\\Requests\\Concerns",
+        "abstraction": 1,
+        "instability": 1,
+        "distance": 0.7071067811865475,
+        "normalizedDistance": 1,
+        "classCount": 2
+    },
+    {
+        "name": "Modules\\Auth\\Http\\Controllers",
+        "abstraction": 0,
+        "instability": 1,
+        "distance": 0,
+        "normalizedDistance": 0,
+        "classCount": 12
+    },
+    {
+        "name": "Modules\\Auth\\Jobs",
+        "abstraction": 0,
+        "instability": 0.8571428571428571,
+        "distance": 0.1010152544552211,
+        "normalizedDistance": 0.1428571428571429,
+        "classCount": 1
+    },
+    {
+        "name": "Modules\\Auth\\Events",
+        "abstraction": 0,
+        "instability": 0.2,
+        "distance": 0.565685424949238,
+        "normalizedDistance": 0.8,
+        "classCount": 7
+    },
+    {
+        "name": "Modules\\Auth\\Observers",
+        "abstraction": 0,
+        "instability": 1,
+        "distance": 0,
+        "normalizedDistance": 0,
+        "classCount": 1
+    },
+    {
+        "name": "Modules\\Auth\\Services",
+        "abstraction": 0,
+        "instability": 0.9310344827586207,
+        "distance": 0.04876598490941709,
+        "normalizedDistance": 0.06896551724137934,
+        "classCount": 28
+    },
+    {
+        "name": "Modules\\Gamification\\Database\\Seeders",
+        "abstraction": 0,
+        "instability": 1,
+        "distance": 0,
+        "normalizedDistance": 0,
+        "classCount": 3
+    },
+    {
+        "name": "Modules\\Gamification\\Database\\Factories",
+        "abstraction": 0,
+        "instability": 1,
+        "distance": 0,
+        "normalizedDistance": 0,
+        "classCount": 1
+    },
+    {
+        "name": "Modules\\Gamification\\Contracts\\Repositories",
+        "abstraction": 1,
+        "instability": 0.5714285714285714,
+        "distance": 0.40406101782088427,
+        "normalizedDistance": 0.5714285714285714,
+        "classCount": 5
+    },
+    {
+        "name": "Modules\\Gamification\\Contracts\\Services",
+        "abstraction": 1,
+        "instability": 0.5714285714285714,
+        "distance": 0.40406101782088427,
+        "normalizedDistance": 0.5714285714285714,
+        "classCount": 3
+    },
+    {
+        "name": "Modules\\Gamification\\Providers",
+        "abstraction": 0,
+        "instability": 1,
+        "distance": 0,
+        "normalizedDistance": 0,
+        "classCount": 3
+    },
+    {
+        "name": "Modules\\Gamification\\Repositories",
+        "abstraction": 0,
+        "instability": 1,
+        "distance": 0,
+        "normalizedDistance": 0,
+        "classCount": 5
+    },
+    {
+        "name": "Modules\\Gamification\\Models",
+        "abstraction": 0,
+        "instability": 0.18181818181818182,
+        "distance": 0.5785419118799024,
+        "normalizedDistance": 0.8181818181818181,
+        "classCount": 11
+    },
+    {
+        "name": "Modules\\Gamification\\Policies",
+        "abstraction": 0,
+        "instability": 1,
+        "distance": 0,
+        "normalizedDistance": 0,
+        "classCount": 2
+    },
+    {
+        "name": "Modules\\Gamification\\DTOs",
+        "abstraction": 0,
+        "instability": 1,
+        "distance": 0,
+        "normalizedDistance": 0,
+        "classCount": 4
+    },
+    {
+        "name": "Modules\\Gamification\\Http\\Controllers",
+        "abstraction": 0,
+        "instability": 1,
+        "distance": 0,
+        "normalizedDistance": 0,
+        "classCount": 3
+    },
+    {
+        "name": "Modules\\Gamification\\Listeners",
+        "abstraction": 0,
+        "instability": 1,
+        "distance": 0,
+        "normalizedDistance": 0,
+        "classCount": 5
+    },
+    {
+        "name": "Modules\\Gamification\\Services",
+        "abstraction": 0,
+        "instability": 0.5357142857142857,
+        "distance": 0.3282995769794685,
+        "normalizedDistance": 0.4642857142857143,
+        "classCount": 3
+    },
+    {
+        "name": "Modules\\Gamification\\Console\\Commands",
+        "abstraction": 0,
+        "instability": 1,
+        "distance": 0,
+        "normalizedDistance": 0,
+        "classCount": 21
+    },
+    {
+        "name": "Modules\\Learning\\Database\\Seeders",
+        "abstraction": 0,
+        "instability": 1,
+        "distance": 0,
+        "normalizedDistance": 0,
+        "classCount": 11
+    },
+    {
+        "name": "Modules\\Learning\\Database\\Factories",
+        "abstraction": 0,
+        "instability": 0.7142857142857143,
+        "distance": 0.20203050891044214,
+        "normalizedDistance": 0.2857142857142857,
+        "classCount": 5
+    },
+    {
+        "name": "Modules\\Learning\\Mail",
+        "abstraction": 0,
+        "instability": 0.8333333333333334,
+        "distance": 0.11785113019775789,
+        "normalizedDistance": 0.16666666666666663,
+        "classCount": 1
+    },
+    {
+        "name": "Modules\\Learning\\Contracts\\Repositories",
+        "abstraction": 1,
+        "instability": 0.5294117647058824,
+        "distance": 0.37435064886346625,
+        "normalizedDistance": 0.5294117647058822,
+        "classCount": 5
+    },
+    {
+        "name": "Modules\\Learning\\Contracts\\Services",
+        "abstraction": 1,
+        "instability": 0.65,
+        "distance": 0.4596194077712558,
+        "normalizedDistance": 0.6499999999999999,
+        "classCount": 5
+    },
+    {
+        "name": "Modules\\Learning\\Providers",
+        "abstraction": 0,
+        "instability": 1,
+        "distance": 0,
+        "normalizedDistance": 0,
+        "classCount": 3
+    },
+    {
+        "name": "Modules\\Learning\\Repositories",
+        "abstraction": 0,
+        "instability": 0.9090909090909091,
+        "distance": 0.06428243465332252,
+        "normalizedDistance": 0.09090909090909094,
+        "classCount": 5
+    },
+    {
+        "name": "Modules\\Learning\\Models",
+        "abstraction": 0,
+        "instability": 0.2682926829268293,
+        "distance": 0.5173952057462542,
+        "normalizedDistance": 0.7317073170731707,
+        "classCount": 6
+    },
+    {
+        "name": "Modules\\Learning\\Exceptions",
+        "abstraction": 0,
+        "instability": 0.3333333333333333,
+        "distance": 0.4714045207910317,
+        "normalizedDistance": 0.6666666666666667,
+        "classCount": 3
+    },
+    {
+        "name": "Modules\\Learning\\Policies",
+        "abstraction": 0,
+        "instability": 1,
+        "distance": 0,
+        "normalizedDistance": 0,
+        "classCount": 2
+    },
+    {
+        "name": "Modules\\Learning\\DTOs",
+        "abstraction": 0,
+        "instability": 0.5,
+        "distance": 0.35355339059327373,
+        "normalizedDistance": 0.5,
+        "classCount": 5
+    },
+    {
+        "name": "Modules\\Learning\\Http\\Resources",
+        "abstraction": 0,
+        "instability": 0.5,
+        "distance": 0.35355339059327373,
+        "normalizedDistance": 0.5,
+        "classCount": 11
+    },
+    {
+        "name": "Modules\\Learning\\Http\\Requests",
+        "abstraction": 0,
+        "instability": 0.75,
+        "distance": 0.17677669529663687,
+        "normalizedDistance": 0.25,
+        "classCount": 13
+    },
+    {
+        "name": "Modules\\Learning\\Http\\Controllers",
+        "abstraction": 0,
+        "instability": 1,
+        "distance": 0,
+        "normalizedDistance": 0,
+        "classCount": 3
+    },
+    {
+        "name": "Modules\\Learning\\Jobs",
+        "abstraction": 0,
+        "instability": 1,
+        "distance": 0,
+        "normalizedDistance": 0,
+        "classCount": 2
+    },
+    {
+        "name": "Modules\\Learning\\Events",
+        "abstraction": 0,
+        "instability": 0.2631578947368421,
+        "distance": 0.5210260492953508,
+        "normalizedDistance": 0.736842105263158,
+        "classCount": 6
+    },
+    {
+        "name": "Modules\\Learning\\Listeners",
+        "abstraction": 0,
+        "instability": 1,
+        "distance": 0,
+        "normalizedDistance": 0,
+        "classCount": 3
+    },
+    {
+        "name": "Modules\\Learning\\Services",
+        "abstraction": 0,
+        "instability": 0.9782608695652174,
+        "distance": 0.01537188654753363,
+        "normalizedDistance": 0.021739130434782594,
+        "classCount": 5
+    },
+    {
+        "name": "Modules\\Learning\\Console\\Commands",
+        "abstraction": 0,
+        "instability": 1,
+        "distance": 0,
+        "normalizedDistance": 0,
+        "classCount": 10
+    },
+    {
+        "name": "Modules\\Content\\Database\\Seeders",
+        "abstraction": 0,
+        "instability": 1,
+        "distance": 0,
+        "normalizedDistance": 0,
+        "classCount": 2
+    },
+    {
+        "name": "Modules\\Content\\Database\\Factories",
+        "abstraction": 0,
+        "instability": 0.42857142857142855,
+        "distance": 0.40406101782088427,
+        "normalizedDistance": 0.5714285714285714,
+        "classCount": 4
+    },
+    {
+        "name": "Modules\\Content\\Traits",
+        "abstraction": 1,
+        "instability": 1,
+        "distance": 0.7071067811865475,
+        "normalizedDistance": 1,
+        "classCount": 1
+    },
+    {
+        "name": "Modules\\Content\\Contracts\\Repositories",
+        "abstraction": 1,
+        "instability": 0.45454545454545453,
+        "distance": 0.32141217326661253,
+        "normalizedDistance": 0.4545454545454546,
+        "classCount": 2
+    },
+    {
+        "name": "Modules\\Content\\Contracts\\Services",
+        "abstraction": 1,
+        "instability": 0.631578947368421,
+        "distance": 0.44659375653887207,
+        "normalizedDistance": 0.631578947368421,
+        "classCount": 4
+    },
+    {
+        "name": "Modules\\Content\\Providers",
+        "abstraction": 0,
+        "instability": 1,
+        "distance": 0,
+        "normalizedDistance": 0,
+        "classCount": 3
+    },
+    {
+        "name": "Modules\\Content\\Repositories",
+        "abstraction": 0,
+        "instability": 0.7647058823529411,
+        "distance": 0.16637806616154063,
+        "normalizedDistance": 0.23529411764705888,
+        "classCount": 3
+    },
+    {
+        "name": "Modules\\Content\\Models",
+        "abstraction": 0,
+        "instability": 0.375,
+        "distance": 0.44194173824159216,
+        "normalizedDistance": 0.625,
+        "classCount": 6
+    },
+    {
+        "name": "Modules\\Content\\Exceptions",
+        "abstraction": 0,
+        "instability": 0.5,
+        "distance": 0.35355339059327373,
+        "normalizedDistance": 0.5,
+        "classCount": 1
+    },
+    {
+        "name": "Modules\\Content\\Policies",
+        "abstraction": 0,
+        "instability": 1,
+        "distance": 0,
+        "normalizedDistance": 0,
+        "classCount": 3
+    },
+    {
+        "name": "Modules\\Content\\DTOs",
+        "abstraction": 0,
+        "instability": 0.16666666666666666,
+        "distance": 0.5892556509887896,
+        "normalizedDistance": 0.8333333333333334,
+        "classCount": 4
+    },
+    {
+        "name": "Modules\\Content\\Http\\Resources",
+        "abstraction": 0,
+        "instability": 0.5,
+        "distance": 0.35355339059327373,
+        "normalizedDistance": 0.5,
+        "classCount": 2
+    },
+    {
+        "name": "Modules\\Content\\Http\\Requests",
+        "abstraction": 0,
+        "instability": 0.4,
+        "distance": 0.42426406871192845,
+        "normalizedDistance": 0.6,
+        "classCount": 4
+    },
+    {
+        "name": "Modules\\Content\\Http\\Controllers",
+        "abstraction": 0,
+        "instability": 1,
+        "distance": 0,
+        "normalizedDistance": 0,
+        "classCount": 6
+    },
+    {
+        "name": "Modules\\Content\\Jobs",
+        "abstraction": 0,
+        "instability": 1,
+        "distance": 0,
+        "normalizedDistance": 0,
+        "classCount": 1
+    },
+    {
+        "name": "Modules\\Content\\Events",
+        "abstraction": 0,
+        "instability": 0.2857142857142857,
+        "distance": 0.5050762722761053,
+        "normalizedDistance": 0.7142857142857143,
+        "classCount": 7
+    },
+    {
+        "name": "Modules\\Content\\Listeners",
+        "abstraction": 0,
+        "instability": 1,
+        "distance": 0,
+        "normalizedDistance": 0,
+        "classCount": 5
+    },
+    {
+        "name": "Modules\\Content\\Services",
+        "abstraction": 0,
+        "instability": 0.9302325581395349,
+        "distance": 0.04933303124557309,
+        "normalizedDistance": 0.06976744186046513,
+        "classCount": 10
+    },
+    {
+        "name": "Modules\\Operations\\Database\\Seeders",
+        "abstraction": 0,
+        "instability": 1,
+        "distance": 0,
+        "normalizedDistance": 0,
+        "classCount": 1
+    },
+    {
+        "name": "Modules\\Operations\\Providers",
+        "abstraction": 0,
+        "instability": 1,
+        "distance": 0,
+        "normalizedDistance": 0,
+        "classCount": 3
+    },
+    {
+        "name": "Modules\\Operations\\Repositories",
+        "abstraction": 0,
+        "instability": 0,
+        "distance": 0.7071067811865475,
+        "normalizedDistance": 1,
+        "classCount": 1
+    },
+    {
+        "name": "Modules\\Operations\\Models",
+        "abstraction": 0,
+        "instability": 1,
+        "distance": 0,
+        "normalizedDistance": 0,
+        "classCount": 3
+    },
+    {
+        "name": "Modules\\Operations\\Http\\Middleware",
+        "abstraction": 0,
+        "instability": 1,
+        "distance": 0,
+        "normalizedDistance": 0,
+        "classCount": 1
+    },
+    {
+        "name": "Modules\\Operations\\Http\\Controllers",
+        "abstraction": 0,
+        "instability": 1,
+        "distance": 0,
+        "normalizedDistance": 0,
+        "classCount": 1
+    },
+    {
+        "name": "Modules\\Operations\\Services",
+        "abstraction": 0,
+        "instability": 0.8,
+        "distance": 0.14142135623730948,
+        "normalizedDistance": 0.19999999999999996,
+        "classCount": 2
+    },
+    {
+        "name": "Modules\\Search\\Database\\Seeders",
+        "abstraction": 0,
+        "instability": 1,
+        "distance": 0,
+        "normalizedDistance": 0,
+        "classCount": 1
+    },
+    {
+        "name": "Modules\\Search\\Contracts\\Repositories",
+        "abstraction": 1,
+        "instability": 0.4,
+        "distance": 0.28284271247461895,
+        "normalizedDistance": 0.3999999999999999,
+        "classCount": 1
+    },
+    {
+        "name": "Modules\\Search\\Contracts\\Services",
+        "abstraction": 1,
+        "instability": 0.5,
+        "distance": 0.35355339059327373,
+        "normalizedDistance": 0.5,
+        "classCount": 1
+    },
+    {
+        "name": "Modules\\Search\\Providers",
+        "abstraction": 0,
+        "instability": 1,
+        "distance": 0,
+        "normalizedDistance": 0,
+        "classCount": 3
+    },
+    {
+        "name": "Modules\\Search\\Repositories",
+        "abstraction": 0,
+        "instability": 1,
+        "distance": 0,
+        "normalizedDistance": 0,
+        "classCount": 1
+    },
+    {
+        "name": "Modules\\Search\\Models",
+        "abstraction": 0,
+        "instability": 0.5,
+        "distance": 0.35355339059327373,
+        "normalizedDistance": 0.5,
+        "classCount": 1
+    },
+    {
+        "name": "Modules\\Search\\DTOs",
+        "abstraction": 0,
+        "instability": 0.3333333333333333,
+        "distance": 0.4714045207910317,
+        "normalizedDistance": 0.6666666666666667,
+        "classCount": 1
+    },
+    {
+        "name": "Modules\\Search\\Http\\Controllers",
+        "abstraction": 0,
+        "instability": 1,
+        "distance": 0,
+        "normalizedDistance": 0,
+        "classCount": 1
+    },
+    {
+        "name": "Modules\\Search\\Services",
+        "abstraction": 0,
+        "instability": 1,
+        "distance": 0,
+        "normalizedDistance": 0,
+        "classCount": 7
+    },
+    {
+        "name": "Modules\\Common\\Database\\Seeders",
+        "abstraction": 0,
+        "instability": 1,
+        "distance": 0,
+        "normalizedDistance": 0,
+        "classCount": 4
+    },
+    {
+        "name": "Modules\\Common\\Contracts\\Repositories",
+        "abstraction": 1,
+        "instability": 0.625,
+        "distance": 0.44194173824159216,
+        "normalizedDistance": 0.625,
+        "classCount": 2
+    },
+    {
+        "name": "Modules\\Common\\Contracts\\Services",
+        "abstraction": 1,
+        "instability": 0.35714285714285715,
+        "distance": 0.2525381361380527,
+        "normalizedDistance": 0.3571428571428572,
+        "classCount": 1
+    },
+    {
+        "name": "Modules\\Common\\Providers",
+        "abstraction": 0,
+        "instability": 1,
+        "distance": 0,
+        "normalizedDistance": 0,
+        "classCount": 3
+    },
+    {
+        "name": "Modules\\Common\\Repositories",
+        "abstraction": 0,
+        "instability": 0.8666666666666667,
+        "distance": 0.09428090415820631,
+        "normalizedDistance": 0.1333333333333333,
+        "classCount": 3
+    },
+    {
+        "name": "Modules\\Common\\Models",
+        "abstraction": 0,
+        "instability": 0.30303030303030304,
+        "distance": 0.49283199900880587,
+        "normalizedDistance": 0.696969696969697,
+        "classCount": 5
+    },
+    {
+        "name": "Modules\\Common\\DTOs",
+        "abstraction": 0,
+        "instability": 1,
+        "distance": 0,
+        "normalizedDistance": 0,
+        "classCount": 2
+    },
+    {
+        "name": "Modules\\Common\\Http\\Resources",
+        "abstraction": 0,
+        "instability": 0.4,
+        "distance": 0.42426406871192845,
+        "normalizedDistance": 0.6,
+        "classCount": 3
+    },
+    {
+        "name": "Modules\\Common\\Http\\Requests",
+        "abstraction": 0,
+        "instability": 0.3333333333333333,
+        "distance": 0.4714045207910317,
+        "normalizedDistance": 0.6666666666666667,
+        "classCount": 5
+    },
+    {
+        "name": "Modules\\Common\\Http\\Requests\\Concerns",
+        "abstraction": 1,
+        "instability": 1,
+        "distance": 0.7071067811865475,
+        "normalizedDistance": 1,
+        "classCount": 3
+    },
+    {
+        "name": "Modules\\Common\\Http\\Controllers",
+        "abstraction": 0,
+        "instability": 1,
+        "distance": 0,
+        "normalizedDistance": 0,
+        "classCount": 3
+    },
+    {
+        "name": "Modules\\Common\\Listeners",
+        "abstraction": 0,
+        "instability": 1,
+        "distance": 0,
+        "normalizedDistance": 0,
+        "classCount": 7
+    },
+    {
+        "name": "Modules\\Common\\Services",
+        "abstraction": 0,
+        "instability": 0.9333333333333333,
+        "distance": 0.047140452079103154,
+        "normalizedDistance": 0.06666666666666665,
+        "classCount": 11
+    },
+    {
+        "name": "Modules\\Notifications\\Database\\Seeders",
+        "abstraction": 0,
+        "instability": 1,
+        "distance": 0,
+        "normalizedDistance": 0,
+        "classCount": 1
+    },
+    {
+        "name": "Modules\\Notifications\\Traits",
+        "abstraction": 1,
+        "instability": 1,
+        "distance": 0.7071067811865475,
+        "normalizedDistance": 1,
+        "classCount": 1
+    },
+    {
+        "name": "Modules\\Notifications\\Contracts\\Services",
+        "abstraction": 1,
+        "instability": 0.3076923076923077,
+        "distance": 0.21757131728816848,
+        "normalizedDistance": 0.3076923076923077,
+        "classCount": 2
+    },
+    {
+        "name": "Modules\\Notifications\\Providers",
+        "abstraction": 0,
+        "instability": 1,
+        "distance": 0,
+        "normalizedDistance": 0,
+        "classCount": 3
+    },
+    {
+        "name": "Modules\\Notifications\\Repositories",
+        "abstraction": 0,
+        "instability": 0,
+        "distance": 0.7071067811865475,
+        "normalizedDistance": 1,
+        "classCount": 1
+    },
+    {
+        "name": "Modules\\Notifications\\Models",
+        "abstraction": 0,
+        "instability": 0.6,
+        "distance": 0.282842712474619,
+        "normalizedDistance": 0.4,
+        "classCount": 4
+    },
+    {
+        "name": "Modules\\Notifications\\DTOs",
+        "abstraction": 0,
+        "instability": 0.6666666666666666,
+        "distance": 0.23570226039551584,
+        "normalizedDistance": 0.33333333333333337,
+        "classCount": 4
+    },
+    {
+        "name": "Modules\\Notifications\\Http\\Controllers",
+        "abstraction": 0,
+        "instability": 1,
+        "distance": 0,
+        "normalizedDistance": 0,
+        "classCount": 2
+    },
+    {
+        "name": "Modules\\Notifications\\Jobs",
+        "abstraction": 0,
+        "instability": 1,
+        "distance": 0,
+        "normalizedDistance": 0,
+        "classCount": 1
+    },
+    {
+        "name": "Modules\\Notifications\\Listeners",
+        "abstraction": 0,
+        "instability": 1,
+        "distance": 0,
+        "normalizedDistance": 0,
+        "classCount": 6
+    },
+    {
+        "name": "Modules\\Notifications\\Notifications",
+        "abstraction": 0,
+        "instability": 1,
+        "distance": 0,
+        "normalizedDistance": 0,
+        "classCount": 6
+    },
+    {
+        "name": "Modules\\Notifications\\Services",
+        "abstraction": 0,
+        "instability": 0.6842105263157895,
+        "distance": 0.22329687826943603,
+        "normalizedDistance": 0.3157894736842105,
+        "classCount": 6
+    }
+];
+
+    /*
+     * value accessor - returns the value to encode for a given data object.
+     * scale - maps value to a visual display encoding, such as a pixel position.
+     * map function - maps from data value to display value
+     * axis - sets up axis
+     */
+
+    // setup x
+    var xValue = function(d) { return d.abstraction;}, // data -> value
+        xScale = d3.scale.linear().range([0, width]), // value -> display
+        xMap = function(d) { return xScale(xValue(d));}, // data -> display
+        xAxis = d3.svg.axis().scale(xScale).orient("bottom");
+
+    // setup y
+    var yValue = function(d) { return d.instability;}, // data -> value
+        yScale = d3.scale.linear().range([height, 0]), // value -> display
+        yMap = function(d) { return yScale(yValue(d));}, // data -> display
+        yAxis = d3.svg.axis().scale(yScale).orient("left");
+
+    // setup fill color
+    var cValue = function(d) { return d.normalizedDistance;},
+        color = d3.scale.linear().domain([0,1])
+            .interpolate(d3.interpolateHcl)
+            .range([d3.rgb("#00FF00"), d3.rgb('#FF0000')])
+
+    // add the graph canvas to #distances
+    var svg = d3.select("#distances").append("svg")
+        .attr("width", width + margin.left + margin.right)
+        .attr("height", height + margin.top + margin.bottom)
+        .append("g")
+        .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+
+    // add the tooltip area to the webpage
+    var tooltip = d3.select("#distances").append("div")
+        .attr("class", "tooltip")
+        .style("opacity", 0);
+
+    // x-axis
+    svg
+        .append("g")
+            .attr("class", "x axis")
+            .attr("transform", "translate(0," + height + ")")
+            .call(xAxis)
+        .append("text")
+            .attr("class", "label")
+            .attr("x", width)
+            .attr("y", -6)
+            .style("text-anchor", "end")
+            .text("Abstraction");
+
+    // y-axis
+    svg
+        .append("g")
+            .attr("class", "y axis")
+            .call(yAxis)
+        .append("text")
+            .attr("class", "label")
+            .attr("transform", "rotate(-90)")
+            .attr("y", 6)
+            .attr("dy", ".71em")
+            .style("text-anchor", "end")
+            .text("Instability");
+
+    // optimal distance line
+    svg.append("path")
+        .attr("class", "line")
+        .attr("d", (d3.svg.line().x(function (d) { return xScale(d); }).y(function (d) { return yScale(1-d); }))([0, 1]));
+
+    // draw dots
+    svg.selectAll(".dot")
+        .data(spots)
+        .enter().append("circle")
+        .attr("class", "dot")
+        .attr("r", function(d) { return 3.0 + 0.5 * d.classCount; })
+        .attr("cx", xMap)
+        .attr("cy", yMap)
+        .style("fill", function(d) { return color(cValue(d));})
+        .on("mouseover", function(d) {
+            tooltip.transition()
+                .duration(200)
+                .style("opacity", .9);
+            tooltip.html(d.name + "<br> (" + (Math.round(1000 * xValue(d)) / 1000)
+                + ", " + (Math.round(1000 * yValue(d)) / 1000) + ")")
+                .style("left", (d3.event.pageX + 5) + "px")
+                .style("top", (d3.event.pageY - 28) + "px");
+        })
+        .on("mouseout", function(d) {
+            tooltip.transition()
+                .duration(500)
+                .style("opacity", 0);
+        });
+</script>

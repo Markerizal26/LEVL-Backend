@@ -5,13 +5,7 @@ namespace Modules\Grading\Providers;
 use App\Support\Traits\RegistersModuleConfig;
 use Illuminate\Support\Facades\Blade;
 use Illuminate\Support\ServiceProvider;
-use Modules\Grading\Contracts\Repositories\AppealRepositoryInterface;
-use Modules\Grading\Contracts\Repositories\GradingRepositoryInterface;
-use Modules\Grading\Contracts\Services\AppealServiceInterface;
-use Modules\Grading\Contracts\Services\GradingServiceInterface;
-use Modules\Grading\Repositories\AppealRepository;
 use Modules\Grading\Repositories\GradingRepository;
-use Modules\Grading\Services\AppealService;
 use Modules\Grading\Services\GradingService;
 use Nwidart\Modules\Traits\PathNamespace;
 
@@ -52,10 +46,8 @@ class GradingServiceProvider extends ServiceProvider
     protected function registerBindings(): void
     {
         $this->app->bind(GradingRepositoryInterface::class, GradingRepository::class);
-        $this->app->bind(AppealRepositoryInterface::class, AppealRepository::class);
 
         $this->app->bind(GradingServiceInterface::class, GradingService::class);
-        $this->app->bind(AppealServiceInterface::class, AppealService::class);
     }
 
     protected function registerCommands(): void

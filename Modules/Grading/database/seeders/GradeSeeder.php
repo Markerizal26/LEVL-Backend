@@ -6,11 +6,9 @@ use Illuminate\Database\Seeder;
 use Modules\Auth\Models\User;
 use Modules\Grading\Models\Grade;
 use Modules\Learning\Models\Submission;
-use Modules\Grading\Models\Appeal;
 use Modules\Grading\Enums\GradeStatus;
-use Modules\Grading\Enums\AppealStatus;
 
-class GradeAndAppealSeeder extends Seeder
+class GradeSeeder extends Seeder
 {
     /**
      * Run the database seeds.
@@ -26,7 +24,7 @@ class GradeAndAppealSeeder extends Seeder
         \DB::connection()->disableQueryLog();
         ini_set('memory_limit', '1536M');
         
-        echo "\n📋 Seeding grades and appeals...\n";
+        echo "\n📋 Seeding grades...\n";
 
         $faker = \Faker\Factory::create('id_ID');
         $pregenFeedback = [];
@@ -67,7 +65,7 @@ class GradeAndAppealSeeder extends Seeder
         echo "   👥 Using " . count($instructorIds) . " instructors\n\n";
 
         $gradeCount = 0;
-        $appealCount = 0;
+
         $chunkNum = 0;
         $chunkSize = 1000;
         $offset = 0;
@@ -89,7 +87,6 @@ class GradeAndAppealSeeder extends Seeder
 
             $chunkNum++;
             $grades = [];
-            $appeals = [];
             $chunkSubmissions = 0;
 
             foreach ($submissions as $submission) {
@@ -124,45 +121,15 @@ class GradeAndAppealSeeder extends Seeder
                     'updated_at' => $createdAt,
                 ];
                 $gradeCount++;
-
-                if (rand(1, 100) <= 5) {
-                    $statusRandom = rand(1, 100);
-                    $status = match (true) {
-                        $statusRandom <= 40 => 'pending',
-                        $statusRandom <= 70 => 'approved',
-                        default => 'denied',
-                    };
-
-                    $reviewerId = $status !== 'pending' ? $instructorIds[array_rand($instructorIds)] : null;
-
-                    $appeals[] = [
-                        'submission_id' => $submission->id,
-                        'student_id' => $submission->user_id,
-                        'reviewer_id' => $reviewerId,
-                        'reason' => $pregenReasons[array_rand($pregenReasons)],
-                        'status' => $status,
-                        'submitted_at' => $createdAt,
-                        'decision_reason' => $status !== 'pending' ? $pregenReasons[array_rand($pregenReasons)] : null,
-                        'decided_at' => $status !== 'pending' ? $createdAt : null,
-                        'supporting_documents' => null,
-                        'created_at' => $createdAt,
-                        'updated_at' => $createdAt,
-                    ];
-                    $appealCount++;
-                }
             }
 
             if (!empty($grades)) {
                 \DB::table('grades')->insertOrIgnore($grades);
             }
-
-            if (!empty($appeals)) {
-                \DB::table('appeals')->insertOrIgnore($appeals);
-            }
             
-            unset($grades, $appeals);
+            unset($grades);
 
-            echo "      ✓ Chunk $chunkNum: $chunkSubmissions submissions | Grades: $gradeCount | Appeals: $appealCount\n";
+            echo "      ✓ Chunk $chunkNum: $chunkSubmissions submissions | Grades: $gradeCount\n";
             
             if ($chunkNum % 3 === 0) {
                 gc_collect_cycles();
@@ -173,9 +140,9 @@ class GradeAndAppealSeeder extends Seeder
         
         unset($pregenFeedback, $pregenReasons);
         
-        echo "\n✅ Grading and appeal seeding completed!\n";
+        echo "\n✅ Grading seeding completed!\n";
         echo "   📊 Total grades created: $gradeCount\n";
-        echo "   📊 Total appeals created: $appealCount\n";
+        echo "   📊 Total grades created: $gradeCount\n";
         
         gc_collect_cycles();
         \DB::connection()->enableQueryLog();

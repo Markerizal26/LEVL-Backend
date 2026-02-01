@@ -46,7 +46,7 @@ class SubmissionResource extends JsonResource
             'answers' => AnswerResource::collection($this->whenLoaded('answers')),
             'previousSubmission' => $this->whenLoaded('previousSubmission'),
             'grade' => $this->whenLoaded('grade'),
-            'appeal' => $this->whenLoaded('appeal'),
+
         ];
     }
 }

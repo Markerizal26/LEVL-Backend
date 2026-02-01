@@ -53,6 +53,7 @@
     "nunomaduro/collision": "^8.6",
     "pestphp/pest": "^3.8",
     "pestphp/pest-plugin-drift": "^3.0",
+    "phpmetrics/phpmetrics": "^2.9",
     "phpstan/phpstan": "^2.1",
     "phpunit/phpunit": "^11.5.3"
   },
@@ -146,6 +147,9 @@
     ],
     "phpstan": [
       "./vendor/bin/phpstan analyse --memory-limit=2G"
+    ],
+    "metrics": [
+      "./vendor/bin/phpmetrics --report-html=public/report app Modules"
     ],
     "phpstan:baseline": [
       "./vendor/bin/phpstan analyse --memory-limit=2G --generate-baseline"

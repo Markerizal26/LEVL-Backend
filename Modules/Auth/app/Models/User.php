@@ -120,15 +120,9 @@ class User extends Authenticatable implements HasMedia, JWTSubject
         return $this->hasOne(\Modules\Gamification\Models\UserGamificationStat::class);
     }
 
-    public function appeals()
-    {
-        return $this->hasMany(\Modules\Grading\Models\Appeal::class, 'student_id');
-    }
 
-    public function reviewedAppeals()
-    {
-        return $this->hasMany(\Modules\Grading\Models\Appeal::class, 'reviewer_id');
-    }
+
+
 
     public function receivedOverrides()
     {

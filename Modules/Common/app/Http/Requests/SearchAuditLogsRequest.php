@@ -35,7 +35,7 @@ class SearchAuditLogsRequest extends FormRequest
             AssessmentAuditService::ACTION_GRADING,
             AssessmentAuditService::ACTION_ANSWER_KEY_CHANGE,
             AssessmentAuditService::ACTION_GRADE_OVERRIDE,
-            AssessmentAuditService::ACTION_APPEAL_DECISION,
+
             AssessmentAuditService::ACTION_OVERRIDE_GRANT,
         ];
 

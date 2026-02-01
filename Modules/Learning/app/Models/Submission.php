@@ -153,10 +153,7 @@ class Submission extends Model
         return $this->hasOne(\Modules\Grading\Models\Grade::class, 'submission_id');
     }
 
-        public function appeal(): HasOne
-    {
-        return $this->hasOne(\Modules\Grading\Models\Appeal::class, 'submission_id');
-    }
+
 
         public function getStateAttribute($value): ?SubmissionState
     {

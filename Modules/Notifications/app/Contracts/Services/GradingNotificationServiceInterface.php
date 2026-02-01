@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace Modules\Notifications\Contracts\Services;
 
 use Illuminate\Support\Collection;
-use Modules\Grading\Models\Appeal;
+
 use Modules\Learning\Models\Submission;
 
 /**
@@ -52,24 +52,6 @@ interface GradingNotificationServiceInterface
      * @see Requirements 21.3
      */
     public function notifyManualGradingRequired(Submission $submission): void;
-
-    /**
-     * Notify instructors that an appeal has been submitted.
-     *
-     * @param  Appeal  $appeal  The submitted appeal
-     *
-     * @see Requirements 21.4
-     */
-    public function notifyAppealSubmitted(Appeal $appeal): void;
-
-    /**
-     * Notify a student about the decision on their appeal.
-     *
-     * @param  Appeal  $appeal  The appeal with the decision
-     *
-     * @see Requirements 21.5
-     */
-    public function notifyAppealDecision(Appeal $appeal): void;
 
     /**
      * Notify a student that their grade has been recalculated.

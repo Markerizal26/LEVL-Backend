@@ -1,15 +1,12 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
-use Modules\Grading\Http\Controllers\AppealController;
+
 use Modules\Grading\Http\Controllers\GradingController;
 
 Route::middleware(['auth:api'])->prefix('v1')->group(function () {
 
-    Route::get('appeals', [AppealController::class, 'index'])->name('appeals.index');
-    Route::get('appeals/{appeal}', [AppealController::class, 'show'])->name('appeals.show');
-    Route::patch('appeals/{appeal}', [AppealController::class, 'updateStatus'])->name('appeals.update-status');
-    Route::post('submissions/{submission}/appeals', [AppealController::class, 'store'])->name('appeals.store');
+
 
     Route::middleware(['role:Superadmin|Admin|Instructor'])->group(function () {
         Route::get('grading', [GradingController::class, 'queue'])->name('grading.index');

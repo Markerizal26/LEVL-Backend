@@ -68,7 +68,7 @@ class SystemSettingSeeder extends Seeder
             // Grading Settings
             // ============================================
             ['key' => 'grading.passing_score_percent', 'value' => '70', 'type' => 'number'],
-            ['key' => 'grading.allow_grade_appeal', 'value' => 'true', 'type' => 'boolean'],
+
             ['key' => 'grading.auto_publish_grades', 'value' => 'false', 'type' => 'boolean'],
             ['key' => 'grading.grading_scale', 'value' => json_encode(['A' => 90, 'B' => 80, 'C' => 70, 'D' => 60, 'E' => 0]), 'type' => 'json'],
             ['key' => 'grading.show_correct_answers', 'value' => 'true', 'type' => 'boolean'],

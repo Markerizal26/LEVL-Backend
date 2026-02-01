@@ -6,13 +6,11 @@ namespace Modules\Common\Providers;
 
 use Illuminate\Foundation\Support\Providers\EventServiceProvider as ServiceProvider;
 use Modules\Common\Listeners\LogAnswerKeyChanged;
-use Modules\Common\Listeners\LogAppealDecided;
 use Modules\Common\Listeners\LogGradeCreated;
 use Modules\Common\Listeners\LogGradeOverridden;
 use Modules\Common\Listeners\LogOverrideGranted;
 use Modules\Common\Listeners\LogSubmissionCreated;
 use Modules\Common\Listeners\LogSubmissionStateChanged;
-use Modules\Grading\Events\AppealDecided;
 use Modules\Grading\Events\GradeCreated;
 use Modules\Grading\Events\GradeOverridden;
 use Modules\Learning\Events\AnswerKeyChanged;
@@ -56,10 +54,7 @@ class EventServiceProvider extends ServiceProvider
             LogAnswerKeyChanged::class,
         ],
 
-        // Appeal events (Requirements 20.5)
-        AppealDecided::class => [
-            LogAppealDecided::class,
-        ],
+
 
         // Override events (Requirements 24.5)
         OverrideGranted::class => [

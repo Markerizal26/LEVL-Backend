@@ -6,7 +6,7 @@ namespace Modules\Common\Contracts\Services;
 
 use Illuminate\Support\Collection;
 use Modules\Common\Models\AuditLog;
-use Modules\Grading\Models\Appeal;
+
 use Modules\Grading\Models\Grade;
 use Modules\Learning\Models\Question;
 use Modules\Learning\Models\Submission;
@@ -75,17 +75,6 @@ interface AuditServiceInterface
      * @param  int  $instructorId  The ID of the instructor performing the override
      */
     public function logGradeOverride(Grade $grade, float $oldScore, float $newScore, string $reason, int $instructorId): void;
-
-    /**
-     * Log appeal decision.
-     *
-     * Requirements: 20.5
-     *
-     * @param  Appeal  $appeal  The appeal being decided
-     * @param  string  $decision  The decision (approved/denied)
-     * @param  int  $instructorId  The ID of the instructor making the decision
-     */
-    public function logAppealDecision(Appeal $appeal, string $decision, int $instructorId): void;
 
     /**
      * Log instructor override grant (prerequisites, attempts, deadlines).

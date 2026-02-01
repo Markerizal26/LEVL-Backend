@@ -6,7 +6,7 @@ namespace Modules\Notifications\Services;
 
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Log;
-use Modules\Grading\Models\Appeal;
+
 use Modules\Learning\Models\Submission;
 use Modules\Notifications\Contracts\Services\GradingNotificationServiceInterface;
 
@@ -43,30 +43,6 @@ class GradingNotificationService implements GradingNotificationServiceInterface
         // TODO: Implement actual notification logic
         Log::info(__('notifications.grading.manual_grading_required', [
             'id' => $submission->id,
-        ]));
-    }
-
-    /**
-     * Notify instructors that an appeal has been submitted.
-     */
-    public function notifyAppealSubmitted(Appeal $appeal): void
-    {
-        // TODO: Implement actual notification logic
-        Log::info(__('notifications.grading.appeal_submitted', [
-            'id' => $appeal->id,
-            'user_id' => $appeal->user_id,
-        ]));
-    }
-
-    /**
-     * Notify a student about the decision on their appeal.
-     */
-    public function notifyAppealDecision(Appeal $appeal): void
-    {
-        // TODO: Implement actual notification logic
-        Log::info(__('notifications.grading.appeal_decision', [
-            'id' => $appeal->id,
-            'user_id' => $appeal->user_id,
         ]));
     }
 
