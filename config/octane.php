@@ -24,7 +24,7 @@ use Laravel\Octane\Listeners\ReportException;
 use Laravel\Octane\Listeners\StopWorkerIfNecessary;
 use Laravel\Octane\Octane;
 
-$cpuCount = function_exists('swoole_cpu_num') ? swoole_cpu_num() : ((int) shell_exec('nproc 2>/dev/null') ?: 4);
+$cpuCount = function_exists('swoole_cpu_num') ? swoole_cpu_num() : 4;
 
 return [
 
@@ -46,11 +46,11 @@ return [
         ],
 
         RequestHandled::class => [
-            \App\Listeners\MonitorWorkerMemory::class,
         ],
 
         RequestTerminated::class => [
             FlushUploadedFiles::class,
+            DisconnectFromDatabases::class,
         ],
 
         TaskReceived::class => [
@@ -111,7 +111,7 @@ return [
 
     'swoole' => [
         'options' => [
-            'worker_num' => env('SWOOLE_WORKER_NUM', $cpuCount * 2),
+            'worker_num' => env('SWOOLE_WORKER_NUM', $cpuCount),
             'task_worker_num' => env('SWOOLE_TASK_WORKER_NUM', $cpuCount),
             'reactor_num' => env('SWOOLE_REACTOR_NUM', $cpuCount),
 
@@ -123,10 +123,9 @@ return [
 
             'enable_coroutine' => false,
             'hook_flags' => 0,
-            'max_coroutine' => 1000,
 
             'log_file' => storage_path('logs/swoole_http.log'),
-            'log_level' => env('SWOOLE_LOG_LEVEL', env('APP_ENV') === 'production' ? 2 : 4),
+            'log_level' => env('APP_ENV') === 'production' ? 2 : 4,
 
             'package_max_length' => 10 * 1024 * 1024,
             'buffer_output_size' => 2 * 1024 * 1024,
@@ -139,10 +138,9 @@ return [
             'http_parse_post' => true,
             'http_parse_cookie' => true,
             'http_compression' => true,
-            'http_compression_level' => env('APP_ENV') === 'production' ? 1 : 0,
+            'http_compression_level' => 1,
 
             'open_http2_protocol' => false,
-            'open_cpu_affinity' => true,
         ],
     ],
 
@@ -164,6 +162,6 @@ return [
 
     'garbage' => env('OCTANE_GARBAGE_COLLECTION', 50),
 
-    'max_execution_time' => env('OCTANE_MAX_EXECUTION_TIME', 30),
+    'max_execution_time' => 30,
 
 ];

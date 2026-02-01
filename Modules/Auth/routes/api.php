@@ -3,6 +3,7 @@
 use Illuminate\Support\Facades\Route;
 use Modules\Auth\Http\Controllers\AdminProfileController;
 use Modules\Auth\Http\Controllers\AuthApiController;
+use Modules\Auth\Http\Controllers\BenchmarkController;
 use Modules\Auth\Http\Controllers\PasswordResetController;
 use Modules\Auth\Http\Controllers\ProfileAccountController;
 use Modules\Auth\Http\Controllers\ProfileActivityController;
@@ -144,11 +145,11 @@ Route::prefix("v1")
     Route::get('/dev/tokens', [AuthApiController::class, 'generateDevTokens'])
       ->name('dev.tokens');
 
-    // Benchmark Routes (Publicly accessible for stress testing)
+    // Benchmark Routes (No middleware for fair testing)
     Route::prefix('benchmark')->group(function () {
-        Route::get('/users', [\Modules\Auth\Http\Controllers\BenchmarkController::class, 'index']);
-        Route::post('/users', [\Modules\Auth\Http\Controllers\BenchmarkController::class, 'store']);
-        Route::delete('/users', [\Modules\Auth\Http\Controllers\BenchmarkController::class, 'destroy']);
+      Route::get('/users', [BenchmarkController::class, 'index']);
+      Route::post('/users', [BenchmarkController::class, 'store']);
+      Route::delete('/users', [BenchmarkController::class, 'destroy']);
     });
   });
 
