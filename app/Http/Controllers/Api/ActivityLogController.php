@@ -25,9 +25,13 @@ class ActivityLogController extends Controller
     ];
 
     $result = $this->service->paginate($params);
+    $paginator = $result['paginator'];
+    
+    // Transform using Resource
+    $paginator->getCollection()->transform(fn ($item) => new \Modules\Common\Transformers\ActivityLogResource($item));
 
     return $this->paginateResponse(
-      $result['paginator'],
+      $paginator,
       __("messages.activity_logs.retrieved"),
       200,
       $result['metadata'],
@@ -47,6 +51,9 @@ class ActivityLogController extends Controller
       return $this->notFound(__("messages.activity_logs.not_found"));
     }
 
-    return $this->success($activity, __("messages.activity_logs.item_retrieved"));
+    return $this->success(
+      new \Modules\Common\Transformers\ActivityLogResource($activity),
+      __("messages.activity_logs.item_retrieved")
+    );
   }
 }

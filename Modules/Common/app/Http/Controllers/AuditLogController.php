@@ -29,12 +29,10 @@ class AuditLogController extends Controller
             return $this->forbidden(__('messages.audit_logs.no_access'));
         }
 
-        $result = $this->queryService->searchAndPaginate($request->validated());
+        $paginator = $this->queryService->searchAndPaginate($request->validated());
+        $paginator->getCollection()->transform(fn ($item) => new AuditLogResource($item));
 
-        return $this->success([
-            'audit_logs' => AuditLogResource::collection($result['logs']),
-            'meta' => $result['meta'],
-        ]);
+        return $this->paginateResponse($paginator, __('messages.audit_logs.retrieved'));
     }
 
     public function show(int $id): JsonResponse

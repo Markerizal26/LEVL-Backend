@@ -18,29 +18,9 @@ class BadgeService
 
     public function paginate(int $perPage = 15, array $params = []): LengthAwarePaginator
     {
-        $perPage = max(1, $perPage);
-        
         $query = Badge::query();
-
-        $searchQuery = $params['search'] ?? request('filter.search') ?? request('search');
-
-        if ($searchQuery && trim($searchQuery) !== '') {
-            try {
-                $ids = Badge::search($searchQuery)->keys()->toArray();
-
-                if (! empty($ids)) {
-                    $query->whereIn('id', $ids);
-                } else {
-                    $query->whereRaw('1 = 0');
-                }
-            } catch (ApiException $e) {
-                if (str_contains($e->getMessage(), 'not found')) {
-                    $query->whereRaw('1 = 0');
-                } else {
-                    throw $e;
-                }
-            }
-        }
+        
+        $this->applySearch($query, $params);
 
         return QueryBuilder::for($query)
             ->allowedFilters([
@@ -51,7 +31,7 @@ class BadgeService
             ])
             ->allowedSorts(['id', 'code', 'name', 'type', 'threshold', 'created_at', 'updated_at'])
             ->defaultSort('-created_at')
-            ->paginate($perPage);
+            ->paginate(max(1, $perPage));
     }
 
     public function create(array $data, array $files = []): Badge
@@ -59,20 +39,12 @@ class BadgeService
         return DB::transaction(function () use ($data, $files) {
             $badge = $this->repository->create($data);
 
-            if (isset($data['rules'])) {
-                foreach ($data['rules'] as $rule) {
-                    \Modules\Gamification\Models\BadgeRule::create([
-                        'badge_id' => $badge->id,
-                        'criterion' => $rule['criterion'],
-                        'operator' => $rule['operator'],
-                        'value' => $rule['value'],
-                    ]);
-                }
+            if (!empty($data['rules'])) {
+                $this->syncRules($badge->id, $data['rules']);
             }
 
             if (isset($files['icon'])) {
-                $badge->addMedia($files['icon'])
-                    ->toMediaCollection('icon');
+                $badge->addMedia($files['icon'])->toMediaCollection('icon');
             }
 
             return $badge->fresh();
@@ -96,22 +68,12 @@ class BadgeService
             $updated = $this->repository->update($badge, $data);
 
             if (isset($data['rules'])) {
-                // Sync rules: Delete existing and create new ones (simplest approach for now)
-                \Modules\Gamification\Models\BadgeRule::where('badge_id', $badge->id)->delete();
-                foreach ($data['rules'] as $rule) {
-                    \Modules\Gamification\Models\BadgeRule::create([
-                        'badge_id' => $badge->id,
-                        'criterion' => $rule['criterion'],
-                        'operator' => $rule['operator'],
-                        'value' => $rule['value'],
-                    ]);
-                }
+                $this->syncRules($badge->id, $data['rules']);
             }
 
             if (isset($files['icon'])) {
                 $updated->clearMediaCollection('icon');
-                $updated->addMedia($files['icon'])
-                    ->toMediaCollection('icon');
+                $updated->addMedia($files['icon'])->toMediaCollection('icon');
             }
 
             return $updated->fresh();
@@ -131,5 +93,38 @@ class BadgeService
 
             return $this->repository->delete($badge);
         });
+    }
+
+    private function applySearch(\Illuminate\Database\Eloquent\Builder $query, array $params): void
+    {
+        $searchQuery = $params['search'] ?? request('filter.search') ?? request('search');
+
+        if (! $searchQuery || trim($searchQuery) === '') {
+            return;
+        }
+
+        try {
+            $ids = Badge::search($searchQuery)->keys()->toArray();
+            $query->whereIn('id', $ids ?: [0]);
+        } catch (ApiException $e) {
+            if (! str_contains($e->getMessage(), 'not found')) {
+                throw $e;
+            }
+            $query->whereRaw('1 = 0');
+        }
+    }
+
+    private function syncRules(int $badgeId, array $rules): void
+    {
+        \Modules\Gamification\Models\BadgeRule::where('badge_id', $badgeId)->delete();
+
+        foreach ($rules as $rule) {
+            \Modules\Gamification\Models\BadgeRule::create([
+                'badge_id' => $badgeId,
+                'criterion' => $rule['criterion'],
+                'operator' => $rule['operator'],
+                'value' => $rule['value'],
+            ]);
+        }
     }
 }

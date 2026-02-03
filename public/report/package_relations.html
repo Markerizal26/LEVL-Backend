@@ -49,7 +49,7 @@
 <div class="page">
     <div class="content content-first">
         <div class="report-details">
-            Created at 2026-02-02 09:34:09        , with PHPMetrics v2.9.1 (<a href="https://twitter.com/Halleck45">Jean-François Lépine</a>).
+            Created at 2026-02-03 00:02:39        , with PHPMetrics v2.9.1 (<a href="https://twitter.com/Halleck45">Jean-François Lépine</a>).
         </div>
 
         
@@ -93,7 +93,7 @@
                             <path d="M0 0h24v24H0z" fill="none">
                             <path d="M20 8h-2.81c-.45-.78-1.07-1.45-1.82-1.96L17 4.41 15.59 3l-2.17 2.17C12.96 5.06 12.49 5 12 5c-.49 0-.96.06-1.41.17L8.41 3 7 4.41l1.62 1.63C7.88 6.55 7.26 7.22 6.81 8H4v2h2.09c-.05.33-.09.66-.09 1v1H4v2h2v1c0 .34.04.67.09 1H4v2h2.81c1.04 1.79 2.97 3 5.19 3s4.15-1.21 5.19-3H20v-2h-2.09c.05-.33.09-.66.09-1v-1h2v-2h-2v-1c0-.34-.04-.67-.09-1H20V8zm-6 8h-4v-2h4v2zm0-4h-4v-2h4v2z">
                         </svg>
-                        Violations (228)
+                        Violations (16)
                     </a>
                 </li>
                                     <li>
@@ -265,312 +265,21 @@
         "relations": []
     },
     {
-        "name": "Modules\\Forums\\Database\\Seeders",
+        "name": "Modules\\Common\\Database\\Seeders",
         "size": 3000,
         "relations": [
             "Illuminate\\Database",
+            "Modules\\Common\\Models",
             "Modules\\Auth\\Models",
-            "Modules\\Schemes\\Models",
-            "Modules\\Forums\\Models"
+            "App\\Models",
+            "Bezhanov\\Faker\\Provider",
+            "Illuminate\\Support\\Facades"
         ]
     },
     {
         "name": "Illuminate\\Database",
         "size": 3000,
         "relations": []
-    },
-    {
-        "name": "Modules\\Auth\\Models",
-        "size": 3000,
-        "relations": [
-            "Illuminate\\Database\\Eloquent",
-            "Illuminate\\Database\\Eloquent\\Relations",
-            "Illuminate\\Foundation\\Auth",
-            "Spatie\\MediaLibrary",
-            "Tymon\\JWTAuth\\Contracts",
-            "Spatie\\Activitylog",
-            "Database\\Factories"
-        ]
-    },
-    {
-        "name": "Modules\\Schemes\\Models",
-        "size": 3000,
-        "relations": [
-            "Illuminate\\Database\\Eloquent",
-            "Illuminate\\Database\\Eloquent\\Relations",
-            "Spatie\\Sluggable",
-            "Spatie\\Activitylog",
-            "Database\\Factories",
-            "Modules\\Schemes\\Database\\Factories",
-            "Spatie\\MediaLibrary",
-            "Spatie\\MediaLibrary\\MediaCollections\\Models"
-        ]
-    },
-    {
-        "name": "Modules\\Forums\\Models",
-        "size": 3000,
-        "relations": [
-            "Illuminate\\Database\\Eloquent",
-            "Modules\\Forums\\Database\\Factories",
-            "Illuminate\\Database\\Eloquent\\Relations",
-            "global"
-        ]
-    },
-    {
-        "name": "Modules\\Forums\\Database\\Factories",
-        "size": 3000,
-        "relations": [
-            "Illuminate\\Database\\Eloquent\\Factories",
-            "Carbon",
-            "Modules\\Schemes\\Models",
-            "Modules\\Auth\\Models",
-            "Modules\\Forums\\Models"
-        ]
-    },
-    {
-        "name": "Illuminate\\Database\\Eloquent\\Factories",
-        "size": 3000,
-        "relations": []
-    },
-    {
-        "name": "Carbon",
-        "size": 3000,
-        "relations": []
-    },
-    {
-        "name": "Modules\\Forums\\Contracts\\Repositories",
-        "size": 3000,
-        "relations": [
-            "Modules\\Forums\\Models",
-            "Illuminate\\Contracts\\Pagination",
-            "Illuminate\\Pagination"
-        ]
-    },
-    {
-        "name": "Illuminate\\Contracts\\Pagination",
-        "size": 3000,
-        "relations": []
-    },
-    {
-        "name": "Illuminate\\Pagination",
-        "size": 3000,
-        "relations": []
-    },
-    {
-        "name": "Modules\\Forums\\Contracts\\Services",
-        "size": 3000,
-        "relations": [
-            "Modules\\Forums\\Models",
-            "Modules\\Auth\\Models",
-            "Illuminate\\Contracts\\Pagination"
-        ]
-    },
-    {
-        "name": "Modules\\Forums\\Providers",
-        "size": 3000,
-        "relations": [
-            "Illuminate\\Foundation\\Support\\Providers",
-            "Illuminate\\Support\\Facades",
-            "Illuminate\\Support"
-        ]
-    },
-    {
-        "name": "Illuminate\\Foundation\\Support\\Providers",
-        "size": 3000,
-        "relations": []
-    },
-    {
-        "name": "Illuminate\\Support",
-        "size": 3000,
-        "relations": []
-    },
-    {
-        "name": "Modules\\Forums\\Repositories",
-        "size": 3000,
-        "relations": [
-            "Modules\\Forums\\Contracts\\Repositories",
-            "Modules\\Forums\\Models",
-            "App\\Repositories",
-            "Illuminate\\Contracts\\Pagination",
-            "Illuminate\\Pagination",
-            "Illuminate\\Database\\Eloquent",
-            "Carbon"
-        ]
-    },
-    {
-        "name": "App\\Repositories",
-        "size": 3000,
-        "relations": []
-    },
-    {
-        "name": "Illuminate\\Database\\Eloquent",
-        "size": 3000,
-        "relations": []
-    },
-    {
-        "name": "Illuminate\\Database\\Eloquent\\Relations",
-        "size": 3000,
-        "relations": []
-    },
-    {
-        "name": "Modules\\Forums\\Policies",
-        "size": 3000,
-        "relations": [
-            "Modules\\Auth\\Models",
-            "Modules\\Forums\\Models",
-            "Modules\\Enrollments\\Models",
-            "Modules\\Schemes\\Models"
-        ]
-    },
-    {
-        "name": "Modules\\Enrollments\\Models",
-        "size": 3000,
-        "relations": [
-            "Illuminate\\Database\\Eloquent",
-            "Spatie\\Activitylog",
-            "Modules\\Enrollments\\Database\\Factories",
-            "Database\\Factories"
-        ]
-    },
-    {
-        "name": "Modules\\Forums\\DTOs",
-        "size": 3000,
-        "relations": [
-            "Spatie\\LaravelData"
-        ]
-    },
-    {
-        "name": "Spatie\\LaravelData",
-        "size": 3000,
-        "relations": []
-    },
-    {
-        "name": "Modules\\Forums\\Http\\Middleware",
-        "size": 3000,
-        "relations": [
-            "Symfony\\Component\\HttpFoundation",
-            "Illuminate\\Http",
-            "global",
-            "Modules\\Enrollments\\Models",
-            "Modules\\Schemes\\Models"
-        ]
-    },
-    {
-        "name": "Symfony\\Component\\HttpFoundation",
-        "size": 3000,
-        "relations": []
-    },
-    {
-        "name": "Illuminate\\Http",
-        "size": 3000,
-        "relations": []
-    },
-    {
-        "name": "Modules\\Forums\\Http\\Requests",
-        "size": 3000,
-        "relations": [
-            "Illuminate\\Foundation\\Http"
-        ]
-    },
-    {
-        "name": "Illuminate\\Foundation\\Http",
-        "size": 3000,
-        "relations": []
-    },
-    {
-        "name": "Modules\\Forums\\Http\\Controllers",
-        "size": 3000,
-        "relations": [
-            "App\\Http\\Controllers",
-            "Modules\\Forums\\Contracts\\Services",
-            "Modules\\Forums\\Services",
-            "Modules\\Forums\\Repositories",
-            "Illuminate\\Http",
-            "Modules\\Forums\\Http\\Requests",
-            "Modules\\Forums\\Models",
-            "Carbon",
-            "Modules\\Forums\\Contracts\\Repositories",
-            "Modules\\Forums\\Events"
-        ]
-    },
-    {
-        "name": "App\\Http\\Controllers",
-        "size": 3000,
-        "relations": []
-    },
-    {
-        "name": "Modules\\Forums\\Services",
-        "size": 3000,
-        "relations": [
-            "Modules\\Forums\\Contracts\\Services",
-            "Modules\\Forums\\Repositories",
-            "Modules\\Forums\\Models",
-            "Modules\\Auth\\Models",
-            "Modules\\Forums\\Events",
-            "Illuminate\\Support\\Facades",
-            "App\\Contracts\\Services",
-            "Illuminate\\Contracts\\Pagination",
-            "Spatie\\QueryBuilder",
-            "global",
-            "Illuminate\\Database\\Migrations",
-            "Illuminate\\Support"
-        ]
-    },
-    {
-        "name": "Modules\\Forums\\Events",
-        "size": 3000,
-        "relations": [
-            "Modules\\Forums\\Models"
-        ]
-    },
-    {
-        "name": "Modules\\Forums\\Listeners",
-        "size": 3000,
-        "relations": [
-            "Modules\\Notifications\\Services",
-            "Modules\\Forums\\Events",
-            "Modules\\Enrollments\\Models",
-            "Modules\\Forums\\Repositories",
-            "Carbon"
-        ]
-    },
-    {
-        "name": "Modules\\Notifications\\Services",
-        "size": 3000,
-        "relations": [
-            "Modules\\Notifications\\Contracts\\Services",
-            "Modules\\Notifications\\Models",
-            "Modules\\Auth\\Models",
-            "Modules\\Learning\\Models",
-            "Illuminate\\Support\\Facades",
-            "Illuminate\\Support",
-            "Modules\\Notifications\\DTOs",
-            "Modules\\Notifications\\Repositories",
-            "Illuminate\\Contracts\\View"
-        ]
-    },
-    {
-        "name": "App\\Contracts\\Services",
-        "size": 3000,
-        "relations": []
-    },
-    {
-        "name": "Spatie\\QueryBuilder",
-        "size": 3000,
-        "relations": []
-    },
-    {
-        "name": "Modules\\Schemes\\Database\\Seeders",
-        "size": 3000,
-        "relations": [
-            "Illuminate\\Database",
-            "Modules\\Schemes\\Models",
-            "Illuminate\\Support",
-            "Illuminate\\Support\\Facades",
-            "global",
-            "Modules\\Auth\\Models",
-            "Modules\\Common\\Models"
-        ]
     },
     {
         "name": "Modules\\Common\\Models",
@@ -586,1005 +295,9 @@
         ]
     },
     {
-        "name": "Modules\\Schemes\\Database\\Factories",
-        "size": 3000,
-        "relations": [
-            "Illuminate\\Database\\Eloquent\\Factories",
-            "Modules\\Schemes\\Models",
-            "Modules\\Auth\\Models",
-            "Bezhanov\\Faker\\Provider",
-            "Illuminate\\Support"
-        ]
-    },
-    {
-        "name": "Bezhanov\\Faker\\Provider",
+        "name": "Modules\\Auth\\Models",
         "size": 3000,
         "relations": []
-    },
-    {
-        "name": "Modules\\Schemes\\Mail",
-        "size": 3000,
-        "relations": [
-            "Illuminate\\Mail",
-            "Modules\\Auth\\Models",
-            "Modules\\Schemes\\Models",
-            "Modules\\Enrollments\\Models"
-        ]
-    },
-    {
-        "name": "Illuminate\\Mail",
-        "size": 3000,
-        "relations": []
-    },
-    {
-        "name": "Modules\\Schemes\\Contracts\\Repositories",
-        "size": 3000,
-        "relations": [
-            "Modules\\Schemes\\Models",
-            "Illuminate\\Contracts\\Pagination",
-            "Illuminate\\Database\\Eloquent"
-        ]
-    },
-    {
-        "name": "Modules\\Schemes\\Contracts\\Services",
-        "size": 3000,
-        "relations": [
-            "Illuminate\\Contracts\\Pagination",
-            "Modules\\Schemes\\Models",
-            "Modules\\Schemes\\Contracts\\Repositories",
-            "Modules\\Schemes\\Repositories"
-        ]
-    },
-    {
-        "name": "Modules\\Schemes\\Repositories",
-        "size": 3000,
-        "relations": [
-            "App\\Repositories",
-            "Modules\\Schemes\\Contracts\\Repositories",
-            "Modules\\Schemes\\Models",
-            "Illuminate\\Contracts\\Pagination",
-            "Illuminate\\Database\\Eloquent",
-            "Illuminate\\Support"
-        ]
-    },
-    {
-        "name": "Modules\\Schemes\\Providers",
-        "size": 3000,
-        "relations": [
-            "Illuminate\\Foundation\\Support\\Providers",
-            "Illuminate\\Support\\Facades",
-            "Illuminate\\Support"
-        ]
-    },
-    {
-        "name": "Spatie\\Sluggable",
-        "size": 3000,
-        "relations": []
-    },
-    {
-        "name": "Spatie\\Activitylog",
-        "size": 3000,
-        "relations": []
-    },
-    {
-        "name": "Database\\Factories",
-        "size": 3000,
-        "relations": []
-    },
-    {
-        "name": "Spatie\\MediaLibrary",
-        "size": 3000,
-        "relations": []
-    },
-    {
-        "name": "Spatie\\MediaLibrary\\MediaCollections\\Models",
-        "size": 3000,
-        "relations": []
-    },
-    {
-        "name": "Modules\\Schemes\\Policies",
-        "size": 3000,
-        "relations": [
-            "Modules\\Auth\\Models",
-            "Modules\\Schemes\\Models",
-            "Modules\\Enrollments\\Models"
-        ]
-    },
-    {
-        "name": "Modules\\Schemes\\DTOs",
-        "size": 3000,
-        "relations": [
-            "Spatie\\LaravelData"
-        ]
-    },
-    {
-        "name": "Modules\\Schemes\\Http\\Resources",
-        "size": 3000,
-        "relations": [
-            "Illuminate\\Http\\Resources\\Json",
-            "Illuminate\\Http",
-            "Modules\\Auth\\Http\\Resources"
-        ]
-    },
-    {
-        "name": "Illuminate\\Http\\Resources\\Json",
-        "size": 3000,
-        "relations": []
-    },
-    {
-        "name": "Modules\\Auth\\Http\\Resources",
-        "size": 3000,
-        "relations": [
-            "Illuminate\\Http\\Resources\\Json",
-            "Illuminate\\Http"
-        ]
-    },
-    {
-        "name": "Modules\\Schemes\\Http\\Requests",
-        "size": 3000,
-        "relations": [
-            "Illuminate\\Foundation\\Http",
-            "Illuminate\\Support",
-            "Illuminate\\Validation",
-            "Modules\\Schemes\\Models"
-        ]
-    },
-    {
-        "name": "Illuminate\\Validation",
-        "size": 3000,
-        "relations": []
-    },
-    {
-        "name": "Modules\\Schemes\\Http\\Requests\\Concerns",
-        "size": 3000,
-        "relations": [
-            "Illuminate\\Validation",
-            "Modules\\Schemes\\Models"
-        ]
-    },
-    {
-        "name": "Modules\\Schemes\\Http\\Controllers",
-        "size": 3000,
-        "relations": [
-            "Illuminate\\Routing",
-            "Modules\\Schemes\\Services",
-            "Illuminate\\Http",
-            "Modules\\Schemes\\Models",
-            "Modules\\Schemes\\Http\\Resources",
-            "Modules\\Schemes\\Http\\Requests",
-            "Modules\\Enrollments\\Contracts\\Services",
-            "Modules\\Schemes\\Contracts\\Services"
-        ]
-    },
-    {
-        "name": "Illuminate\\Routing",
-        "size": 3000,
-        "relations": []
-    },
-    {
-        "name": "Modules\\Schemes\\Services",
-        "size": 3000,
-        "relations": [
-            "Modules\\Schemes\\Contracts\\Repositories",
-            "Modules\\Schemes\\Models",
-            "Illuminate\\Database\\Eloquent",
-            "Spatie\\QueryBuilder",
-            "Illuminate\\Support",
-            "Illuminate\\Support\\Facades",
-            "global",
-            "Modules\\Schemes\\Services\\Support",
-            "Modules\\Enrollments\\Models",
-            "Modules\\Auth\\Models",
-            "Illuminate\\Contracts\\Pagination",
-            "Modules\\Schemes\\Contracts\\Services",
-            "Illuminate\\Http",
-            "App\\Support",
-            "Illuminate\\Database\\Migrations"
-        ]
-    },
-    {
-        "name": "Modules\\Enrollments\\Contracts\\Services",
-        "size": 3000,
-        "relations": [
-            "Modules\\Schemes\\Models",
-            "Modules\\Auth\\Models",
-            "Illuminate\\Database\\Eloquent",
-            "Illuminate\\Contracts\\Pagination",
-            "Modules\\Enrollments\\Models"
-        ]
-    },
-    {
-        "name": "Modules\\Schemes\\Events",
-        "size": 3000,
-        "relations": [
-            "Modules\\Schemes\\Models",
-            "Modules\\Enrollments\\Models"
-        ]
-    },
-    {
-        "name": "Modules\\Schemes\\Listeners",
-        "size": 3000,
-        "relations": [
-            "Modules\\Schemes\\Services",
-            "Modules\\Schemes\\Events",
-            "Modules\\Enrollments\\Models",
-            "Illuminate\\Support\\Facades",
-            "Modules\\Schemes\\Mail"
-        ]
-    },
-    {
-        "name": "Modules\\Schemes\\Services\\Support",
-        "size": 3000,
-        "relations": [
-            "Modules\\Schemes\\Contracts\\Repositories",
-            "Modules\\Schemes\\Services",
-            "Illuminate\\Contracts\\Pagination",
-            "Modules\\Schemes\\Models",
-            "Illuminate\\Database\\Eloquent",
-            "Spatie\\QueryBuilder",
-            "Illuminate\\Support",
-            "Illuminate\\Http",
-            "App\\Support\\Helpers",
-            "Modules\\Enrollments\\Models",
-            "Modules\\Schemes\\Events",
-            "Illuminate\\Support\\Facades",
-            "App\\Jobs",
-            "App\\Exceptions",
-            "Illuminate\\Database",
-            "App\\Support",
-            "Modules\\Auth\\Models"
-        ]
-    },
-    {
-        "name": "App\\Support",
-        "size": 3000,
-        "relations": []
-    },
-    {
-        "name": "App\\Support\\Helpers",
-        "size": 3000,
-        "relations": []
-    },
-    {
-        "name": "App\\Jobs",
-        "size": 3000,
-        "relations": []
-    },
-    {
-        "name": "App\\Exceptions",
-        "size": 3000,
-        "relations": []
-    },
-    {
-        "name": "Modules\\Enrollments\\Database\\Seeders",
-        "size": 3000,
-        "relations": [
-            "Illuminate\\Database",
-            "global",
-            "Modules\\Auth\\Models",
-            "Modules\\Schemes\\Models",
-            "Illuminate\\Support\\Facades",
-            "Modules\\Enrollments\\Models"
-        ]
-    },
-    {
-        "name": "Modules\\Enrollments\\Database\\Factories",
-        "size": 3000,
-        "relations": [
-            "Illuminate\\Database\\Eloquent\\Factories",
-            "Modules\\Auth\\Models",
-            "Modules\\Schemes\\Models",
-            "Modules\\Enrollments\\Models"
-        ]
-    },
-    {
-        "name": "Modules\\Enrollments\\Mail",
-        "size": 3000,
-        "relations": [
-            "Illuminate\\Mail",
-            "Illuminate\\Contracts\\Queue",
-            "Modules\\Auth\\Models",
-            "Modules\\Schemes\\Models",
-            "Modules\\Enrollments\\Models"
-        ]
-    },
-    {
-        "name": "Illuminate\\Contracts\\Queue",
-        "size": 3000,
-        "relations": []
-    },
-    {
-        "name": "Modules\\Enrollments\\Contracts\\Repositories",
-        "size": 3000,
-        "relations": [
-            "Illuminate\\Contracts\\Pagination",
-            "Illuminate\\Database\\Eloquent"
-        ]
-    },
-    {
-        "name": "Modules\\Enrollments\\Providers",
-        "size": 3000,
-        "relations": [
-            "Illuminate\\Foundation\\Support\\Providers",
-            "Illuminate\\Support\\Facades",
-            "Illuminate\\Support"
-        ]
-    },
-    {
-        "name": "Modules\\Enrollments\\Repositories",
-        "size": 3000,
-        "relations": [
-            "App\\Repositories",
-            "Modules\\Enrollments\\Contracts\\Repositories",
-            "Illuminate\\Contracts\\Pagination",
-            "Modules\\Enrollments\\Models",
-            "Illuminate\\Support\\Facades",
-            "Illuminate\\Database\\Eloquent"
-        ]
-    },
-    {
-        "name": "Modules\\Enrollments\\Policies",
-        "size": 3000,
-        "relations": [
-            "Modules\\Auth\\Models",
-            "Modules\\Schemes\\Models",
-            "Modules\\Enrollments\\Models"
-        ]
-    },
-    {
-        "name": "Modules\\Enrollments\\Exports",
-        "size": 3000,
-        "relations": [
-            "Maatwebsite\\Excel\\Concerns",
-            "Illuminate\\Database\\Eloquent"
-        ]
-    },
-    {
-        "name": "Maatwebsite\\Excel\\Concerns",
-        "size": 3000,
-        "relations": []
-    },
-    {
-        "name": "Modules\\Enrollments\\DTOs",
-        "size": 3000,
-        "relations": [
-            "Spatie\\LaravelData",
-            "global"
-        ]
-    },
-    {
-        "name": "Modules\\Enrollments\\Http\\Resources",
-        "size": 3000,
-        "relations": [
-            "Illuminate\\Http\\Resources\\Json",
-            "Illuminate\\Http"
-        ]
-    },
-    {
-        "name": "Modules\\Enrollments\\Http\\Requests",
-        "size": 3000,
-        "relations": [
-            "Illuminate\\Foundation\\Http"
-        ]
-    },
-    {
-        "name": "Modules\\Enrollments\\Http\\Controllers",
-        "size": 3000,
-        "relations": [
-            "Illuminate\\Routing",
-            "Modules\\Enrollments\\Contracts\\Services",
-            "Illuminate\\Http",
-            "Modules\\Schemes\\Models",
-            "Modules\\Enrollments\\Exports",
-            "Maatwebsite\\Excel\\Facades",
-            "Modules\\Enrollments\\Http\\Resources",
-            "Modules\\Enrollments\\Models"
-        ]
-    },
-    {
-        "name": "Maatwebsite\\Excel\\Facades",
-        "size": 3000,
-        "relations": []
-    },
-    {
-        "name": "Modules\\Enrollments\\Jobs",
-        "size": 3000,
-        "relations": [
-            "Illuminate\\Contracts\\Queue",
-            "Illuminate\\Support\\Facades",
-            "Modules\\Enrollments\\Models"
-        ]
-    },
-    {
-        "name": "Modules\\Enrollments\\Events",
-        "size": 3000,
-        "relations": [
-            "Modules\\Enrollments\\Models"
-        ]
-    },
-    {
-        "name": "Modules\\Enrollments\\Listeners",
-        "size": 3000,
-        "relations": [
-            "Illuminate\\Contracts\\Queue",
-            "Modules\\Enrollments\\Events",
-            "Illuminate\\Support\\Facades"
-        ]
-    },
-    {
-        "name": "Modules\\Enrollments\\Services",
-        "size": 3000,
-        "relations": [
-            "Modules\\Enrollments\\Contracts\\Services",
-            "Modules\\Enrollments\\Services\\Support",
-            "Illuminate\\Contracts\\Pagination",
-            "Modules\\Auth\\Models",
-            "Modules\\Enrollments\\Models",
-            "Modules\\Schemes\\Models",
-            "Illuminate\\Database\\Eloquent"
-        ]
-    },
-    {
-        "name": "Modules\\Enrollments\\Services\\Support",
-        "size": 3000,
-        "relations": [
-            "Modules\\Enrollments\\Contracts\\Repositories",
-            "Illuminate\\Contracts\\Pagination",
-            "Spatie\\QueryBuilder",
-            "Modules\\Auth\\Models",
-            "App\\Exceptions",
-            "Modules\\Enrollments\\Models",
-            "Modules\\Schemes\\Models",
-            "Illuminate\\Http",
-            "Illuminate\\Support",
-            "Illuminate\\Database\\Eloquent",
-            "App\\Contracts",
-            "Modules\\Enrollments\\Events",
-            "Illuminate\\Support\\Facades",
-            "Modules\\Enrollments\\Mail",
-            "App\\Support\\Helpers",
-            "Illuminate\\Database\\Migrations"
-        ]
-    },
-    {
-        "name": "App\\Contracts",
-        "size": 3000,
-        "relations": []
-    },
-    {
-        "name": "Modules\\Grading\\Database\\Seeders",
-        "size": 3000,
-        "relations": [
-            "Illuminate\\Database",
-            "global",
-            "Faker"
-        ]
-    },
-    {
-        "name": "Faker",
-        "size": 3000,
-        "relations": []
-    },
-    {
-        "name": "Modules\\Grading\\Database\\Factories",
-        "size": 3000,
-        "relations": [
-            "Illuminate\\Database\\Eloquent\\Factories",
-            "Modules\\Learning\\Models",
-            "Modules\\Auth\\Models"
-        ]
-    },
-    {
-        "name": "Modules\\Learning\\Models",
-        "size": 3000,
-        "relations": [
-            "Illuminate\\Database\\Eloquent",
-            "Illuminate\\Database\\Eloquent\\Relations",
-            "Modules\\Learning\\Enums",
-            "Carbon",
-            "Spatie\\MediaLibrary",
-            "Modules\\Learning\\Database\\Factories",
-            "global",
-            "Modules\\Learning\\Exceptions",
-            "Modules\\Learning\\Events",
-            "Illuminate\\Support",
-            "Modules\\Schemes\\Models"
-        ]
-    },
-    {
-        "name": "Modules\\Grading\\Strategies",
-        "size": 3000,
-        "relations": [
-            "Modules\\Grading\\Contracts",
-            "Modules\\Learning\\Enums",
-            "Modules\\Learning\\Models"
-        ]
-    },
-    {
-        "name": "Modules\\Grading\\Contracts",
-        "size": 3000,
-        "relations": [
-            "Modules\\Learning\\Models"
-        ]
-    },
-    {
-        "name": "Modules\\Learning\\Enums",
-        "size": 3000,
-        "relations": []
-    },
-    {
-        "name": "Modules\\Grading\\Contracts\\Repositories",
-        "size": 3000,
-        "relations": [
-            "Illuminate\\Contracts\\Pagination",
-            "Modules\\Grading\\Models"
-        ]
-    },
-    {
-        "name": "Modules\\Grading\\Models",
-        "size": 3000,
-        "relations": [
-            "Illuminate\\Database\\Eloquent",
-            "Illuminate\\Database\\Eloquent\\Relations",
-            "global"
-        ]
-    },
-    {
-        "name": "Modules\\Grading\\Providers",
-        "size": 3000,
-        "relations": [
-            "Illuminate\\Foundation\\Support\\Providers",
-            "Illuminate\\Support\\Facades",
-            "Illuminate\\Support"
-        ]
-    },
-    {
-        "name": "Modules\\Grading\\Repositories",
-        "size": 3000,
-        "relations": [
-            "Modules\\Grading\\Contracts\\Repositories",
-            "Modules\\Grading\\Models",
-            "Illuminate\\Support\\Facades",
-            "Illuminate\\Contracts\\Pagination",
-            "Illuminate\\Database\\Eloquent",
-            "Illuminate\\Http",
-            "Spatie\\QueryBuilder"
-        ]
-    },
-    {
-        "name": "Modules\\Grading\\Policies",
-        "size": 3000,
-        "relations": [
-            "Modules\\Auth\\Models",
-            "Modules\\Grading\\Models"
-        ]
-    },
-    {
-        "name": "Modules\\Grading\\DTOs",
-        "size": 3000,
-        "relations": [
-            "Spatie\\LaravelData"
-        ]
-    },
-    {
-        "name": "Modules\\Grading\\Http\\Resources",
-        "size": 3000,
-        "relations": [
-            "Illuminate\\Http\\Resources\\Json",
-            "Illuminate\\Http"
-        ]
-    },
-    {
-        "name": "Modules\\Grading\\Http\\Requests",
-        "size": 3000,
-        "relations": [
-            "Illuminate\\Foundation\\Http"
-        ]
-    },
-    {
-        "name": "Modules\\Grading\\Http\\Controllers",
-        "size": 3000,
-        "relations": [
-            "Illuminate\\Routing",
-            "Modules\\Grading\\Services",
-            "Illuminate\\Http",
-            "Modules\\Grading\\Http\\Requests",
-            "Modules\\Learning\\Models",
-            "Modules\\Grading\\DTOs",
-            "Modules\\Grading\\Http\\Resources"
-        ]
-    },
-    {
-        "name": "Modules\\Grading\\Services",
-        "size": 3000,
-        "relations": [
-            "Illuminate\\Contracts\\Pagination",
-            "Illuminate\\Support",
-            "Illuminate\\Http",
-            "Spatie\\QueryBuilder",
-            "Modules\\Learning\\Models",
-            "Modules\\Grading\\Models",
-            "Modules\\Grading\\Services\\Support",
-            "Modules\\Learning\\Contracts\\Repositories",
-            "Modules\\Grading\\DTOs",
-            "Modules\\Learning\\Exceptions",
-            "global",
-            "Modules\\Grading\\Events",
-            "Modules\\Grading\\Jobs",
-            "Illuminate\\Database\\Migrations",
-            "Illuminate\\Support\\Facades"
-        ]
-    },
-    {
-        "name": "Modules\\Grading\\Jobs",
-        "size": 3000,
-        "relations": [
-            "Illuminate\\Contracts\\Queue",
-            "Modules\\Learning\\Models",
-            "Illuminate\\Support\\Facades",
-            "Modules\\Grading\\Strategies",
-            "Modules\\Grading\\Events",
-            "global",
-            "Modules\\Grading\\Services"
-        ]
-    },
-    {
-        "name": "Modules\\Grading\\Events",
-        "size": 3000,
-        "relations": [
-            "Modules\\Grading\\Models",
-            "Modules\\Learning\\Models",
-            "Illuminate\\Support"
-        ]
-    },
-    {
-        "name": "Modules\\Grading\\Services\\Support",
-        "size": 3000,
-        "relations": [
-            "Modules\\Learning\\Models",
-            "Modules\\Common\\Models",
-            "Illuminate\\Support",
-            "Modules\\Learning\\Exceptions",
-            "Modules\\Grading\\Models",
-            "Modules\\Grading\\Events",
-            "global",
-            "Modules\\Grading\\Strategies"
-        ]
-    },
-    {
-        "name": "Modules\\Learning\\Contracts\\Repositories",
-        "size": 3000,
-        "relations": [
-            "Modules\\Learning\\Models",
-            "Modules\\Learning\\Enums",
-            "Illuminate\\Database\\Eloquent",
-            "Illuminate\\Support",
-            "Illuminate\\Contracts\\Pagination"
-        ]
-    },
-    {
-        "name": "Modules\\Learning\\Exceptions",
-        "size": 3000,
-        "relations": [
-            "global"
-        ]
-    },
-    {
-        "name": "Modules\\Auth\\Database\\Seeders",
-        "size": 3000,
-        "relations": [
-            "Illuminate\\Database",
-            "Modules\\Auth\\Models",
-            "Illuminate\\Support",
-            "Illuminate\\Support\\Facades",
-            "global",
-            "Spatie\\Permission\\Models",
-            "Modules\\Auth\\Enums",
-            "Database\\Factories"
-        ]
-    },
-    {
-        "name": "Spatie\\Permission\\Models",
-        "size": 3000,
-        "relations": []
-    },
-    {
-        "name": "Modules\\Auth\\Enums",
-        "size": 3000,
-        "relations": []
-    },
-    {
-        "name": "Modules\\Auth\\Database\\Factories",
-        "size": 3000,
-        "relations": [
-            "Illuminate\\Database\\Eloquent\\Factories",
-            "Modules\\Auth\\Models",
-            "Illuminate\\Support"
-        ]
-    },
-    {
-        "name": "Modules\\Auth\\Traits",
-        "size": 3000,
-        "relations": [
-            "Modules\\Auth\\Models"
-        ]
-    },
-    {
-        "name": "Modules\\Auth\\Mail",
-        "size": 3000,
-        "relations": [
-            "Illuminate\\Mail",
-            "Modules\\Auth\\Models"
-        ]
-    },
-    {
-        "name": "Modules\\Auth\\Contracts",
-        "size": 3000,
-        "relations": [
-            "Modules\\Auth\\Models"
-        ]
-    },
-    {
-        "name": "Modules\\Auth\\Contracts\\Repositories",
-        "size": 3000,
-        "relations": [
-            "Modules\\Auth\\Models",
-            "Illuminate\\Contracts\\Pagination",
-            "Illuminate\\Support"
-        ]
-    },
-    {
-        "name": "Modules\\Auth\\Contracts\\Services",
-        "size": 3000,
-        "relations": [
-            "Modules\\Auth\\Models",
-            "Tymon\\JWTAuth",
-            "Illuminate\\Contracts\\Pagination",
-            "Illuminate\\Support"
-        ]
-    },
-    {
-        "name": "Tymon\\JWTAuth",
-        "size": 3000,
-        "relations": []
-    },
-    {
-        "name": "Modules\\Auth\\Providers",
-        "size": 3000,
-        "relations": [
-            "Illuminate\\Support",
-            "Modules\\Auth\\Models",
-            "Modules\\Auth\\Support",
-            "Illuminate\\Support\\Facades",
-            "Illuminate\\Foundation\\Support\\Providers"
-        ]
-    },
-    {
-        "name": "Modules\\Auth\\Support",
-        "size": 3000,
-        "relations": [
-            "Illuminate\\Auth"
-        ]
-    },
-    {
-        "name": "Modules\\Auth\\Repositories",
-        "size": 3000,
-        "relations": [
-            "App\\Repositories",
-            "Illuminate\\Support",
-            "Modules\\Auth\\Contracts\\Repositories",
-            "Modules\\Auth\\Models",
-            "Illuminate\\Contracts\\Pagination",
-            "global",
-            "Modules\\Auth\\Enums"
-        ]
-    },
-    {
-        "name": "Illuminate\\Foundation\\Auth",
-        "size": 3000,
-        "relations": []
-    },
-    {
-        "name": "Tymon\\JWTAuth\\Contracts",
-        "size": 3000,
-        "relations": []
-    },
-    {
-        "name": "Modules\\Auth\\Policies",
-        "size": 3000,
-        "relations": [
-            "Modules\\Auth\\Models",
-            "Modules\\Schemes\\Models",
-            "Modules\\Enrollments\\Models",
-            "Modules\\Auth\\Contracts"
-        ]
-    },
-    {
-        "name": "Modules\\Auth\\Exports",
-        "size": 3000,
-        "relations": [
-            "Maatwebsite\\Excel\\Concerns",
-            "Modules\\Auth\\Models",
-            "PhpOffice\\PhpSpreadsheet\\Worksheet"
-        ]
-    },
-    {
-        "name": "PhpOffice\\PhpSpreadsheet\\Worksheet",
-        "size": 3000,
-        "relations": []
-    },
-    {
-        "name": "Modules\\Auth\\DTOs",
-        "size": 3000,
-        "relations": [
-            "Spatie\\LaravelData"
-        ]
-    },
-    {
-        "name": "Illuminate\\Auth",
-        "size": 3000,
-        "relations": []
-    },
-    {
-        "name": "Modules\\Auth\\Http\\Middleware",
-        "size": 3000,
-        "relations": [
-            "Illuminate\\Http",
-            "global",
-            "Symfony\\Component\\HttpFoundation"
-        ]
-    },
-    {
-        "name": "Modules\\Auth\\Http\\Requests",
-        "size": 3000,
-        "relations": [
-            "Illuminate\\Foundation\\Http",
-            "App\\Http\\Requests",
-            "App\\Support\\ValidationRules",
-            "Illuminate\\Contracts\\Validation",
-            "Illuminate\\Http\\Exceptions",
-            "Illuminate\\Validation"
-        ]
-    },
-    {
-        "name": "App\\Http\\Requests",
-        "size": 3000,
-        "relations": []
-    },
-    {
-        "name": "App\\Support\\ValidationRules",
-        "size": 3000,
-        "relations": []
-    },
-    {
-        "name": "Illuminate\\Contracts\\Validation",
-        "size": 3000,
-        "relations": []
-    },
-    {
-        "name": "Illuminate\\Http\\Exceptions",
-        "size": 3000,
-        "relations": []
-    },
-    {
-        "name": "Modules\\Auth\\Http\\Requests\\Concerns",
-        "size": 3000,
-        "relations": [
-            "Illuminate\\Validation\\Rules",
-            "Illuminate\\Validation"
-        ]
-    },
-    {
-        "name": "Illuminate\\Validation\\Rules",
-        "size": 3000,
-        "relations": []
-    },
-    {
-        "name": "Modules\\Auth\\Http\\Controllers",
-        "size": 3000,
-        "relations": [
-            "App\\Http\\Controllers",
-            "App\\Contracts\\Services",
-            "Illuminate\\Http",
-            "Modules\\Auth\\Http\\Requests",
-            "Modules\\Auth\\Contracts\\Services",
-            "Modules\\Auth\\Contracts\\Repositories",
-            "Modules\\Auth\\Services",
-            "Modules\\Auth\\Http\\Resources",
-            "Modules\\Auth\\Models",
-            "Illuminate\\Support\\Facades",
-            "Modules\\Auth\\Mail",
-            "Modules\\Auth\\Events",
-            "Laravel\\Socialite\\Facades",
-            "Illuminate\\Validation"
-        ]
-    },
-    {
-        "name": "Modules\\Auth\\Services",
-        "size": 3000,
-        "relations": [
-            "Modules\\Auth\\Contracts\\Services",
-            "Modules\\Auth\\Contracts\\Repositories",
-            "Modules\\Auth\\Models",
-            "Modules\\Auth\\Jobs",
-            "Illuminate\\Http",
-            "Spatie\\QueryBuilder",
-            "Modules\\Schemes\\Models",
-            "Illuminate\\Support",
-            "global",
-            "Illuminate\\Support\\Facades",
-            "Modules\\Auth\\Services\\Support",
-            "Illuminate\\Validation",
-            "Modules\\Common\\Models",
-            "Modules\\Auth\\Mail",
-            "Tymon\\JWTAuth",
-            "App\\Exceptions",
-            "Modules\\Auth\\Events",
-            "Modules\\Auth\\Support",
-            "Illuminate\\Contracts\\Pagination",
-            "App\\Models",
-            "Modules\\Auth\\DTOs",
-            "Modules\\Auth\\Repositories",
-            "App\\Contracts\\Services",
-            "Illuminate\\Auth\\Access",
-            "Illuminate\\Cache",
-            "Illuminate\\Database\\Migrations"
-        ]
-    },
-    {
-        "name": "Modules\\Auth\\Events",
-        "size": 3000,
-        "relations": [
-            "Modules\\Auth\\Models"
-        ]
-    },
-    {
-        "name": "Laravel\\Socialite\\Facades",
-        "size": 3000,
-        "relations": []
-    },
-    {
-        "name": "Modules\\Auth\\Jobs",
-        "size": 3000,
-        "relations": [
-            "Illuminate\\Contracts\\Queue",
-            "Modules\\Auth\\Exports",
-            "Maatwebsite\\Excel\\Facades",
-            "Illuminate\\Support\\Facades",
-            "Modules\\Auth\\Mail"
-        ]
-    },
-    {
-        "name": "Modules\\Auth\\Observers",
-        "size": 3000,
-        "relations": [
-            "Modules\\Auth\\Models"
-        ]
-    },
-    {
-        "name": "Modules\\Auth\\Services\\Support",
-        "size": 3000,
-        "relations": [
-            "Modules\\Auth\\Contracts\\Repositories",
-            "Tymon\\JWTAuth",
-            "Modules\\Auth\\Services",
-            "Illuminate\\Validation",
-            "Illuminate\\Support\\Facades",
-            "App\\Exceptions",
-            "Modules\\Auth\\Support",
-            "App\\Jobs",
-            "Modules\\Auth\\Models",
-            "Modules\\Auth\\Contracts",
-            "Illuminate\\Contracts\\Pagination",
-            "Illuminate\\Auth\\Access",
-            "Illuminate\\Support",
-            "Illuminate\\Http",
-            "Spatie\\QueryBuilder",
-            "Modules\\Schemes\\Models",
-            "Modules\\Common\\Models",
-            "Modules\\Auth\\Mail",
-            "Modules\\Auth\\Enums"
-        ]
     },
     {
         "name": "App\\Models",
@@ -1592,766 +305,9 @@
         "relations": []
     },
     {
-        "name": "Illuminate\\Auth\\Access",
+        "name": "Bezhanov\\Faker\\Provider",
         "size": 3000,
         "relations": []
-    },
-    {
-        "name": "Illuminate\\Cache",
-        "size": 3000,
-        "relations": []
-    },
-    {
-        "name": "Modules\\Gamification\\Database\\Seeders",
-        "size": 3000,
-        "relations": [
-            "Illuminate\\Database",
-            "Modules\\Gamification\\Models",
-            "Modules\\Gamification\\Contracts\\Services",
-            "global",
-            "Faker",
-            "Modules\\Auth\\Models",
-            "Modules\\Gamification\\Enums",
-            "Modules\\Schemes\\Models"
-        ]
-    },
-    {
-        "name": "Modules\\Gamification\\Models",
-        "size": 3000,
-        "relations": [
-            "Illuminate\\Database\\Eloquent",
-            "Illuminate\\Database\\Eloquent\\Relations",
-            "Spatie\\MediaLibrary"
-        ]
-    },
-    {
-        "name": "Modules\\Gamification\\Contracts\\Services",
-        "size": 3000,
-        "relations": [
-            "Illuminate\\Support",
-            "Modules\\Gamification\\Models",
-            "Illuminate\\Contracts\\Pagination",
-            "Illuminate\\Contracts\\View"
-        ]
-    },
-    {
-        "name": "Modules\\Gamification\\Enums",
-        "size": 3000,
-        "relations": []
-    },
-    {
-        "name": "Modules\\Gamification\\Database\\Factories",
-        "size": 3000,
-        "relations": [
-            "Illuminate\\Database\\Eloquent\\Factories",
-            "Modules\\Auth\\Models"
-        ]
-    },
-    {
-        "name": "Modules\\Gamification\\Contracts\\Repositories",
-        "size": 3000,
-        "relations": [
-            "Modules\\Gamification\\Models",
-            "Illuminate\\Support",
-            "Illuminate\\Contracts\\Pagination"
-        ]
-    },
-    {
-        "name": "Illuminate\\Contracts\\View",
-        "size": 3000,
-        "relations": []
-    },
-    {
-        "name": "Modules\\Gamification\\Providers",
-        "size": 3000,
-        "relations": [
-            "Illuminate\\Foundation\\Support\\Providers",
-            "Illuminate\\Support\\Facades",
-            "Illuminate\\Support"
-        ]
-    },
-    {
-        "name": "Modules\\Gamification\\Repositories",
-        "size": 3000,
-        "relations": [
-            "Modules\\Gamification\\Contracts\\Repositories",
-            "Illuminate\\Contracts\\Pagination",
-            "Modules\\Gamification\\Models",
-            "Illuminate\\Support",
-            "Illuminate\\Database\\Eloquent"
-        ]
-    },
-    {
-        "name": "Modules\\Gamification\\Policies",
-        "size": 3000,
-        "relations": [
-            "Modules\\Gamification\\Models",
-            "Modules\\Auth\\Models"
-        ]
-    },
-    {
-        "name": "Modules\\Gamification\\DTOs",
-        "size": 3000,
-        "relations": [
-            "Spatie\\LaravelData"
-        ]
-    },
-    {
-        "name": "Modules\\Gamification\\Transformers",
-        "size": 3000,
-        "relations": [
-            "Illuminate\\Http\\Resources\\Json"
-        ]
-    },
-    {
-        "name": "Modules\\Gamification\\Http\\Controllers",
-        "size": 3000,
-        "relations": [
-            "App\\Http\\Controllers",
-            "Modules\\Gamification\\Services",
-            "Illuminate\\Http",
-            "Modules\\Gamification\\Transformers",
-            "Modules\\Gamification\\Contracts\\Services",
-            "Modules\\Schemes\\Models"
-        ]
-    },
-    {
-        "name": "Modules\\Gamification\\Services",
-        "size": 3000,
-        "relations": [
-            "Modules\\Gamification\\Contracts\\Services",
-            "Modules\\Gamification\\Services\\Support",
-            "Spatie\\QueryBuilder",
-            "Illuminate\\Support",
-            "Illuminate\\Contracts\\Pagination",
-            "Modules\\Gamification\\Models",
-            "Illuminate\\Contracts\\View",
-            "Modules\\Schemes\\Models",
-            "Illuminate\\Support\\Facades"
-        ]
-    },
-    {
-        "name": "Modules\\Gamification\\Listeners",
-        "size": 3000,
-        "relations": [
-            "Modules\\Gamification\\Services",
-            "Modules\\Schemes\\Events",
-            "Modules\\Common\\Models",
-            "Modules\\Grading\\Events",
-            "Modules\\Learning\\Events"
-        ]
-    },
-    {
-        "name": "Modules\\Learning\\Events",
-        "size": 3000,
-        "relations": [
-            "Modules\\Learning\\Models",
-            "Modules\\Learning\\Enums"
-        ]
-    },
-    {
-        "name": "Modules\\Gamification\\Services\\Support",
-        "size": 3000,
-        "relations": [
-            "Modules\\Gamification\\Repositories",
-            "Illuminate\\Support\\Facades",
-            "Illuminate\\Support",
-            "Modules\\Gamification\\Models",
-            "Carbon",
-            "Illuminate\\Database\\Eloquent",
-            "Illuminate\\Contracts\\Pagination",
-            "Modules\\Auth\\Models",
-            "Modules\\Schemes\\Models",
-            "Modules\\Learning\\Models",
-            "Modules\\Grading\\Models",
-            "Spatie\\QueryBuilder",
-            "Symfony\\Component\\HttpKernel\\Exception"
-        ]
-    },
-    {
-        "name": "Symfony\\Component\\HttpKernel\\Exception",
-        "size": 3000,
-        "relations": []
-    },
-    {
-        "name": "Modules\\Gamification\\Console\\Commands",
-        "size": 3000,
-        "relations": [
-            "Illuminate\\Console",
-            "Modules\\Gamification\\Services",
-            "Illuminate\\Database\\Migrations",
-            "Illuminate\\Support\\Facades",
-            "global"
-        ]
-    },
-    {
-        "name": "Illuminate\\Console",
-        "size": 3000,
-        "relations": []
-    },
-    {
-        "name": "Modules\\Learning\\Database\\Seeders",
-        "size": 3000,
-        "relations": [
-            "Illuminate\\Database",
-            "global",
-            "Faker",
-            "Modules\\Auth\\Models",
-            "Modules\\Schemes\\Models",
-            "Carbon",
-            "Illuminate\\Support\\Facades",
-            "Modules\\Enrollments\\Models",
-            "Modules\\Learning\\Models",
-            "Illuminate\\Support"
-        ]
-    },
-    {
-        "name": "Modules\\Learning\\Database\\Factories",
-        "size": 3000,
-        "relations": [
-            "Illuminate\\Database\\Eloquent\\Factories",
-            "Modules\\Learning\\Models",
-            "Modules\\Auth\\Models",
-            "Modules\\Enrollments\\Models",
-            "Modules\\Schemes\\Models",
-            "Modules\\Learning\\Enums"
-        ]
-    },
-    {
-        "name": "Modules\\Learning\\Mail",
-        "size": 3000,
-        "relations": [
-            "Illuminate\\Mail",
-            "Illuminate\\Contracts\\Queue",
-            "Modules\\Auth\\Models",
-            "Modules\\Schemes\\Models",
-            "Modules\\Learning\\Models"
-        ]
-    },
-    {
-        "name": "Modules\\Learning\\Contracts\\Services",
-        "size": 3000,
-        "relations": [
-            "Modules\\Learning\\Models",
-            "Modules\\Schemes\\Models",
-            "Modules\\Learning\\DTOs",
-            "Illuminate\\Support",
-            "Illuminate\\Contracts\\Pagination",
-            "Modules\\Auth\\Models",
-            "Modules\\Learning\\Enums"
-        ]
-    },
-    {
-        "name": "Modules\\Learning\\DTOs",
-        "size": 3000,
-        "relations": [
-            "Spatie\\LaravelData",
-            "Illuminate\\Support"
-        ]
-    },
-    {
-        "name": "Modules\\Learning\\Providers",
-        "size": 3000,
-        "relations": [
-            "Illuminate\\Support",
-            "Illuminate\\Support\\Facades",
-            "Illuminate\\Foundation\\Support\\Providers"
-        ]
-    },
-    {
-        "name": "Modules\\Learning\\Repositories",
-        "size": 3000,
-        "relations": [
-            "App\\Repositories",
-            "Modules\\Learning\\Contracts\\Repositories",
-            "Illuminate\\Contracts\\Pagination",
-            "Modules\\Learning\\Models",
-            "Illuminate\\Http",
-            "Spatie\\QueryBuilder",
-            "Illuminate\\Support",
-            "Illuminate\\Database\\Eloquent",
-            "Illuminate\\Support\\Facades",
-            "Modules\\Schemes\\Models",
-            "Modules\\Learning\\Enums"
-        ]
-    },
-    {
-        "name": "Modules\\Learning\\Policies",
-        "size": 3000,
-        "relations": [
-            "Modules\\Auth\\Models",
-            "Modules\\Learning\\Models",
-            "Modules\\Enrollments\\Models",
-            "Illuminate\\Auth\\Access",
-            "Modules\\Schemes\\Models"
-        ]
-    },
-    {
-        "name": "Modules\\Learning\\Http\\Resources",
-        "size": 3000,
-        "relations": [
-            "Illuminate\\Http\\Resources\\Json",
-            "Illuminate\\Http"
-        ]
-    },
-    {
-        "name": "Modules\\Learning\\Http\\Requests",
-        "size": 3000,
-        "relations": [
-            "Illuminate\\Foundation\\Http",
-            "Illuminate\\Validation",
-            "global",
-            "Modules\\Learning\\Enums",
-            "Modules\\Learning\\Models"
-        ]
-    },
-    {
-        "name": "Modules\\Learning\\Http\\Controllers",
-        "size": 3000,
-        "relations": [
-            "App\\Http\\Controllers",
-            "Modules\\Learning\\Services",
-            "Illuminate\\Http",
-            "Illuminate\\Routing",
-            "Modules\\Learning\\Contracts\\Services",
-            "Modules\\Schemes\\Models",
-            "Modules\\Learning\\Http\\Resources",
-            "Modules\\Learning\\Http\\Requests",
-            "Modules\\Learning\\Models"
-        ]
-    },
-    {
-        "name": "Modules\\Learning\\Services",
-        "size": 3000,
-        "relations": [
-            "Modules\\Learning\\Contracts\\Services",
-            "Modules\\Learning\\Contracts\\Repositories",
-            "Modules\\Learning\\Models",
-            "Illuminate\\Support\\Facades",
-            "global",
-            "Modules\\Learning\\Events",
-            "Modules\\Grading\\Jobs",
-            "Illuminate\\Support",
-            "Illuminate\\Contracts\\Pagination",
-            "Spatie\\QueryBuilder",
-            "Modules\\Learning\\Enums",
-            "Modules\\Learning\\Services\\Support",
-            "Modules\\Auth\\Models",
-            "Modules\\Learning\\Repositories",
-            "Illuminate\\Contracts\\View",
-            "Modules\\Schemes\\Models",
-            "Illuminate\\Validation",
-            "Illuminate\\Database\\Eloquent",
-            "Modules\\Learning\\DTOs"
-        ]
-    },
-    {
-        "name": "Modules\\Learning\\Jobs",
-        "size": 3000,
-        "relations": [
-            "Illuminate\\Contracts\\Queue",
-            "Modules\\Learning\\Models",
-            "Illuminate\\Support\\Facades",
-            "global"
-        ]
-    },
-    {
-        "name": "Modules\\Learning\\Listeners",
-        "size": 3000,
-        "relations": [
-            "Illuminate\\Contracts\\Queue",
-            "Modules\\Learning\\Events",
-            "Modules\\Enrollments\\Models",
-            "Illuminate\\Support\\Facades",
-            "Modules\\Learning\\Mail",
-            "Modules\\Learning\\Contracts\\Services",
-            "Modules\\Grading\\Services"
-        ]
-    },
-    {
-        "name": "Modules\\Learning\\Services\\Support",
-        "size": 3000,
-        "relations": [
-            "Modules\\Learning\\Models",
-            "Modules\\Learning\\Enums",
-            "Modules\\Learning\\Contracts\\Repositories",
-            "Modules\\Enrollments\\Contracts\\Repositories",
-            "Modules\\Learning\\Exceptions",
-            "Illuminate\\Support",
-            "Modules\\Learning\\Events",
-            "Illuminate\\Support\\Facades",
-            "Modules\\Schemes\\Models",
-            "Modules\\Common\\Models",
-            "Illuminate\\Contracts\\Pagination",
-            "Modules\\Auth\\Models",
-            "Spatie\\QueryBuilder",
-            "global",
-            "Illuminate\\Database\\Eloquent",
-            "Modules\\Grading\\Services",
-            "Modules\\Grading\\DTOs",
-            "Modules\\Learning\\DTOs"
-        ]
-    },
-    {
-        "name": "Modules\\Learning\\Console\\Commands",
-        "size": 3000,
-        "relations": [
-            "Illuminate\\Console",
-            "Modules\\Learning\\Models",
-            "Illuminate\\Support\\Facades",
-            "Illuminate\\Database\\Migrations"
-        ]
-    },
-    {
-        "name": "Modules\\Content\\Database\\Seeders",
-        "size": 3000,
-        "relations": [
-            "Illuminate\\Database",
-            "Modules\\Content\\Models",
-            "Modules\\Auth\\Models",
-            "Modules\\Schemes\\Models"
-        ]
-    },
-    {
-        "name": "Modules\\Content\\Models",
-        "size": 3000,
-        "relations": [
-            "Illuminate\\Database\\Eloquent",
-            "Spatie\\MediaLibrary",
-            "Modules\\Content\\Database\\Factories",
-            "Spatie\\Sluggable",
-            "Spatie\\Activitylog",
-            "Illuminate\\Database\\Eloquent\\Relations",
-            "global",
-            "Modules\\Auth\\Models"
-        ]
-    },
-    {
-        "name": "Modules\\Content\\Database\\Factories",
-        "size": 3000,
-        "relations": [
-            "Illuminate\\Database\\Eloquent\\Factories",
-            "Modules\\Auth\\Models",
-            "Modules\\Schemes\\Models"
-        ]
-    },
-    {
-        "name": "Modules\\Content\\Traits",
-        "size": 3000,
-        "relations": [
-            "Modules\\Auth\\Models",
-            "Modules\\Content\\Models"
-        ]
-    },
-    {
-        "name": "Modules\\Content\\Contracts\\Repositories",
-        "size": 3000,
-        "relations": [
-            "Illuminate\\Pagination",
-            "Modules\\Auth\\Models",
-            "Modules\\Content\\Models",
-            "Illuminate\\Database\\Eloquent"
-        ]
-    },
-    {
-        "name": "Modules\\Content\\Contracts\\Services",
-        "size": 3000,
-        "relations": [
-            "Illuminate\\Database\\Eloquent",
-            "Modules\\Auth\\Models",
-            "Illuminate\\Pagination",
-            "Modules\\Content\\Models",
-            "Modules\\Content\\DTOs",
-            "Carbon",
-            "Illuminate\\Support"
-        ]
-    },
-    {
-        "name": "Modules\\Content\\DTOs",
-        "size": 3000,
-        "relations": [
-            "Spatie\\LaravelData"
-        ]
-    },
-    {
-        "name": "Modules\\Content\\Providers",
-        "size": 3000,
-        "relations": [
-            "Illuminate\\Support",
-            "Illuminate\\Support\\Facades",
-            "Illuminate\\Foundation\\Support\\Providers"
-        ]
-    },
-    {
-        "name": "Modules\\Content\\Repositories",
-        "size": 3000,
-        "relations": [
-            "Modules\\Content\\Contracts\\Repositories",
-            "Illuminate\\Pagination",
-            "Modules\\Auth\\Models",
-            "Modules\\Content\\Models",
-            "Illuminate\\Database\\Eloquent",
-            "Illuminate\\Http",
-            "Spatie\\QueryBuilder",
-            "global",
-            "Illuminate\\Support\\Facades",
-            "Illuminate\\Support"
-        ]
-    },
-    {
-        "name": "Modules\\Content\\Exceptions",
-        "size": 3000,
-        "relations": [
-            "global"
-        ]
-    },
-    {
-        "name": "Modules\\Content\\Policies",
-        "size": 3000,
-        "relations": [
-            "Modules\\Auth\\Models",
-            "Modules\\Content\\Models",
-            "Modules\\Schemes\\Models"
-        ]
-    },
-    {
-        "name": "Modules\\Content\\Http\\Resources",
-        "size": 3000,
-        "relations": [
-            "App\\Http\\Resources",
-            "Illuminate\\Http"
-        ]
-    },
-    {
-        "name": "App\\Http\\Resources",
-        "size": 3000,
-        "relations": []
-    },
-    {
-        "name": "Modules\\Content\\Http\\Requests",
-        "size": 3000,
-        "relations": [
-            "Illuminate\\Foundation\\Http",
-            "Illuminate\\Validation"
-        ]
-    },
-    {
-        "name": "Modules\\Content\\Http\\Controllers",
-        "size": 3000,
-        "relations": [
-            "App\\Http\\Controllers",
-            "Modules\\Content\\Contracts\\Services",
-            "Modules\\Content\\Contracts\\Repositories",
-            "Illuminate\\Http",
-            "Illuminate\\Support\\Facades",
-            "Modules\\Content\\Models",
-            "App\\Contracts\\Services",
-            "Modules\\Content\\Repositories",
-            "Modules\\Schemes\\Models",
-            "Modules\\Content\\Http\\Requests",
-            "Carbon",
-            "Modules\\Content\\Http\\Resources",
-            "App\\Exceptions"
-        ]
-    },
-    {
-        "name": "Modules\\Content\\Jobs",
-        "size": 3000,
-        "relations": [
-            "Illuminate\\Contracts\\Queue",
-            "Modules\\Content\\Services",
-            "Illuminate\\Support\\Facades"
-        ]
-    },
-    {
-        "name": "Modules\\Content\\Services",
-        "size": 3000,
-        "relations": [
-            "Modules\\Content\\Contracts\\Services",
-            "Modules\\Content\\Contracts\\Repositories",
-            "Illuminate\\Pagination",
-            "Spatie\\QueryBuilder",
-            "Modules\\Content\\Models",
-            "Modules\\Content\\DTOs",
-            "Modules\\Auth\\Models",
-            "Illuminate\\Support\\Facades",
-            "App\\Exceptions",
-            "Modules\\Content\\Events",
-            "Carbon",
-            "Illuminate\\Database\\Eloquent",
-            "Modules\\Content\\Exceptions",
-            "global",
-            "Illuminate\\Support",
-            "Modules\\Content\\Repositories",
-            "App\\Contracts\\Services",
-            "Illuminate\\Database\\Migrations"
-        ]
-    },
-    {
-        "name": "Modules\\Content\\Events",
-        "size": 3000,
-        "relations": [
-            "Illuminate\\Database\\Eloquent",
-            "Modules\\Auth\\Models",
-            "Modules\\Content\\Models"
-        ]
-    },
-    {
-        "name": "Modules\\Content\\Listeners",
-        "size": 3000,
-        "relations": [
-            "Modules\\Content\\Events",
-            "Illuminate\\Support\\Facades",
-            "Modules\\Content\\Services",
-            "Modules\\Auth\\Models",
-            "Modules\\Content\\Models"
-        ]
-    },
-    {
-        "name": "Modules\\Operations\\Database\\Seeders",
-        "size": 3000,
-        "relations": [
-            "Illuminate\\Database"
-        ]
-    },
-    {
-        "name": "Modules\\Operations\\Providers",
-        "size": 3000,
-        "relations": [
-            "Illuminate\\Foundation\\Support\\Providers",
-            "Illuminate\\Support\\Facades",
-            "Illuminate\\Support"
-        ]
-    },
-    {
-        "name": "Modules\\Operations\\Repositories",
-        "size": 3000,
-        "relations": []
-    },
-    {
-        "name": "Modules\\Operations\\Models",
-        "size": 3000,
-        "relations": [
-            "Illuminate\\Database\\Eloquent",
-            "Spatie\\MediaLibrary"
-        ]
-    },
-    {
-        "name": "Modules\\Operations\\Http\\Middleware",
-        "size": 3000,
-        "relations": [
-            "Illuminate\\Http",
-            "global",
-            "Illuminate\\Support\\Facades"
-        ]
-    },
-    {
-        "name": "Modules\\Operations\\Http\\Controllers",
-        "size": 3000,
-        "relations": [
-            "App\\Http\\Controllers",
-            "Modules\\Operations\\Services",
-            "Illuminate\\Http"
-        ]
-    },
-    {
-        "name": "Modules\\Operations\\Services",
-        "size": 3000,
-        "relations": [
-            "Modules\\Operations\\Repositories",
-            "Illuminate\\Contracts\\View",
-            "Illuminate\\Database\\Migrations",
-            "Illuminate\\Support\\Facades"
-        ]
-    },
-    {
-        "name": "Modules\\Search\\Database\\Seeders",
-        "size": 3000,
-        "relations": [
-            "Illuminate\\Database"
-        ]
-    },
-    {
-        "name": "Modules\\Search\\Contracts\\Repositories",
-        "size": 3000,
-        "relations": [
-            "Illuminate\\Support",
-            "Modules\\Search\\Models"
-        ]
-    },
-    {
-        "name": "Modules\\Search\\Models",
-        "size": 3000,
-        "relations": [
-            "Illuminate\\Database\\Eloquent",
-            "Illuminate\\Database\\Eloquent\\Relations"
-        ]
-    },
-    {
-        "name": "Modules\\Search\\Contracts\\Services",
-        "size": 3000,
-        "relations": [
-            "Modules\\Search\\DTOs",
-            "Modules\\Auth\\Models"
-        ]
-    },
-    {
-        "name": "Modules\\Search\\DTOs",
-        "size": 3000,
-        "relations": [
-            "Illuminate\\Pagination"
-        ]
-    },
-    {
-        "name": "Modules\\Search\\Providers",
-        "size": 3000,
-        "relations": [
-            "Illuminate\\Foundation\\Support\\Providers",
-            "Illuminate\\Support\\Facades",
-            "Illuminate\\Support"
-        ]
-    },
-    {
-        "name": "Modules\\Search\\Repositories",
-        "size": 3000,
-        "relations": [
-            "Modules\\Search\\Contracts\\Repositories",
-            "Illuminate\\Support",
-            "Modules\\Search\\Models"
-        ]
-    },
-    {
-        "name": "Modules\\Search\\Http\\Controllers",
-        "size": 3000,
-        "relations": [
-            "App\\Http\\Controllers",
-            "Modules\\Search\\Contracts\\Services",
-            "Modules\\Search\\Contracts\\Repositories",
-            "Illuminate\\Http"
-        ]
-    },
-    {
-        "name": "Modules\\Search\\Services",
-        "size": 3000,
-        "relations": [
-            "Modules\\Search\\Contracts\\Services",
-            "Modules\\Search\\Contracts\\Repositories",
-            "Modules\\Search\\DTOs",
-            "Modules\\Schemes\\Models",
-            "Modules\\Auth\\Models",
-            "Illuminate\\Database\\Migrations",
-            "Illuminate\\Support\\Facades"
-        ]
-    },
-    {
-        "name": "Modules\\Common\\Database\\Seeders",
-        "size": 3000,
-        "relations": [
-            "Illuminate\\Database",
-            "Modules\\Common\\Models",
-            "Bezhanov\\Faker\\Provider",
-            "Illuminate\\Support\\Facades"
-        ]
     },
     {
         "name": "Modules\\Common\\Contracts\\Repositories",
@@ -2364,6 +320,21 @@
         ]
     },
     {
+        "name": "Illuminate\\Contracts\\Pagination",
+        "size": 3000,
+        "relations": []
+    },
+    {
+        "name": "Illuminate\\Database\\Eloquent",
+        "size": 3000,
+        "relations": []
+    },
+    {
+        "name": "Illuminate\\Support",
+        "size": 3000,
+        "relations": []
+    },
+    {
         "name": "Modules\\Common\\Contracts\\Services",
         "size": 3000,
         "relations": [
@@ -2373,6 +344,16 @@
         ]
     },
     {
+        "name": "Modules\\Learning\\Models",
+        "size": 3000,
+        "relations": []
+    },
+    {
+        "name": "Modules\\Grading\\Models",
+        "size": 3000,
+        "relations": []
+    },
+    {
         "name": "Modules\\Common\\Providers",
         "size": 3000,
         "relations": [
@@ -2380,6 +361,11 @@
             "Illuminate\\Support\\Facades",
             "Illuminate\\Support"
         ]
+    },
+    {
+        "name": "Illuminate\\Foundation\\Support\\Providers",
+        "size": 3000,
+        "relations": []
     },
     {
         "name": "Modules\\Common\\Repositories",
@@ -2396,7 +382,51 @@
         ]
     },
     {
+        "name": "App\\Repositories",
+        "size": 3000,
+        "relations": []
+    },
+    {
+        "name": "Illuminate\\Http",
+        "size": 3000,
+        "relations": []
+    },
+    {
+        "name": "Spatie\\QueryBuilder",
+        "size": 3000,
+        "relations": []
+    },
+    {
+        "name": "Spatie\\Activitylog",
+        "size": 3000,
+        "relations": []
+    },
+    {
+        "name": "Database\\Factories",
+        "size": 3000,
+        "relations": []
+    },
+    {
         "name": "Modules\\Common\\Enums",
+        "size": 3000,
+        "relations": []
+    },
+    {
+        "name": "Illuminate\\Database\\Eloquent\\Relations",
+        "size": 3000,
+        "relations": []
+    },
+    {
+        "name": "Modules\\Common\\Policies",
+        "size": 3000,
+        "relations": [
+            "Modules\\Gamification\\Models",
+            "Modules\\Auth\\Models",
+            "Modules\\Common\\Models"
+        ]
+    },
+    {
+        "name": "Modules\\Gamification\\Models",
         "size": 3000,
         "relations": []
     },
@@ -2408,12 +438,22 @@
         ]
     },
     {
+        "name": "App\\Support",
+        "size": 3000,
+        "relations": []
+    },
+    {
         "name": "Modules\\Common\\Support",
         "size": 3000,
         "relations": [
             "global",
             "Spatie\\Permission\\Models"
         ]
+    },
+    {
+        "name": "Spatie\\Permission\\Models",
+        "size": 3000,
+        "relations": []
     },
     {
         "name": "Modules\\Common\\Http\\Resources",
@@ -2424,11 +464,27 @@
         ]
     },
     {
+        "name": "Illuminate\\Http\\Resources\\Json",
+        "size": 3000,
+        "relations": []
+    },
+    {
         "name": "Modules\\Common\\Http\\Requests",
         "size": 3000,
         "relations": [
-            "Illuminate\\Foundation\\Http"
+            "Illuminate\\Foundation\\Http",
+            "Modules\\Gamification\\Enums"
         ]
+    },
+    {
+        "name": "Illuminate\\Foundation\\Http",
+        "size": 3000,
+        "relations": []
+    },
+    {
+        "name": "Modules\\Gamification\\Enums",
+        "size": 3000,
+        "relations": []
     },
     {
         "name": "Modules\\Common\\Http\\Requests\\Concerns",
@@ -2438,6 +494,21 @@
             "Illuminate\\Contracts\\Validation",
             "Illuminate\\Http\\Exceptions"
         ]
+    },
+    {
+        "name": "Illuminate\\Validation",
+        "size": 3000,
+        "relations": []
+    },
+    {
+        "name": "Illuminate\\Contracts\\Validation",
+        "size": 3000,
+        "relations": []
+    },
+    {
+        "name": "Illuminate\\Http\\Exceptions",
+        "size": 3000,
+        "relations": []
     },
     {
         "name": "Modules\\Common\\Http\\Controllers",
@@ -2451,6 +522,11 @@
             "App\\Http\\Controllers",
             "Modules\\Common\\Enums"
         ]
+    },
+    {
+        "name": "Illuminate\\Routing",
+        "size": 3000,
+        "relations": []
     },
     {
         "name": "Modules\\Common\\Services",
@@ -2470,10 +546,14 @@
             "Illuminate\\Support\\Facades",
             "Illuminate\\Database\\Eloquent",
             "Illuminate\\Pagination",
-            "Illuminate\\Http",
-            "Illuminate\\Database\\Migrations",
-            "global"
+            "Modules\\Gamification\\Models",
+            "Illuminate\\Http"
         ]
+    },
+    {
+        "name": "App\\Http\\Controllers",
+        "size": 3000,
+        "relations": []
     },
     {
         "name": "Modules\\Common\\Listeners",
@@ -2486,114 +566,22 @@
         ]
     },
     {
-        "name": "Modules\\Notifications\\Database\\Seeders",
-        "size": 3000,
-        "relations": [
-            "Illuminate\\Database"
-        ]
-    },
-    {
-        "name": "Modules\\Notifications\\Traits",
-        "size": 3000,
-        "relations": [
-            "Modules\\Auth\\Models",
-            "Modules\\Notifications\\Models"
-        ]
-    },
-    {
-        "name": "Modules\\Notifications\\Models",
-        "size": 3000,
-        "relations": [
-            "Illuminate\\Database\\Eloquent",
-            "Modules\\Notifications\\Enums",
-            "Illuminate\\Database\\Eloquent\\Relations",
-            "Database\\Factories"
-        ]
-    },
-    {
-        "name": "Modules\\Notifications\\Contracts\\Services",
-        "size": 3000,
-        "relations": [
-            "Illuminate\\Support",
-            "Modules\\Auth\\Models",
-            "Modules\\Learning\\Models"
-        ]
-    },
-    {
-        "name": "Modules\\Notifications\\Providers",
-        "size": 3000,
-        "relations": [
-            "Illuminate\\Support",
-            "Illuminate\\Support\\Facades",
-            "Illuminate\\Foundation\\Support\\Providers"
-        ]
-    },
-    {
-        "name": "Modules\\Notifications\\Repositories",
+        "name": "Illuminate\\Contracts\\Queue",
         "size": 3000,
         "relations": []
     },
     {
-        "name": "Modules\\Notifications\\Enums",
+        "name": "Modules\\Learning\\Events",
         "size": 3000,
         "relations": []
     },
     {
-        "name": "Modules\\Notifications\\DTOs",
-        "size": 3000,
-        "relations": [
-            "Spatie\\LaravelData"
-        ]
-    },
-    {
-        "name": "Modules\\Notifications\\Http\\Controllers",
-        "size": 3000,
-        "relations": [
-            "App\\Http\\Controllers",
-            "Modules\\Notifications\\Contracts\\Services",
-            "Illuminate\\Http",
-            "Modules\\Notifications\\Models",
-            "Modules\\Notifications\\Services"
-        ]
-    },
-    {
-        "name": "Modules\\Notifications\\Jobs",
-        "size": 3000,
-        "relations": [
-            "Illuminate\\Contracts\\Queue",
-            "Illuminate\\Support\\Facades",
-            "Modules\\Auth\\Models",
-            "global"
-        ]
-    },
-    {
-        "name": "Modules\\Notifications\\Listeners",
-        "size": 3000,
-        "relations": [
-            "Modules\\Notifications\\Contracts\\Services",
-            "Modules\\Learning\\Events",
-            "Modules\\Notifications\\Services",
-            "Modules\\Schemes\\Events",
-            "Modules\\Grading\\Events"
-        ]
-    },
-    {
-        "name": "Modules\\Notifications\\Notifications",
-        "size": 3000,
-        "relations": [
-            "Illuminate\\Notifications",
-            "Illuminate\\Contracts\\Queue",
-            "Modules\\Learning\\Models",
-            "Illuminate\\Notifications\\Messages"
-        ]
-    },
-    {
-        "name": "Illuminate\\Notifications",
+        "name": "Modules\\Grading\\Events",
         "size": 3000,
         "relations": []
     },
     {
-        "name": "Illuminate\\Notifications\\Messages",
+        "name": "Illuminate\\Pagination",
         "size": 3000,
         "relations": []
     }

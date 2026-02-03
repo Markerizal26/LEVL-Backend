@@ -21,7 +21,8 @@ class TagController extends Controller
 
     public function index(Request $request)
     {
-        $data = $this->service->list($request->all(), (int) $request->query('per_page', 15));
+        $filters = $request->except(['page', 'per_page']);
+        $data = $this->service->list($filters, (int) $request->query('per_page', 15));
 
         if ($data instanceof \Illuminate\Contracts\Pagination\LengthAwarePaginator) {
             return $this->paginateResponse($data->through(fn($tag) => new TagResource($tag)));

@@ -29,7 +29,8 @@ Route::prefix('v1')->group(function () {
         Route::get('/', [TagController::class, 'index'])->name('index');
         Route::get('/{tag:slug}', [TagController::class, 'show'])->name('show');
         
-        Route::middleware(['auth:api', 'role:Superadmin'])->group(function () {
+        // Allowed for Superadmin, Admin, and Instructor
+        Route::middleware(['auth:api', 'role:Superadmin|Admin|Instructor'])->group(function () {
             Route::post('/', [TagController::class, 'store'])->name('store');
             Route::put('/{tag:slug}', [TagController::class, 'update'])->name('update');
             Route::delete('/{tag:slug}', [TagController::class, 'destroy'])->name('destroy');
@@ -59,7 +60,7 @@ Route::prefix('v1')->group(function () {
         Route::get('/', [BadgesController::class, 'index'])->name('index');
         Route::get('/{badge}', [BadgesController::class, 'show'])->name('show');
 
-        Route::middleware(['auth:api'])->group(function () {
+        Route::middleware(['auth:api', 'role:Superadmin'])->group(function () {
             Route::post('/', [BadgesController::class, 'store'])->name('store');
             Route::put('/{badge}', [BadgesController::class, 'update'])->name('update');
             Route::delete('/{badge}', [BadgesController::class, 'destroy'])->name('destroy');
@@ -70,7 +71,7 @@ Route::prefix('v1')->group(function () {
         Route::get('/', [LevelConfigsController::class, 'index'])->name('index');
         Route::get('/{level_config}', [LevelConfigsController::class, 'show'])->name('show');
 
-        Route::middleware(['auth:api'])->group(function () {
+        Route::middleware(['auth:api', 'role:Superadmin'])->group(function () {
             Route::post('/', [LevelConfigsController::class, 'store'])->name('store');
             Route::put('/{level_config}', [LevelConfigsController::class, 'update'])->name('update');
             Route::delete('/{level_config}', [LevelConfigsController::class, 'destroy'])->name('destroy');
@@ -81,7 +82,7 @@ Route::prefix('v1')->group(function () {
         Route::get('/', [ChallengeManagementController::class, 'index'])->name('index');
         Route::get('/{challenge}', [ChallengeManagementController::class, 'show'])->name('show');
 
-        Route::middleware(['auth:api'])->group(function () {
+        Route::middleware(['auth:api', 'role:Superadmin'])->group(function () {
             Route::post('/', [ChallengeManagementController::class, 'store'])->name('store');
             Route::put('/{challenge}', [ChallengeManagementController::class, 'update'])->name('update');
             Route::delete('/{challenge}', [ChallengeManagementController::class, 'destroy'])->name('destroy');

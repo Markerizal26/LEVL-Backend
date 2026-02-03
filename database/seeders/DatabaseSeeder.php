@@ -16,6 +16,8 @@ class DatabaseSeeder extends Seeder
       SuperAdminSeeder::class,
       ActiveUsersSeeder::class,
       \Modules\Common\Database\Seeders\CommonDatabaseSeeder::class,
+      \Modules\Common\Database\Seeders\ActivityLogSeeder::class,
+      \Modules\Common\Database\Seeders\AuditLogSeeder::class,
       MasterDataSeeder::class,
       \Modules\Auth\Database\Seeders\AuthComprehensiveDataSeeder::class,
       \Modules\Auth\Database\Seeders\ProfileSeeder::class,

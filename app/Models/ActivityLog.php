@@ -30,4 +30,31 @@ class ActivityLog extends SpatieActivity
       default => "help-circle",
     };
   }
+   /**
+   * Scope query for created_at between dates
+   */
+   /**
+   * Scope query for created_at between dates.
+   * Spatie Query Builder passes values as spread arguments: $query, ...$values
+   */
+  public function scopeCreatedAtBetween($query, ...$dates)
+  {
+      // If passed as a single string "start,end" via API
+      if (count($dates) === 1 && is_string($dates[0]) && str_contains($dates[0], ',')) {
+          $dates = explode(',', $dates[0]);
+      }
+      // If passed as array or multiple args
+      if (count($dates) === 1 && is_array($dates[0])) {
+          $dates = $dates[0];
+      }
+
+      if (count($dates) >= 2) {
+            return $query->whereBetween('created_at', [
+                \Carbon\Carbon::parse($dates[0])->startOfDay(), 
+                \Carbon\Carbon::parse($dates[1])->endOfDay()
+            ]);
+      }
+
+      return $query;
+  }
 }

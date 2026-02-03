@@ -27,7 +27,7 @@ class AuditLogQueryService
         return $user->hasRole('Admin') || $user->hasRole('Superadmin');
     }
 
-    public function searchAndPaginate(array $validated): array
+    public function searchAndPaginate(array $validated): LengthAwarePaginator
     {
         $filters = $this->buildFilters($validated);
         $auditLogs = $this->auditService->search($filters);
@@ -35,66 +35,80 @@ class AuditLogQueryService
         return $this->paginateResults($auditLogs, $validated);
     }
 
-    public function findById(int $id): ?AuditLog
-    {
-        return AuditLog::find($id);
-    }
-
-    public function getAvailableActions(): array
-    {
-        return [
-            AssessmentAuditService::ACTION_SUBMISSION_CREATED,
-            AssessmentAuditService::ACTION_STATE_TRANSITION,
-            AssessmentAuditService::ACTION_GRADING,
-            AssessmentAuditService::ACTION_ANSWER_KEY_CHANGE,
-            AssessmentAuditService::ACTION_GRADE_OVERRIDE,
-            AssessmentAuditService::ACTION_OVERRIDE_GRANT,
-        ];
-    }
-
     private function buildFilters(array $validated): array
     {
-        $filterKeys = [
-            'action', 'actions', 'actor_id', 'actor_type', 
-            'subject_id', 'subject_type', 'start_date', 'end_date',
-            'context_search', 'assignment_id', 'student_id'
-        ];
-
         $filters = [];
-        foreach ($filterKeys as $key) {
-            if (isset($validated[$key])) {
-                $filters[$key] = $validated[$key];
-            }
+
+        if (isset($validated['action'])) {
+            $filters['action'] = $validated['action'];
+        }
+
+        if (isset($validated['actions'])) {
+            $filters['actions'] = $validated['actions'];
+        }
+
+        if (isset($validated['actor_id'])) {
+            $filters['actor_id'] = $validated['actor_id'];
+        }
+
+        if (isset($validated['actor_type'])) {
+            $filters['actor_type'] = $validated['actor_type'];
+        }
+
+        if (isset($validated['subject_id'])) {
+            $filters['subject_id'] = $validated['subject_id'];
+        }
+
+        if (isset($validated['subject_type'])) {
+            $filters['subject_type'] = $validated['subject_type'];
+        }
+
+        if (isset($validated['start_date'])) {
+            $filters['start_date'] = $validated['start_date'];
+        }
+
+        if (isset($validated['end_date'])) {
+            $filters['end_date'] = $validated['end_date'];
+        }
+
+        if (isset($validated['context_search'])) {
+            $filters['context_search'] = $validated['context_search'];
+        }
+
+        if (isset($validated['assignment_id'])) {
+            $filters['assignment_id'] = $validated['assignment_id'];
+        }
+
+        if (isset($validated['student_id'])) {
+            $filters['student_id'] = $validated['student_id'];
         }
 
         return $filters;
     }
 
-    private function paginateResults(Collection $auditLogs, array $validated): array
+    // ... findById ...
+
+    private function paginateResults(Collection $auditLogs, array $validated): LengthAwarePaginator
     {
         $page = $this->extractPage($validated);
         $perPage = $this->extractPerPage($validated);
+        $count = $auditLogs->count();
         
-        return [
-            'logs' => $this->sliceLogs($auditLogs, $page, $perPage),
-            'meta' => $this->buildMeta($auditLogs->count(), $page, $perPage),
-        ];
+        $items = $auditLogs->slice(($page - 1) * $perPage, $perPage)->values();
+
+        return new PaginatorInstance(
+            $items,
+            $count,
+            $perPage,
+            $page,
+            [
+                'path' => PaginatorInstance::resolveCurrentPath(),
+                'query' => $validated,
+            ]
+        );
     }
 
-    private function sliceLogs(Collection $auditLogs, int $page, int $perPage): Collection
-    {
-        return $auditLogs->slice(($page - 1) * $perPage, $perPage)->values();
-    }
-
-    private function buildMeta(int $total, int $page, int $perPage): array
-    {
-        return [
-            'total' => $total,
-            'per_page' => $perPage,
-            'current_page' => $page,
-            'last_page' => (int) ceil($total / $perPage),
-        ];
-    }
+    // sliceLogs and buildMeta methods can be removed as Paginator handles this.
 
     private function extractPage(array $validated): int
     {

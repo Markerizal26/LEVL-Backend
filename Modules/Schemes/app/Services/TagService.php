@@ -62,6 +62,11 @@ class TagService
 
     public function handleCreate(array $data): BaseCollection|Tag
     {
+        if (array_key_exists(0, $data)) {
+            $names = collect($data)->pluck('name')->toArray();
+            return $this->createMany($names);
+        }
+
         if (isset($data['names']) && is_array($data['names'])) {
             return $this->createMany($data['names']);
         }

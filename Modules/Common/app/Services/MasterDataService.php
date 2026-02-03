@@ -19,7 +19,8 @@ class MasterDataService
 
     public function __construct(
         private readonly MasterDataRepository $repository,
-        private readonly MasterDataEnumMapper $enumMapper
+        private readonly MasterDataEnumMapper $enumMapper,
+        private readonly \Modules\Common\Support\MasterDataProcessor $processor
     ) {}
 
     public function get(string $type): array|Collection
@@ -58,10 +59,7 @@ class MasterDataService
         $dbTypes = $this->buildDatabaseTypesList();
         $merged = $staticTypes->concat($dbTypes);
 
-        $merged = $this->applyTypeFilters($merged, $params);
-        $merged = $this->applySorting($merged, $params);
-
-        return $this->paginateCollection($merged, $params);
+        return $this->processor->process($merged, $params);
     }
 
     public function create(string $type, array $data): MasterDataItem
@@ -123,108 +121,6 @@ class MasterDataService
 
             return $item;
         });
-    }
-
-    private function applyTypeFilters(Collection $merged, array $params): Collection
-    {
-        $merged = $this->filterByCrud($merged, $params);
-        $merged = $this->filterBySearch($merged, $params);
-
-        return $merged;
-    }
-
-    private function filterByCrud(Collection $merged, array $params): Collection
-    {
-        if (! isset($params['filter']['is_crud'])) {
-            return $merged;
-        }
-
-        $isCrud = filter_var($params['filter']['is_crud'], FILTER_VALIDATE_BOOLEAN);
-        return $merged->filter(fn ($item) => $item['is_crud'] === $isCrud);
-    }
-
-    private function filterBySearch(Collection $merged, array $params): Collection
-    {
-        if (empty($params['search'])) {
-            return $merged;
-        }
-
-        $search = strtolower($params['search']);
-        return $merged->filter(
-            fn ($item) => str_contains(strtolower($item['type']), $search) || 
-                         str_contains(strtolower($item['label']), $search)
-        );
-    }
-
-    private function applySorting(Collection $merged, array $params): Collection
-    {
-        $validSorts = $this->getValidSortsFromParams($params);
-
-        return $this->applySortsToCollection($merged, $validSorts);
-    }
-
-    private function getValidSortsFromParams(array $params): array
-    {
-        $allowedSorts = ['type', 'label', 'count', 'last_updated'];
-        $defaultSort = 'label';
-        $sortParam = $params['sort'] ?? $defaultSort;
-        $requestedSorts = is_array($sortParam) ? $sortParam : explode(',', (string) $sortParam);
-
-        return $this->extractValidSorts($requestedSorts, $allowedSorts, $defaultSort);
-    }
-
-    private function applySortsToCollection(Collection $merged, array $validSorts): Collection
-    {
-        foreach (array_reverse($validSorts) as $sort) {
-            $merged = $this->applySingleSort($merged, $sort);
-        }
-
-        return $merged;
-    }
-
-    private function applySingleSort(Collection $collection, string $sort): Collection
-    {
-        $descending = str_starts_with($sort, '-');
-        $field = $descending ? substr($sort, 1) : $sort;
-
-        return $descending
-            ? $collection->sortByDesc($field, SORT_NATURAL | SORT_FLAG_CASE)
-            : $collection->sortBy($field, SORT_NATURAL | SORT_FLAG_CASE);
-    }
-
-    private function extractValidSorts(array $requestedSorts, array $allowedSorts, string $defaultSort): array
-    {
-        $validSorts = array_filter(
-            array_map(fn($sort) => $this->normalizeSortIfValid(trim($sort), $allowedSorts), $requestedSorts)
-        );
-
-        return empty($validSorts) ? [$defaultSort] : $validSorts;
-    }
-
-    private function normalizeSortIfValid(string $sort, array $allowedSorts): ?string
-    {
-        $descending = str_starts_with($sort, '-');
-        $field = $descending ? substr($sort, 1) : $sort;
-
-        if (! in_array($field, $allowedSorts, true)) {
-            return null;
-        }
-
-        return $descending ? "-{$field}" : $field;
-    }
-
-    private function paginateCollection(Collection $merged, array $params): LengthAwarePaginator
-    {
-        $page = (int) ($params['page'] ?? 1);
-        $perPage = (int) ($params['per_page'] ?? 15);
-
-        return new \Illuminate\Pagination\LengthAwarePaginator(
-            $merged->forPage($page, $perPage)->values(),
-            $merged->count(),
-            $perPage,
-            $page,
-            ['path' => \Illuminate\Support\Facades\Request::url(), 'query' => $params]
-        );
     }
 
     public function extractQueryParams(array $query): array

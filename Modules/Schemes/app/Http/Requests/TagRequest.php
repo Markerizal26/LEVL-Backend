@@ -27,6 +27,12 @@ class TagRequest extends FormRequest
             $uniqueName = $uniqueName->ignore($tagId);
         }
 
+        if ($this->isJson() && is_array($this->all()) && array_key_exists(0, $this->all())) {
+             return [
+                 '*.name' => ['required', 'string', 'min:1', 'max:100', 'distinct'],
+             ];
+        }
+
         return [
             'name' => ['required_without:names', 'nullable', 'string', 'min:1', 'max:100', $uniqueName],
             'names' => ['required_without:name', 'array', 'min:1'],
