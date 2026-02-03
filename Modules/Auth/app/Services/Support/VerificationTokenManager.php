@@ -6,8 +6,8 @@ namespace Modules\Auth\Services\Support;
 
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Str;
-use Modules\Auth\Mail\ChangeEmailVerificationMail;
-use Modules\Auth\Mail\VerifyEmailLinkMail;
+use Modules\Mail\Mail\Auth\ChangeEmailVerificationMail;
+use Modules\Mail\Mail\Auth\VerifyEmailLinkMail;
 use Modules\Auth\Models\OtpCode;
 use Modules\Auth\Models\User;
 use Modules\Auth\Enums\UserStatus;

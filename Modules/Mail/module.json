@@ -1,0 +1,12 @@
+{
+    "name": "Mail",
+    "alias": "mail",
+    "description": "Centralized email handling for all modules",
+    "keywords": ["mail", "email", "notifications"],
+    "priority": 0,
+    "providers": [
+        "Modules\\Mail\\Providers\\MailServiceProvider",
+        "Modules\\Mail\\Providers\\EventServiceProvider"
+    ],
+    "files": []
+}

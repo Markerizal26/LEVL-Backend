@@ -14,7 +14,7 @@ use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Storage;
 use Maatwebsite\Excel\Facades\Excel;
 use Modules\Auth\Exports\UsersExport;
-use Modules\Auth\Mail\UsersExportMail;
+use Modules\Mail\Mail\Auth\UsersExportMail;
 
 class ExportUsersToEmailJob implements ShouldQueue
 {
@@ -29,7 +29,7 @@ class ExportUsersToEmailJob implements ShouldQueue
 
     Excel::store(new UsersExport($this->userIds), $path, "local");
 
-    Mail::to($this->recipientEmail)->send(new UsersExportMail(Storage::path($path), $fileName));
+    Mail::to($this->recipientEmail)->send(new \Modules\Mail\Mail\Auth\UsersExportMail($this->recipientEmail, route('profile.exports.download', $fileName), $fileName));
 
     dispatch(function () use ($path) {
       if (Storage::exists($path)) {

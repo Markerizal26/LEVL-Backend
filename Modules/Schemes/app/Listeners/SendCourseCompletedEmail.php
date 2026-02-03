@@ -6,7 +6,7 @@ namespace Modules\Schemes\Listeners;
 
 use Illuminate\Support\Facades\Mail;
 use Modules\Schemes\Events\CourseCompleted;
-use Modules\Schemes\Mail\CourseCompletedMail;
+use Modules\Mail\Mail\Schemes\CourseCompletedMail;
 
 class SendCourseCompletedEmail
 {

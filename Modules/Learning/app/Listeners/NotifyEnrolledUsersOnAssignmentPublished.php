@@ -8,7 +8,7 @@ use Illuminate\Support\Facades\Mail;
 use Modules\Enrollments\Enums\EnrollmentStatus;
 use Modules\Enrollments\Models\Enrollment;
 use Modules\Learning\Events\AssignmentPublished;
-use Modules\Learning\Mail\AssignmentPublishedMail;
+use Modules\Mail\Mail\Learning\AssignmentPublishedMail;
 
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Queue\InteractsWithQueue;

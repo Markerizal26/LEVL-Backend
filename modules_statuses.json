@@ -12,5 +12,6 @@
     "Content": true,
     "Search": true,
     "Questions": true,
-    "Benchmark": true
+    "Benchmark": true,
+    "Mail": true
 }

@@ -7,7 +7,7 @@ namespace Modules\Auth\Services;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Str;
-use Modules\Auth\Mail\AccountDeletionVerificationMail;
+use Modules\Mail\Mail\Auth\AccountDeletionVerificationMail;
 use Modules\Auth\Models\OtpCode;
 use Modules\Auth\Models\User;
 use Modules\Common\Models\SystemSetting;
@@ -57,7 +57,7 @@ class AccountDeletionService
         $frontendUrl = config('app.frontend_url');
         $verifyUrl = $frontendUrl.'/profile/account/delete/confirm?token='.$token.'&uuid='.$uuid;
 
-        Mail::to($user->email)->send(new AccountDeletionVerificationMail($user, $verifyUrl, $ttlMinutes));
+        Mail::to($user->email)->send(new \Modules\Mail\Mail\Auth\AccountDeletionVerificationMail($user->email, $verifyUrl, $ttlMinutes));
 
         return $uuid;
     }

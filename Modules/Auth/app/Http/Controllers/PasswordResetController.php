@@ -13,7 +13,7 @@ use Modules\Auth\Contracts\Repositories\PasswordResetTokenRepositoryInterface;
 use Modules\Auth\Http\Requests\ChangePasswordRequest;
 use Modules\Auth\Http\Requests\ForgotPasswordRequest;
 use Modules\Auth\Http\Requests\ResetPasswordRequest;
-use Modules\Auth\Mail\ResetPasswordMail;
+use Modules\Mail\Mail\Auth\ResetPasswordMail;
 use Modules\Auth\Models\User;
 
 class PasswordResetController extends Controller
