@@ -170,6 +170,23 @@ return [
     "attempt" => "Percobaan",
     "challenge" => "Tantangan",
     "system" => "Sistem",
+    "grade" => "Pencapaian Nilai",
+  ],
+
+  "challenge_criteria_type" => [
+    "lessons_completed" => "Selesaikan Lesson",
+    "assignments_submitted" => "Kumpulkan Tugas",
+    "exercises_completed" => "Selesaikan Latihan",
+    "xp_earned" => "Kumpulkan XP",
+    "streak_days" => "Pertahankan Streak",
+    "courses_completed" => "Selesaikan Course",
+  ],
+
+  "setting_type" => [
+    "string" => "Teks",
+    "number" => "Angka",
+    "boolean" => "Boolean",
+    "json" => "JSON",
   ],
 
   "point_reason" => [
@@ -219,6 +236,11 @@ return [
   ],
 
   // Common
+  "category_status" => [
+    "active" => "Aktif",
+    "inactive" => "Tidak Aktif",
+  ],
+
   "category_status" => [
     "active" => "Aktif",
     "inactive" => "Tidak Aktif",

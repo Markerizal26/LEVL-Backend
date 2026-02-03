@@ -83,7 +83,11 @@ class LevelConfigsController extends Controller
 
         $this->authorize('delete', $model);
 
-        $this->service->delete($levelConfig);
+        $deleted = $this->service->delete($levelConfig);
+
+        if (! $deleted) {
+            return $this->error(__('messages.level_configs.not_found'), 404);
+        }
 
         return $this->success([], __('messages.level_configs.deleted'));
     }

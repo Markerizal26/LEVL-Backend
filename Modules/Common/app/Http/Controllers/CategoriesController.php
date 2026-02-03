@@ -7,17 +7,20 @@ namespace Modules\Common\Http\Controllers;
 use App\Support\ApiResponse;
 use App\Support\Traits\HandlesFiltering;
 use App\Support\Traits\ProvidesMetadata;
+use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Routing\Controller;
 use Modules\Common\Http\Requests\CategoryStoreRequest;
 use Modules\Common\Http\Requests\CategoryUpdateRequest;
 use Modules\Common\Http\Resources\CategoryResource;
+use Modules\Common\Models\Category;
 use Modules\Common\Services\CategoryService;
 
 class CategoriesController extends Controller
 {
     use ApiResponse;
+    use AuthorizesRequests;
     use HandlesFiltering;
     use ProvidesMetadata;
 
@@ -25,6 +28,7 @@ class CategoriesController extends Controller
 
     public function index(Request $request): JsonResponse
     {
+        $this->authorize('viewAny', Category::class);
         $params = $this->extractFilterParams($request);
         $perPage = $params['per_page'] ?? 15;
         $paginator = $this->service->paginate($perPage);
@@ -36,6 +40,7 @@ class CategoriesController extends Controller
 
     public function store(CategoryStoreRequest $request): JsonResponse
     {
+        $this->authorize('create', Category::class);
         $category = $this->service->create($request->validated());
 
         return $this->created(new CategoryResource($category), __('messages.categories.created'));
@@ -49,27 +54,35 @@ class CategoriesController extends Controller
             return $this->error(__('messages.categories.not_found'), 404);
         }
 
+        $this->authorize('view', $model);
+
         return $this->success(new CategoryResource($model));
     }
 
     public function update(CategoryUpdateRequest $request, int $category): JsonResponse
     {
-        $updated = $this->service->update($category, $request->validated());
+        $model = $this->service->find($category);
 
-        if (! $updated) {
+        if (! $model) {
             return $this->error(__('messages.categories.not_found'), 404);
         }
+
+        $this->authorize('update', $model);
+        $updated = $this->service->update($category, $request->validated());
 
         return $this->success(new CategoryResource($updated), __('messages.categories.updated'));
     }
 
     public function destroy(int $category): JsonResponse
     {
-        $deleted = $this->service->delete($category);
+        $model = $this->service->find($category);
 
-        if (! $deleted) {
+        if (! $model) {
             return $this->error(__('messages.categories.not_found'), 404);
         }
+
+        $this->authorize('delete', $model);
+        $deleted = $this->service->delete($category);
 
         return $this->success([], __('messages.categories.deleted'));
     }
@@ -91,4 +104,8 @@ class CategoriesController extends Controller
         );
     }
 }
+            $this->authorize('view', $model);
 
+
+
+        $this->authorize('view', $model);

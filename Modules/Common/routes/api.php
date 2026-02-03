@@ -4,6 +4,7 @@ use App\Http\Controllers\Api\ActivityLogController;
 use Illuminate\Support\Facades\Route;
 use Modules\Common\Http\Controllers\AuditLogController;
 use Modules\Common\Http\Controllers\BadgesController;
+use Modules\Common\Http\Controllers\CategoriesController;
 use Modules\Common\Http\Controllers\ChallengeManagementController;
 use Modules\Common\Http\Controllers\LevelConfigsController;
 use Modules\Common\Http\Controllers\MasterDataController;
@@ -53,6 +54,17 @@ Route::prefix('v1')->group(function () {
             Route::post('{type}', [MasterDataController::class, 'store'])->name('store');
             Route::put('{type}/{id}', [MasterDataController::class, 'update'])->name('update');
             Route::delete('{type}/{id}', [MasterDataController::class, 'destroy'])->name('destroy');
+        });
+    });
+
+    Route::prefix('categories')->name('categories.')->group(function () {
+        Route::get('/', [CategoriesController::class, 'index'])->name('index');
+        Route::get('/{category}', [CategoriesController::class, 'show'])->name('show');
+
+        Route::middleware(['auth:api', 'role:Superadmin'])->group(function () {
+            Route::post('/', [CategoriesController::class, 'store'])->name('store');
+            Route::put('/{category}', [CategoriesController::class, 'update'])->name('update');
+            Route::delete('/{category}', [CategoriesController::class, 'destroy'])->name('destroy');
         });
     });
 

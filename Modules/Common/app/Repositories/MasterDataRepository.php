@@ -171,7 +171,7 @@ class MasterDataRepository extends \App\Repositories\BaseRepository implements \
 
   private function extractSearchQuery(array $params): string
   {
-    return trim((string)($params["search"] ?? (request("filter.search") ?? request("search"))));
+    return trim((string)($params["search"] ?? request("search")));
   }
 
   private function applySearchFilter($query, string $searchQuery, string $type): bool

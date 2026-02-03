@@ -170,6 +170,23 @@ return [
         'attempt' => 'Attempt',
         'challenge' => 'Challenge',
         'system' => 'System',
+        'grade' => 'Grade Achievement',
+    ],
+
+    'challenge_criteria_type' => [
+        'lessons_completed' => 'Complete Lessons',
+        'assignments_submitted' => 'Submit Assignments',
+        'exercises_completed' => 'Complete Exercises',
+        'xp_earned' => 'Earn XP',
+        'streak_days' => 'Maintain Streak',
+        'courses_completed' => 'Complete Courses',
+    ],
+
+    'setting_type' => [
+        'string' => 'String',
+        'number' => 'Number',
+        'boolean' => 'Boolean',
+        'json' => 'JSON',
     ],
 
     'point_reason' => [

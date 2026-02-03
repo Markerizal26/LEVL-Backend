@@ -87,7 +87,11 @@ class BadgesController extends Controller
 
         $this->authorize('delete', $model);
 
-        $this->service->delete($badge);
+        $deleted = $this->service->delete($badge);
+
+        if (! $deleted) {
+            return $this->error(__('messages.badges.not_found'), 404);
+        }
 
         return $this->success([], __('messages.badges.deleted'));
     }

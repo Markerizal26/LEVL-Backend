@@ -29,106 +29,137 @@ Mendapatkan daftar pengumuman untuk user yang sedang login.
 **Endpoint:** `GET /announcements`
 
 **Query Parameters:**
-- `course_id` (optional): Filter by course ID
-- `priority` (optional): Filter by priority (low, normal, high)
-- `unread` (optional): Filter unread announcements (true/false)
-- `per_page` (optional): Items per page (default: 15)
+- `filter[course_id]` (optional, integer): ID kursus
+- `filter[priority]` (optional, string): `low` | `normal` | `high`
+- `filter[unread]` (optional, boolean): `true` | `false`
+- `sort` (optional, string): `created_at` | `published_at` (gunakan prefix `-` untuk descending)
+- `page` (optional, integer): default 1
+- `per_page` (optional, integer): default 15
 
 **Response:**
 ```json
 {
-  "status": "success",
-  "data": {
-    "current_page": 1,
-    "data": [
-      {
+  "success": true,
+  "message": "Berhasil",
+  "data": [
+    {
+      "id": 1,
+      "title": "Selamat Datang",
+      "content": "Selamat datang di platform...",
+      "status": "published",
+      "target_type": "all",
+      "priority": "high",
+      "published_at": "2025-12-01T10:00:00.000000Z",
+      "author": {
         "id": 1,
-        "title": "Selamat Datang",
-        "content": "Selamat datang di platform...",
-        "status": "published",
-        "target_type": "all",
-        "priority": "high",
-        "published_at": "2025-12-01T10:00:00.000000Z",
-        "author": {
-          "id": 1,
-          "name": "Admin"
-        }
+        "name": "Admin"
       }
-    ],
-    "total": 10
+    }
+  ],
+  "meta": {
+    "pagination": {
+      "current_page": 1,
+      "last_page": 5,
+      "per_page": 15,
+      "total": 75
+    }
   }
 }
 ```
 
 ### 2. Create Announcement
 
-Membuat pengumuman baru (Admin only).
+Membuat pengumuman baru (role: Superadmin/Admin/Instructor).
 
 **Endpoint:** `POST /announcements`
 
-**Request Body:**
+**JSON Body (raw):**
 ```json
 {
   "title": "Pengumuman Penting",
   "content": "Ini adalah pengumuman penting...",
+  "course_id": 1,
   "target_type": "all",
   "target_value": null,
-  "priority": "high",
+  "priority": "normal",
   "status": "draft",
-  "scheduled_at": null
+  "scheduled_at": "2026-02-10T10:00:00Z"
 }
 ```
+
+**Field Rules:**
+- `title` (required, string, max 255)
+- `content` (required, string)
+- `course_id` (optional, integer, exists:courses,id)
+- `target_type` (required, string): `all` | `role` | `course`
+- `target_value` (optional, string, max 255)
+- `priority` (optional, string): `low` | `normal` | `high`
+- `status` (optional, string): `draft` | `published` | `scheduled`
+- `scheduled_at` (optional, date, after now) — gunakan saat `status=scheduled`
 
 **Response:**
 ```json
 {
-  "status": "success",
+  "success": true,
   "message": "Pengumuman berhasil dibuat.",
   "data": {
-    "id": 1,
-    "title": "Pengumuman Penting",
-    "status": "draft",
-    "created_at": "2025-12-02T10:00:00.000000Z"
+    "announcement": {
+      "id": 1,
+      "title": "Pengumuman Penting",
+      "status": "draft"
+    }
   }
 }
 ```
 
 ### 3. Get Announcement Detail
 
-Mendapatkan detail pengumuman.
+Mendapatkan detail pengumuman (otomatis mark as read dan increment views).
 
 **Endpoint:** `GET /announcements/{id}`
 
 **Response:**
 ```json
 {
-  "status": "success",
+  "success": true,
   "data": {
-    "id": 1,
-    "title": "Pengumuman Penting",
-    "content": "Ini adalah pengumuman...",
-    "author": {
+    "announcement": {
       "id": 1,
-      "name": "Admin"
-    },
-    "revisions": []
+      "title": "Pengumuman Penting",
+      "content": "Ini adalah pengumuman...",
+      "author": {
+        "id": 1,
+        "name": "Admin"
+      },
+      "revisions": []
+    }
   }
 }
 ```
 
 ### 4. Update Announcement
 
-Mengupdate pengumuman.
+Memperbarui pengumuman (role: Superadmin/Admin/Instructor, author).
 
 **Endpoint:** `PUT /announcements/{id}`
 
-**Request Body:**
+**JSON Body (raw):**
 ```json
 {
   "title": "Pengumuman Updated",
-  "content": "Konten yang diupdate..."
+  "content": "Konten yang diupdate...",
+  "target_type": "role",
+  "target_value": "Instructor",
+  "priority": "high"
 }
 ```
+
+**Field Rules:**
+- `title` (sometimes|required, string, max 255)
+- `content` (sometimes|required, string)
+- `target_type` (sometimes|required, string): `all` | `role` | `course`
+- `target_value` (optional, string, max 255)
+- `priority` (optional, string): `low` | `normal` | `high`
 
 ### 5. Delete Announcement
 
@@ -136,10 +167,12 @@ Menghapus pengumuman (soft delete).
 
 **Endpoint:** `DELETE /announcements/{id}`
 
+**Body:** tidak ada
+
 **Response:**
 ```json
 {
-  "status": "success",
+  "success": true,
   "message": "Pengumuman berhasil dihapus."
 }
 ```
@@ -150,10 +183,12 @@ Mempublikasikan pengumuman.
 
 **Endpoint:** `POST /announcements/{id}/publish`
 
+**Body:** tidak ada
+
 **Response:**
 ```json
 {
-  "status": "success",
+  "success": true,
   "message": "Pengumuman berhasil dipublikasikan.",
   "data": {
     "id": 1,
@@ -169,12 +204,15 @@ Menjadwalkan publikasi pengumuman.
 
 **Endpoint:** `POST /announcements/{id}/schedule`
 
-**Request Body:**
+**JSON Body (raw):**
 ```json
 {
-  "scheduled_at": "2025-12-10T10:00:00Z"
+  "scheduled_at": "2026-02-10T10:00:00Z"
 }
 ```
+
+**Field Rules:**
+- `scheduled_at` (required, date, after now)
 
 ### 8. Mark as Read
 
@@ -182,10 +220,12 @@ Menandai pengumuman sudah dibaca.
 
 **Endpoint:** `POST /announcements/{id}/read`
 
+**Body:** tidak ada
+
 **Response:**
 ```json
 {
-  "status": "success",
+  "success": true,
   "message": "Pengumuman ditandai sudah dibaca."
 }
 ```
@@ -201,60 +241,85 @@ Mendapatkan daftar berita.
 **Endpoint:** `GET /news`
 
 **Query Parameters:**
-- `category_id` (optional): Filter by category
-- `tag_id` (optional): Filter by tag
-- `featured` (optional): Filter featured news (true/false)
-- `date_from` (optional): Filter from date
-- `date_to` (optional): Filter to date
-- `per_page` (optional): Items per page (default: 15)
+- `filter[category_id]` (optional, integer)
+- `filter[tag_id]` (optional, integer)
+- `filter[featured]` (optional, boolean): `true` | `false`
+- `filter[date_from]` (optional, string, format Y-m-d)
+- `filter[date_to]` (optional, string, format Y-m-d)
+- `sort` (optional, string): `created_at` | `published_at` | `views_count` (prefix `-` untuk descending)
+- `page` (optional, integer): default 1
+- `per_page` (optional, integer): default 15
 
 **Response:**
 ```json
 {
-  "status": "success",
-  "data": {
-    "current_page": 1,
-    "data": [
-      {
+  "success": true,
+  "message": "Berhasil",
+  "data": [
+    {
+      "id": 1,
+      "title": "Berita Terbaru",
+      "slug": "berita-terbaru",
+      "excerpt": "Ringkasan berita...",
+      "is_featured": true,
+      "views_count": 150,
+      "published_at": "2025-12-01T10:00:00.000000Z",
+      "author": {
         "id": 1,
-        "title": "Berita Terbaru",
-        "slug": "berita-terbaru",
-        "excerpt": "Ringkasan berita...",
-        "featured_image_path": "/images/news.jpg",
-        "is_featured": true,
-        "published_at": "2025-12-01T10:00:00.000000Z",
-        "views_count": 150,
-        "author": {
-          "id": 1,
-          "name": "Admin"
-        },
-        "categories": []
-      }
-    ]
+        "name": "Admin"
+      },
+      "categories": []
+    }
+  ],
+  "meta": {
+    "pagination": {
+      "current_page": 1,
+      "last_page": 5,
+      "per_page": 15,
+      "total": 75
+    }
   }
 }
 ```
 
 ### 2. Create News
 
-Membuat berita baru (Admin/Instructor).
+Membuat berita baru (role: Superadmin/Admin/Instructor).
 
 **Endpoint:** `POST /news`
 
-**Request Body:**
+**JSON Body (raw):**
 ```json
 {
   "title": "Berita Baru",
   "slug": "berita-baru",
   "excerpt": "Ringkasan berita...",
   "content": "Konten lengkap berita...",
-  "featured_image_path": "/images/news.jpg",
   "is_featured": false,
   "status": "draft",
+  "scheduled_at": "2026-02-10T10:00:00Z",
   "category_ids": [1, 2],
   "tag_ids": [1, 2, 3]
 }
 ```
+
+**Multipart Form-Data (untuk upload gambar):**
+- `featured_image` (file, image, max 5MB)
+- field lain sama dengan JSON di atas
+
+**Field Rules:**
+- `title` (required, string, max 255)
+- `slug` (optional, string, max 255, unique:news,slug)
+- `excerpt` (optional, string)
+- `content` (required, string)
+- `featured_image` (optional, image, max 5120 KB)
+- `is_featured` (optional, boolean)
+- `status` (optional, string): `draft` | `published` | `scheduled`
+- `scheduled_at` (optional, date, after now) — gunakan saat `status=scheduled`
+- `category_ids` (optional, array)
+- `category_ids.*` (exists:content_categories,id)
+- `tag_ids` (optional, array)
+- `tag_ids.*` (exists:tags,id)
 
 ### 3. Get News Detail
 
@@ -265,7 +330,7 @@ Mendapatkan detail berita.
 **Response:**
 ```json
 {
-  "status": "success",
+  "success": true,
   "data": {
     "id": 1,
     "title": "Berita Terbaru",
@@ -287,14 +352,32 @@ Mengupdate berita.
 
 **Endpoint:** `PUT /news/{slug}`
 
-**Request Body:**
+**JSON Body (raw):**
 ```json
 {
   "title": "Berita Updated",
   "content": "Konten yang diupdate...",
-  "category_ids": [1, 3]
+  "excerpt": "Ringkasan update",
+  "is_featured": true,
+  "category_ids": [1, 3],
+  "tag_ids": [2, 4]
 }
 ```
+
+**Multipart Form-Data (opsional):**
+- `featured_image` (file, image, max 5MB)
+- field lain sama dengan JSON di atas
+
+**Field Rules:**
+- `title` (sometimes|required, string, max 255)
+- `content` (sometimes|required, string)
+- `excerpt` (optional, string)
+- `featured_image` (optional, image, max 5120 KB)
+- `is_featured` (optional, boolean)
+- `category_ids` (optional, array)
+- `category_ids.*` (exists:content_categories,id)
+- `tag_ids` (optional, array)
+- `tag_ids.*` (exists:tags,id)
 
 ### 5. Delete News
 
@@ -302,11 +385,15 @@ Menghapus berita (soft delete).
 
 **Endpoint:** `DELETE /news/{slug}`
 
+**Body:** tidak ada
+
 ### 6. Publish News
 
 Mempublikasikan berita.
 
 **Endpoint:** `POST /news/{slug}/publish`
+
+**Body:** tidak ada
 
 ### 7. Schedule News
 
@@ -314,12 +401,15 @@ Menjadwalkan publikasi berita.
 
 **Endpoint:** `POST /news/{slug}/schedule`
 
-**Request Body:**
+**JSON Body (raw):**
 ```json
 {
-  "scheduled_at": "2025-12-10T10:00:00Z"
+  "scheduled_at": "2026-02-10T10:00:00Z"
 }
 ```
+
+**Field Rules:**
+- `scheduled_at` (required, date, after now)
 
 ### 8. Get Trending News
 
@@ -328,22 +418,7 @@ Mendapatkan berita trending.
 **Endpoint:** `GET /news/trending`
 
 **Query Parameters:**
-- `limit` (optional): Number of items (default: 10)
-
-**Response:**
-```json
-{
-  "status": "success",
-  "data": [
-    {
-      "id": 1,
-      "title": "Berita Trending",
-      "views_count": 500,
-      "trending_score": 125.5
-    }
-  ]
-}
-```
+- `limit` (optional, integer): default 10
 
 ---
 
@@ -355,38 +430,37 @@ Mendapatkan pengumuman untuk kursus tertentu.
 
 **Endpoint:** `GET /courses/{course}/announcements`
 
-**Response:**
-```json
-{
-  "status": "success",
-  "data": {
-    "data": [
-      {
-        "id": 1,
-        "title": "Pengumuman Kursus",
-        "course_id": 1,
-        "published_at": "2025-12-01T10:00:00.000000Z"
-      }
-    ]
-  }
-}
-```
+**Query Parameters:**
+- `page` (optional, integer): default 1
+- `per_page` (optional, integer): default 15
 
 ### 2. Create Course Announcement
 
-Membuat pengumuman untuk kursus (Instructor/Admin).
+Membuat pengumuman untuk kursus (role: Superadmin/Admin/Instructor).
 
 **Endpoint:** `POST /courses/{course}/announcements`
 
-**Request Body:**
+**JSON Body (raw):**
 ```json
 {
   "title": "Pengumuman Kursus",
   "content": "Konten pengumuman...",
+  "target_type": "course",
+  "target_value": null,
   "priority": "normal",
-  "status": "published"
+  "status": "published",
+  "scheduled_at": "2026-02-10T10:00:00Z"
 }
 ```
+
+**Field Rules:**
+- `title` (required, string, max 255)
+- `content` (required, string)
+- `target_type` (required, string): `course`
+- `target_value` (optional, string, max 255)
+- `priority` (optional, string): `low` | `normal` | `high`
+- `status` (optional, string): `draft` | `published` | `scheduled`
+- `scheduled_at` (optional, date, after now)
 
 ---
 
@@ -399,51 +473,17 @@ Mendapatkan statistik keseluruhan.
 **Endpoint:** `GET /content/statistics`
 
 **Query Parameters:**
-- `type` (optional): Type of content (all, announcements, news)
-- `course_id` (optional): Filter by course
-- `category_id` (optional): Filter by category
-- `date_from` (optional): From date
-- `date_to` (optional): To date
-
-**Response:**
-```json
-{
-  "status": "success",
-  "data": {
-    "dashboard": {
-      "total_announcements": 50,
-      "total_news": 100,
-      "total_views": 5000,
-      "recent_announcements": 10,
-      "recent_news": 20
-    },
-    "announcements": [],
-    "news": []
-  }
-}
-```
+- `filter[type]` (optional, string): `all` | `announcements` | `news`
+- `filter[course_id]` (optional, integer)
+- `filter[category_id]` (optional, integer)
+- `filter[date_from]` (optional, string, format Y-m-d)
+- `filter[date_to]` (optional, string, format Y-m-d)
 
 ### 2. Get Announcement Statistics
 
 Mendapatkan statistik pengumuman tertentu.
 
 **Endpoint:** `GET /content/statistics/announcements/{id}`
-
-**Response:**
-```json
-{
-  "status": "success",
-  "data": {
-    "announcement_id": 1,
-    "title": "Pengumuman",
-    "views_count": 100,
-    "read_count": 80,
-    "read_rate": 80.0,
-    "unread_count": 20,
-    "unread_users": []
-  }
-}
-```
 
 ### 3. Get News Statistics
 
@@ -457,6 +497,9 @@ Mendapatkan berita trending.
 
 **Endpoint:** `GET /content/statistics/trending`
 
+**Query Parameters:**
+- `limit` (optional, integer): default 10
+
 ### 5. Get Most Viewed
 
 Mendapatkan berita paling banyak dilihat.
@@ -464,8 +507,8 @@ Mendapatkan berita paling banyak dilihat.
 **Endpoint:** `GET /content/statistics/most-viewed`
 
 **Query Parameters:**
-- `days` (optional): Time period in days (default: 30)
-- `limit` (optional): Number of items (default: 10)
+- `days` (optional, integer): default 30
+- `limit` (optional, integer): default 10
 
 ---
 
@@ -478,29 +521,69 @@ Mencari konten (berita dan pengumuman).
 **Endpoint:** `GET /content/search`
 
 **Query Parameters:**
-- `q` (required): Search query (min 2 characters)
-- `type` (optional): Content type (all, news, announcements)
-- `category_id` (optional): Filter by category
-- `date_from` (optional): From date
-- `date_to` (optional): To date
-- `per_page` (optional): Items per page (default: 15)
+- `search` (required, string, min 2)
+- `filter[type]` (optional, string): `all` | `news` | `announcements`
+- `filter[category_id]` (optional, integer)
+- `filter[date_from]` (optional, string, format Y-m-d)
+- `filter[date_to]` (optional, string, format Y-m-d)
+- `per_page` (optional, integer): default 15
 
-**Response:**
+---
+
+## Content Approval Workflow
+
+### 1. Submit Content for Review
+
+**Endpoint:** `POST /content/{type}/{id}/submit`
+
+**Path Params:**
+- `type` (required, string): `news` | `announcement`
+- `id` (required, integer)
+
+**Body:** tidak ada
+
+### 2. Approve Content
+
+**Endpoint:** `POST /content/{type}/{id}/approve`
+
+**Path Params:**
+- `type` (required, string): `news` | `announcement`
+- `id` (required, integer)
+
+**JSON Body (raw):**
 ```json
 {
-  "status": "success",
-  "data": {
-    "data": [
-      {
-        "id": 1,
-        "title": "Hasil Pencarian",
-        "excerpt": "Ringkasan...",
-        "type": "news"
-      }
-    ]
-  }
+  "note": "Disetujui untuk dipublikasikan"
 }
 ```
+
+**Field Rules:**
+- `note` (optional, string, max 1000)
+
+### 3. Reject Content
+
+**Endpoint:** `POST /content/{type}/{id}/reject`
+
+**Path Params:**
+- `type` (required, string): `news` | `announcement`
+- `id` (required, integer)
+
+**JSON Body (raw):**
+```json
+{
+  "reason": "Konten belum lengkap"
+}
+```
+
+**Field Rules:**
+- `reason` (required, string, max 1000)
+
+### 4. Get Pending Review
+
+**Endpoint:** `GET /content/pending-review`
+
+**Query Parameters:**
+- `type` (optional, string): `all` | `news` | `announcement` (default: all)
 
 ---
 

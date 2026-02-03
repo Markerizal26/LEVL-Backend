@@ -24,12 +24,12 @@ enum ChallengeCriteriaType: string
     public function label(): string
     {
         return match ($this) {
-            self::LessonsCompleted => 'Selesaikan Lesson',
-            self::AssignmentsSubmitted => 'Kumpulkan Tugas',
-            self::ExercisesCompleted => 'Selesaikan Latihan',
-            self::XpEarned => 'Kumpulkan XP',
-            self::StreakDays => 'Pertahankan Streak',
-            self::CoursesCompleted => 'Selesaikan Course',
+            self::LessonsCompleted => __('enums.challenge_criteria_type.lessons_completed'),
+            self::AssignmentsSubmitted => __('enums.challenge_criteria_type.assignments_submitted'),
+            self::ExercisesCompleted => __('enums.challenge_criteria_type.exercises_completed'),
+            self::XpEarned => __('enums.challenge_criteria_type.xp_earned'),
+            self::StreakDays => __('enums.challenge_criteria_type.streak_days'),
+            self::CoursesCompleted => __('enums.challenge_criteria_type.courses_completed'),
         };
     }
 }

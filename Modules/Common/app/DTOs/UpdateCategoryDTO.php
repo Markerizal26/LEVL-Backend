@@ -11,7 +11,6 @@ final class UpdateCategoryDTO extends BaseDTO
     public function __construct(
         public readonly ?string $name = null,
         public readonly ?string $description = null,
-        public readonly ?int $parentId = null,
         public readonly ?string $status = null,
     ) {}
 
@@ -20,7 +19,6 @@ final class UpdateCategoryDTO extends BaseDTO
         return new self(
             name: $data['name'] ?? null,
             description: $data['description'] ?? null,
-            parentId: $data['parent_id'] ?? null,
             status: $data['status'] ?? null,
         );
     }
@@ -30,7 +28,6 @@ final class UpdateCategoryDTO extends BaseDTO
         return [
             'name' => $this->name,
             'description' => $this->description,
-            'parent_id' => $this->parentId,
             'status' => $this->status,
         ];
     }

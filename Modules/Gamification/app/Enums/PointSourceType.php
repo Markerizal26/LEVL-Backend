@@ -29,7 +29,7 @@ enum PointSourceType: string
             self::Attempt => __('enums.point_source_type.attempt'),
             self::Challenge => __('enums.point_source_type.challenge'),
             self::System => __('enums.point_source_type.system'),
-            self::Grade => 'Grade Achievement',
+            self::Grade => __('enums.point_source_type.grade'),
         };
     }
 }

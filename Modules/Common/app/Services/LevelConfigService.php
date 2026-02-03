@@ -5,15 +5,21 @@ declare(strict_types=1);
 namespace Modules\Common\Services;
 
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
+use Illuminate\Support\Facades\DB;
 use Meilisearch\Exceptions\ApiException;
+use Modules\Common\Contracts\Services\LevelConfigServiceInterface;
 use Modules\Common\Models\LevelConfig;
 use Modules\Common\Repositories\LevelConfigRepository;
+use Modules\Gamification\Models\Badge;
 use Spatie\QueryBuilder\AllowedFilter;
 use Spatie\QueryBuilder\QueryBuilder;
 
-class LevelConfigService
+class LevelConfigService implements LevelConfigServiceInterface
 {
-    public function __construct(private readonly LevelConfigRepository $repository) {}
+    public function __construct(
+        private readonly LevelConfigRepository $repository,
+        private readonly BadgeService $badgeService,
+    ) {}
 
     public function paginate(int $perPage = 15, array $params = []): LengthAwarePaginator
     {
@@ -21,7 +27,7 @@ class LevelConfigService
 
         $query = LevelConfig::query();
 
-        $searchQuery = $params['search'] ?? request('filter.search') ?? request('search');
+        $searchQuery = $params['search'] ?? request('search');
 
         if ($searchQuery && trim($searchQuery) !== '') {
             try {
@@ -54,7 +60,11 @@ class LevelConfigService
 
     public function create(array $data): LevelConfig
     {
-        return $this->repository->create($data);
+        return DB::transaction(function () use ($data) {
+            $levelConfig = $this->repository->create($data);
+            $this->syncBadgesFromRewards($levelConfig->id, $data['rewards'] ?? []);
+            return $levelConfig->fresh();
+        });
     }
 
     public function find(int $id): ?LevelConfig
@@ -70,17 +80,44 @@ class LevelConfigService
             return null;
         }
 
-        return $this->repository->update($config, $data);
+        return DB::transaction(function () use ($config, $data) {
+            $updated = $this->repository->update($config, $data);
+            $this->syncBadgesFromRewards($updated->id, $data['rewards'] ?? []);
+            return $updated->fresh();
+        });
     }
 
     public function delete(int $id): bool
     {
-        $config = $this->repository->findById($id);
+        return DB::transaction(function () use ($id) {
+            $config = $this->repository->findById($id);
+            if (! $config) {
+                return false;
+            }
+            return $this->repository->delete($config);
+        });
+    }
 
-        if (! $levelConfig) {
-            return false;
+    private function syncBadgesFromRewards(int $levelConfigId, array $rewards): void
+    {
+        if (empty($rewards)) {
+            return;
         }
 
-        return $this->repository->delete($levelConfig);
+        foreach ($rewards as $reward) {
+            if ($reward['type'] !== 'badge') {
+                continue;
+            }
+
+            $badgeCode = $reward['value'] ?? null;
+            if (! $badgeCode) {
+                continue;
+            }
+
+            $this->badgeService->createOrFind($badgeCode, [
+                'description' => 'Badge earned upon reaching level milestone',
+                'type' => 'milestone',
+            ]);
+        }
     }
 }

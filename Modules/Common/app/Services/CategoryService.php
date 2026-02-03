@@ -5,12 +5,16 @@ declare(strict_types=1);
 namespace Modules\Common\Services;
 
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
+use Illuminate\Support\Facades\DB;
+use Modules\Common\Contracts\Services\CategoryServiceInterface;
+use Modules\Common\DTOs\CreateCategoryDTO;
+use Modules\Common\DTOs\UpdateCategoryDTO;
 use Modules\Common\Models\Category;
 use Modules\Common\Repositories\CategoryRepository;
 use Spatie\QueryBuilder\AllowedFilter;
 use Spatie\QueryBuilder\QueryBuilder;
 
-class CategoryService
+class CategoryService implements CategoryServiceInterface
 {
     public function __construct(private readonly CategoryRepository $repository) {}
 
@@ -29,9 +33,12 @@ class CategoryService
         return $query->paginate($perPage);
     }
 
-    public function create(array $data): Category
+    public function create(CreateCategoryDTO|array $data): Category
     {
-        return $this->repository->create($data);
+        return DB::transaction(function () use ($data) {
+            $dto = $data instanceof CreateCategoryDTO ? $data : CreateCategoryDTO::fromRequest($data);
+            return $this->repository->create($dto->toArray());
+        });
     }
 
     public function find(int $id): ?Category
@@ -39,23 +46,27 @@ class CategoryService
         return $this->repository->find($id);
     }
 
-    public function update(int $id, array $data): ?Category
+    public function update(int $id, UpdateCategoryDTO|array $data): ?Category
     {
         $category = $this->repository->find($id);
         if (! $category) {
             return null;
         }
 
-        return $this->repository->update($category, $data);
+        $dto = $data instanceof UpdateCategoryDTO ? $data : UpdateCategoryDTO::fromRequest($data);
+        return $this->repository->update($category, array_filter($dto->toArray(), fn ($value) => $value !== null));
     }
 
     public function delete(int $id): bool
     {
-        $category = $this->repository->find($id);
-        if (! $category) {
-            return false;
-        }
+        return DB::transaction(function () use ($id) {
+            $category = $this->repository->find($id);
+            if (! $category) {
+                return false;
+            }
 
-        return $this->repository->delete($category);
+            return $this->repository->delete($category);
+        });
     }
 }
+

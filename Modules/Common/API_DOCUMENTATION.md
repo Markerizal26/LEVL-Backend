@@ -355,37 +355,114 @@ Mendapatkan daftar badges.
 | `sort` | string | Sort field | `name`, `created_at`, `threshold` |
 
 ### 5.2 Create Badge
-Membuat badge baru.
+Membuat badge baru dengan semua fields yang diperlukan.
 
 - **Method**: `POST`
 - **URL**: `/api/v1/badges`
 - **Akses**: `Superadmin`
 
 **Request Body (Multipart/Form-Data):**
-| Field | Tipe | Wajib | Keterangan |
-|-------|------|-------|------------|
-| `code` | string | Ya | Unique Code (a-z, 0-9, _). |
-| `name` | string | Ya | Nama Badge Display. |
-| `description` | string | Tidak | Deskripsi singkat. |
-| `type` | string | Ya | `achievement`, `milestone`, `completion`. |
-| `threshold` | integer | Tidak | Nilai target (misal: 100 XP). |
-| `icon` | file | Ya | Image file (jpg, png, svg, webp) max 2MB. |
-| `rules` | array | Tidak | Array of objects rule otomatisasi. |
-| `rules[0][criterion]`| string | Ya | `lesson_completed`, `xp_earned`, `streak_days` |
-| `rules[0][operator]` | string | Ya | `=`, `>=`, `>` |
-| `rules[0][value]` | integer | Ya | Value target rule. |
+
+#### Field Details & Explanations
+
+| Field | Tipe | Wajib | Max | Keterangan |
+|-------|------|-------|-----|------------|
+| `code` | string | **Ya** | 50 | **Unique identifier untuk badge** (lowercase, snake_case format). Contoh: `first_submission`, `level_5_master`, `course_complete`. Digunakan untuk internal tracking. |
+| `name` | string | **Ya** | 255 | **Nama badge yang ditampilkan kepada user**. Harus user-friendly dan deskriptif. Contoh: `First Submission`, `Level 5 Master`, `Course Graduate`. |
+| `description` | string | Tidak | 1000 | **Penjelasan detail tentang badge**. Jelaskan cara mendapatkan badge dan apa yang diperlukan. Contoh: `Earned by submitting your first assignment`, `Reached level 5 with 5000 XP`. |
+| `type` | string | **Ya** | - | **Kategori/Tipe badge**: `achievement` (aksi tertentu), `milestone` (tingkat/level), `completion` (menyelesaikan sesuatu). |
+| `threshold` | integer | Tidak | - | **Nilai ambang batas untuk mendapat badge** (min: 1). Contoh: threshold 5 = user harus mencapai nilai 5. Biasanya untuk achievement atau milestone. |
+| `icon` | file | **Ya** | 2MB | **WAJIB: Image/Icon badge**. Supported: JPEG, PNG, SVG, WebP. Recommended size: 256x256 px dengan transparent background. Akan disimpan dalam 3 versi: original, thumb (64x64), large (128x128). |
+| `rules` | array | Tidak | - | **Array of rule objects untuk pemberian badge otomatis**. Diproses saat user mencapai kondisi tertentu. |
+| `rules[0][criterion]` | string | Ya (jika rules ada) | 50 | **Kriteria yang dicek** (contoh: `xp_earned`, `lesson_completed`, `assignment_submitted`, `level_reached`). |
+| `rules[0][operator]` | string | Ya (jika rules ada) | - | **Operator perbandingan**: `=` (sama dengan), `>=` (lebih besar/sama), `>` (lebih besar). |
+| `rules[0][value]` | integer | Ya (jika rules ada) | - | **Nilai numerik untuk dibandingkan dengan criterion** (min: 1). |
+
+#### Tipe Badge Penjelasan Lengkap
+
+**1. Achievement** (`achievement`)
+- Badge untuk pencapaian atau aksi spesifik
+- Contoh: First Submission, 10 Lessons Completed, 100 Posts
+- Biasanya punya threshold yang terukur
+- Rules: `assignments_submitted >= 1`, `posts_made >= 10`
+
+**2. Milestone** (`milestone`)
+- Badge untuk mencapai level/tingkat tertentu
+- Contoh: Level 5 Reached, 10,000 XP Earned, 30-Day Streak
+- Biasanya milestone gamification
+- Rules: `level_reached >= 5`, `xp_earned >= 10000`
+
+**3. Completion** (`completion`)
+- Badge untuk menyelesaikan sesuatu
+- Contoh: Course Graduated, Unit Completed, Chapter Done
+- Biasanya punya nilai kualitatif
+- Rules: `course_completed = 1`, `all_lessons_done = 1`
+
+#### Icon File Requirement
+
+**PENTING**: Badge HARUS memiliki icon/image. File diperlukan sebagai form-data.
+
+- **Format**: JPEG, PNG, SVG, WebP
+- **Max Size**: 2 MB
+- **Recommended Dimension**: 256x256 px atau lebih
+- **Background**: Transparent recommended untuk fleksibilitas
+- **Storage**: Disimpan di Spatie Media Library dengan 3 versi:
+  - `original`: File asli yang di-upload
+  - `thumb`: 64x64 px (untuk list view)
+  - `large`: 128x128 px (untuk detail view)
+
+#### Rules Object Structure
+
+Rules adalah array of objects yang mendefinisikan kondisi otomatis pemberian badge:
+
+```json
+{
+  "rules": [
+    {
+      "criterion": "xp_earned",
+      "operator": ">=",
+      "value": 5000
+    },
+    {
+      "criterion": "level_reached",
+      "operator": ">=",
+      "value": 5
+    }
+  ]
+}
+```
+
+- **Multiple rules**: Diproses dengan AND logic (semua harus terpenuhi)
+- **Empty rules**: Badge tidak diberikan otomatis, hanya manual assign
+- **Criteria Examples**: `xp_earned`, `lesson_completed`, `assignment_submitted`, `level_reached`, `streak_days`, `challenges_completed`
 
 **Example Form Data:**
 ```bash
 code: first_step
 name: Langkah Awal
-description: Menyelesaikan pelajaran pertama
+description: Menyelesaikan pelajaran pertama dengan sempurna
 type: achievement
-icon: (binary file)
+icon: (binary file - file.png)
 threshold: 1
 rules[0][criterion]: lesson_completed
 rules[0][operator]: >=
 rules[0][value]: 1
+```
+
+#### Complete Example (cURL)
+
+```bash
+curl -X POST http://localhost:8000/api/v1/badges \
+  -H "Authorization: Bearer YOUR_TOKEN" \
+  -F "code=achievement_first_submission" \
+  -F "name=First Submission" \
+  -F "description=Earned by submitting your first assignment" \
+  -F "type=achievement" \
+  -F "threshold=1" \
+  -F "icon=@/path/to/badge-icon.png" \
+  -F "rules[0][criterion]=assignments_submitted" \
+  -F "rules[0][operator]=>=" \
+  -F "rules[0][value]=1"
 ```
 
 ### 5.3 Update & Delete Badge
@@ -399,7 +476,7 @@ rules[0][value]: 1
 ## 6. Level Configs (Konfigurasi Level)
 
 ### 6.1 List & Manage
-Konfigurasi kenaikan level berdasarkan XP.
+Konfigurasi kenaikan level berdasarkan XP. Ketika membuat/update level config dengan badge rewards, badge akan dibuat/disinkronkan otomatis.
 
 - **List**: `GET /api/v1/level-configs`
 - **Create**: `POST /api/v1/level-configs` (Superadmin)
@@ -417,6 +494,47 @@ Konfigurasi kenaikan level berdasarkan XP.
         { "type": "points", "value": 100 }
     ]
 }
+```
+
+#### Badge Synchronization Feature
+
+Ketika Anda membuat atau update level config dengan badge rewards, sistem akan:
+
+1. **Otomatis membuat badge** jika belum ada dengan code dari `value` field
+   ```json
+   {
+     "type": "badge",
+     "value": "level_10_master"
+   }
+   ```
+   Akan membuat badge dengan code: `level_10_master`
+
+2. **Badge yang dibuat otomatis akan memiliki:**
+   - `code`: Dari rewards value (contoh: `level_10_master`)
+   - `name`: Auto-generated dari code (contoh: `Level 10 Master`)
+   - `description`: `Badge earned upon reaching level milestone`
+   - `type`: `milestone` (auto-set)
+   - `icon`: **NONE** (harus ditambahkan manual dengan PUT request)
+
+3. **Jika badge sudah ada**, sistem hanya akan menggunakan badge yang ada tanpa membuat duplikat
+
+#### PENTING: Icon Requirement
+
+⚠️ **Badge yang dibuat otomatis dari level config TIDAK memiliki icon!**
+
+Untuk memberikan icon pada badge, lakukan UPDATE dengan endpoint:
+```
+PUT /api/v1/badges/{badge_id}
+Content-Type: multipart/form-data
+
+icon: (file)
+```
+
+Contoh: Setelah membuat level config dengan badge `level_10_master`, update badge tersebut untuk menambahkan icon:
+```bash
+curl -X PUT http://localhost:8000/api/v1/badges/123 \
+  -H "Authorization: Bearer YOUR_TOKEN" \
+  -F "icon=@/path/to/master-badge.png"
 ```
 
 ---

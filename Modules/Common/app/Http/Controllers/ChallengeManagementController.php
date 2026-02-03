@@ -83,7 +83,11 @@ class ChallengeManagementController extends Controller
 
         $this->authorize('delete', $model);
 
-        $this->service->delete($challenge);
+        $deleted = $this->service->delete($challenge);
+
+        if (! $deleted) {
+            return $this->error(__('messages.achievements.not_found'), 404);
+        }
 
         return $this->success([], __('messages.achievements.deleted'));
     }

@@ -7,12 +7,13 @@ namespace Modules\Common\Services;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Facades\DB;
 use Meilisearch\Exceptions\ApiException;
+use Modules\Common\Contracts\Services\BadgeServiceInterface;
 use Modules\Common\Repositories\BadgeRepository;
 use Modules\Gamification\Models\Badge;
 use Spatie\QueryBuilder\AllowedFilter;
 use Spatie\QueryBuilder\QueryBuilder;
 
-class BadgeService
+class BadgeService implements BadgeServiceInterface
 {
     public function __construct(private readonly BadgeRepository $repository) {}
 
@@ -49,6 +50,30 @@ class BadgeService
 
             return $badge->fresh();
         });
+    }
+
+    public function createOrFind(string $code, array $data = [], ?string $iconPath = null): Badge
+    {
+        $existingBadge = Badge::where('code', $code)->first();
+        if ($existingBadge) {
+            return $existingBadge;
+        }
+
+        $badgeData = array_merge([
+            'code' => $code,
+            'name' => ucfirst(str_replace('_', ' ', $code)),
+            'description' => $data['description'] ?? 'Badge for milestone',
+            'type' => $data['type'] ?? 'milestone',
+            'threshold' => $data['threshold'] ?? null,
+        ], $data);
+
+        $badge = $this->repository->create($badgeData);
+
+        if ($iconPath && file_exists($iconPath)) {
+            $badge->addMedia($iconPath)->toMediaCollection('icon');
+        }
+
+        return $badge->fresh();
     }
 
     public function find(int $id): ?Badge
@@ -97,7 +122,7 @@ class BadgeService
 
     private function applySearch(\Illuminate\Database\Eloquent\Builder $query, array $params): void
     {
-        $searchQuery = $params['search'] ?? request('filter.search') ?? request('search');
+        $searchQuery = $params['search'] ?? request('search');
 
         if (! $searchQuery || trim($searchQuery) === '') {
             return;

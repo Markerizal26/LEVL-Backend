@@ -7,6 +7,7 @@ namespace Modules\Common\Http\Requests;
 use Illuminate\Foundation\Http\FormRequest;
 use Modules\Common\Http\Requests\Concerns\HasApiValidation;
 use Modules\Common\Http\Requests\Concerns\HasCommonRequestRules;
+use Modules\Common\Models\Category;
 
 class CategoryUpdateRequest extends FormRequest
 {
@@ -14,7 +15,7 @@ class CategoryUpdateRequest extends FormRequest
 
     public function authorize(): bool
     {
-        return true;
+        return auth('api')->check() && auth('api')->user()->hasRole('Superadmin');
     }
 
     public function rules(): array

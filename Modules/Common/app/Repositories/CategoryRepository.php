@@ -37,7 +37,7 @@ class CategoryRepository extends BaseRepository
     {
         $query = $this->query();
 
-        $searchQuery = $params['search'] ?? request('filter.search') ?? request('search');
+        $searchQuery = $params['search'] ?? request('search');
 
         if ($searchQuery && trim($searchQuery) !== '') {
             $ids = Category::search($searchQuery)->keys()->toArray();
@@ -63,7 +63,7 @@ class CategoryRepository extends BaseRepository
     {
         $query = $this->query();
 
-        $searchQuery = $params['search'] ?? request('filter.search') ?? request('search');
+        $searchQuery = $params['search'] ?? request('search');
 
         if ($searchQuery && trim($searchQuery) !== '') {
             $ids = Category::search($searchQuery)->keys()->toArray();

@@ -12,7 +12,13 @@ class MasterDataSeeder extends Seeder
    */
   public function run(): void
   {
-    // Categories (migrated from legacy CategorySeeder)
+    $this->seedCategories();
+    $this->seedDifficultyLevels();
+    $this->seedContentTypes();
+  }
+
+  private function seedCategories(): void
+  {
     $categories = [
       ["value" => "information-technology", "label" => "Teknologi Informasi"],
       ["value" => "project-management", "label" => "Manajemen Proyek"],
@@ -36,8 +42,10 @@ class MasterDataSeeder extends Seeder
         ],
       );
     }
+  }
 
-    // Difficulty Levels
+  private function seedDifficultyLevels(): void
+  {
     $difficultyLevels = [
       ["value" => "beginner", "label" => "Beginner", "label_id" => "Pemula"],
       ["value" => "intermediate", "label" => "Intermediate", "label_id" => "Menengah"],
@@ -58,8 +66,10 @@ class MasterDataSeeder extends Seeder
         ],
       );
     }
+  }
 
-    // Content Types (Example dynamic types)
+  private function seedContentTypes(): void
+  {
     $contentTypes = [
       ["value" => "article", "label" => "Article"],
       ["value" => "video", "label" => "Video"],

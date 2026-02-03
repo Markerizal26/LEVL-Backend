@@ -5,13 +5,16 @@ declare(strict_types=1);
 namespace Modules\Common\Services;
 
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
+use Illuminate\Support\Facades\DB;
 use Meilisearch\Exceptions\ApiException;
+use Modules\Common\Contracts\Services\ChallengeManagementServiceInterface;
 use Modules\Common\Repositories\ChallengeManagementRepository;
 use Modules\Gamification\Models\Challenge;
 use Spatie\QueryBuilder\AllowedFilter;
 use Spatie\QueryBuilder\QueryBuilder;
 
 class ChallengeManagementService
+implements ChallengeManagementServiceInterface
 {
     public function __construct(private readonly ChallengeManagementRepository $repository) {}
 
@@ -21,7 +24,7 @@ class ChallengeManagementService
 
         $query = Challenge::query()->with('badge');
 
-        $searchQuery = $params['search'] ?? request('filter.search') ?? request('search');
+        $searchQuery = $params['search'] ?? request('search');
 
         if ($searchQuery && trim($searchQuery) !== '') {
             try {
@@ -54,7 +57,9 @@ class ChallengeManagementService
 
     public function create(array $data): Challenge
     {
-        return $this->repository->create($data);
+        return DB::transaction(function () use ($data) {
+            return $this->repository->create($data);
+        });
     }
 
     public function find(int $id): ?Challenge
@@ -65,22 +70,22 @@ class ChallengeManagementService
     public function update(int $id, array $data): ?Challenge
     {
         $achievement = $this->repository->findById($id);
-
         if (! $achievement) {
             return null;
         }
-
-        return $this->repository->update($achievement, $data);
+        return DB::transaction(function () use ($achievement, $data) {
+            return $this->repository->update($achievement, $data);
+        });
     }
 
     public function delete(int $id): bool
     {
-        $achievement = $this->repository->findById($id);
-
-        if (! $achievement) {
-            return false;
-        }
-
-        return $this->repository->delete($achievement);
+        return DB::transaction(function () use ($id) {
+            $achievement = $this->repository->findById($id);
+            if (! $achievement) {
+                return false;
+            }
+            return $this->repository->delete($achievement);
+        });
     }
 }

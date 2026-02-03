@@ -8,9 +8,11 @@ use App\Support\Traits\RegistersModuleConfig;
 use Illuminate\Support\Facades\Blade;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\ServiceProvider;
+use Modules\Common\Models\Category;
 use Modules\Common\Models\LevelConfig;
 use Modules\Common\Policies\AchievementPolicy;
 use Modules\Common\Policies\BadgePolicy;
+use Modules\Common\Policies\CategoryPolicy;
 use Modules\Common\Policies\LevelConfigPolicy;
 use Modules\Gamification\Models\Badge;
 use Modules\Gamification\Models\Challenge;
@@ -58,6 +60,26 @@ class CommonServiceProvider extends ServiceProvider
             \Modules\Common\Contracts\Services\AuditServiceInterface::class,
             \Modules\Common\Services\AssessmentAuditService::class
         );
+
+        $this->app->bind(
+            \Modules\Common\Contracts\Services\CategoryServiceInterface::class,
+            \Modules\Common\Services\CategoryService::class
+        );
+
+        $this->app->bind(
+            \Modules\Common\Contracts\Services\BadgeServiceInterface::class,
+            \Modules\Common\Services\BadgeService::class
+        );
+
+        $this->app->bind(
+            \Modules\Common\Contracts\Services\LevelConfigServiceInterface::class,
+            \Modules\Common\Services\LevelConfigService::class
+        );
+
+        $this->app->bind(
+            \Modules\Common\Contracts\Services\ChallengeManagementServiceInterface::class,
+            \Modules\Common\Services\ChallengeManagementService::class
+        );
     }
 
     protected function registerCommands(): void {}
@@ -84,6 +106,7 @@ class CommonServiceProvider extends ServiceProvider
 
     protected function registerPolicies(): void
     {
+        Gate::policy(Category::class, CategoryPolicy::class);
         Gate::policy(Badge::class, BadgePolicy::class);
         Gate::policy(LevelConfig::class, LevelConfigPolicy::class);
         Gate::policy(Challenge::class, AchievementPolicy::class);
