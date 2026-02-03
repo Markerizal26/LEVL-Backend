@@ -9,6 +9,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\MorphTo;
 use Illuminate\Support\Facades\Auth;
+use Laravel\Scout\Searchable;
 
 /**
  * AuditLog Model - Immutable (append-only) audit log for compliance.
@@ -34,7 +35,7 @@ use Illuminate\Support\Facades\Auth;
  */
 class AuditLog extends Model
 {
-    use HasFactory;
+    use HasFactory, Searchable;
 
     /**
      * The table associated with the model.
@@ -291,5 +292,17 @@ class AuditLog extends Model
             'user_id' => Auth::check() ? Auth::id() : null,
             'context' => $context,
         ]);
+    }
+
+    public function toSearchableArray(): array
+    {
+        return [
+            'id' => $this->id,
+            'action' => $this->action,
+            'actor_type' => $this->actor_type,
+            'subject_type' => $this->subject_type,
+            'context' => $this->context,
+            'event' => $this->event, // Legacy
+        ];
     }
 }

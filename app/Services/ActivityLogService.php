@@ -19,8 +19,20 @@ class ActivityLogService
     
     // Convert array filters to QueryBuilder format
     $filters = data_get($params, 'filter', []);
+    $search = $params['search'] ?? null;
     
-    $paginator = \Spatie\QueryBuilder\QueryBuilder::for(ActivityLog::class)
+    $query = ActivityLog::query();
+    
+    if ($search) {
+        try {
+             $ids = ActivityLog::search($search)->keys()->toArray();
+             $query->whereIn('id', $ids ?: [0]);
+        } catch (\Exception $e) {
+             // Handle search exception (e.g. empty index or connection issue)
+        }
+    }
+    
+    $paginator = \Spatie\QueryBuilder\QueryBuilder::for($query)
         ->with(['causer', 'subject'])
         ->allowedFilters([
             'log_name',

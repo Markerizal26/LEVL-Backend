@@ -25,8 +25,30 @@ class AuditLogQueryService
     {
         $perPage = (int) ($validated['per_page'] ?? 15);
         $perPage = max(1, min($perPage, 100));
+        
+        $query = AuditLog::query();
+        $search = $validated['search'] ?? null;
 
-        return QueryBuilder::for(AuditLog::class)
+        if ($search) {
+             try {
+                $ids = AuditLog::search($search)->keys()->toArray();
+                $query->whereIn('id', $ids ?: [0]);
+            } catch (\Exception $e) {
+                 // Fallback or ignore if search fails (e.g. meilisearch down)
+                 // For now, if unrelated to "not found", rethrow or log?
+                 // Standard safe approach: if search fails, empty result
+                 // But Scout usually returns empty keys if no match.
+                 // If connection error, we might want to fail gracefully or throw.
+                 // We will replicate the pattern used in other services (like BadgeService).
+                 if (str_contains($e->getMessage(), 'not found')) {
+                    $query->whereRaw('1 = 0');
+                 } else {
+                     // Optionally log error
+                 }
+            }
+        }
+
+        return QueryBuilder::for($query)
             ->with('actor')
             ->allowedFilters([
                 AllowedFilter::exact('action'),

@@ -6,7 +6,9 @@ use Spatie\Activitylog\Models\Activity as SpatieActivity;
 
 class ActivityLog extends SpatieActivity
 {
-  protected $appends = ["device_info"];
+    use \Laravel\Scout\Searchable;
+
+    protected $appends = ["device_info"];
 
   /**
    * Get formatted device info
@@ -56,5 +58,16 @@ class ActivityLog extends SpatieActivity
       }
 
       return $query;
+  }
+
+  public function toSearchableArray(): array
+  {
+      return [
+          'id' => $this->id,
+          'log_name' => $this->log_name,
+          'description' => $this->description,
+          'event' => $this->event,
+          'properties' => $this->properties->toArray(),
+      ];
   }
 }

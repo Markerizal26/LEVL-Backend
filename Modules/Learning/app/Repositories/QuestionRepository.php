@@ -146,8 +146,23 @@ class QuestionRepository extends BaseRepository implements QuestionRepositoryInt
 
     public function searchByAssignment(int $assignmentId, string $query): Collection
     {
-        return Question::search($query)
+        if (trim($query) === '') {
+            return $this->findByAssignment($assignmentId);
+        }
+
+        $ids = Question::search($query)
+            ->query(fn ($q) => $q->where('assignment_id', $assignmentId))
+            ->keys()
+            ->toArray();
+
+        if (empty($ids)) {
+            return new Collection();
+        }
+
+        return Question::whereIn('id', $ids)
             ->where('assignment_id', $assignmentId)
+            ->with(self::DEFAULT_EAGER_LOAD)
+            ->ordered()
             ->get();
     }
 

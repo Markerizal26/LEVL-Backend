@@ -19,8 +19,8 @@ Mendapatkan daftar log aktivitas user.
 | `per_page` | integer | Tidak | Pagination (Default: 15) | `20` |
 | `page` | integer | Tidak | Halaman | `1` |
 | `sort` | string | Tidak | Sorting (`-created_at`, `created_at`, `log_name`, `event`) | `-created_at` |
+| `search` | string | Tidak | Global Search (Meilisearch) | `login` |
 | `filter[log_name]` | string | Tidak | Kategori log (`auth`, `system`, `user`, `course`) | `auth` |
-| `filter[description]` | string | Tidak | Search deskripsi (partial) | `login` |
 | `filter[event]` | string | Tidak | Event type (`login`, `logout`, `created`, `updated`, `deleted`) | `login` |
 | `filter[subject_type]` | string | Tidak | Tipe subject (Class Name) | `Modules\Auth\Models\User` |
 | `filter[subject_id]` | integer | Tidak | ID Subject | `1` |
@@ -123,13 +123,13 @@ Mendapatkan daftar audit logs sistem untuk keperluan validasi dan compliance.
 |-----------|------|------------|-----------------------|
 | `page` | integer | Halaman | `1` |
 | `per_page` | integer | Pagination | `15` |
+| `search` | string | Global Search (Meilisearch) | `submission` |
 | `sort` | string | Sorting (`-created_at`, `created_at`) | `-created_at` |
 | `filter[action]` | string | Filter single action | `submission_created` |
 | `filter[actions]` | string | Filter multiple actions (comma separated) | `grading,grade_override` |
 | `filter[actor_id]` | integer | ID User Aktor | `1` |
 | `filter[subject_id]` | integer | ID Subject | `10` |
 | `filter[created_between]` | string | Filter date range (comma separated `YYYY-MM-DD`) | `2024-01-01,2024-12-31` |
-| `filter[context_contains]`| string | Cari text dalam JSON context | `reason` |
 | `filter[assignment_id]` | integer | Filter assignment ID in context | `5` |
 | `filter[student_id]` | integer | Filter student ID in context | `20` |
 
@@ -165,9 +165,7 @@ Mendapatkan daftar tags.
 | Parameter | Tipe | Wajib | Keterangan |
 |-----------|------|-------|------------|
 | `per_page` | integer | Tidak | Pagination |
-| `search` | string | Tidak | Pencarian nama tag |
-| `filter[name]` | string | Tidak | Filter nama (partial) |
-| `filter[slug]` | string | Tidak | Filter slug (partial) |
+| `search` | string | Tidak | Pencarian nama tag / slug (Meilisearch) |
 | `sort` | string | Tidak | `name`, `-name`, `created_at` |
 
 **Response Example:**
@@ -350,6 +348,7 @@ Mendapatkan daftar badges.
 **Query Parameters:**
 | Parameter | Tipe | Keterangan | Valid Values |
 |-----------|------|------------|--------------|
+| `search` | string | Global Search (Meilisearch) | `first step` |
 | `filter[code]` | string | Filter code | e.g., `first_step` |
 | `filter[type]` | string | Filter type | `achievement`, `milestone`, `completion` |
 | `sort` | string | Sort field | `name`, `created_at`, `threshold` |
@@ -482,6 +481,12 @@ Konfigurasi kenaikan level berdasarkan XP. Ketika membuat/update level config de
 - **Create**: `POST /api/v1/level-configs` (Superadmin)
 - **Update**: `PUT /api/v1/level-configs/{id}` (Superadmin)
 - **Delete**: `DELETE /api/v1/level-configs/{id}` (Superadmin)
+
+**Query Parameters:**
+| Parameter | Tipe | Keterangan |
+|-----------|------|------------|
+| `search` | string | Global Search (Meilisearch) |
+| `sort` | string | Sort field (`level`, `name`, `xp_required`) |
 
 **Request Body (Create/Update):**
 ```json
