@@ -78,17 +78,31 @@ class Enrollment extends Model
 
     public function toSearchableArray(): array
     {
+        $this->loadMissing(['user', 'course']);
+
         return [
-            'id' => $this->id,
-            'status' => $this->status,
+            'id' => (int) $this->id,
+            'status' => $this->status?->value,
+            'user_id' => (int) $this->user_id,
+            'course_id' => (int) $this->course_id,
+            'user_name' => $this->user?->name ?? '',
+            'user_email' => $this->user?->email ?? '',
+            'course_title' => $this->course?->title ?? '',
+            'course_code' => $this->course?->code ?? '',
             'enrolled_at' => $this->enrolled_at?->timestamp,
-            'created_at' => $this->created_at->timestamp,
+            'completed_at' => $this->completed_at?->timestamp,
+            'created_at' => $this->created_at?->timestamp,
         ];
+    }
+
+    public function searchableAs(): string
+    {
+        return 'enrollments_index';
     }
 
     public function shouldBeSearchable(): bool
     {
-        return false;
+        return true;
     }
 
     protected static function newFactory()

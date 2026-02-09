@@ -1,140 +1,32 @@
 <?php
 
-return [
+$defaultTypoTolerance = [
+    'enabled' => true,
+    'minWordSizeForTypos' => ['oneTypo' => 6, 'twoTypos' => 10],
+];
 
-    /*
-    |--------------------------------------------------------------------------
-    | Default Search Engine
-    |--------------------------------------------------------------------------
-    |
-    | This option controls the default search connection that gets used while
-    | using Laravel Scout. This connection is used when syncing all models
-    | to the search service. You should adjust this based on your needs.
-    |
-    | Supported: "algolia", "meilisearch", "typesense",
-    |            "database", "collection", "null"
-    |
-    */
+$strictTypoTolerance = [
+    'enabled' => false,
+];
+
+return [
 
     'driver' => env('SCOUT_DRIVER', 'collection'),
 
-    /*
-    |--------------------------------------------------------------------------
-    | Index Prefix
-    |--------------------------------------------------------------------------
-    |
-    | Here you may specify a prefix that will be applied to all search index
-    | names used by Scout. This prefix may be useful if you have multiple
-    | "tenants" or applications sharing the same search infrastructure.
-    |
-    */
-
     'prefix' => env('SCOUT_PREFIX', ''),
-
-    /*
-    |--------------------------------------------------------------------------
-    | Queue Data Syncing
-    |--------------------------------------------------------------------------
-    |
-    | This option allows you to control if the operations that sync your data
-    | with your search engines are queued. When this is set to "true" then
-    | all automatic data syncing will get queued for better performance.
-    |
-    */
 
     'queue' => env('SCOUT_QUEUE', false),
 
-    /*
-    |--------------------------------------------------------------------------
-    | Database Transactions
-    |--------------------------------------------------------------------------
-    |
-    | This configuration option determines if your data will only be synced
-    | with your search indexes after every open database transaction has
-    | been committed, thus preventing any discarded data from syncing.
-    |
-    */
-
-    'after_commit' => false,
-
-    /*
-    |--------------------------------------------------------------------------
-    | Chunk Sizes
-    |--------------------------------------------------------------------------
-    |
-    | These options allow you to control the maximum chunk size when you are
-    | mass importing data into the search engine. This allows you to fine
-    | tune each of these chunk sizes based on the power of the servers.
-    |
-    */
+    'after_commit' => true,
 
     'chunk' => [
         'searchable' => 500,
         'unsearchable' => 500,
     ],
 
-    /*
-    |--------------------------------------------------------------------------
-    | Soft Deletes
-    |--------------------------------------------------------------------------
-    |
-    | This option allows to control whether to keep soft deleted records in
-    | the search indexes. Maintaining soft deleted records can be useful
-    | if your application still needs to search for the records later.
-    |
-    */
-
     'soft_delete' => false,
 
-    /*
-    |--------------------------------------------------------------------------
-    | Identify User
-    |--------------------------------------------------------------------------
-    |
-    | This option allows you to control whether to notify the search engine
-    | of the user performing the search. This is sometimes useful if the
-    | engine supports any analytics based on this application's users.
-    |
-    | Supported engines: "algolia"
-    |
-    */
-
     'identify' => env('SCOUT_IDENTIFY', false),
-
-    /*
-    |--------------------------------------------------------------------------
-    | Algolia Configuration
-    |--------------------------------------------------------------------------
-    |
-    | Here you may configure your Algolia settings. Algolia is a cloud hosted
-    | search engine which works great with Scout out of the box. Just plug
-    | in your application ID and admin API key to get started searching.
-    |
-    */
-
-    'algolia' => [
-        'id' => env('ALGOLIA_APP_ID', ''),
-        'secret' => env('ALGOLIA_SECRET', ''),
-        'index-settings' => [
-            // 'users' => [
-            //     'searchableAttributes' => ['id', 'name', 'email'],
-            //     'attributesForFaceting'=> ['filterOnly(email)'],
-            // ],
-        ],
-    ],
-
-    /*
-    |--------------------------------------------------------------------------
-    | Meilisearch Configuration
-    |--------------------------------------------------------------------------
-    |
-    | Here you may configure your Meilisearch settings. Meilisearch is an open
-    | source search engine with minimal configuration. Below, you can state
-    | the host and key information for your own Meilisearch installation.
-    |
-    | See: https://www.meilisearch.com/docs/learn/configuration/instance_options#all-instance-options
-    |
-    */
 
     'meilisearch' => [
         'host' => env('MEILISEARCH_HOST', 'http://localhost:7700'),
@@ -162,10 +54,7 @@ return [
                     'instructor_name',
                     'tags',
                 ],
-                'typoTolerance' => [
-                    'enabled' => true,
-                    'minWordSizeForTypos' => ['oneTypo' => 5, 'twoTypos' => 9],
-                ],
+                'typoTolerance' => $defaultTypoTolerance,
             ],
             'categories_index' => [
                 'filterableAttributes' => [
@@ -180,10 +69,7 @@ return [
                     'value',
                     'description',
                 ],
-                'typoTolerance' => [
-                    'enabled' => true,
-                    'minWordSizeForTypos' => ['oneTypo' => 5, 'twoTypos' => 9],
-                ],
+                'typoTolerance' => $defaultTypoTolerance,
             ],
             'tags_index' => [
                 'filterableAttributes' => [],
@@ -196,10 +82,7 @@ return [
                     'slug',
                     'description',
                 ],
-                'typoTolerance' => [
-                    'enabled' => true,
-                    'minWordSizeForTypos' => ['oneTypo' => 5, 'twoTypos' => 9],
-                ],
+                'typoTolerance' => $defaultTypoTolerance,
             ],
             'users_index' => [
                 'filterableAttributes' => [
@@ -215,10 +98,7 @@ return [
                     'email',
                     'username',
                 ],
-                'typoTolerance' => [
-                    'enabled' => true,
-                    'minWordSizeForTypos' => ['oneTypo' => 5, 'twoTypos' => 9],
-                ],
+                'typoTolerance' => $defaultTypoTolerance,
             ],
             'units_index' => [
                 'filterableAttributes' => [
@@ -235,10 +115,7 @@ return [
                     'code',
                     'course_title',
                 ],
-                'typoTolerance' => [
-                    'enabled' => true,
-                    'minWordSizeForTypos' => ['oneTypo' => 5, 'twoTypos' => 9],
-                ],
+                'typoTolerance' => $defaultTypoTolerance,
             ],
             'lessons_index' => [
                 'filterableAttributes' => [
@@ -258,10 +135,7 @@ return [
                     'unit_title',
                     'course_title',
                 ],
-                'typoTolerance' => [
-                    'enabled' => true,
-                    'minWordSizeForTypos' => ['oneTypo' => 5, 'twoTypos' => 9],
-                ],
+                'typoTolerance' => $defaultTypoTolerance,
             ],
             'master_data_index' => [
                 'filterableAttributes' => [
@@ -280,10 +154,7 @@ return [
                     'value',
                     'label',
                 ],
-                'typoTolerance' => [
-                    'enabled' => true,
-                    'minWordSizeForTypos' => ['oneTypo' => 5, 'twoTypos' => 9],
-                ],
+                'typoTolerance' => $defaultTypoTolerance,
             ],
             'submissions_index' => [
                 'filterableAttributes' => [
@@ -311,151 +182,84 @@ return [
                     'assignment_title',
                     'state',
                 ],
-                'typoTolerance' => [
-                    'enabled' => true,
-                    'minWordSizeForTypos' => ['oneTypo' => 5, 'twoTypos' => 9],
+                'typoTolerance' => $defaultTypoTolerance,
+            ],
+            'enrollments_index' => [
+                'filterableAttributes' => [
+                    'status',
+                    'user_id',
+                    'course_id',
+                    'enrolled_at',
+                    'completed_at',
+                    'created_at',
                 ],
+                'sortableAttributes' => [
+                    'enrolled_at',
+                    'completed_at',
+                    'created_at',
+                ],
+                'searchableAttributes' => [
+                    'user_name',
+                    'user_email',
+                    'course_title',
+                    'course_code',
+                ],
+                'typoTolerance' => $defaultTypoTolerance,
             ],
             'threads_index' => [
                 'filterableAttributes' => ['course_id', 'author_id', 'is_pinned', 'is_closed', 'is_resolved'],
                 'sortableAttributes' => ['created_at', 'last_activity_at', 'views_count', 'replies_count'],
                 'searchableAttributes' => ['title', 'content', 'author_name'],
-                'typoTolerance' => [
-                    'enabled' => true,
-                    'minWordSizeForTypos' => ['oneTypo' => 5, 'twoTypos' => 9],
-                ],
+                'typoTolerance' => $defaultTypoTolerance,
             ],
             'replies_index' => [
                 'filterableAttributes' => ['thread_id', 'author_id', 'is_accepted_answer'],
                 'sortableAttributes' => ['created_at'],
                 'searchableAttributes' => ['content', 'author_name'],
-                'typoTolerance' => [
-                    'enabled' => true,
-                    'minWordSizeForTypos' => ['oneTypo' => 5, 'twoTypos' => 9],
-                ],
+                'typoTolerance' => $defaultTypoTolerance,
             ],
             'badges_index' => [
                 'filterableAttributes' => ['type', 'is_active'],
                 'sortableAttributes' => ['name', 'points', 'created_at'],
                 'searchableAttributes' => ['name', 'description'],
-                'typoTolerance' => [
-                    'enabled' => true,
-                    'minWordSizeForTypos' => ['oneTypo' => 5, 'twoTypos' => 9],
-                ],
+                'typoTolerance' => $defaultTypoTolerance,
             ],
             'challenges_index' => [
                 'filterableAttributes' => ['type', 'badge_id', 'start_at', 'end_at'],
                 'sortableAttributes' => ['title', 'points_reward', 'created_at'],
                 'searchableAttributes' => ['title', 'description'],
-                'typoTolerance' => [
-                    'enabled' => true,
-                    'minWordSizeForTypos' => ['oneTypo' => 5, 'twoTypos' => 9],
-                ],
+                'typoTolerance' => $defaultTypoTolerance,
             ],
             'grades_index' => [
                 'filterableAttributes' => ['source_type', 'source_id', 'user_id', 'graded_by', 'status', 'is_override', 'is_draft'],
                 'sortableAttributes' => ['score', 'graded_at', 'released_at'],
                 'searchableAttributes' => ['feedback'],
-                'typoTolerance' => [
-                    'enabled' => true,
-                    'minWordSizeForTypos' => ['oneTypo' => 5, 'twoTypos' => 9],
-                ],
+                'typoTolerance' => $defaultTypoTolerance,
             ],
             'assignments_index' => [
                 'filterableAttributes' => ['lesson_id', 'assignable_type', 'assignable_id', 'created_by', 'type', 'submission_type', 'status'],
                 'sortableAttributes' => ['title', 'max_score', 'available_from', 'deadline_at', 'created_at'],
                 'searchableAttributes' => ['title', 'description'],
-                'typoTolerance' => [
-                    'enabled' => true,
-                    'minWordSizeForTypos' => ['oneTypo' => 5, 'twoTypos' => 9],
-                ],
+                'typoTolerance' => $defaultTypoTolerance,
             ],
             'questions_index' => [
                 'filterableAttributes' => ['assignment_id', 'type', 'difficulty'],
                 'sortableAttributes' => ['order', 'points'],
                 'searchableAttributes' => ['question_text', 'explanation'],
-                'typoTolerance' => [
-                    'enabled' => true,
-                    'minWordSizeForTypos' => ['oneTypo' => 5, 'twoTypos' => 9],
-                ],
+                'typoTolerance' => $defaultTypoTolerance,
             ],
             'audit_logs_index' => [
                 'filterableAttributes' => ['action', 'actor_type', 'actor_id', 'subject_type', 'subject_id', 'user_id'],
                 'sortableAttributes' => ['created_at'],
                 'searchableAttributes' => ['action', 'event'],
-                'typoTolerance' => [
-                    'enabled' => false,
-                ],
+                'typoTolerance' => $strictTypoTolerance,
             ],
             'level_configs_index' => [
                 'filterableAttributes' => ['is_active'],
                 'sortableAttributes' => ['level', 'min_points'],
                 'searchableAttributes' => ['name', 'description'],
-                'typoTolerance' => [
-                    'enabled' => true,
-                    'minWordSizeForTypos' => ['oneTypo' => 5, 'twoTypos' => 9],
-                ],
+                'typoTolerance' => $defaultTypoTolerance,
             ],
-        ],
-    ],
-
-    /*
-    |--------------------------------------------------------------------------
-    | Typesense Configuration
-    |--------------------------------------------------------------------------
-    |
-    | Here you may configure your Typesense settings. Typesense is an open
-    | source search engine using minimal configuration. Below, you will
-    | state the host, key, and schema configuration for the instance.
-    |
-    */
-
-    'typesense' => [
-        'client-settings' => [
-            'api_key' => env('TYPESENSE_API_KEY', 'xyz'),
-            'nodes' => [
-                [
-                    'host' => env('TYPESENSE_HOST', 'localhost'),
-                    'port' => env('TYPESENSE_PORT', '8108'),
-                    'path' => env('TYPESENSE_PATH', ''),
-                    'protocol' => env('TYPESENSE_PROTOCOL', 'http'),
-                ],
-            ],
-            'nearest_node' => [
-                'host' => env('TYPESENSE_HOST', 'localhost'),
-                'port' => env('TYPESENSE_PORT', '8108'),
-                'path' => env('TYPESENSE_PATH', ''),
-                'protocol' => env('TYPESENSE_PROTOCOL', 'http'),
-            ],
-            'connection_timeout_seconds' => env('TYPESENSE_CONNECTION_TIMEOUT_SECONDS', 2),
-            'healthcheck_interval_seconds' => env('TYPESENSE_HEALTHCHECK_INTERVAL_SECONDS', 30),
-            'num_retries' => env('TYPESENSE_NUM_RETRIES', 3),
-            'retry_interval_seconds' => env('TYPESENSE_RETRY_INTERVAL_SECONDS', 1),
-        ],
-        // 'max_total_results' => env('TYPESENSE_MAX_TOTAL_RESULTS', 1000),
-        'model-settings' => [
-            // User::class => [
-            //     'collection-schema' => [
-            //         'fields' => [
-            //             [
-            //                 'name' => 'id',
-            //                 'type' => 'string',
-            //             ],
-            //             [
-            //                 'name' => 'name',
-            //                 'type' => 'string',
-            //             ],
-            //             [
-            //                 'name' => 'created_at',
-            //                 'type' => 'int64',
-            //             ],
-            //         ],
-            //         'default_sorting_field' => 'created_at',
-            //     ],
-            //     'search-parameters' => [
-            //         'query_by' => 'name'
-            //     ],
-            // ],
         ],
     ],
 
