@@ -46,13 +46,7 @@ class CourseRepository extends BaseRepository implements CourseRepositoryInterfa
         $searchQuery = $params['search'] ?? request('search');
 
         if ($searchQuery && trim($searchQuery) !== '') {
-            $ids = Course::search($searchQuery)->keys()->toArray();
-
-            if (! empty($ids)) {
-                $query->whereIn('id', $ids);
-            } else {
-                $query->whereRaw('1 = 0');
-            }
+            $query->search($searchQuery);
         }
 
         $tagFilter = $params['filter']['tag'] ?? request('filter.tag');
@@ -77,13 +71,7 @@ class CourseRepository extends BaseRepository implements CourseRepositoryInterfa
         $searchQuery = $params['search'] ?? request('search');
 
         if ($searchQuery && trim($searchQuery) !== '') {
-            $ids = Course::search($searchQuery)->keys()->toArray();
-
-            if (! empty($ids)) {
-                $query->whereIn('id', $ids);
-            } else {
-                return new Collection;
-            }
+            $query->search($searchQuery);
         }
 
         $tagFilter = $params['filter']['tag'] ?? request('filter.tag');

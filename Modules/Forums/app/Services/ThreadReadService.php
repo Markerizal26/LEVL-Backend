@@ -47,8 +47,7 @@ class ThreadReadService
             ->defaultSort('-is_pinned', '-last_activity_at');
 
         if ($search && trim($search) !== '') {
-            $ids = Thread::search($search)->keys()->toArray();
-            $threadsQuery->whereIn('id', $ids ?: [0]);
+            $threadsQuery->search($search);
         }
 
         $threads = $threadsQuery->paginate($perPage);

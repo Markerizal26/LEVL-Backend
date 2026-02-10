@@ -78,19 +78,9 @@ class ChallengeService implements ChallengeServiceInterface
                 AllowedFilter::partial('challenge.title'),
                 AllowedFilter::exact('challenge.type'),
                 AllowedFilter::callback('search', function ($query, $value) {
-                    try {
-                        // Strictly Meilisearch as requested
-                        $ids = \Modules\Gamification\Models\Challenge::search($value)->keys()->toArray();
-                        if (!empty($ids)) {
-                            $query->whereIn('challenge_id', $ids);
-                        } else {
-                            $query->whereRaw('1 = 0');
-                        }
-                    } catch (\Exception $e) {
-                         // Fallback is strictly forbidden by user request ("TIDAK BOLEH ADA QUERY LIKE")
-                         // So we return no results if Meilisearch fails
-                         $query->whereRaw('1 = 0');
-                    }
+                        $query->whereHas('challenge', function ($q) use ($value) {
+                             $q->search($value);
+                        });
                 }),
             ])
             ->allowedSorts(['completed_date', 'points_earned'])

@@ -114,8 +114,7 @@ class CourseFinder
         );
 
         if ($searchQuery && trim((string) $searchQuery) !== '') {
-            $ids = Course::search($searchQuery)->keys()->toArray();
-            $builder->whereIn('id', $ids ?: [0]);
+            $builder->search($searchQuery);
         }
 
         if ($tagFilter = data_get($filters, 'tag')) {
@@ -150,8 +149,7 @@ class CourseFinder
         );
 
         if ($searchQuery && trim((string) $searchQuery) !== '') {
-            $ids = Course::search($searchQuery)->keys()->toArray();
-            $builder->whereIn('id', $ids ?: [0]);
+            $builder->search($searchQuery);
         }
 
         if ($tagFilter = data_get($filters, 'tag')) {

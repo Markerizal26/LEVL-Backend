@@ -42,8 +42,7 @@ class TagService
         $builder = QueryBuilder::for(Tag::class, $this->buildQueryBuilderRequest($cleanFilters));
 
         if ($searchQuery && trim((string) $searchQuery) !== '') {
-            $ids = Tag::search($searchQuery)->keys()->toArray();
-            $builder->whereIn('id', $ids ?: [0]);
+            $builder->search($searchQuery);
         }
 
         return $builder

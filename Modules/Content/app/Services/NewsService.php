@@ -30,13 +30,7 @@ class NewsService implements NewsServiceInterface
         $builder = QueryBuilder::for(News::class);
 
         if ($searchQuery && trim($searchQuery) !== '') {
-            $ids = News::search($searchQuery)->keys()->toArray();
-
-            if (! empty($ids)) {
-                $builder->whereIn('id', $ids);
-            } else {
-                $builder->whereRaw('1 = 0');
-            }
+            $builder->search($searchQuery);
         }
 
         $builder->allowedFilters([

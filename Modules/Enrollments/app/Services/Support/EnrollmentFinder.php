@@ -239,8 +239,7 @@ class EnrollmentFinder
         $searchQuery = data_get($filters, 'search');
 
         if ($searchQuery && trim((string) $searchQuery) !== '') {
-            $ids = Enrollment::search($searchQuery)->take(1000)->keys()->toArray();
-            $builder->whereIn('id', $ids ?: [0]);
+            $builder->search($searchQuery);
         }
 
         $builder->with(['user', 'course'])
@@ -265,8 +264,7 @@ class EnrollmentFinder
         $searchQuery = data_get($filters, 'search');
 
         if ($searchQuery && trim((string) $searchQuery) !== '') {
-            $ids = Enrollment::search($searchQuery)->take(1000)->keys()->toArray();
-            $builder->whereIn('id', $ids ?: [0]);
+            $builder->search($searchQuery);
         }
 
         $builder->with(['user:id,name,email', 'course:id,title,slug,code'])

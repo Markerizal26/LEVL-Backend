@@ -40,13 +40,7 @@ class CategoryRepository extends BaseRepository
         $searchQuery = $params['search'] ?? request('search');
 
         if ($searchQuery && trim($searchQuery) !== '') {
-            $ids = Category::search($searchQuery)->keys()->toArray();
-
-            if (! empty($ids)) {
-                $query->whereIn('id', $ids);
-            } else {
-                $query->whereRaw('1 = 0');
-            }
+            $query->search($searchQuery);
         }
 
         return $this->filteredPaginate(
@@ -66,13 +60,7 @@ class CategoryRepository extends BaseRepository
         $searchQuery = $params['search'] ?? request('search');
 
         if ($searchQuery && trim($searchQuery) !== '') {
-            $ids = Category::search($searchQuery)->keys()->toArray();
-
-            if (! empty($ids)) {
-                $query->whereIn('id', $ids);
-            } else {
-                return new Collection;
-            }
+            $query->search($searchQuery);
         }
 
         $this->applyFiltering($query, $params, $this->allowedFilters, $this->allowedSorts, $this->defaultSort);

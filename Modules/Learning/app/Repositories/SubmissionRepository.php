@@ -8,7 +8,6 @@ use App\Repositories\BaseRepository;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Carbon;
-use Laravel\Scout\Builder as ScoutBuilder;
 use Modules\Auth\Models\User;
 use Modules\Learning\Contracts\Repositories\SubmissionRepositoryInterface;
 use Modules\Learning\Enums\SubmissionState;
@@ -83,13 +82,9 @@ class SubmissionRepository extends BaseRepository implements SubmissionRepositor
         $sortBy = $options['field'] ?? $options['sort_by'] ?? 'submitted_at';
         $sortDirection = strtolower($options['direction'] ?? $options['sort_direction'] ?? 'desc');
 
-        // 1. Get matching IDs from Scout (Meilisearch)
-        $scoutSearch = Submission::search($query);
-        $ids = $scoutSearch->keys()->toArray();
-
-        // 2. Use Spatie Query Builder on Eloquent model constrained by IDs
+        // 1. Use Spatie Query Builder on Eloquent model constrained by search
         return \Spatie\QueryBuilder\QueryBuilder::for(Submission::class, new \Illuminate\Http\Request($filters))
-            ->whereIn('id', $ids)
+            ->search($query)
             ->allowedFilters([
                 'state',
                 \Spatie\QueryBuilder\AllowedFilter::exact('assignment_id'),
@@ -110,10 +105,7 @@ class SubmissionRepository extends BaseRepository implements SubmissionRepositor
 
     public function create(array $attributes): Submission
     {
-        // Temporarily disable Scout observer to prevent serialization issues with enums during model creation
-        return Submission::withoutSyncingToSearch(function () use ($attributes) {
-            return Submission::create($attributes);
-        });
+        return Submission::create($attributes);
     }
 
     public function update(Model|Submission $model, array $attributes): Model|Submission

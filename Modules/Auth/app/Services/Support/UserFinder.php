@@ -47,8 +47,7 @@ class UserFinder
             ->with(['roles:id,name,guard_name', 'media:id,model_type,model_id,collection_name,file_name,disk']);
 
         if ($search && trim((string) $search) !== '') {
-            $ids = User::search($search)->keys()->toArray();
-            $query->whereIn('id', $ids);
+            $query->search($search);
         }
 
         if ($authUser->hasRole('Admin') && ! $authUser->hasRole('Superadmin')) {
@@ -82,8 +81,7 @@ class UserFinder
             }),
             AllowedFilter::callback('search', function (Builder $query, $value) {
                 if (is_string($value) && trim($value) !== '') {
-                    $ids = User::search($value)->keys()->toArray();
-                    $query->whereIn($query->getModel()->getTable().'.id', $ids);
+                    $query->search($value);
                 }
             }),
         ])

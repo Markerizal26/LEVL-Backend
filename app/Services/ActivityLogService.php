@@ -24,12 +24,7 @@ class ActivityLogService
     $query = ActivityLog::query();
     
     if ($search) {
-        try {
-             $ids = ActivityLog::search($search)->keys()->toArray();
-             $query->whereIn('id', $ids ?: [0]);
-        } catch (\Exception $e) {
-             // Handle search exception (e.g. empty index or connection issue)
-        }
+        $query->search($search);
     }
     
     $paginator = \Spatie\QueryBuilder\QueryBuilder::for($query)

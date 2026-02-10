@@ -43,8 +43,7 @@ class UserBulkService implements UserBulkServiceInterface
             ->select('id');
 
         if ($search && trim($search) !== '') {
-            $ids = User::search($search)->keys()->toArray();
-            $query->whereIn('id', $ids);
+            $query->search($search);
         }
 
         if ($isAdmin && ! $isSuperadmin) {

@@ -6,7 +6,7 @@ namespace Modules\Common\Services;
 
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Facades\DB;
-use Meilisearch\Exceptions\ApiException;
+
 use Modules\Common\Contracts\Services\LevelConfigServiceInterface;
 use Modules\Common\Models\LevelConfig;
 use Modules\Common\Repositories\LevelConfigRepository;
@@ -30,21 +30,7 @@ class LevelConfigService implements LevelConfigServiceInterface
         $searchQuery = $params['search'] ?? request('search');
 
         if ($searchQuery && trim($searchQuery) !== '') {
-            try {
-                $ids = LevelConfig::search($searchQuery)->keys()->toArray();
-
-                if (! empty($ids)) {
-                    $query->whereIn('id', $ids);
-                } else {
-                    $query->whereRaw('1 = 0');
-                }
-            } catch (ApiException $e) {
-                if (str_contains($e->getMessage(), 'not found')) {
-                    $query->whereRaw('1 = 0');
-                } else {
-                    throw $e;
-                }
-            }
+            $query->search($searchQuery);
         }
 
         return QueryBuilder::for($query)

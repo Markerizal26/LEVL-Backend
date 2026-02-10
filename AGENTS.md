@@ -220,7 +220,7 @@ OperationTerminated::class => [
 - Laravel Modules (nWidart)
 - Pest PHP (Testing)
 - Spatie Permission, Query Builder, Media Library
-- Meilisearch via Laravel Scout
+- PostgreSQL FTS (Full Text Search) via `PgSearchable` trait
 - Laravel Octane (FrankenPHP)
 
 ## File Paths

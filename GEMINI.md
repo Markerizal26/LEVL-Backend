@@ -15,7 +15,7 @@ This is the backend API for a gamified Learning Management System designed for p
     - **Authentication**: JWT (`tymon/jwt-auth`)
     - **High Performance**: Runs on Laravel Octane for enhanced performance.
     - **API Documentation**: Automatically generates OpenAPI specs using `dedoc/scramble` with an interactive UI via `scalar/laravel`.
-    - **Search**: Implements full-text search using Laravel Scout with a Meilisearch driver.
+    - **Search**: Implements full-text search using PostgreSQL Full-Text Search (FTS) via custom `PgSearchable` trait.
     - **File Handling**: Manages media and file uploads with `spatie/laravel-medialibrary`.
     - **Frontend Tooling**: Uses Vite for asset bundling.
 
@@ -122,7 +122,7 @@ This is the backend API for a gamified Learning Management System designed for p
 - Pest PHP (Testing Framework)
 - Spatie Query Builder (Filtering/Sorting)
 - Spatie Media Library (Media Management)
-- Meilisearch (via Laravel Scout)
+- PostgreSQL FTS (Full Text Search) via `PgSearchable` trait
 
 ## Comment Policy
 - No new comments (PHPDoc, inline `//`, or block `/* */`) may be added.
@@ -1546,9 +1546,8 @@ if (app()->environment('local')) {
 - Jobs MUST use proper queue connection/driver
 
 ## Scout/Search Queue
-- **Async Indexing REQUIRED**: `SCOUT_QUEUE=true` MUST be enabled in `.env` or config.
-- **Synchronous Indexing FORBIDDEN**: In production, synchronous indexing performance is unacceptable.
-- **Queue Worker**: Ensure a worker is running for the default or configured Scout queue.
+- **Async Indexing**: Not required for PostgreSQL FTS as currently implemented (synchronous).
+
 
 ---
 
@@ -1556,10 +1555,10 @@ if (app()->environment('local')) {
 
 ## Search Implementation (CRITICAL)
 - Use `Spatie\QueryBuilder\QueryBuilder` for filtering/sorting
-- **Search**: MUST use Meilisearch via Laravel Scout (`Model::search()`) for all text search features
+- **Search**: MUST use PostgreSQL FTS via `PgSearchable` trait for all text search features
 - Search parameter: Use `search` directly (top-level), NOT `filter[search]`
-- **No LIKE Queries**: FORBIDDEN to use `where('field', 'like', '%...%')` for user-facing search (use Scout instead)
-- **No Raw SQL Search**: FORBIDDEN `MATCH/AGAINST` full-text search (use Scout)
+- **No LIKE Queries**: FORBIDDEN to use `where('field', 'like', '%...%')` for user-facing search (use `PgSearchable` instead)
+- **No Raw SQL Search**: FORBIDDEN `MATCH/AGAINST` full-text search (use `PgSearchable`)
 
 ## Filter Implementation (STRICT)
 - MUST define `allowedFilters` explicitly (strict validation)
@@ -1614,7 +1613,7 @@ QueryBuilder::for(Model::class, new Request(['filter' => $filters]))
 - Use eager loading for required relationships (avoid N+1 queries)
 - Complex queries MUST be reviewed for performance
 - Use EXPLAIN to analyze query performance
-- Search MUST use Meilisearch/Scout, NOT LIKE queries for user-facing search
+- Search MUST use `PgSearchable`, NOT LIKE queries for user-facing search
 
 ---
 
@@ -1940,44 +1939,27 @@ event(new AssignmentMutated($assignmentId));
 cache()->tags(['learning', 'assignment'])->flush();
 ```
 
-## Search / Indexing (Meilisearch)
-- Models using Scout define `toSearchableArray()`; specify index settings (filterable/sortable/synonyms, ranking rules).
-- Ensure `SCOUT_QUEUE=true` and a queue worker is running.
-- Reindex on relevant mutations via events/listeners.
+## Search / Indexing (PostgreSQL FTS)
+- Models use `PgSearchable` trait and define `protected $searchable_columns`.
+- No need for separate indexing queue or reindexing commands.
+- Search is performed directly on the database using `pg_trgm` and `unaccent`.
 
 ```php
 declare(strict_types=1);
 
 namespace Modules\Learning\app\Models;
 
-use Laravel\Scout\Searchable;
+use Modules\Common\Traits\PgSearchable;
 
 class Assignment extends Model
 {
-    use Searchable;
+    use PgSearchable;
 
-    public function toSearchableArray(): array
-    {
-        return [
-            'id' => $this->id,
-            'title' => $this->title,
-            'course_id' => $this->course_id,
-            'description' => $this->description,
-            'due_at' => optional($this->due_at)?->toAtomString(),
-        ];
-    }
+    protected array $searchable_columns = [
+        'title',
+        'description',
+    ];
 }
-```
-
-Index settings (executed in a service/setup script):
-
-```php
-meilisearch()->index('assignments')->updateSettings([
-    'filterableAttributes' => ['course_id', 'due_at'],
-    'sortableAttributes' => ['due_at', 'created_at'],
-    'synonyms' => ['task' => ['assignment']],
-    'rankingRules' => ['words','typo','proximity','attribute','sort','exactness'],
-]);
 ```
 
 ## Media Standards (Spatie Media Library)

@@ -11,7 +11,7 @@ TA PREP LSP is a Learning Management System (LMS) backend API platform designed 
 - **API Documentation**: Scramble + Scalar
 - **Storage**: Spatie Media Library for file management
 - **Performance**: Laravel Octane with Swoole for enhanced performance
-- **Search**: MeiliSearch integration
+- **Search**: PostgreSQL FTS integration
 - **Caching**: Redis support
 - **Testing**: PestPHP, PHPUnit with extensive test suites
 
@@ -265,7 +265,7 @@ composer format
 The platform includes a comprehensive gamification system with XP points, badges, challenges, and leaderboards to motivate learners.
 
 ### Advanced Search
-Integration with MeiliSearch provides fast, full-text search capabilities across the platform.
+Integration with PostgreSQL FTS provides fast, full-text search capabilities across the platform without external dependencies.
 
 ### Media Management
 Spatie Media Library provides robust file management with automatic conversion and responsive image support.

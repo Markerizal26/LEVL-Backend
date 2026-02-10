@@ -111,12 +111,7 @@ class MasterDataRepository extends \App\Repositories\BaseRepository implements \
       ->selectRaw("MAX(updated_at) as last_updated");
 
     if ($search !== "") {
-      $ids = MasterDataItem::search($search)->keys()->toArray();
-      if (! empty($ids)) {
-        $query->whereIn('id', $ids);
-      } else {
-        $query->whereRaw('1 = 0');
-      }
+      $query->search($search);
     }
 
     return $query->groupBy("type")
@@ -200,22 +195,7 @@ class MasterDataRepository extends \App\Repositories\BaseRepository implements \
       return true;
     }
 
-    $ids = $this->searchIds($searchQuery, $type);
-
-    if (empty($ids)) {
-      $query->whereRaw("1 = 0");
-      return false;
-    }
-
-    $query->whereIn("id", $ids);
+    $query->search($searchQuery);
     return true;
-  }
-
-  private function searchIds(string $searchQuery, string $type): array
-  {
-    return MasterDataItem::search($searchQuery)
-      ->query(fn($q) => $q->where("type", $type))
-      ->keys()
-      ->toArray();
   }
 }

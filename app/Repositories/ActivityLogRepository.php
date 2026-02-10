@@ -73,9 +73,8 @@ class ActivityLogRepository extends BaseRepository
         ]);
       }]);
 
-      if ($search !== '' && config('scout.driver')) {
-        $ids = ActivityLog::search($search)->keys()->toArray();
-        $query->whereIn('id', $ids ?: [0]);
+      if ($search !== '') {
+        $query->search($search);
       }
 
       $allowedFilters = array_merge(

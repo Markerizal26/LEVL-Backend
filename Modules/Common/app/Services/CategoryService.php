@@ -22,17 +22,9 @@ class CategoryService implements CategoryServiceInterface
     {
         $perPage = max(1, $perPage);
 
-        $query = Category::search(request('search', ''))->query(function ($builder) {
-             return $builder;
-        });
-        
-        // If search is empty, Scout returns all (if configured) or we can fallback to normal query.
-        // Better approach for consistency with filtering: use keys() if search is present.
-        
         $eloquentQuery = Category::query();
         if (request()->has('search') && request('search')) {
-             $ids = Category::search(request('search'))->keys()->toArray();
-             $eloquentQuery->whereIn('id', $ids ?: [0]);
+             $eloquentQuery->search(request('search'));
         }
 
         $query = QueryBuilder::for($eloquentQuery)

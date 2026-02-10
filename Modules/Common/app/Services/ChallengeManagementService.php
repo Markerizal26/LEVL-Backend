@@ -6,7 +6,7 @@ namespace Modules\Common\Services;
 
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Facades\DB;
-use Meilisearch\Exceptions\ApiException;
+
 use Modules\Common\Contracts\Services\ChallengeManagementServiceInterface;
 use Modules\Common\Repositories\ChallengeManagementRepository;
 use Modules\Gamification\Models\Challenge;
@@ -27,21 +27,7 @@ implements ChallengeManagementServiceInterface
         $searchQuery = $params['search'] ?? request('search');
 
         if ($searchQuery && trim($searchQuery) !== '') {
-            try {
-                $ids = Challenge::search($searchQuery)->keys()->toArray();
-
-                if (! empty($ids)) {
-                    $query->whereIn('id', $ids);
-                } else {
-                    $query->whereRaw('1 = 0');
-                }
-            } catch (ApiException $e) {
-                if (str_contains($e->getMessage(), 'not found')) {
-                    $query->whereRaw('1 = 0');
-                } else {
-                    throw $e;
-                }
-            }
+            $query->search($searchQuery);
         }
 
         return QueryBuilder::for($query)

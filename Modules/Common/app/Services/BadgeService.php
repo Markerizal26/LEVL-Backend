@@ -6,7 +6,7 @@ namespace Modules\Common\Services;
 
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Facades\DB;
-use Meilisearch\Exceptions\ApiException;
+
 use Modules\Common\Contracts\Services\BadgeServiceInterface;
 use Modules\Common\Repositories\BadgeRepository;
 use Modules\Gamification\Models\Badge;
@@ -133,15 +133,7 @@ class BadgeService implements BadgeServiceInterface
             return;
         }
 
-        try {
-            $ids = Badge::search($searchQuery)->keys()->toArray();
-            $query->whereIn('id', $ids ?: [0]);
-        } catch (ApiException $e) {
-            if (! str_contains($e->getMessage(), 'not found')) {
-                throw $e;
-            }
-            $query->whereRaw('1 = 0');
-        }
+        $query->search($searchQuery);
     }
 
     private function syncRules(int $badgeId, array $rules): void

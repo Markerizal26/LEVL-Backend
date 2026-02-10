@@ -165,8 +165,7 @@ class AssignmentFinder
         );
 
         if ($searchQuery && trim((string) $searchQuery) !== '') {
-            $ids = Assignment::search($searchQuery)->take(1000)->keys()->toArray();
-            $builder->whereIn('id', $ids ?: [0]);
+            $builder->search($searchQuery);
         }
 
         return $builder
@@ -190,8 +189,7 @@ class AssignmentFinder
         );
 
         if ($searchQuery && trim((string) $searchQuery) !== '') {
-            $ids = Assignment::search($searchQuery)->take(1000)->keys()->toArray();
-            $builder->whereIn('id', $ids ?: [0]);
+            $builder->search($searchQuery);
         }
 
         return $builder

@@ -130,23 +130,12 @@ class ThreadRepository extends BaseRepository
             ->with(['author.media', 'replies']);
 
         if (! empty(trim($searchQuery))) {
-            $threadIds = Thread::search($searchQuery)
-                ->where('course_id', $courseId)
-                ->keys()
-                ->toArray();
-
-            $replyIds = Reply::search($searchQuery)->keys()->toArray();
-            $replyThreadIds = $replyIds
-                ? Reply::whereIn('id', $replyIds)->pluck('thread_id')->unique()->toArray()
-                : [];
-
-            $ids = array_unique(array_merge($threadIds, $replyThreadIds));
-
-            if (! empty($ids)) {
-                $query->whereIn('id', $ids);
-            } else {
-                $query->whereRaw('1 = 0');
-            }
+            $query->where(function ($subQuery) use ($searchQuery) {
+                $subQuery->search($searchQuery)
+                    ->orWhereHas('replies', function ($replyQuery) use ($searchQuery) {
+                        $replyQuery->search($searchQuery);
+                    });
+            });
         }
 
         return $this->filteredPaginate(
@@ -195,13 +184,7 @@ class ThreadRepository extends BaseRepository
             ->with(['author.media', 'course']);
 
         if ($search && ! empty(trim($search))) {
-            $ids = Thread::search($search)->keys()->toArray();
-
-            if (! empty($ids)) {
-                $query->whereIn('id', $ids);
-            } else {
-                $query->whereRaw('1 = 0');
-            }
+            $query->search($search);
         }
 
         return $this->filteredPaginate(
@@ -232,15 +215,7 @@ class ThreadRepository extends BaseRepository
             ->with(['author.media', 'course']);
 
         if ($search && ! empty(trim($search))) {
-            $ids = Thread::search($search)
-                ->keys()
-                ->toArray();
-
-            if (! empty($ids)) {
-                $query->whereIn('id', $ids);
-            } else {
-                $query->whereRaw('1 = 0');
-            }
+            $query->search($search);
         }
 
         return $this->filteredPaginate(
@@ -267,16 +242,7 @@ class ThreadRepository extends BaseRepository
             ->with(['author.media', 'course']);
 
         if ($search && ! empty(trim($search))) {
-            $ids = Thread::search($search)
-                ->where('author_id', $userId)
-                ->keys()
-                ->toArray();
-
-            if (! empty($ids)) {
-                $query->whereIn('id', $ids);
-            } else {
-                $query->whereRaw('1 = 0');
-            }
+            $query->search($search);
         }
 
         return $this->filteredPaginate(
@@ -334,13 +300,7 @@ class ThreadRepository extends BaseRepository
             ->with(['author.media', 'course']);
 
         if ($search && ! empty(trim($search))) {
-            $ids = Thread::search($search)->keys()->toArray();
-
-            if (! empty($ids)) {
-                $query->whereIn('id', $ids);
-            } else {
-                $query->whereRaw('1 = 0');
-            }
+            $query->search($search);
         }
 
         return $this->filteredPaginate(
@@ -386,15 +346,7 @@ class ThreadRepository extends BaseRepository
             ->with(['author.media', 'course']);
 
         if ($search && ! empty(trim($search))) {
-            $ids = Thread::search($search)
-                ->keys()
-                ->toArray();
-
-            if (! empty($ids)) {
-                $query->whereIn('id', $ids);
-            } else {
-                $query->whereRaw('1 = 0');
-            }
+            $query->search($search);
         }
 
         $paginator = $this->filteredPaginate(
