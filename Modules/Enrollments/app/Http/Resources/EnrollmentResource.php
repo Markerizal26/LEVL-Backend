@@ -19,12 +19,12 @@ class EnrollmentResource extends JsonResource
             'created_at' => $this->created_at->toISOString(),
             'updated_at' => $this->updated_at->toISOString(),
 
-            // Relationships (when loaded)
             'user' => $this->whenLoaded('user', function () {
                 return [
                     'id' => $this->user->id,
                     'name' => $this->user->name,
                     'email' => $this->user->email,
+                    'avatar_url' => $this->user->avatar_url,
                 ];
             }),
 

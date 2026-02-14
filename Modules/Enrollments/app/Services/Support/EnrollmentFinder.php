@@ -298,13 +298,30 @@ class EnrollmentFinder
             ->allowedFilters($this->getAllowedFilters())
             ->allowedIncludes(['user', 'course']);
 
+        $userNameSort = AllowedSort::field('user_name', 'user.name');
+        $courseNameSort = AllowedSort::field('course_title', 'course.title');
+        $statusSort = AllowedSort::field('status', 'status');
+
         if ($usePrioritySort) {
             $prioritySort = $this->getPrioritySort();
-            $builder->allowedSorts(['enrolled_at', 'completed_at', 'created_at', $prioritySort])
-                ->defaultSort($prioritySort);
+            $builder->allowedSorts([
+                'enrolled_at',
+                'completed_at',
+                'created_at',
+                $prioritySort,
+                $userNameSort,
+                $courseNameSort,
+                $statusSort
+            ])->defaultSort($prioritySort);
         } else {
-            $builder->allowedSorts(['enrolled_at', 'completed_at', 'created_at'])
-                ->defaultSort('-enrolled_at');
+            $builder->allowedSorts([
+                'enrolled_at',
+                'completed_at',
+                'created_at',
+                $userNameSort,
+                $courseNameSort,
+                $statusSort
+            ])->defaultSort('-enrolled_at');
         }
 
         return $builder->paginate($perPage);
@@ -322,13 +339,30 @@ class EnrollmentFinder
         $builder->with(['user:id,name,email', 'course:id,title,slug,code'])
             ->allowedFilters($this->getAllowedFilters());
 
+        $userNameSort = AllowedSort::field('user_name', 'user.name');
+        $courseNameSort = AllowedSort::field('course_title', 'course.title');
+        $statusSort = AllowedSort::field('status', 'status');
+
         if ($usePrioritySort) {
             $prioritySort = $this->getPrioritySort();
-            $builder->allowedSorts(['enrolled_at', 'completed_at', 'created_at', $prioritySort])
-                ->defaultSort($prioritySort);
+            $builder->allowedSorts([
+                'enrolled_at',
+                'completed_at',
+                'created_at',
+                $prioritySort,
+                $userNameSort,
+                $courseNameSort,
+                $statusSort
+            ])->defaultSort($prioritySort);
         } else {
-            $builder->allowedSorts(['enrolled_at', 'completed_at', 'created_at'])
-                ->defaultSort('-enrolled_at');
+            $builder->allowedSorts([
+                'enrolled_at',
+                'completed_at',
+                'created_at',
+                $userNameSort,
+                $courseNameSort,
+                $statusSort
+            ])->defaultSort('-enrolled_at');
         }
 
         return $builder->paginate($perPage);
