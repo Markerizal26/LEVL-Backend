@@ -300,16 +300,28 @@ class UserSeederEnhanced extends Seeder
             'updated_at' => now(),
         ]);
 
-        try {
-            $url = "https://api.dicebear.com/9.x/avataaars/png?seed={$user->username}";
-            $user->addMediaFromUrl($url)
-                ->toMediaCollection('avatar');
-        } catch (\Throwable $e) {
-            // Log warning but continue
-            $this->command->warn("Failed to add avatar for {$user->username}: " . $e->getMessage());
-        }
+        $this->attachAvatar($user);
 
         return $user;
+    }
+
+    /**
+     * Attach avatar: try DiceBear first, fallback to ui-avatars.com (from name) if URL fails.
+     */
+    private function attachAvatar(User $user): void
+    {
+        $urls = [
+            "https://api.dicebear.com/9.x/avataaars/png?seed={$user->username}",
+            'https://ui-avatars.com/api/?name=' . rawurlencode($user->name) . '&size=256&background=random',
+        ];
+        foreach ($urls as $url) {
+            try {
+                $user->addMediaFromUrl($url)->toMediaCollection('avatar');
+                return;
+            } catch (\Throwable $e) {
+                $this->command->warn("Avatar URL failed for {$user->username}, trying next: " . $e->getMessage());
+            }
+        }
     }
 
     private function batchCreatePrivacySettings($users, string $role): void

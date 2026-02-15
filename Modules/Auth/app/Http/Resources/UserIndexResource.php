@@ -17,7 +17,9 @@ class UserIndexResource extends JsonResource
             'name' => $this['name'] ?? (is_object($this->resource) ? $this->name : null),
             'email' => $this['email'] ?? (is_object($this->resource) ? $this->email : null),
             'username' => $this['username'] ?? (is_object($this->resource) ? $this->username : null),
-            'avatar_url' => $this->whenLoaded('media') ? ($this->getFirstMedia('avatar')?->getUrl() ?? '') : '',
+            'avatar_url' => (is_object($this->resource) && method_exists($this->resource, 'getFirstMedia'))
+                ? ($this->resource->getFirstMedia('avatar')?->getUrl() ?? '')
+                : '',
             'status' => isset($this['status']) && $this['status'] instanceof UserStatus
                 ? $this['status']->value
                 : (string) ($this['status'] ?? (is_object($this->resource) ? $this->status : null)),

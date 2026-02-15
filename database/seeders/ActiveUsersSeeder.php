@@ -77,17 +77,22 @@ class ActiveUsersSeeder extends Seeder
             $student->assignRole('Student');
         }
 
-        // Add avatars to all users
+        // Add avatars: DiceBear first, fallback to ui-avatars.com
+        $avatarUrls = fn ($user) => [
+            "https://api.dicebear.com/9.x/avataaars/png?seed={$user->username}",
+            'https://ui-avatars.com/api/?name=' . rawurlencode($user->name) . '&size=256&background=random',
+        ];
         foreach ([$superadmin, $admin, $instructor, $student] as $user) {
-            try {
-                if (! $user->hasMedia('avatar')) {
-                    $url = "https://api.dicebear.com/9.x/avataaars/png?seed={$user->username}";
-                    $user->addMediaFromUrl($url)
-                        ->toMediaCollection('avatar');
+            if ($user->hasMedia('avatar')) {
+                continue;
+            }
+            foreach ($avatarUrls($user) as $url) {
+                try {
+                    $user->addMediaFromUrl($url)->toMediaCollection('avatar');
+                    break;
+                } catch (\Throwable $e) {
+                    $this->command->warn("Avatar URL failed for {$user->username}, trying next: " . $e->getMessage());
                 }
-            } catch (\Throwable $e) {
-                // Log warning but continue
-                $this->command->warn("Failed to add avatar for {$user->username}: " . $e->getMessage());
             }
         }
     }

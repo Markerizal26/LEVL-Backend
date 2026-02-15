@@ -49,7 +49,7 @@ class UserFinder
 
                 $query = QueryBuilder::for(User::class, $request)
                     ->select(['id', 'name', 'email', 'username', 'status', 'account_status', 'created_at', 'email_verified_at', 'is_password_set'])
-                    ->with(['roles:id,name,guard_name', 'media:id,model_type,model_id,collection_name,file_name,disk']);
+                    ->with(['roles:id,name,guard_name', 'media']);
 
                 if ($search && trim((string) $search) !== '') {
                     $query->search($search);

@@ -90,7 +90,7 @@ Route::prefix('v1')->group(function () {
         });
     });
 
-    Route::prefix('management/challenges')->name('challenges.')->group(function () {
+    Route::prefix('management/challenges')->name('management.challenges.')->group(function () {
         Route::get('/', [ChallengeManagementController::class, 'index'])->name('index');
         Route::get('/{challenge}', [ChallengeManagementController::class, 'show'])->name('show');
 
