@@ -15,12 +15,15 @@ Route::middleware(['auth:api'])->prefix('v1')->group(function () {
         Route::post('enrollments/decline/bulk', [EnrollmentsController::class, 'bulkDecline'])->name('enrollments.bulk-decline');
         Route::post('enrollments/remove/bulk', [EnrollmentsController::class, 'bulkRemove'])->name('enrollments.bulk-remove');
         Route::post('enrollments/{enrollment}/approve', [EnrollmentsController::class, 'approve'])
+            ->whereNumber('enrollment')
             ->middleware('can:approve,enrollment')
             ->name('enrollments.approve');
         Route::post('enrollments/{enrollment}/decline', [EnrollmentsController::class, 'decline'])
+            ->whereNumber('enrollment')
             ->middleware('can:decline,enrollment')
             ->name('enrollments.decline');
         Route::post('enrollments/{enrollment}/remove', [EnrollmentsController::class, 'remove'])
+            ->whereNumber('enrollment')
             ->middleware('can:remove,enrollment')
             ->name('enrollments.remove');
     });
