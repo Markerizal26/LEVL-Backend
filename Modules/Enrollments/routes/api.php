@@ -11,6 +11,9 @@ Route::middleware(['auth:api'])->prefix('v1')->group(function () {
             ->middleware('role:Student');
         Route::post('courses/{course:slug}/cancel', [EnrollmentsController::class, 'cancel'])->name('courses.enrollments.cancel');
         Route::post('courses/{course:slug}/withdraw', [EnrollmentsController::class, 'withdraw'])->name('courses.enrollments.withdraw');
+        Route::post('enrollments/approve/bulk', [EnrollmentsController::class, 'bulkApprove'])->name('enrollments.bulk-approve');
+        Route::post('enrollments/decline/bulk', [EnrollmentsController::class, 'bulkDecline'])->name('enrollments.bulk-decline');
+        Route::post('enrollments/remove/bulk', [EnrollmentsController::class, 'bulkRemove'])->name('enrollments.bulk-remove');
         Route::post('enrollments/{enrollment}/approve', [EnrollmentsController::class, 'approve'])
             ->middleware('can:approve,enrollment')
             ->name('enrollments.approve');
@@ -20,9 +23,6 @@ Route::middleware(['auth:api'])->prefix('v1')->group(function () {
         Route::post('enrollments/{enrollment}/remove', [EnrollmentsController::class, 'remove'])
             ->middleware('can:remove,enrollment')
             ->name('enrollments.remove');
-        Route::post('enrollments/approve/bulk', [EnrollmentsController::class, 'bulkApprove'])->name('enrollments.bulk-approve');
-        Route::post('enrollments/decline/bulk', [EnrollmentsController::class, 'bulkDecline'])->name('enrollments.bulk-decline');
-        Route::post('enrollments/remove/bulk', [EnrollmentsController::class, 'bulkRemove'])->name('enrollments.bulk-remove');
     });
 
     // Read-only enrollment endpoints with default API rate limiting
