@@ -6,7 +6,6 @@ namespace Modules\Enrollments\Contracts\Services;
 
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use Modules\Auth\Models\User;
-use Modules\Enrollments\DTOs\CreateEnrollmentDTO;
 use Modules\Enrollments\Models\Enrollment;
 use Modules\Schemes\Models\Course;
 
@@ -33,6 +32,14 @@ interface EnrollmentServiceInterface
     public function decline(Enrollment $enrollment): Enrollment;
 
     public function remove(Enrollment $enrollment): Enrollment;
+
+    public function bulkApprove(array $enrollments): array;
+
+    public function bulkDecline(array $enrollments): array;
+
+    public function bulkRemove(array $enrollments): array;
+
+    public function getEnrollmentsAuthorizedFor(User $user, array $enrollmentIds, string $ability): array;
 
     public function isUserEnrolledInCourse(int $userId, int $courseId): bool;
 

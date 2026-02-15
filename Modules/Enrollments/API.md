@@ -547,11 +547,131 @@ Force remove a user from a course.
 
 ---
 
+### 10. Bulk Approve Enrollments (Manager)
+
+Approve multiple pending enrollment requests in one request.
+
+**Endpoint:** `POST /enrollments/approve/bulk`
+
+**Authorization:** Course Admin or Instructor for each enrollment (only enrollments the user can approve are processed)
+
+**Request Body:**
+| Field | Type | Required | Rules | Description |
+|-------|------|----------|-------|-------------|
+| `enrollment_ids` | array | Yes | array, min:1, max:100; each item integer, exists:enrollments,id | List of enrollment IDs to approve |
+
+**Request body (raw JSON):**
+```json
+{
+  "enrollment_ids": [1, 2, 3]
+}
+```
+
+**Business Rules:**
+- Only `pending` enrollments can be approved; others are returned in `failed` with reason
+- Only enrollments the user is authorized to approve (per course) are processed; unauthorized IDs are skipped
+- Sends approval email to each student whose enrollment is approved
+
+**Response:** `200 OK`
+```json
+{
+  "success": true,
+  "message": "Bulk action completed.",
+  "data": {
+    "processed": [
+      {
+        "id": 1,
+        "user_id": 5,
+        "course_id": 2,
+        "status": "active",
+        "enrolled_at": "2026-01-20T08:00:00.000000Z",
+        "completed_at": null,
+        "created_at": "2026-01-20T06:30:00.000000Z",
+        "updated_at": "2026-01-20T08:00:00.000000Z"
+      }
+    ],
+    "failed": [
+      { "id": 3, "reason": "Only pending enrollment requests can be approved." }
+    ]
+  },
+  "errors": null
+}
+```
+
+**Error Responses:**
+- `422` - Validation error (e.g. empty list, invalid IDs)
+
+---
+
+### 11. Bulk Decline Enrollments (Manager)
+
+Decline (reject) multiple pending enrollment requests in one request.
+
+**Endpoint:** `POST /enrollments/decline/bulk`
+
+**Authorization:** Course Admin or Instructor for each enrollment (only enrollments the user can decline are processed)
+
+**Request Body:**
+| Field | Type | Required | Rules | Description |
+|-------|------|----------|-------|-------------|
+| `enrollment_ids` | array | Yes | array, min:1, max:100; each item integer, exists:enrollments,id | List of enrollment IDs to decline |
+
+**Request body (raw JSON):**
+```json
+{
+  "enrollment_ids": [4, 5, 6]
+}
+```
+
+**Business Rules:**
+- Only `pending` enrollments can be declined; others are returned in `failed` with reason
+- Only enrollments the user is authorized to decline are processed
+- Sends decline email to each student whose enrollment is declined
+
+**Response:** `200 OK` (same structure as Bulk Approve: `data.processed`, `data.failed`)
+
+**Error Responses:**
+- `422` - Validation error
+
+---
+
+### 12. Bulk Remove Enrollments (Manager)
+
+Remove multiple users from courses in one request.
+
+**Endpoint:** `POST /enrollments/remove/bulk`
+
+**Authorization:** Course Admin or Instructor for each enrollment (only enrollments the user can remove are processed)
+
+**Request Body:**
+| Field | Type | Required | Rules | Description |
+|-------|------|----------|-------|-------------|
+| `enrollment_ids` | array | Yes | array, min:1, max:100; each item integer, exists:enrollments,id | List of enrollment IDs to remove |
+
+**Request body (raw JSON):**
+```json
+{
+  "enrollment_ids": [7, 8, 9]
+}
+```
+
+**Business Rules:**
+- Can remove `active` or `pending` enrollments; others are returned in `failed` with reason
+- Only enrollments the user is authorized to remove are processed
+- Status is set to `cancelled` for each processed enrollment
+
+**Response:** `200 OK` (same structure as Bulk Approve: `data.processed`, `data.failed`)
+
+**Error Responses:**
+- `422` - Validation error
+
+---
+
 ## Rate Limiting
 
 | Endpoint Group | Limit |
 |----------------|-------|
-| State-changing endpoints (enroll, cancel, withdraw, approve, decline, remove) | 5 requests/minute |
+| State-changing endpoints (enroll, cancel, withdraw, approve, decline, remove, bulk approve/decline/remove) | 5 requests/minute |
 | Read-only endpoints (list, status) | 60 requests/minute |
 
 **Rate Limit Headers:**
@@ -713,6 +833,33 @@ curl -X POST "https://api.example.com/api/v1/courses/junior-web-programmer/cance
 curl -X POST "https://api.example.com/api/v1/enrollments/123/approve" \
   -H "Authorization: Bearer {token}" \
   -H "Accept: application/json"
+```
+
+### Bulk Approve Enrollments
+```bash
+curl -X POST "https://api.example.com/api/v1/enrollments/approve/bulk" \
+  -H "Authorization: Bearer {token}" \
+  -H "Content-Type: application/json" \
+  -H "Accept: application/json" \
+  -d '{"enrollment_ids": [1, 2, 3]}'
+```
+
+### Bulk Decline Enrollments
+```bash
+curl -X POST "https://api.example.com/api/v1/enrollments/decline/bulk" \
+  -H "Authorization: Bearer {token}" \
+  -H "Content-Type: application/json" \
+  -H "Accept: application/json" \
+  -d '{"enrollment_ids": [4, 5, 6]}'
+```
+
+### Bulk Remove Enrollments
+```bash
+curl -X POST "https://api.example.com/api/v1/enrollments/remove/bulk" \
+  -H "Authorization: Bearer {token}" \
+  -H "Content-Type: application/json" \
+  -H "Accept: application/json" \
+  -d '{"enrollment_ids": [7, 8, 9]}'
 ```
 
 ---

@@ -20,6 +20,9 @@ Route::middleware(['auth:api'])->prefix('v1')->group(function () {
         Route::post('enrollments/{enrollment}/remove', [EnrollmentsController::class, 'remove'])
             ->middleware('can:remove,enrollment')
             ->name('enrollments.remove');
+        Route::post('enrollments/approve/bulk', [EnrollmentsController::class, 'bulkApprove'])->name('enrollments.bulk-approve');
+        Route::post('enrollments/decline/bulk', [EnrollmentsController::class, 'bulkDecline'])->name('enrollments.bulk-decline');
+        Route::post('enrollments/remove/bulk', [EnrollmentsController::class, 'bulkRemove'])->name('enrollments.bulk-remove');
     });
 
     // Read-only enrollment endpoints with default API rate limiting

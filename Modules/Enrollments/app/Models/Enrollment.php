@@ -81,8 +81,6 @@ class Enrollment extends Model
         return $this->hasOne(CourseProgress::class);
     }
 
-
-
     protected static function newFactory()
     {
         return \Modules\Enrollments\Database\Factories\EnrollmentFactory::new();

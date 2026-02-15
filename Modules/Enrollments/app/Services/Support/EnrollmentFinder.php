@@ -25,7 +25,7 @@ class EnrollmentFinder
     public function paginateByCourse(int $courseId, int $perPage = 15, array $filters = []): LengthAwarePaginator
     {
         return cache()->tags(['enrollments', "course:{$courseId}"])->remember(
-            "enrollments:course:{$courseId}:{$perPage}:" . md5(json_encode($filters)),
+            "enrollments:course:{$courseId}:{$perPage}:".md5(json_encode($filters)),
             300,
             function () use ($courseId, $filters, $perPage) {
                 return $this->buildQuery(
@@ -40,7 +40,7 @@ class EnrollmentFinder
     public function paginateByCourseForIndex(int $courseId, int $perPage = 15, array $filters = []): LengthAwarePaginator
     {
         return cache()->tags(['enrollments', "course:{$courseId}"])->remember(
-            "enrollments:course:index:{$courseId}:{$perPage}:" . md5(json_encode($filters)),
+            "enrollments:course:index:{$courseId}:{$perPage}:".md5(json_encode($filters)),
             300,
             function () use ($courseId, $filters, $perPage) {
                 return $this->buildQueryForIndex(
@@ -56,8 +56,9 @@ class EnrollmentFinder
     {
         sort($courseIds);
         $idsHash = md5(json_encode($courseIds));
+
         return cache()->tags(['enrollments', 'course_ids'])->remember(
-            "enrollments:courses:ids:{$idsHash}:{$perPage}:" . md5(json_encode($filters)),
+            "enrollments:courses:ids:{$idsHash}:{$perPage}:".md5(json_encode($filters)),
             300,
             function () use ($courseIds, $filters, $perPage) {
                 return $this->buildQuery(
@@ -73,8 +74,9 @@ class EnrollmentFinder
     {
         sort($courseIds);
         $idsHash = md5(json_encode($courseIds));
+
         return cache()->tags(['enrollments', 'course_ids'])->remember(
-            "enrollments:courses:index:ids:{$idsHash}:{$perPage}:" . md5(json_encode($filters)),
+            "enrollments:courses:index:ids:{$idsHash}:{$perPage}:".md5(json_encode($filters)),
             300,
             function () use ($courseIds, $filters, $perPage) {
                 return $this->buildQueryForIndex(
@@ -89,7 +91,7 @@ class EnrollmentFinder
     public function paginateByUser(int $userId, int $perPage = 15, array $filters = []): LengthAwarePaginator
     {
         return cache()->tags(['enrollments', "user:{$userId}"])->remember(
-            "enrollments:user:{$userId}:{$perPage}:" . md5(json_encode($filters)),
+            "enrollments:user:{$userId}:{$perPage}:".md5(json_encode($filters)),
             300,
             function () use ($userId, $filters, $perPage) {
                 return $this->buildQuery(
@@ -105,7 +107,7 @@ class EnrollmentFinder
     public function paginateByUserForIndex(int $userId, int $perPage = 15, array $filters = []): LengthAwarePaginator
     {
         return cache()->tags(['enrollments', "user:{$userId}"])->remember(
-            "enrollments:user:index:{$userId}:{$perPage}:" . md5(json_encode($filters)),
+            "enrollments:user:index:{$userId}:{$perPage}:".md5(json_encode($filters)),
             300,
             function () use ($userId, $filters, $perPage) {
                 return $this->buildQueryForIndex(
@@ -121,7 +123,7 @@ class EnrollmentFinder
     public function paginateAll(int $perPage = 15, array $filters = []): LengthAwarePaginator
     {
         return cache()->tags(['enrollments'])->remember(
-            "enrollments:all:{$perPage}:" . md5(json_encode($filters)),
+            "enrollments:all:{$perPage}:".md5(json_encode($filters)),
             300,
             function () use ($filters, $perPage) {
                 return $this->buildQuery(
@@ -136,7 +138,7 @@ class EnrollmentFinder
     public function paginateAllForIndex(int $perPage = 15, array $filters = []): LengthAwarePaginator
     {
         return cache()->tags(['enrollments'])->remember(
-            "enrollments:all:index:{$perPage}:" . md5(json_encode($filters)),
+            "enrollments:all:index:{$perPage}:".md5(json_encode($filters)),
             300,
             function () use ($filters, $perPage) {
                 return $this->buildQueryForIndex(
@@ -282,6 +284,7 @@ class EnrollmentFinder
     private function makeRequest(array $filters): Request
     {
         $cleanFilters = Arr::except($filters, ['search']);
+
         return new Request($cleanFilters);
     }
 
@@ -320,7 +323,7 @@ class EnrollmentFinder
                 $prioritySort,
                 $userNameSort,
                 $courseNameSort,
-                $statusSort
+                $statusSort,
             ])->defaultSort($prioritySort);
         } else {
             $builder->allowedSorts([
@@ -329,7 +332,7 @@ class EnrollmentFinder
                 'created_at',
                 $userNameSort,
                 $courseNameSort,
-                $statusSort
+                $statusSort,
             ])->defaultSort('-enrolled_at');
         }
 
@@ -370,7 +373,7 @@ class EnrollmentFinder
                 $prioritySort,
                 $userNameSort,
                 $courseNameSort,
-                $statusSort
+                $statusSort,
             ])->defaultSort($prioritySort);
         } else {
             $builder->allowedSorts([
@@ -379,7 +382,7 @@ class EnrollmentFinder
                 'created_at',
                 $userNameSort,
                 $courseNameSort,
-                $statusSort
+                $statusSort,
             ])->defaultSort('-enrolled_at');
         }
 
@@ -406,8 +409,8 @@ class EnrollmentFinder
 
     private function makeUserNameSort(): AllowedSort
     {
-        $usersTable = (new Enrollment())->user()->getRelated()->getTable();
-        $enrollmentsTable = (new Enrollment())->getTable();
+        $usersTable = (new Enrollment)->user()->getRelated()->getTable();
+        $enrollmentsTable = (new Enrollment)->getTable();
 
         return AllowedSort::callback('user_name', function ($query, $descending) use ($usersTable, $enrollmentsTable) {
             $query->select("{$enrollmentsTable}.*")
@@ -418,8 +421,8 @@ class EnrollmentFinder
 
     private function makeCourseTitleSort(): AllowedSort
     {
-        $coursesTable = (new Enrollment())->course()->getRelated()->getTable();
-        $enrollmentsTable = (new Enrollment())->getTable();
+        $coursesTable = (new Enrollment)->course()->getRelated()->getTable();
+        $enrollmentsTable = (new Enrollment)->getTable();
 
         return AllowedSort::callback('course_title', function ($query, $descending) use ($coursesTable, $enrollmentsTable) {
             $query->select("{$enrollmentsTable}.*")

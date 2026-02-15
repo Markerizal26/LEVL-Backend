@@ -440,6 +440,7 @@ return [
         'enrollment_pending' => 'Your enrollment is being processed and awaiting approval.',
         'enrollment_success' => 'Enrollment successful.',
         'enrollment_failed' => 'Enrollment failed. Please try again.',
+        'bulk_action_completed' => 'Bulk action completed.',
     ],
 
     // Assignments Module

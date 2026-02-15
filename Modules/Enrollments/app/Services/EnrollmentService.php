@@ -4,7 +4,9 @@ declare(strict_types=1);
 
 namespace Modules\Enrollments\Services;
 
+use App\Exceptions\BusinessException;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
+use Illuminate\Support\Facades\Gate;
 use Modules\Auth\Models\User;
 use Modules\Enrollments\Contracts\Services\EnrollmentServiceInterface;
 use Modules\Enrollments\Models\Enrollment;
@@ -113,6 +115,7 @@ class EnrollmentService implements EnrollmentServiceInterface
     {
         $result = $this->lifecycleProcessor->enroll($user, $course, $data);
         cache()->tags(['enrollments'])->flush();
+
         return $result;
     }
 
@@ -120,6 +123,7 @@ class EnrollmentService implements EnrollmentServiceInterface
     {
         $result = $this->lifecycleProcessor->cancel($enrollment);
         cache()->tags(['enrollments'])->flush();
+
         return $result;
     }
 
@@ -127,6 +131,7 @@ class EnrollmentService implements EnrollmentServiceInterface
     {
         $result = $this->lifecycleProcessor->withdraw($enrollment);
         cache()->tags(['enrollments'])->flush();
+
         return $result;
     }
 
@@ -134,6 +139,7 @@ class EnrollmentService implements EnrollmentServiceInterface
     {
         $result = $this->lifecycleProcessor->approve($enrollment);
         cache()->tags(['enrollments'])->flush();
+
         return $result;
     }
 
@@ -141,6 +147,7 @@ class EnrollmentService implements EnrollmentServiceInterface
     {
         $result = $this->lifecycleProcessor->decline($enrollment);
         cache()->tags(['enrollments'])->flush();
+
         return $result;
     }
 
@@ -148,6 +155,55 @@ class EnrollmentService implements EnrollmentServiceInterface
     {
         $result = $this->lifecycleProcessor->remove($enrollment);
         cache()->tags(['enrollments'])->flush();
+
         return $result;
+    }
+
+    public function bulkApprove(array $enrollments): array
+    {
+        return $this->bulkAction($enrollments, 'approve');
+    }
+
+    public function bulkDecline(array $enrollments): array
+    {
+        return $this->bulkAction($enrollments, 'decline');
+    }
+
+    public function bulkRemove(array $enrollments): array
+    {
+        return $this->bulkAction($enrollments, 'remove');
+    }
+
+    public function getEnrollmentsAuthorizedFor(User $user, array $enrollmentIds, string $ability): array
+    {
+        $enrollments = Enrollment::whereIn('id', $enrollmentIds)->get();
+
+        return $enrollments->filter(fn (Enrollment $e) => Gate::forUser($user)->allows($ability, $e))->values()->all();
+    }
+
+    private function bulkAction(array $enrollments, string $action): array
+    {
+        $processed = [];
+        $failed = [];
+
+        foreach ($enrollments as $enrollment) {
+            try {
+                $updated = match ($action) {
+                    'approve' => $this->lifecycleProcessor->approve($enrollment),
+                    'decline' => $this->lifecycleProcessor->decline($enrollment),
+                    'remove' => $this->lifecycleProcessor->remove($enrollment),
+                    default => $enrollment,
+                };
+                $processed[] = $updated;
+            } catch (BusinessException $e) {
+                $failed[] = ['id' => $enrollment->id, 'reason' => $e->getMessage()];
+            }
+        }
+
+        if (count($processed) > 0) {
+            cache()->tags(['enrollments'])->flush();
+        }
+
+        return ['processed' => $processed, 'failed' => $failed];
     }
 }

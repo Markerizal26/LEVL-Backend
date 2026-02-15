@@ -404,6 +404,7 @@ return [
         'enrolled_success' => 'Enrol berhasil.',
         'key_based_success' => 'Enrol berhasil menggunakan kode kunci.',
         'course_not_published' => 'Course belum dipublikasikan.',
+        'bulk_action_completed' => 'Aksi bulk selesai.',
         'enrollment_pending' => 'Pendaftaran Anda sedang diproses dan menunggu persetujuan.',
         'enrollment_success' => 'Pendaftaran berhasil.',
         'enrollment_failed' => 'Pendaftaran gagal. Silakan coba lagi.',
@@ -576,8 +577,6 @@ return [
         'reward_already_claimed' => 'Hadiah tantangan ini sudah diklaim sebelumnya.',
         'not_completed_cannot_claim' => 'Tantangan belum selesai, tidak dapat mengklaim hadiah.',
     ],
-
-
 
     // Forums Module
     'forums' => [

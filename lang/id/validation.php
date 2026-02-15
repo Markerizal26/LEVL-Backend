@@ -259,6 +259,7 @@ $overrides = [
         'code' => 'Kode',
         'level_tag' => 'Level',
         'level' => 'Level',
+        'enrollment_ids' => 'ID enrollment',
         'enrollment_type' => 'Tipe Pendaftaran',
         'progression_mode' => 'Mode Progres',
         'category_id' => 'Kategori',

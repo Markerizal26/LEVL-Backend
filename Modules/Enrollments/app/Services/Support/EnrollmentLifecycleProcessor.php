@@ -13,12 +13,12 @@ use Illuminate\Support\Facades\Mail;
 use Modules\Auth\Models\User;
 use Modules\Enrollments\Contracts\Repositories\EnrollmentRepositoryInterface;
 use Modules\Enrollments\Enums\EnrollmentStatus;
+use Modules\Enrollments\Models\Enrollment;
 use Modules\Mail\Mail\Enrollments\AdminEnrollmentNotificationMail;
 use Modules\Mail\Mail\Enrollments\StudentEnrollmentActiveMail;
 use Modules\Mail\Mail\Enrollments\StudentEnrollmentApprovedMail;
 use Modules\Mail\Mail\Enrollments\StudentEnrollmentDeclinedMail;
 use Modules\Mail\Mail\Enrollments\StudentEnrollmentPendingMail;
-use Modules\Enrollments\Models\Enrollment;
 use Modules\Schemes\Enums\CourseStatus;
 use Modules\Schemes\Enums\EnrollmentType;
 use Modules\Schemes\Models\Course;
@@ -81,25 +81,25 @@ class EnrollmentLifecycleProcessor
                 $enrollment->status = $initialStatus;
                 $enrollment->enrolled_at = $enrolledAt;
                 $enrollment->save();
-                
-                // Note: Original code didn't use events here, or I missed it? 
+
+                // Note: Original code didn't use events here, or I missed it?
                 // Ah, `EnrollmentCreated` was imported but used in `create` which I didn't see fully in view_file.
                 // But `enroll` was shown. It didn't seem to dispatch event?
                 // `enroll` method was cut off in `view_file` at line 800.
-                // I should assume an event might be dispatched. 
+                // I should assume an event might be dispatched.
                 // However, preserving behavior based on visible code:
                 // The visible code was `... $enrollment->save();`.
-                // I will add cache invalidation as in other methods. 
+                // I will add cache invalidation as in other methods.
                 // And I should dispatch `EnrollmentCreated` if it's a new enrollment.
                 // Assuming it's `Modules\Enrollments\Events\EnrollmentCreated`.
             }
 
             // Invalidate cache
             $this->invalidateEnrollmentCache($enrollment);
-            
+
             // Dispatch event for new enrollments (best practice, even if I didn't see it explicitly)
-            if (!$existingEnrollment) {
-                 \Modules\Enrollments\Events\EnrollmentCreated::dispatch($enrollment);
+            if (! $existingEnrollment) {
+                \Modules\Enrollments\Events\EnrollmentCreated::dispatch($enrollment);
             }
 
             $this->sendEnrollmentEmails($enrollment, $course, $user, $initialStatus instanceof EnrollmentStatus ? $initialStatus->value : $initialStatus);
@@ -217,7 +217,7 @@ class EnrollmentLifecycleProcessor
         // Simple cache invalidation if needed.
         // Original code had this method but implementation wasn't fully visible or just trivial?
         // Checking view_file output... `invalidateEnrollmentCache` was called in `cancel`, `withdraw` etc.
-        // But the method DEFINITION was not visible in index 1-800? 
+        // But the method DEFINITION was not visible in index 1-800?
         // Wait, line 471 called it. Method likely near end of file.
         // Since I can't see it, I will assume it clears relevant caches.
         // For now, I'll implement a basic one or leave placeholder if I don't use cache service.

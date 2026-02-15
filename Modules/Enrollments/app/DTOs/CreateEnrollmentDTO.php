@@ -12,22 +12,22 @@ use Spatie\LaravelData\Mappers\SnakeCaseMapper;
 #[MapInputName(SnakeCaseMapper::class)]
 final class CreateEnrollmentDTO extends Data
 {
-  public function __construct(
-    #[Required] #[MapInputName("course_id")] public int $courseId,
+    public function __construct(
+        #[Required] #[MapInputName('course_id')] public int $courseId,
 
-    #[MapInputName("enrollment_key")] public ?string $enrollmentKey = null,
-  ) {}
+        #[MapInputName('enrollment_key')] public ?string $enrollmentKey = null,
+    ) {}
 
-  public function toModelArray(): array
-  {
-    return [
-      "course_id" => $this->courseId,
-      "enrollment_key" => $this->enrollmentKey,
-    ];
-  }
+    public function toModelArray(): array
+    {
+        return [
+            'course_id' => $this->courseId,
+            'enrollment_key' => $this->enrollmentKey,
+        ];
+    }
 
-  public static function fromRequest(array $data): static
-  {
-    return static::from($data);
-  }
+    public static function fromRequest(array $data): static
+    {
+        return self::from($data);
+    }
 }

@@ -24,6 +24,7 @@ class EnrollmentIndexResource extends JsonResource
                 if (is_object($this->user) && method_exists($this->user, 'getFirstMedia')) {
                     $avatarUrl = $this->user->getFirstMedia('avatar')?->getUrl();
                 }
+
                 return [
                     'id' => $this->user->id,
                     'name' => $this->user->name,
