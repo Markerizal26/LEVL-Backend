@@ -1,4 +1,5 @@
 name: CI/CD Pipeline
+
 on:
   push:
     branches: [main]
@@ -6,6 +7,7 @@ on:
     branches: [main]
 
 jobs:
+
   validate:
     name: Validate Code
     runs-on: ubuntu-latest
@@ -14,6 +16,28 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
+      - name: Notify Trigger
+        run: |
+          SHORT_SHA=$(echo "${{ github.sha }}" | cut -c1-7)
+
+          MESSAGE="🚀 *CI/CD PIPELINE TRIGGERED*
+
+📦 *Repository:* \`${{ github.repository }}\`
+🌿 *Branch:* \`${{ github.ref_name }}\`
+👤 *Triggered by:* \`${{ github.actor }}\`
+🆔 *Commit:* \`${SHORT_SHA}\`
+
+📝 *Message:*  
+${{ github.event.head_commit.message }}
+
+🔗 [View Commit](https://github.com/${{ github.repository }}/commit/${{ github.sha }})
+🔗 [Workflow Run](https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }})"
+
+          bash .github/scripts/telegram.sh \
+          "${{ secrets.TELEGRAM_BOT_TOKEN }}" \
+          "${{ secrets.TELEGRAM_CHAT_ID }}" \
+          "$MESSAGE"
+
       - name: Setup PHP
         uses: shivammathur/setup-php@v2
         with:
@@ -21,22 +45,12 @@ jobs:
           extensions: pdo, pdo_pgsql, pgsql, zip, gd, bcmath, exif, intl
           coverage: none
 
-      - name: Cache Composer dependencies
-        uses: actions/cache@v3
-        with:
-          path: vendor
-          key: ${{ runner.os }}-composer-${{ hashFiles('**/composer.lock') }}
-          restore-keys: ${{ runner.os }}-composer-
-
       - name: Install dependencies
         run: composer install --no-interaction --no-progress --prefer-dist --optimize-autoloader
-        env:
-          COMPOSER_PROCESS_TIMEOUT: 0
-          COMPOSER_NO_INTERACTION: 1
-          COMPOSER_NO_AUDIT: 1
 
       - name: Validate composer.json
         run: composer validate --strict
+
 
   deploy:
     name: Deploy to VPS
@@ -45,6 +59,24 @@ jobs:
     if: github.ref == 'refs/heads/main' && github.event_name == 'push'
 
     steps:
+      - name: Notify Deploy Start
+        run: |
+          SHORT_SHA=$(echo "${{ github.sha }}" | cut -c1-7)
+
+          MESSAGE="🔨 *DEPLOYMENT STARTED*
+
+📦 *Repository:* \`${{ github.repository }}\`
+🌿 *Branch:* \`main\`
+🖥 *Server:* \`${{ secrets.DEPLOY_SERVER }}\`
+🆔 *Commit:* \`${SHORT_SHA}\`
+
+⚙️ Status: *Deploying to VPS...*"
+
+          bash .github/scripts/telegram.sh \
+          "${{ secrets.TELEGRAM_BOT_TOKEN }}" \
+          "${{ secrets.TELEGRAM_CHAT_ID }}" \
+          "$MESSAGE"
+
       - name: Checkout code
         uses: actions/checkout@v4
 
@@ -66,9 +98,49 @@ jobs:
             php artisan route:clear
             php artisan cache:clear
             php artisan view:cache
-
-            # Sync Meilisearch index settings and import all searchable models
-            php artisan meilisearch:import-all --fresh
-
-            # Restart Octane via systemd
             sudo systemctl restart laravel-octane
+
+      - name: Notify Success
+        if: success()
+        run: |
+          SHORT_SHA=$(echo "${{ github.sha }}" | cut -c1-7)
+
+          MESSAGE="✅ *DEPLOYMENT SUCCESS*
+
+📦 *Repository:* \`${{ github.repository }}\`
+🌿 *Branch:* \`main\`
+🖥 *Server:* \`${{ secrets.DEPLOY_SERVER }}\`
+🆔 *Commit:* \`${SHORT_SHA}\`
+
+🟢 Status: *Application is LIVE*
+
+🔗 [View Commit](https://github.com/${{ github.repository }}/commit/${{ github.sha }})
+🔗 [Workflow Run](https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }})"
+
+          bash .github/scripts/telegram.sh \
+          "${{ secrets.TELEGRAM_BOT_TOKEN }}" \
+          "${{ secrets.TELEGRAM_CHAT_ID }}" \
+          "$MESSAGE"
+
+      - name: Notify Failure
+        if: failure()
+        run: |
+          SHORT_SHA=$(echo "${{ github.sha }}" | cut -c1-7)
+
+          MESSAGE="❌ *DEPLOYMENT FAILED*
+
+📦 *Repository:* \`${{ github.repository }}\`
+🌿 *Branch:* \`main\`
+🖥 *Server:* \`${{ secrets.DEPLOY_SERVER }}\`
+🆔 *Commit:* \`${SHORT_SHA}\`
+
+🔴 Status: *Deployment failed*
+
+🔍 Please check logs immediately.
+
+🔗 [View Workflow Logs](https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }})"
+
+          bash .github/scripts/telegram.sh \
+          "${{ secrets.TELEGRAM_BOT_TOKEN }}" \
+          "${{ secrets.TELEGRAM_CHAT_ID }}" \
+          "$MESSAGE"

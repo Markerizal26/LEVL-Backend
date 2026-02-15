@@ -307,8 +307,8 @@ class EnrollmentFinder
             ->allowedFilters($this->getAllowedFilters())
             ->allowedIncludes(['user', 'course']);
 
-        $userNameSort = AllowedSort::field('user_name', 'user.name');
-        $courseNameSort = AllowedSort::field('course_title', 'course.title');
+        $userNameSort = $this->makeUserNameSort();
+        $courseNameSort = $this->makeCourseTitleSort();
         $statusSort = AllowedSort::field('status', 'status');
 
         if ($usePrioritySort) {
@@ -357,8 +357,8 @@ class EnrollmentFinder
         $builder->with(['user' => fn ($q) => $q->select('id', 'name', 'email')->with('media'), 'course:id,title,slug,code'])
             ->allowedFilters($this->getAllowedFilters());
 
-        $userNameSort = AllowedSort::field('user_name', 'user.name');
-        $courseNameSort = AllowedSort::field('course_title', 'course.title');
+        $userNameSort = $this->makeUserNameSort();
+        $courseNameSort = $this->makeCourseTitleSort();
         $statusSort = AllowedSort::field('status', 'status');
 
         if ($usePrioritySort) {
@@ -402,6 +402,30 @@ class EnrollmentFinder
             AllowedFilter::callback('enrolled_from', fn ($q, $value) => $q->whereDate('enrolled_at', '>=', $value)),
             AllowedFilter::callback('enrolled_to', fn ($q, $value) => $q->whereDate('enrolled_at', '<=', $value)),
         ];
+    }
+
+    private function makeUserNameSort(): AllowedSort
+    {
+        $usersTable = (new Enrollment())->user()->getRelated()->getTable();
+        $enrollmentsTable = (new Enrollment())->getTable();
+
+        return AllowedSort::callback('user_name', function ($query, $descending) use ($usersTable, $enrollmentsTable) {
+            $query->select("{$enrollmentsTable}.*")
+                ->leftJoin($usersTable, "{$enrollmentsTable}.user_id", '=', "{$usersTable}.id")
+                ->orderBy("{$usersTable}.name", $descending ? 'desc' : 'asc');
+        });
+    }
+
+    private function makeCourseTitleSort(): AllowedSort
+    {
+        $coursesTable = (new Enrollment())->course()->getRelated()->getTable();
+        $enrollmentsTable = (new Enrollment())->getTable();
+
+        return AllowedSort::callback('course_title', function ($query, $descending) use ($coursesTable, $enrollmentsTable) {
+            $query->select("{$enrollmentsTable}.*")
+                ->leftJoin($coursesTable, "{$enrollmentsTable}.course_id", '=', "{$coursesTable}.id")
+                ->orderBy("{$coursesTable}.title", $descending ? 'desc' : 'asc');
+        });
     }
 
     private function getPrioritySort(): AllowedSort
