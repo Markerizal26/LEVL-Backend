@@ -44,18 +44,25 @@ class EnrollmentsController extends Controller
         return $this->paginateResponse($paginator, __('messages.enrollments.course_list_retrieved'));
     }
 
-    public function show(Enrollment $enrollment)
+    public function show($id)
     {
+        $enrollment = \Spatie\QueryBuilder\QueryBuilder::for(Enrollment::class)
+            ->allowedIncludes(['user', 'course'])
+            ->with(['user', 'course'])
+            ->findOrFail($id);
+
         $this->authorize('view', $enrollment);
 
         return $this->success(new EnrollmentResource($enrollment), __('messages.enrollments.retrieved'));
     }
 
-    public function showByCourse(Course $course, Enrollment $enrollment)
+    public function showByCourse(Course $course, $enrollmentId)
     {
-        if ((int) $enrollment->course_id !== (int) $course->id) {
-            abort(404);
-        }
+        $enrollment = \Spatie\QueryBuilder\QueryBuilder::for(Enrollment::class)
+            ->allowedIncludes(['user', 'course'])
+            ->with(['user', 'course']) 
+            ->where('course_id', $course->id)
+            ->findOrFail($enrollmentId);
 
         $this->authorize('view', $enrollment);
 

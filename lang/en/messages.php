@@ -407,6 +407,7 @@ return [
         'withdrawn' => 'Successfully withdrawn from course.',
         'course_list_retrieved' => 'Course enrollment list retrieved successfully.',
         'list_retrieved' => 'Enrollment list retrieved successfully.',
+        'retrieved' => 'Enrollment retrieved successfully.',
         'status_retrieved' => 'Enrollment status retrieved successfully.',
         'course_not_managed' => 'Course not found or not under your management.',
         'no_view_all_access' => 'You do not have access to view all enrollments.',

@@ -375,6 +375,7 @@ return [
         'withdrawn' => 'Anda berhasil mengundurkan diri dari course.',
         'course_list_retrieved' => 'Daftar enrollment course berhasil diambil.',
         'list_retrieved' => 'Daftar enrollment berhasil diambil.',
+        'retrieved' => 'Detail pendaftaran berhasil diambil.',
         'status_retrieved' => 'Status enrollment berhasil diambil.',
         'course_not_managed' => 'Course tidak ditemukan atau tidak berada di bawah pengelolaan Anda.',
         'no_view_all_access' => 'Anda tidak memiliki akses untuk melihat seluruh enrollment.',
