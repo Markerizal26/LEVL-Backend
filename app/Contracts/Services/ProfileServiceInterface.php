@@ -84,4 +84,25 @@ interface ProfileServiceInterface
      * @return bool True if account restoration was successful
      */
     public function restoreAccount(User $user): bool;
+
+    /**
+     * Request email change verification.
+     *
+     * @param  User  $user  The user requesting email change
+     * @param  string  $newEmail  The new email address
+     * @param  string|null  $ip  Request IP (for audit)
+     * @param  string|null  $userAgent  Request user agent (for audit)
+     * @return string|null UUID for verification process
+     */
+    public function requestEmailChange(User $user, string $newEmail, ?string $ip, ?string $userAgent): ?string;
+
+    /**
+     * Verify email change using token.
+     *
+     * @param  User  $user  The user verifying email change
+     * @param  string  $token  Verification token
+     * @param  string  $uuid  Verification UUID
+     * @return array Status result payload
+     */
+    public function verifyEmailChange(User $user, string $token, string $uuid): array;
 }

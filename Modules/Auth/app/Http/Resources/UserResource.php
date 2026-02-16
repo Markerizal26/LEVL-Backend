@@ -20,7 +20,7 @@ class UserResource extends JsonResource
 {
     public function toArray(Request $request): array
     {
-        return [
+        $data = [
             'id' => $this['id'] ?? (is_object($this->resource) ? $this->id : null),
             'name' => $this['name'] ?? (is_object($this->resource) ? $this->name : null),
             'email' => $this['email'] ?? (is_object($this->resource) ? $this->email : null),
@@ -33,24 +33,85 @@ class UserResource extends JsonResource
             'created_at' => $this->formatDate($this['created_at'] ?? (is_object($this->resource) ? $this->created_at : null)),
             'email_verified_at' => $this->formatDate($this['email_verified_at'] ?? (is_object($this->resource) ? $this->email_verified_at : null)),
 
-            'roles' => $this->whenLoaded('roles', fn () => $this->getRoles()),
-
-            'privacySettings' => $this->whenLoaded('privacySettings', fn () => new ProfilePrivacyResource($this->privacySettings)),
-            'enrollments' => $this->whenLoaded('enrollments', fn () => EnrollmentResource::collection($this->enrollments)),
-            'managedCourses' => $this->whenLoaded('managedCourses', fn () => CourseIndexResource::collection($this->managedCourses)),
-            'gamificationStats' => $this->whenLoaded('gamificationStats', fn () => $this->gamificationStats ? $this->gamificationStats->toArray() : null),
-            'badges' => $this->whenLoaded('badges', fn () => $this->badges->toArray()),
-            'challenges' => $this->whenLoaded('challenges', fn () => UserChallengeAssignmentResource::collection($this->challenges)),
-            'challengeCompletions' => $this->whenLoaded('challengeCompletions', fn () => ChallengeCompletionResource::collection($this->challengeCompletions)),
-            'points' => $this->whenLoaded('points', fn () => $this->points->toArray()),
-            'levels' => $this->whenLoaded('levels', fn () => $this->levels->toArray()),
-            'learningStreaks' => $this->whenLoaded('learningStreaks', fn () => $this->learningStreaks->toArray()),
-            'submissions' => $this->whenLoaded('submissions', fn () => SubmissionIndexResource::collection($this->submissions)),
-            'assignments' => $this->whenLoaded('assignments', fn () => AssignmentIndexResource::collection($this->assignments)),
-            'receivedOverrides' => $this->whenLoaded('receivedOverrides', fn () => OverrideResource::collection($this->receivedOverrides)),
-            'grantedOverrides' => $this->whenLoaded('grantedOverrides', fn () => OverrideResource::collection($this->grantedOverrides)),
-            'threads' => $this->whenLoaded('threads', fn () => ThreadResource::collection($this->threads)),
+            // Always include roles (empty array if not present/loaded)
+            'roles' => $this->getRoles(),
         ];
+
+        // For endpoints that pass an array into the resource (e.g. login),
+        // we cannot use whenLoaded() because relationLoaded() doesn't exist on arrays.
+        if ($this->resource instanceof \Illuminate\Database\Eloquent\Model) {
+            $data['privacySettings'] = $this->resource->relationLoaded('privacySettings')
+                ? new ProfilePrivacyResource($this->resource->privacySettings)
+                : null;
+            $data['enrollments'] = $this->resource->relationLoaded('enrollments')
+                ? EnrollmentResource::collection($this->resource->enrollments)
+                : null;
+            $data['managedCourses'] = $this->resource->relationLoaded('managedCourses')
+                ? CourseIndexResource::collection($this->resource->managedCourses)
+                : null;
+            $data['gamificationStats'] = $this->resource->relationLoaded('gamificationStats')
+                ? ($this->resource->gamificationStats ? $this->resource->gamificationStats->toArray() : null)
+                : null;
+            $data['badges'] = $this->resource->relationLoaded('badges')
+                ? $this->resource->badges->toArray()
+                : null;
+            $data['challenges'] = $this->resource->relationLoaded('challenges')
+                ? UserChallengeAssignmentResource::collection($this->resource->challenges)
+                : null;
+            $data['challengeCompletions'] = $this->resource->relationLoaded('challengeCompletions')
+                ? ChallengeCompletionResource::collection($this->resource->challengeCompletions)
+                : null;
+            $data['points'] = $this->resource->relationLoaded('points')
+                ? $this->resource->points->toArray()
+                : null;
+            $data['levels'] = $this->resource->relationLoaded('levels')
+                ? $this->resource->levels->toArray()
+                : null;
+            $data['learningStreaks'] = $this->resource->relationLoaded('learningStreaks')
+                ? $this->resource->learningStreaks->toArray()
+                : null;
+            $data['submissions'] = $this->resource->relationLoaded('submissions')
+                ? SubmissionIndexResource::collection($this->resource->submissions)
+                : null;
+            $data['assignments'] = $this->resource->relationLoaded('assignments')
+                ? AssignmentIndexResource::collection($this->resource->assignments)
+                : null;
+            $data['receivedOverrides'] = $this->resource->relationLoaded('receivedOverrides')
+                ? OverrideResource::collection($this->resource->receivedOverrides)
+                : null;
+            $data['grantedOverrides'] = $this->resource->relationLoaded('grantedOverrides')
+                ? OverrideResource::collection($this->resource->grantedOverrides)
+                : null;
+            $data['threads'] = $this->resource->relationLoaded('threads')
+                ? ThreadResource::collection($this->resource->threads)
+                : null;
+        } elseif (is_array($this->resource)) {
+            // If the resource is an array, only include keys that exist.
+            foreach ([
+                'privacySettings',
+                'enrollments',
+                'managedCourses',
+                'gamificationStats',
+                'badges',
+                'challenges',
+                'challengeCompletions',
+                'points',
+                'levels',
+                'learningStreaks',
+                'submissions',
+                'assignments',
+                'receivedOverrides',
+                'grantedOverrides',
+                'threads',
+            ] as $key) {
+                if (array_key_exists($key, $this->resource)) {
+                    $data[$key] = $this->resource[$key];
+                }
+            }
+        }
+
+        // Remove null keys (but keep empty arrays/false/0)
+        return array_filter($data, static fn ($v) => $v !== null);
     }
 
     protected function formatDate(mixed $date): ?string

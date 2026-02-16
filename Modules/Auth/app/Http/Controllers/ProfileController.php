@@ -25,6 +25,7 @@ class ProfileController extends Controller
         if (!$user->relationLoaded('media')) {
             $user->load('media');
         }
+    $user->loadMissing('roles');
         $profileData = $this->profileService->getProfileData($user);
 
         return $this->success(new \Modules\Auth\Http\Resources\ProfileResource($profileData));
@@ -34,6 +35,7 @@ class ProfileController extends Controller
     {
         $user = $request->user();
         $updatedUser = $this->profileService->updateProfile($user, $request->validated());
+    $updatedUser->loadMissing('roles');
 
         return $this->success(
             $this->profileService->getProfileData($updatedUser),

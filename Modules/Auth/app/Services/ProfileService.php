@@ -7,6 +7,7 @@ namespace Modules\Auth\Services;
 use App\Contracts\Services\ProfileServiceInterface;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Str;
 use Illuminate\Validation\ValidationException;
 use Modules\Auth\Events\AccountDeleted;
 use Modules\Auth\Events\PasswordChanged;
@@ -73,6 +74,9 @@ class ProfileService implements ProfileServiceInterface
     {
         $viewer = $viewer ?? $user;
 
+        $roleNames = $user->getRoleNames()->values();
+        $primaryRole = Str::lower((string) ($roleNames->first() ?? 'student'));
+
         $data = [
             'id' => $user->id,
             'name' => $user->name,
@@ -82,8 +86,13 @@ class ProfileService implements ProfileServiceInterface
             'bio' => $user->bio,
             'avatar_url' => $user->avatar_url,
             'account_status' => $user->account_status,
+            'status' => $user->account_status,
+            'role' => $primaryRole,
+            'roles' => $roleNames->all(),
+            'email_verified_at' => $user->email_verified_at,
             'last_profile_update' => $user->last_profile_update,
             'created_at' => $user->created_at,
+            'updated_at' => $user->updated_at,
         ];
 
         if ($viewer->id !== $user->id) {
