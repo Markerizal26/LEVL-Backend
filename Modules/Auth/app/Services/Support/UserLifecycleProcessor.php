@@ -8,12 +8,14 @@ use App\Jobs\CreateAuditJob;
 use Illuminate\Auth\Access\AuthorizationException;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Str;
 use Illuminate\Validation\ValidationException;
 use Modules\Auth\Contracts\Repositories\AuthRepositoryInterface;
 use Modules\Auth\Enums\UserStatus;
 use Modules\Auth\Models\User;
 use Modules\Auth\Services\UserCacheService;
+use Modules\Mail\Mail\Auth\UserCredentialsMail;
 
 class UserLifecycleProcessor
 {
@@ -97,6 +99,8 @@ class UserLifecycleProcessor
         $user = $this->authRepository->createUser($validated + ['is_password_set' => false]);
         $user->assignRole($role);
 
+        $this->sendCredentialsEmail($user, $passwordPlain);
+
         return $user;
     }
 
@@ -129,5 +133,12 @@ class UserLifecycleProcessor
 
             return $user->fresh();
         });
+    }
+
+    protected function sendCredentialsEmail(User $user, string $passwordPlain): void
+    {
+        $loginUrl = rtrim(config('app.frontend_url', 'http://localhost:3000'), '/').'/login';
+
+        Mail::to($user->email)->send(new UserCredentialsMail($user, $passwordPlain, $loginUrl));
     }
 }
