@@ -30,10 +30,20 @@ class ThreadResource extends JsonResource
             'id' => $this->id,
             'title' => $this->title,
             'content' => $this->content,
-            'author' => new AuthorResource($this->whenLoaded('author')),
-
-            'course_slug' => $this->whenLoaded('course', fn () => $this->course?->slug),
-            'course' => $this->whenLoaded('course'),
+            'author' => $this->whenLoaded('author', function () {
+                return [
+                    'name' => $this->author?->name,
+                    'username' => $this->author?->username,
+                    'email' => $this->author?->email,
+                    'avatar' => $this->author && $this->author->relationLoaded('media') ? ($this->author->getFirstMediaUrl('avatar') ?: null) : null,
+                ];
+            }),
+            'course' => $this->whenLoaded('course', function () {
+                return [
+                    'name' => $this->course?->title,
+                    'slug' => $this->course?->slug,
+                ];
+            }),
             'is_pinned' => $this->is_pinned,
             'is_closed' => $this->is_closed,
             'is_resolved' => $this->is_resolved,
