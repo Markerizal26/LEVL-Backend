@@ -69,11 +69,26 @@ class UserChallengeAssignment extends Model
 
     public function getStatusAttribute($value)
     {
-        if ($this->isCriteriaMet() && $value !== ChallengeAssignmentStatus::Claimed->value && $value !== ChallengeAssignmentStatus::Completed->value) {
+        // Because this accessor exists, it overrides Eloquent casting.
+        // Normalize the raw DB value into our enum so downstream code can safely use ->value / ->label().
+        $status = $value instanceof ChallengeAssignmentStatus
+            ? $value
+            : (is_string($value) ? ChallengeAssignmentStatus::tryFrom($value) : null);
+
+        // If the value is somehow unknown, keep the raw value to avoid hard failures.
+        if (! $status) {
+            return $value;
+        }
+
+        if (
+            $this->isCriteriaMet()
+            && $status !== ChallengeAssignmentStatus::Claimed
+            && $status !== ChallengeAssignmentStatus::Completed
+        ) {
             return ChallengeAssignmentStatus::Completed;
         }
 
-        return $value;
+        return $status;
     }
 
     public function getProgressPercentage(): float
@@ -104,5 +119,12 @@ class UserChallengeAssignment extends Model
         $target = $this->challenge?->criteria_target ?? 1;
 
         return $this->current_progress >= $target;
+    }
+
+    public function isClaimable(): bool
+    {
+        return $this->isCompleted()
+            && ! $this->reward_claimed
+            && ! $this->isExpired();
     }
 }

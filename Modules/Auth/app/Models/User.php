@@ -168,17 +168,12 @@ class User extends Authenticatable implements HasMedia, JWTSubject
 
     public function assignments()
     {
-        return $this->hasMany(\Modules\Learning\Models\Assignment::class);
-    }
-
-    public function posts()
-    {
-        return $this->hasMany(\Modules\Forums\Models\Post::class);
+        return $this->hasMany(\Modules\Learning\Models\Assignment::class, 'created_by');
     }
 
     public function threads()
     {
-        return $this->hasMany(\Modules\Forums\Models\Thread::class);
+        return $this->hasMany(\Modules\Forums\Models\Thread::class, 'author_id');
     }
 
     public function receivedOverrides()

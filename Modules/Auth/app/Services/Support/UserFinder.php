@@ -9,12 +9,14 @@ use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\Request;
 use Illuminate\Support\Arr;
+use Illuminate\Support\Collection;
 use Illuminate\Support\Str;
 use Modules\Auth\Contracts\UserAccessPolicyInterface;
 use Modules\Auth\Models\User;
 use Modules\Auth\Services\UserCacheService;
 use Modules\Schemes\Models\CourseAdmin;
 use Spatie\QueryBuilder\AllowedFilter;
+use Spatie\QueryBuilder\Exceptions\InvalidIncludeQuery;
 use Spatie\QueryBuilder\QueryBuilder;
 
 class UserFinder
@@ -94,7 +96,28 @@ class UserFinder
                         }
                     }),
                 ])
-                    ->allowedIncludes(['roles'])
+                    ->allowedIncludes([
+                        // Auth Module
+                        'roles',
+                        'privacySettings',
+                        'enrollments',
+                        'managedCourses',
+                        // Gamification Module (milestones table has no user_id - global catalog only)
+                        'gamificationStats',
+                        'badges',
+                        'challenges',
+                        'challengeCompletions',
+                        'points',
+                        'levels',
+                        'learningStreaks',
+                        // Learning Module
+                        'submissions',
+                        'assignments',
+                        'receivedOverrides',
+                        'grantedOverrides',
+                        // Forums Module (Post model doesn't exist - only Thread and Reply exist)
+                        'threads',
+                    ])
                     ->allowedSorts(['name', 'email', 'username', 'status', 'created_at'])
                     ->defaultSort('-created_at')
                     ->paginate($perPage);
@@ -109,14 +132,74 @@ class UserFinder
         if (! $target) {
             $query = QueryBuilder::for(User::class, $request ?? new Request())
                 ->with(['roles:id,name,guard_name'])
-                ->allowedIncludes(['roles'])
+                ->allowedIncludes([
+                    // Auth Module
+                    'roles',
+                    'privacySettings',
+                    'enrollments',
+                    'managedCourses',
+                    // Gamification Module (milestones table has no user_id - global catalog only)
+                    'gamificationStats',
+                    'badges',
+                    'challenges',
+                    'challengeCompletions',
+                    'points',
+                    'levels',
+                    'learningStreaks',
+                    // Learning Module
+                    'submissions',
+                    'assignments',
+                    'receivedOverrides',
+                    'grantedOverrides',
+                    // Forums Module (Post model doesn't exist - only Thread and Reply exist)
+                    'threads',
+                ])
                 ->where('id', $userId);
             
             $target = $query->firstOrFail();
+            
+            // Always load course when enrollments is loaded (either via include or already loaded)
+            if ($target->relationLoaded('enrollments')) {
+                $target->loadMissing('enrollments.course');
+            }
         } else {
-            // If cached, load roles if not already loaded or if explicitly requested
+            // If cached, load roles if not already loaded
             if (! $target->relationLoaded('roles')) {
                 $target->load('roles:id,name,guard_name');
+            }
+            
+            // Load other requested includes if specified
+            if ($request && $request->has('include')) {
+                $includes = explode(',', $request->get('include'));
+                $includes = array_map('trim', $includes);
+                $includes = array_filter($includes); // Remove empty strings
+                
+                $allowedIncludes = [
+                    'roles', 'privacySettings', 'enrollments', 'managedCourses',
+                    'gamificationStats', 'badges', 'challenges', 'challengeCompletions',
+                    'points', 'levels', 'learningStreaks',
+                    'submissions', 'assignments', 'receivedOverrides', 'grantedOverrides',
+                    'threads',
+                ];
+                
+                // Validate includes - throw error if any invalid includes are requested
+                $invalidIncludes = array_diff($includes, $allowedIncludes);
+                if (!empty($invalidIncludes)) {
+                    throw new InvalidIncludeQuery(
+                        Collection::make($invalidIncludes),
+                        Collection::make($allowedIncludes)
+                    );
+                }
+                
+                // Load valid includes
+                if (!empty($includes)) {
+                    $target->load($includes);
+                    
+                    // Always load course when enrollments is loaded
+                    if (in_array('enrollments', $includes) && $target->relationLoaded('enrollments')) {
+                        $target->loadMissing('enrollments.course');
+                    }
+                }
             }
         }
 
