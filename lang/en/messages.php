@@ -332,6 +332,12 @@ return [
         'not_found' => 'User not found.',
     ],
 
+    'users' => [
+        'bulk_activated' => '{0} No users activated|{1} 1 user activated|[2,*] :count users activated',
+        'bulk_deactivated' => '{0} No users deactivated|{1} 1 user deactivated|[2,*] :count users deactivated',
+        'bulk_deleted' => '{0} No users deleted|{1} 1 user deleted|[2,*] :count users deleted',
+    ],
+
     // Password Module
     'password' => [
         'reset_sent' => 'Password reset link has been sent to your email.',

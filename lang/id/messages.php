@@ -299,6 +299,12 @@ return [
         'not_found' => 'Pengguna tidak ditemukan.',
     ],
 
+    'users' => [
+        'bulk_activated' => '{0} Tidak ada pengguna diaktifkan|{1} 1 pengguna diaktifkan|[2,*] :count pengguna diaktifkan',
+        'bulk_deactivated' => '{0} Tidak ada pengguna dinonaktifkan|{1} 1 pengguna dinonaktifkan|[2,*] :count pengguna dinonaktifkan',
+        'bulk_deleted' => '{0} Tidak ada pengguna dihapus|{1} 1 pengguna dihapus|[2,*] :count pengguna dihapus',
+    ],
+
     // Password Module
     'password' => [
         'reset_sent' => 'Link reset password telah dikirim ke email Anda.',

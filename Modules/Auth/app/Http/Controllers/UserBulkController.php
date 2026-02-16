@@ -43,8 +43,8 @@ class UserBulkController extends Controller
     );
 
     return $this->success(
-      ['activated_count' => $count],
-      __("messages.users.bulk_activated", ['count' => $count])
+      ['updated' => $count],
+      trans_choice("messages.users.bulk_activated", $count, ['count' => $count])
     );
   }
 
@@ -57,8 +57,8 @@ class UserBulkController extends Controller
       );
 
       return $this->success(
-        ['deactivated_count' => $count],
-        __("messages.users.bulk_deactivated", ['count' => $count])
+        ['updated' => $count],
+        trans_choice("messages.users.bulk_deactivated", $count, ['count' => $count])
       );
   }
 
@@ -70,8 +70,23 @@ class UserBulkController extends Controller
       );
 
       return $this->success(
-        ['deleted_count' => $count],
-        __("messages.users.bulk_deleted", ['count' => $count])
+        ['deleted' => $count],
+        trans_choice("messages.users.bulk_deleted", $count, ['count' => $count])
       );
+  }
+
+  public function activate(BulkActivateRequest $request): JsonResponse
+  {
+    return $this->bulkActivate($request);
+  }
+
+  public function deactivate(BulkDeactivateRequest $request): JsonResponse
+  {
+    return $this->bulkDeactivate($request);
+  }
+
+  public function delete(BulkDeleteRequest $request): JsonResponse
+  {
+    return $this->bulkDelete($request);
   }
 }
