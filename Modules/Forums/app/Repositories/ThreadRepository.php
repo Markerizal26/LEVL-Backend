@@ -129,8 +129,8 @@ class ThreadRepository extends BaseRepository implements ThreadRepositoryInterfa
                         AllowedFilter::scope('closed'),
                         AllowedFilter::scope('is_mentioned'),
                     ],
-                    ['last_activity_at', 'created_at', 'replies_count', 'views_count'],
-                    '-last_activity_at',
+                    ['last_activity_at', 'created_at', 'replies_count', 'views_count', 'is_pinned'],
+                    '-is_pinned,-last_activity_at',
                     $filters['per_page'] ?? 20
                 );
             }
@@ -173,8 +173,8 @@ class ThreadRepository extends BaseRepository implements ThreadRepositoryInterfa
                         AllowedFilter::scope('closed'),
                         AllowedFilter::scope('is_mentioned'),
                     ],
-                    ['last_activity_at', 'created_at', 'replies_count', 'views_count'],
-                    '-last_activity_at',
+                    ['last_activity_at', 'created_at', 'replies_count', 'views_count', 'is_pinned'],
+                    '-is_pinned,-last_activity_at',
                     $filters['per_page'] ?? 20
                 );
             }
@@ -229,8 +229,8 @@ class ThreadRepository extends BaseRepository implements ThreadRepositoryInterfa
                         AllowedFilter::scope('closed'),
                         AllowedFilter::scope('is_mentioned'),
                     ],
-                    ['last_activity_at', 'created_at', 'replies_count', 'views_count'],
-                    '-last_activity_at',
+                    ['last_activity_at', 'created_at', 'replies_count', 'views_count', 'is_pinned'],
+                    '-is_pinned,-last_activity_at',
                     $filters['per_page'] ?? 20
                 );
             }
@@ -267,8 +267,8 @@ class ThreadRepository extends BaseRepository implements ThreadRepositoryInterfa
                         AllowedFilter::scope('closed'),
                         AllowedFilter::scope('is_mentioned'),
                     ],
-                    ['last_activity_at', 'created_at', 'replies_count', 'views_count'],
-                    '-last_activity_at',
+                    ['last_activity_at', 'created_at', 'replies_count', 'views_count', 'is_pinned'],
+                    '-is_pinned,-last_activity_at',
                     $filters['per_page'] ?? 20
                 );
             }
