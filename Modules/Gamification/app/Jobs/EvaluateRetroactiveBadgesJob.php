@@ -16,8 +16,7 @@ use Modules\Gamification\Services\Support\BadgeManager;
 class EvaluateRetroactiveBadgesJob implements ShouldQueue
 {
     use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
-
-    public ?string $queue = 'gamification';
+    public $queue = 'gamification';
 
     public function __construct(
         private readonly int $userId,
