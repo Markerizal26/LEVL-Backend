@@ -17,7 +17,7 @@ class EvaluateRetroactiveBadgesJob implements ShouldQueue
 {
     use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
 
-    public $queue = 'gamification';
+    public ?string $queue = 'gamification';
 
     public function __construct(
         private readonly int $userId,
