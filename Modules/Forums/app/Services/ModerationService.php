@@ -8,6 +8,7 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Modules\Auth\Models\User;
 use Modules\Forums\Contracts\Services\ModerationServiceInterface;
+use Modules\Forums\Events\ReplyAccepted;
 use Modules\Forums\Events\ThreadClosed;
 use Modules\Forums\Events\ThreadOpened;
 use Modules\Forums\Events\ThreadResolved;
@@ -109,7 +110,7 @@ class ModerationService implements ModerationServiceInterface
 
     public function markAsAcceptedAnswer(Reply $reply, User $user): Reply
     {
-        return DB::transaction(function () use ($reply, $user) {
+        $updatedReply = DB::transaction(function () use ($reply, $user) {
             $this->replyRepository->markAsAccepted($reply);
 
             $thread = $reply->thread;
@@ -122,6 +123,12 @@ class ModerationService implements ModerationServiceInterface
 
             return $reply->fresh();
         });
+
+        if ($updatedReply instanceof Reply) {
+            event(new ReplyAccepted($updatedReply, $user));
+        }
+
+        return $updatedReply;
     }
 
     public function unmarkAsAcceptedAnswer(Reply $reply, User $user): Reply
@@ -189,7 +196,6 @@ class ModerationService implements ModerationServiceInterface
         Log::channel('daily')->info('Forum moderation action', $logData);
     }
 
-    
     protected function clearThreadCache(Thread $thread): void
     {
         cache()->tags(['forums', 'threads'])->flush();

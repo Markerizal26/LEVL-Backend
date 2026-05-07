@@ -7,7 +7,7 @@ use Illuminate\Foundation\Support\Providers\EventServiceProvider as ServiceProvi
 class EventServiceProvider extends ServiceProvider
 {
     protected $listen = [
-        
+
         \Modules\Schemes\Events\LessonCompleted::class => [
             \Modules\Gamification\Listeners\AwardXpForLessonCompleted::class,
         ],
@@ -18,7 +18,6 @@ class EventServiceProvider extends ServiceProvider
             \Modules\Gamification\Listeners\AwardBadgeForCourseCompleted::class,
         ],
 
-        
         \Modules\Learning\Events\SubmissionStateChanged::class => [
             \Modules\Gamification\Listeners\AwardXpForAssignmentSubmitted::class,
         ],
@@ -29,13 +28,11 @@ class EventServiceProvider extends ServiceProvider
             \Modules\Gamification\Listeners\AwardXpForQuizPassed::class,
         ],
 
-        
         \Modules\Grading\Events\GradesReleased::class => [
             \Modules\Gamification\Listeners\AwardXpForGradeReleased::class,
             \Modules\Gamification\Listeners\AwardXpForPerfectScore::class,
         ],
 
-        
         \Modules\Forums\Events\ThreadCreated::class => [
             \Modules\Gamification\Listeners\AwardXpForThreadCreated::class,
         ],
@@ -46,7 +43,6 @@ class EventServiceProvider extends ServiceProvider
             \Modules\Gamification\Listeners\AwardXpForReactionReceived::class,
         ],
 
-        
         \Modules\Gamification\Events\UserLeveledUp::class => [
             \Modules\Gamification\Listeners\HandleLevelUp::class,
         ],
@@ -55,6 +51,14 @@ class EventServiceProvider extends ServiceProvider
         ],
         \Modules\Gamification\Events\BadgeEarned::class => [
             \Modules\Gamification\Listeners\SendBadgeEarnedNotification::class,
+        ],
+
+        \Modules\Auth\Events\ProfileUpdated::class => [
+            \Modules\Gamification\Listeners\AwardGamificationForProfileUpdated::class,
+        ],
+
+        \Modules\Forums\Events\ReplyAccepted::class => [
+            \Modules\Gamification\Listeners\AwardGamificationForReplyAccepted::class,
         ],
     ];
 

@@ -34,6 +34,7 @@ class BadgeStoreRequest extends FormRequest
             'rules' => ['nullable', 'array'],
             'rules.*.event_trigger' => ['required', 'string', 'max:100'],
             'rules.*.conditions' => ['nullable', 'array'],
+            'rules.*.conditions.course_slug' => ['nullable', 'string', 'exists:courses,slug'],
             'rules.*.priority' => ['nullable', 'integer', 'min:0'],
             'rules.*.cooldown_seconds' => ['nullable', 'integer', 'min:0'],
             'rules.*.rule_enabled' => ['nullable', 'boolean'],

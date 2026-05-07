@@ -6,24 +6,26 @@ namespace Modules\Gamification\Listeners;
 
 use Illuminate\Support\Facades\Log;
 use Modules\Gamification\Events\UserLeveledUp;
+use Modules\Gamification\Services\EventCounterService;
 use Modules\Gamification\Services\Support\BadgeManager;
 use Modules\Gamification\Services\Support\BadgeRuleEvaluator;
 use Modules\Gamification\Services\Support\PointManager;
 
 class HandleLevelUp extends GamificationListener
 {
-
     public function __construct(
         private readonly BadgeManager $badgeManager,
         private readonly PointManager $pointManager,
+        private readonly EventCounterService $counterService,
         private readonly BadgeRuleEvaluator $evaluator
     ) {}
 
-    
     public function handle(UserLeveledUp $event): void
     {
         try {
-            
+
+            $this->counterService->increment($event->userId, 'level_reached', 'global', null, 'lifetime');
+
             $user = $this->getCachedUser($event->userId);
             if ($user) {
                 $this->evaluator->evaluate($user, 'level_reached', [
@@ -33,7 +35,6 @@ class HandleLevelUp extends GamificationListener
                 ]);
             }
 
-            
             if (! empty($event->rewards)) {
                 $this->awardRewards($event);
             }

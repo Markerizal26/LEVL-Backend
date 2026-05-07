@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Modules\Gamification\Listeners;
 
+use Modules\Gamification\Services\EventCounterService;
 use Modules\Gamification\Services\GamificationService;
 use Modules\Schemes\Events\CourseCompleted;
 
@@ -11,12 +12,13 @@ class AwardBadgeForCourseCompleted extends GamificationListener
 {
     public function __construct(
         private GamificationService $gamification,
+        private EventCounterService $counterService,
         private \Modules\Gamification\Services\Support\BadgeRuleEvaluator $evaluator
     ) {}
 
     public function handle(CourseCompleted $event): void
     {
-        
+
         $enrollment = $event->enrollment;
         $course = $event->course;
 
@@ -50,7 +52,8 @@ class AwardBadgeForCourseCompleted extends GamificationListener
             );
         }
 
-        
+        $this->counterService->incrementGlobal($enrollment->user_id, 'course_completed');
+
         $payload = [
             'course_id' => $course->id,
             'course_slug' => $course->slug,

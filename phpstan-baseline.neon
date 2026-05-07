@@ -2145,7 +2145,7 @@ parameters:
 		-
 			message: '#^Access to an undefined property Modules\\Enrollments\\Models\\Enrollment\:\:\$user_id\.$#'
 			identifier: property.notFound
-			count: 2
+			count: 3
 			path: Modules/Gamification/app/Listeners/AwardBadgeForCourseCompleted.php
 
 		-

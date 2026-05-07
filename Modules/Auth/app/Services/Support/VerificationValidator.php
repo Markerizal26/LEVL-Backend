@@ -7,12 +7,19 @@ namespace Modules\Auth\Services\Support;
 use Modules\Auth\Enums\UserStatus;
 use Modules\Auth\Models\OtpCode;
 use Modules\Auth\Models\User;
+use Modules\Gamification\Services\EventCounterService;
+use Modules\Gamification\Services\Support\BadgeRuleEvaluator;
 
 class VerificationValidator
 {
     public const PURPOSE_REGISTER = 'register_verification';
 
     public const PURPOSE_CHANGE_EMAIL = 'email_change_verification';
+
+    public function __construct(
+        private readonly EventCounterService $counterService,
+        private readonly BadgeRuleEvaluator $badgeEvaluator
+    ) {}
 
     public function verifyByCode(string $uuidOrToken, string $code): array
     {
@@ -114,7 +121,11 @@ class VerificationValidator
             ])->save();
         }
 
-        
+        if ($user instanceof User) {
+            $this->counterService->increment($user->id, 'account_created', 'global', null, 'lifetime');
+            $this->badgeEvaluator->evaluate($user, 'account_created', []);
+        }
+
         $user->load(['roles', 'media']);
 
         return ['status' => 'ok', 'user_id' => $user->id, 'user' => $user];

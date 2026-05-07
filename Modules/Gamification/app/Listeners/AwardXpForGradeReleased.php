@@ -5,14 +5,15 @@ declare(strict_types=1);
 namespace Modules\Gamification\Listeners;
 
 use Modules\Common\Models\SystemSetting;
+use Modules\Gamification\Services\EventCounterService;
 use Modules\Gamification\Services\GamificationService;
 use Modules\Grading\Events\GradesReleased;
 
 class AwardXpForGradeReleased extends GamificationListener
 {
-
     public function __construct(
         private readonly GamificationService $gamification,
+        private readonly EventCounterService $counterService,
         private readonly \Modules\Gamification\Services\Support\BadgeRuleEvaluator $evaluator
     ) {}
 
@@ -46,17 +47,16 @@ class AwardXpForGradeReleased extends GamificationListener
                 ]
             );
 
-            
-            
+            $this->counterService->incrementGlobal($submission->user_id, 'assignment_graded');
+
             $user = $this->getCachedUser($submission->user_id);
-            if ($user && $this->evaluator) {
+            if ($user) {
                 $payload = [
                     'assignment_id' => $assignment->id,
                     'course_id' => $assignment->course_id,
                     'score' => $grade->effective_score,
                     'attempts' => $submission->attempt,
                     'is_first_submission' => $submission->attempt === 1,
-                    
                     'time' => $submission->created_at->format('H:i:s'),
                 ];
                 $this->evaluator->evaluate($user, 'assignment_graded', $payload);
