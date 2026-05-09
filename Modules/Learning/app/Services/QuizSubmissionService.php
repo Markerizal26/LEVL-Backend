@@ -12,6 +12,7 @@ use Modules\Learning\Contracts\Services\QuizSubmissionServiceInterface;
 use Modules\Learning\Enums\QuizGradingStatus;
 use Modules\Learning\Enums\QuizQuestionType;
 use Modules\Learning\Enums\QuizSubmissionStatus;
+use Modules\Learning\Enums\RandomizationType;
 use Modules\Learning\Models\Quiz;
 use Modules\Learning\Models\QuizAnswer;
 use Modules\Learning\Models\QuizQuestion;
@@ -36,7 +37,7 @@ class QuizSubmissionService implements QuizSubmissionServiceInterface
     {
         $accessCheck = $this->prerequisiteService->checkQuizAccess($quiz, $userId);
 
-        if (! $accessCheck['accessible']) {
+        if (!$accessCheck['accessible']) {
             $missingCount = count($accessCheck['missing']);
             $message = trans_choice('messages.quizzes.locked_cannot_start', $missingCount, ['count' => $missingCount]);
             throw \Illuminate\Validation\ValidationException::withMessages([
@@ -74,6 +75,7 @@ class QuizSubmissionService implements QuizSubmissionServiceInterface
 
         return DB::transaction(function () use ($quiz, $userId, $enrollmentId) {
             $attemptNumber = $this->repository->getAttemptCount($quiz->id, $userId) + 1;
+            $questionSet = $this->generateQuestionSet($quiz);
 
             return $this->repository->create([
                 'quiz_id' => $quiz->id,
@@ -83,9 +85,35 @@ class QuizSubmissionService implements QuizSubmissionServiceInterface
                 'status' => QuizSubmissionStatus::Draft->value,
                 'grading_status' => QuizGradingStatus::Pending->value,
                 'attempt_number' => $attemptNumber,
+                'question_set' => $questionSet,
                 'started_at' => now(),
             ]);
         });
+    }
+
+    private function generateQuestionSet(Quiz $quiz): ?array
+    {
+        $type = $quiz->randomization_type;
+
+        if ($type === null || $type === RandomizationType::Static) {
+            return null;
+        }
+
+        $allIds = $quiz->questions()->ordered()->pluck('id')->toArray();
+
+        if (empty($allIds)) {
+            return null;
+        }
+
+        if ($type === RandomizationType::Bank) {
+            $count = (int) ($quiz->question_bank_count ?? count($allIds));
+            $count = min($count, count($allIds));
+            shuffle($allIds);
+            return array_slice($allIds, 0, $count);
+        }
+
+        shuffle($allIds);
+        return $allIds;
     }
 
     public function saveAnswer(QuizSubmission $submission, int $questionId, array $data): QuizAnswer

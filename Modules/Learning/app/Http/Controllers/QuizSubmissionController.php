@@ -13,11 +13,13 @@ use Modules\Learning\Http\Requests\SaveQuizAnswerRequest;
 use Modules\Learning\Http\Resources\QuizSubmissionResource;
 use Modules\Learning\Models\Quiz;
 use Modules\Learning\Models\QuizSubmission;
+use Modules\Schemes\Traits\ValidatesEnrollment;
 
 class QuizSubmissionController extends Controller
 {
     use ApiResponse;
     use AuthorizesRequests;
+    use ValidatesEnrollment;
 
     public function __construct(
         private readonly QuizSubmissionServiceInterface $submissionService,
@@ -60,7 +62,17 @@ class QuizSubmissionController extends Controller
     {
         $this->authorize('takeQuiz', $quiz);
         $user = auth('api')->user();
-        $submission = $this->submissionService->start($quiz, $user->id);
+
+        $enrollmentId = null;
+        if ($user->hasRole('Student')) {
+            $course = $quiz->getCourse();
+            if ($course) {
+                $enrollment = $this->getActiveEnrollment($course);
+                $enrollmentId = $enrollment?->id;
+            }
+        }
+
+        $submission = $this->submissionService->start($quiz, $user->id, $enrollmentId);
 
         return $this->created(QuizSubmissionResource::make($submission), __('messages.quiz_submissions.started'));
     }
