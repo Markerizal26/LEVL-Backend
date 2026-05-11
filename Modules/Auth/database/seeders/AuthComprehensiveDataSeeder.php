@@ -23,7 +23,6 @@ class AuthComprehensiveDataSeeder extends Seeder
         $this->call([
             RolePermissionSeeder::class,
             UserSeederEnhanced::class,
-            ProfilePrivacySettingSeeder::class,
             ProfileSeeder::class,
             JwtRefreshTokenSeeder::class,
             OtpCodeSeeder::class,
@@ -52,7 +51,6 @@ class AuthComprehensiveDataSeeder extends Seeder
         $this->command->info('  • Total users: '.\Modules\Auth\Models\User::count());
         $this->command->info('  • Demo accounts: 4');
         $this->command->info('  • Special test users: 8');
-        $this->command->info('  • Privacy settings: '.\Illuminate\Support\Facades\DB::table('profile_privacy_settings')->count());
         $this->command->info('  • OTP codes: '.\Modules\Auth\Models\OtpCode::count());
         $this->command->info('  • Password reset tokens: '.\Illuminate\Support\Facades\DB::table('password_reset_tokens')->count());
 

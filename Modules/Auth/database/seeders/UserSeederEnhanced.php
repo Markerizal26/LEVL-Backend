@@ -276,7 +276,6 @@ class UserSeederEnhanced extends Seeder
                 }
             }
 
-            $this->batchCreatePrivacySettings($users, $role);
             $this->batchCreateUserActivities($users, $status);
 
             foreach ($users as $user) {
@@ -306,18 +305,6 @@ class UserSeederEnhanced extends Seeder
         ]);
 
         $user->assignRole($data['role']);
-
-        DB::table('profile_privacy_settings')->insert([
-            'user_id' => $user->id,
-            'profile_visibility' => 'public',
-            'show_email' => $this->pgsqlBool(true),
-            'show_phone' => $this->pgsqlBool(true),
-            'show_activity_history' => $this->pgsqlBool(true),
-            'show_achievements' => $this->pgsqlBool(true),
-            'show_statistics' => $this->pgsqlBool(true),
-            'created_at' => SeederDate::randomPastDateTimeBetween(1, 180),
-            'updated_at' => SeederDate::randomPastDateTimeBetween(1, 180),
-        ]);
 
         $this->attachAvatar($user);
 
@@ -354,36 +341,6 @@ class UserSeederEnhanced extends Seeder
     private function pgsqlBool(mixed $value): string
     {
         return filter_var($value, FILTER_VALIDATE_BOOLEAN) ? 'true' : 'false';
-    }
-
-    private function batchCreatePrivacySettings($users, string $role): void
-    {
-        if ($users->isEmpty()) {
-            return;
-        }
-
-        $privacySettings = $users->map(function ($user) use ($role) {
-            $m = $user->id % 10;
-            $privacyVisibility = match (true) {
-                $role === 'Student' && $m < 4 => 'private',
-                $role === 'Student' && $m < 7 => 'friends_only',
-                default => 'public',
-            };
-
-            return [
-                'user_id' => $user->id,
-                'profile_visibility' => $privacyVisibility,
-                'show_email' => $this->pgsqlBool(($user->id % 3) === 0),
-                'show_phone' => $this->pgsqlBool(($user->id % 4) === 0),
-                'show_activity_history' => $this->pgsqlBool(true),
-                'show_achievements' => $this->pgsqlBool(true),
-                'show_statistics' => $this->pgsqlBool(true),
-                'created_at' => SeederDate::randomPastDateTimeBetween(1, 180),
-                'updated_at' => SeederDate::randomPastDateTimeBetween(1, 180),
-            ];
-        })->toArray();
-
-        DB::table('profile_privacy_settings')->insertOrIgnore($privacySettings);
     }
 
     private function batchCreateUserActivities($users, UserStatus $status): void

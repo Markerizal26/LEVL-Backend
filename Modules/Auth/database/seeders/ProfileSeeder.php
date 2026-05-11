@@ -4,7 +4,6 @@ namespace Modules\Auth\Database\Seeders;
 
 use App\Support\SeederDate;
 use Illuminate\Database\Seeder;
-use Modules\Auth\Models\ProfilePrivacySetting;
 use Modules\Auth\Models\User;
 use Modules\Auth\Models\UserActivity;
 
@@ -17,7 +16,7 @@ class ProfileSeeder extends Seeder
 
         echo "Seeding profile data for all users...\n";
 
-        $users = User::with('privacySettings', 'roles')
+        $users = User::with('roles')
             ->whereNull('deleted_at')
             ->get();
 
@@ -27,68 +26,22 @@ class ProfileSeeder extends Seeder
             return;
         }
 
-        $privacyCount = 0;
-        $createdAt = SeederDate::randomPastDateTimeBetween(1, 180);
-        $visibilities = [
-            ProfilePrivacySetting::VISIBILITY_PUBLIC,
-            ProfilePrivacySetting::VISIBILITY_PRIVATE,
-        ];
-
-        $privacySettings = [];
-        foreach ($users as $user) {
-            if (! $user->privacySettings) {
-                $isAdmin = $user->roles->whereIn('name', ['Superadmin', 'Admin', 'Instructor'])->count() > 0;
-                $visibility = $isAdmin
-                    ? ProfilePrivacySetting::VISIBILITY_PUBLIC
-                    : $visibilities[array_rand($visibilities)];
-
-                $privacySettings[] = [
-                    'user_id' => $user->id,
-                    'profile_visibility' => $visibility,
-                    'show_email' => $this->pgsqlBool(rand(1, 100) <= 20),
-                    'show_phone' => $this->pgsqlBool(rand(1, 100) <= 10),
-                    'show_activity_history' => $this->pgsqlBool(true),
-                    'show_achievements' => $this->pgsqlBool(true),
-                    'show_statistics' => $this->pgsqlBool(true),
-                    'created_at' => $createdAt,
-                    'updated_at' => $createdAt,
-                ];
-                $privacyCount++;
-
-                if (count($privacySettings) >= 200) {
-                    \Illuminate\Support\Facades\DB::table('profile_privacy_settings')->insertOrIgnore($privacySettings);
-                    $privacySettings = [];
-                    gc_collect_cycles();
-                }
-            }
-        }
-
-        if (! empty($privacySettings)) {
-            \Illuminate\Support\Facades\DB::table('profile_privacy_settings')->insertOrIgnore($privacySettings);
-        }
-
         $activeUserIds = $users->filter(fn ($user) => $user->status === 'active')->pluck('id')->toArray();
         unset($users);
         gc_collect_cycles();
 
         $activityCount = $this->createUserActivitiesBatch($activeUserIds);
 
-        echo "✅ Created $privacyCount privacy settings\n";
         echo "✅ Created $activityCount user activities\n";
 
-        if ($privacyCount === 0 && $activityCount === 0) {
-            echo "ℹ️  All users already have profile data (privacy settings and activities)\n";
+        if ($activityCount === 0) {
+            echo "ℹ️  All users already have activity data\n";
         }
 
         echo "✅ Profile seeding completed!\n";
 
         gc_collect_cycles();
         \DB::connection()->enableQueryLog();
-    }
-
-    private function pgsqlBool(mixed $value): string
-    {
-        return filter_var($value, FILTER_VALIDATE_BOOLEAN) ? 'true' : 'false';
     }
 
     private function createUserActivitiesBatch(array $userIds): int

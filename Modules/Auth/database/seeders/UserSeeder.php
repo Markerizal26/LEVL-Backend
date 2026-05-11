@@ -102,11 +102,10 @@ class UserSeeder extends Seeder
             ],
         ];
 
-        $privacySettings = [];
         $createdUsers = collect();
 
         foreach ($demoUsers as $demoUser) {
-            
+
             $existingUser = User::where('email', $demoUser['email'])
                 ->orWhere('username', $demoUser['username'])
                 ->first();
@@ -132,27 +131,10 @@ class UserSeeder extends Seeder
 
             $user->assignRole($demoUser['role']);
 
-            $privacySettings[] = [
-                'user_id' => $user->id,
-                'profile_visibility' => 'public',
-                'show_email' => $this->pgsqlBool(($seed % 2) === 0),
-                'show_phone' => $this->pgsqlBool(($seed % 3) === 0),
-                'show_activity_history' => $this->pgsqlBool(true),
-                'show_achievements' => $this->pgsqlBool(true),
-                'show_statistics' => $this->pgsqlBool(true),
-                'created_at' => SeederDate::randomPastDateTimeBetween(1, 180),
-                'updated_at' => SeederDate::randomPastDateTimeBetween(1, 180),
-            ];
-
             $createdUsers->push($user);
         }
 
-        
-        if (! empty($privacySettings)) {
-            \Illuminate\Support\Facades\DB::table('profile_privacy_settings')->insertOrIgnore($privacySettings);
-        }
 
-        
         if ($createdUsers->isNotEmpty()) {
             $this->createUserActivitiesBatch($createdUsers, UserStatus::Active);
         }
@@ -232,30 +214,6 @@ class UserSeeder extends Seeder
                 gc_collect_cycles();
             }
         }
-
-        $createdAt = SeederDate::randomPastDateTimeBetween(1, 180);
-        $privacySettings = collect($users)->map(function ($user) use ($role, $createdAt) {
-            $m = $user->id % 10;
-            $privacyVisibility = match (true) {
-                $role === 'Student' && $m < 4 => 'private',
-                $role === 'Student' && $m < 7 => 'friends_only',
-                default => 'public',
-            };
-
-            return [
-                'user_id' => $user->id,
-                'profile_visibility' => $privacyVisibility,
-                'show_email' => $this->pgsqlBool(($user->id % 3) === 0),
-                'show_phone' => $this->pgsqlBool(($user->id % 4) === 0),
-                'show_activity_history' => $this->pgsqlBool(true),
-                'show_achievements' => $this->pgsqlBool(true),
-                'show_statistics' => $this->pgsqlBool(true),
-                'created_at' => $createdAt,
-                'updated_at' => $createdAt,
-            ];
-        })->toArray();
-
-        \Illuminate\Support\Facades\DB::table('profile_privacy_settings')->insertOrIgnore($privacySettings);
 
         $this->createUserActivitiesBatch($users, $status);
     }

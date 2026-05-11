@@ -9,7 +9,6 @@ use App\Support\RealisticSeederContent;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Schema;
-use Modules\Auth\Models\ProfilePrivacySetting;
 use Modules\Auth\Models\User;
 use Modules\Enrollments\Models\Enrollment;
 use Modules\Forums\Models\Thread;
@@ -110,20 +109,6 @@ class CompleteStudentIncludesSeeder extends Seeder
         );
         $otherStudent->syncRoles(['Student']);
 
-        
-        ProfilePrivacySetting::updateOrCreate(
-            ['user_id' => $student->id],
-            $this->onlyExistingColumns('profile_privacy_settings', [
-                'profile_visibility' => ProfilePrivacySetting::VISIBILITY_PRIVATE,
-                'show_email' => $this->pgsqlBool(false),
-                'show_phone' => $this->pgsqlBool(true),
-                'show_activity_history' => $this->pgsqlBool(true),
-                'show_achievements' => $this->pgsqlBool(true),
-                'show_statistics' => $this->pgsqlBool(true),
-            ]),
-        );
-
-        
         $course = Course::updateOrCreate(
             ['slug' => 'seed-complete-student-course'],
             $this->onlyExistingColumns('courses', [
