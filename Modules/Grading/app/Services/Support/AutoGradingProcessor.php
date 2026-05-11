@@ -38,7 +38,7 @@ class AutoGradingProcessor
                 $score = $strategy->grade($question, $answer);
                 $answer->update([
                     'score' => $score,
-                    'is_auto_graded' => true,
+                    'is_auto_graded' => 1,
                 ]);
             } else {
                 $hasManualQuestions = true;

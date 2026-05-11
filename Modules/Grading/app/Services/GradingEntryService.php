@@ -146,7 +146,7 @@ class GradingEntryService
             $answer->update([
                 'score' => $score,
                 'feedback' => $gradeData['feedback'] ?? null,
-                'is_auto_graded' => false,
+                'is_auto_graded' => 0,
             ]);
         }
 
@@ -175,7 +175,7 @@ class GradingEntryService
             $answer->update([
                 'score' => $gradeData['score'] ?? null,
                 'feedback' => $gradeData['feedback'] ?? null,
-                'is_auto_graded' => false,
+                'is_auto_graded' => 0,
             ]);
         }
 

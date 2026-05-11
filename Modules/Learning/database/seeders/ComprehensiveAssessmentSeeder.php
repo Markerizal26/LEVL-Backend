@@ -4,16 +4,16 @@ declare(strict_types=1);
 
 namespace Modules\Learning\Database\Seeders;
 
-use App\Support\SeederDate;
 use App\Support\RealisticSeederContent;
+use App\Support\SeederDate;
 use App\Support\UATMediaFixtures;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\DB;
 use Modules\Learning\Enums\AssignmentStatus;
 use Modules\Learning\Enums\QuizGradingStatus;
 use Modules\Learning\Enums\QuizQuestionType;
-use Modules\Learning\Enums\QuizSubmissionStatus;
 use Modules\Learning\Enums\QuizStatus;
+use Modules\Learning\Enums\QuizSubmissionStatus;
 use Modules\Learning\Enums\RandomizationType;
 use Modules\Learning\Enums\ReviewMode;
 use Modules\Learning\Enums\SubmissionState;
@@ -609,9 +609,7 @@ class ComprehensiveAssessmentSeeder extends Seeder
 
         $gradingStatus = match ($scenario) {
             'draft' => QuizGradingStatus::Pending->value,
-            'submitted' => rand(1, 100) <= 50
-                ? QuizGradingStatus::PartiallyGraded->value
-                : QuizGradingStatus::WaitingForGrading->value,
+            'submitted' => QuizGradingStatus::PartiallyGraded->value,
             'graded' => QuizGradingStatus::Graded->value,
             'released' => QuizGradingStatus::Released->value,
             default => QuizGradingStatus::Pending->value,
@@ -643,7 +641,7 @@ class ComprehensiveAssessmentSeeder extends Seeder
 
         foreach ($questions as $question) {
             $isEssay = $question['type'] === QuizQuestionType::Essay->value;
-            $score = $this->createQuizAnswer($submissionId, $question, $passingGrade);
+            $score = $this->createQuizAnswer($submissionId, $question, $passingGrade, $scenario);
             $stats['answers']++;
 
             if ($isEssay) {
@@ -689,7 +687,7 @@ class ComprehensiveAssessmentSeeder extends Seeder
         return $stats;
     }
 
-    private function createQuizAnswer(int $submissionId, array $question, float $passingGrade): float
+    private function createQuizAnswer(int $submissionId, array $question, float $passingGrade, string $scenario): float
     {
         $answerData = [
             'quiz_submission_id' => $submissionId,
@@ -697,7 +695,7 @@ class ComprehensiveAssessmentSeeder extends Seeder
             'content' => null,
             'selected_options' => null,
             'score' => 0,
-            'is_auto_graded' => \DB::raw('true'),
+            'is_auto_graded' => 1,
             'feedback' => null,
             'created_at' => $this->createdAt,
             'updated_at' => $this->createdAt,
@@ -719,17 +717,21 @@ class ComprehensiveAssessmentSeeder extends Seeder
 
             case QuizQuestionType::Essay->value:
                 $answerData['content'] = $this->pregenParagraphs[array_rand($this->pregenParagraphs)];
-                $answerData['is_auto_graded'] = \DB::raw('false');
-                $answerData['score'] = rand((int) ($question['weight'] * 0.7), $question['weight']);
-                $answerData['feedback'] = $this->pregenSentences[array_rand($this->pregenSentences)];
+                $answerData['is_auto_graded'] = 0;
+                if (in_array($scenario, ['graded', 'released'], true)) {
+                    $answerData['score'] = rand((int) ($question['weight'] * 0.7), $question['weight']);
+                    $answerData['feedback'] = $this->pregenSentences[array_rand($this->pregenSentences)];
+                } else {
+                    $answerData['score'] = null;
+                    $answerData['feedback'] = null;
+                }
                 break;
         }
 
         DB::table('quiz_answers')->insertOrIgnore($answerData);
 
-        return $answerData['score'];
+        return (float) ($answerData['score'] ?? 0);
     }
-
 
     private function pickAssignmentStatus(): string
     {

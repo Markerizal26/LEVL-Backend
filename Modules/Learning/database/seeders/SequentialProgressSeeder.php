@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace Modules\Learning\Database\Seeders;
 
-use App\Support\SeederDate;
 use App\Support\RealisticSeederContent;
+use App\Support\SeederDate;
 use App\Support\UATMediaFixtures;
 use Illuminate\Database\Seeder;
 use Modules\Learning\Enums\QuizGradingStatus;
@@ -145,12 +145,6 @@ class SequentialProgressSeeder extends Seeder
 
     private function processLessonCompletion(int $studentId, Lesson $lesson, string $studentType): bool
     {
-        
-        
-        
-        
-        
-        
 
         $completionChance = match ($studentType) {
             'complete' => 100,
@@ -163,7 +157,6 @@ class SequentialProgressSeeder extends Seeder
             return false;
         }
 
-        
         $enrollment = \DB::table('enrollments')
             ->join('units', 'enrollments.course_id', '=', 'units.course_id')
             ->join('lessons', 'units.id', '=', 'lessons.unit_id')
@@ -176,7 +169,6 @@ class SequentialProgressSeeder extends Seeder
             return false;
         }
 
-        
         \DB::table('lesson_progress')->insertOrIgnore([
             'enrollment_id' => $enrollment->enrollment_id,
             'lesson_id' => $lesson->id,
@@ -192,12 +184,6 @@ class SequentialProgressSeeder extends Seeder
 
     private function processAssignmentProgress(int $studentId, Assignment $assignment, int $enrollmentId, string $studentType): bool
     {
-        
-        
-        
-        
-        
-        
 
         if (! $enrollmentId) {
             return false;
@@ -308,7 +294,6 @@ class SequentialProgressSeeder extends Seeder
             'attempt_number' => 1,
         ]);
 
-        
         if ($submissionType === \Modules\Learning\Enums\SubmissionType::File) {
             $this->attachFileToSubmission($submission);
         } elseif ($submissionType === \Modules\Learning\Enums\SubmissionType::Mixed) {
@@ -330,12 +315,6 @@ class SequentialProgressSeeder extends Seeder
 
     private function processQuizProgress(int $studentId, Quiz $quiz, int $enrollmentId, string $studentType): bool
     {
-        
-        
-        
-        
-        
-        
 
         if (! $enrollmentId) {
             return false;
@@ -361,11 +340,13 @@ class SequentialProgressSeeder extends Seeder
             return false;
         }
 
+        $hasEssay = $questions->contains(fn ($q) => $q->type === 'essay');
+        $hasObjective = $questions->contains(fn ($q) => $q->type !== 'essay');
+
         $daysAgo = rand(1, 14);
         $submittedAt = SeederDate::randomPastCarbonBetween($daysAgo, $daysAgo)->toDateTimeString();
         $startedAt = SeederDate::randomPastCarbonBetween($daysAgo, $daysAgo)->subMinutes(rand(10, 120))->toDateTimeString();
 
-        
         $scenarioRoll = rand(1, 100);
         $scenario = match (true) {
             $scenarioRoll <= 20 => 'draft',
@@ -377,7 +358,9 @@ class SequentialProgressSeeder extends Seeder
 
         $status = match ($scenario) {
             'draft' => QuizSubmissionStatus::Draft->value,
-            'submitted' => QuizSubmissionStatus::Submitted->value,
+            'submitted' => ! $hasEssay
+                ? QuizSubmissionStatus::Graded->value
+                : QuizSubmissionStatus::Submitted->value,
             'graded' => QuizSubmissionStatus::Graded->value,
             'released' => QuizSubmissionStatus::Released->value,
             default => QuizSubmissionStatus::Missing->value,
@@ -385,9 +368,11 @@ class SequentialProgressSeeder extends Seeder
 
         $gradingStatus = match ($scenario) {
             'draft' => QuizGradingStatus::Pending->value,
-            'submitted' => rand(1, 100) <= 50
-                ? QuizGradingStatus::PartiallyGraded->value
-                : QuizGradingStatus::WaitingForGrading->value,
+            'submitted' => match (true) {
+                ! $hasEssay => QuizGradingStatus::Graded->value,
+                $hasEssay && $hasObjective => QuizGradingStatus::PartiallyGraded->value,
+                default => QuizGradingStatus::WaitingForGrading->value,
+            },
             'graded' => QuizGradingStatus::Graded->value,
             'released' => QuizGradingStatus::Released->value,
             default => QuizGradingStatus::Pending->value,
@@ -448,7 +433,7 @@ class SequentialProgressSeeder extends Seeder
                 'content' => null,
                 'selected_options' => null,
                 'score' => $scenario === 'draft' ? null : $questionScore,
-                'is_auto_graded' => \DB::raw($question->type !== 'essay' ? 'true' : 'false'),
+                'is_auto_graded' => $question->type !== 'essay' ? 1 : 0,
                 'feedback' => null,
                 'created_at' => $this->createdAt,
                 'updated_at' => $this->createdAt,
@@ -464,7 +449,7 @@ class SequentialProgressSeeder extends Seeder
                 $answerData['selected_options'] = $isCorrect ? $question->answer_key : json_encode([0]);
             } elseif ($question->type === 'essay') {
                 $answerData['content'] = $this->pregenAnswers[array_rand($this->pregenAnswers)];
-                $answerData['is_auto_graded'] = \DB::raw('false');
+                $answerData['is_auto_graded'] = 0;
 
                 if (in_array($scenario, ['graded', 'released'], true)) {
                     if ($isCorrect) {
@@ -476,7 +461,7 @@ class SequentialProgressSeeder extends Seeder
                     }
                     $essayScore = (float) $answerData['score'];
                 } else {
-                    
+
                     $answerData['score'] = null;
                     $answerData['feedback'] = null;
                 }
@@ -500,6 +485,15 @@ class SequentialProgressSeeder extends Seeder
             : 0.0;
 
         if ($scenario === 'submitted') {
+            if (! $hasEssay) {
+                $submission->update([
+                    'score' => $objectiveScore,
+                    'final_score' => $objectiveScore,
+                ]);
+
+                return $objectiveScore >= $passingGrade;
+            }
+
             $submission->update([
                 'score' => $objectiveScore,
                 'final_score' => null,
@@ -545,7 +539,7 @@ class SequentialProgressSeeder extends Seeder
         }
 
         try {
-            
+
             $media = $submission->addMedia($dummyFilePath)
                 ->preservingOriginal()
                 ->usingName('submission-'.$submission->id)
@@ -610,9 +604,6 @@ class SequentialProgressSeeder extends Seeder
 
         \DB::table('quiz_answers')->delete();
         echo "  ✓ Cleaned quiz answers\n";
-
-        
-        
 
         \DB::table('submissions')->delete();
         echo "  ✓ Cleaned submissions\n";
