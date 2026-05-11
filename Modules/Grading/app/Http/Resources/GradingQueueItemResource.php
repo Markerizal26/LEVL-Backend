@@ -63,6 +63,14 @@ class GradingQueueItemResource extends JsonResource
             'workflow_state_value' => $workflowValue,
             'workflow_state_label' => $this->enumLabel($this->state),
             'score' => $this->score,
+            'grade' => $this->whenLoaded('grade', fn () => $this->grade ? [
+                'id' => $this->grade->id,
+                'score' => $this->grade->score,
+                'max_score' => $this->grade->max_score,
+                'feedback' => $this->grade->feedback,
+                'is_draft' => (bool) $this->grade->is_draft,
+                'graded_at' => $this->grade->graded_at,
+            ] : null),
         ];
 
         if ($this->isDetailView) {

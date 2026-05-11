@@ -138,6 +138,7 @@ class GradingOrchestratorService
                 'assignment.unit:id,course_id,order',
                 'assignment.unit.course:id,title,slug,code',
                 'media',
+                'grade',
             ]);
 
             return $this->success(
@@ -220,7 +221,14 @@ class GradingOrchestratorService
 
             $this->entryService->saveDraftGrade($dto);
 
-            return $this->success(['submission_id' => $submission->id], __('messages.grading.draft_saved'));
+            $grade = $submission->grade()->first();
+
+            return $this->success([
+                'submission_id' => $submission->id,
+                'draft_score' => $grade?->score,
+                'draft_feedback' => $grade?->feedback,
+                'is_draft' => true,
+            ], __('messages.grading.draft_saved'));
         } catch (InvalidArgumentException $e) {
             return $this->error($e->getMessage(), [], 422);
         }

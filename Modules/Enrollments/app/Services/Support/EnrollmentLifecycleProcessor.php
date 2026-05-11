@@ -306,7 +306,7 @@ class EnrollmentLifecycleProcessor
         foreach ($managers as $manager) {
             if ($manager && $manager->email) {
                 Mail::to($manager->email)
-                    ->queue((new AdminEnrollmentNotificationMail($manager, $student, $course, $enrollmentsUrl))->onQueue('emails-transactional'));
+                    ->queue((new AdminEnrollmentNotificationMail($manager, $student, $course, $enrollment, $enrollmentsUrl))->onQueue('emails-transactional'));
             }
         }
     }
