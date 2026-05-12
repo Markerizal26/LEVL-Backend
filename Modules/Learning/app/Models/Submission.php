@@ -42,6 +42,8 @@ class Submission extends Model implements HasMedia
                 'image/webp',
                 'image/gif',
                 'text/plain',
+                'text/csv',
+                'application/csv',
             ]);
     }
 

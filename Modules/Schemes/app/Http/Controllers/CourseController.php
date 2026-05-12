@@ -132,6 +132,11 @@ class CourseController extends Controller
     public function destroy(Course $course)
     {
         $courseWithInstructors = $this->service->findWithInstructors($course->id);
+
+        if (! $courseWithInstructors) {
+            return $this->notFound(__('messages.courses.not_found'));
+        }
+
         $this->authorize('delete', $courseWithInstructors);
         DeleteCourseJob::dispatch($course->id, auth('api')->id());
 

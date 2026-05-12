@@ -7,6 +7,7 @@ namespace Modules\Enrollments\Services\Support;
 use App\Contracts\EnrollmentKeyHasherInterface;
 use App\Exceptions\BusinessException;
 use App\Support\Helpers\UrlHelper;
+use Illuminate\Database\UniqueConstraintViolationException;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Mail;
@@ -55,27 +56,32 @@ class EnrollmentLifecycleProcessor
             }
         }
 
-        return DB::transaction(function () use ($user, $course, $existingEnrollment) {
-            $initialStatus = $this->determineInitialStatus($course->enrollment_type);
-            $enrolledAt = Carbon::now();
+        try {
+            return DB::transaction(function () use ($user, $course, $existingEnrollment) {
+                $initialStatus = $this->determineInitialStatus($course->enrollment_type);
+                $enrolledAt = Carbon::now();
 
-            $enrollment = $this->saveEnrollment($existingEnrollment, $user->id, $course->id, $initialStatus, $enrolledAt, false);
+                $enrollment = $this->saveEnrollment($existingEnrollment, $user->id, $course->id, $initialStatus, $enrolledAt, false);
 
-            if (! $existingEnrollment) {
-                \Modules\Enrollments\Events\EnrollmentCreated::dispatch($enrollment);
-            }
+                if (! $existingEnrollment) {
+                    \Modules\Enrollments\Events\EnrollmentCreated::dispatch($enrollment);
+                }
 
-            $this->sendEnrollmentEmails($enrollment, $course, $user, $initialStatus);
+                $this->sendEnrollmentEmails($enrollment, $course, $user, $initialStatus);
 
-            return [
-                'status' => 'success',
-                'enrollment' => $enrollment,
-                'message' => $initialStatus === EnrollmentStatus::Pending
-                    ? __('messages.enrollments.enrollment_pending')
-                    : __('messages.enrollments.enrolled_successfully'),
-            ];
-        });
+                return [
+                    'status' => 'success',
+                    'enrollment' => $enrollment,
+                    'message' => $initialStatus === EnrollmentStatus::Pending
+                        ? __('messages.enrollments.enrollment_pending')
+                        : __('messages.enrollments.enrolled_successfully'),
+                ];
+            });
+        } catch (UniqueConstraintViolationException) {
+            throw new BusinessException(__('messages.enrollments.already_enrolled'));
+        }
     }
+
 
     public function enrollManually(User $actor, Course $course, array $data): array
     {

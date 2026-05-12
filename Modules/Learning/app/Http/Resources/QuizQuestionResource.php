@@ -16,7 +16,9 @@ class QuizQuestionResource extends JsonResource
             'type' => $this->type?->value,
             'type_label' => $this->type?->label(),
             'content' => $this->content,
-            'options' => $this->options,
+            'options' => is_array($this->options)
+                ? array_map(static fn ($opt) => is_array($opt) && array_key_exists('text', $opt) ? $opt['text'] : $opt, $this->options)
+                : null,
             'answer_key' => $this->when(
                 $this->userCanSeeAnswerKey($request),
                 fn () => $this->answer_key

@@ -21,9 +21,8 @@ class StoreQuizQuestionRequest extends FormRequest
             'type' => ['required', 'string', QuizQuestionType::rule()],
             'content' => ['required', 'string'],
             'options' => ['nullable', 'array', 'min:2'],
-            'options.*.text' => ['nullable', 'string'],
-            'options.*.image' => ['nullable', 'file', 'image'],
-            
+            'options.*' => ['nullable', 'string'],
+
             'answer_key' => ['nullable'],
             'answer_key.*' => ['integer', 'min:0'],
             'weight' => ['nullable', 'numeric', 'min:0.01'],
@@ -37,7 +36,6 @@ class StoreQuizQuestionRequest extends FormRequest
         $type = $this->input('type');
         $answerKey = $this->input('answer_key');
 
-        
         if ($type === QuizQuestionType::MultipleChoice->value && ! is_array($answerKey) && $answerKey !== null) {
             $this->merge(['answer_key' => [(int) $answerKey]]);
         }
@@ -64,7 +62,6 @@ class StoreQuizQuestionRequest extends FormRequest
                 return;
             }
 
-            
             if ($questionType->requiresOptions()) {
                 $options = $this->input('options', []);
                 if (count($options) < 2) {
@@ -72,7 +69,6 @@ class StoreQuizQuestionRequest extends FormRequest
                 }
             }
 
-            
             if ($questionType->canAutoGrade()) {
                 $answerKey = $this->input('answer_key');
 
@@ -90,7 +86,7 @@ class StoreQuizQuestionRequest extends FormRequest
                     } elseif (! is_array($answerKey)) {
                         $validator->errors()->add('answer_key', __('messages.questions.answer_key_required'));
                     } else {
-                        
+
                         $options = $this->input('options', []);
                         $optionCount = count($options);
                         foreach ($answerKey as $idx => $keyIndex) {
@@ -108,8 +104,6 @@ class StoreQuizQuestionRequest extends FormRequest
                 }
             }
 
-            
-            
         });
     }
 }

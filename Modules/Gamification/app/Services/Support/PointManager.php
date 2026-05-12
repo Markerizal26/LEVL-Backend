@@ -17,9 +17,7 @@ use Modules\Gamification\Models\XpSource;
 use Modules\Gamification\Repositories\GamificationRepository;
 use Modules\Gamification\Services\LevelService;
 use Modules\Learning\Models\Assignment;
-use Modules\Schemes\Models\Course;
 use Modules\Schemes\Models\Lesson;
-use Modules\Schemes\Models\Unit;
 use Spatie\QueryBuilder\AllowedFilter;
 use Spatie\QueryBuilder\QueryBuilder;
 
@@ -217,22 +215,10 @@ class PointManager
                     break;
 
                 case 'assignment':
-                    $assignment = Assignment::find($sourceId);
-                    if ($assignment) {
-
-                        if ($assignment->assignable_type === Course::class) {
-                            $scopes['course'] = $assignment->assignable_id;
-                        } elseif ($assignment->assignable_type === Unit::class) {
-                            $scopes['unit'] = $assignment->assignable_id;
-                            $scopes['course'] = $assignment->assignable?->course_id;
-                        } elseif ($assignment->assignable_type === Lesson::class) {
-                            $scopes['unit'] = $assignment->assignable?->unit_id;
-                            $scopes['course'] = $assignment->assignable?->unit?->course_id;
-                        } elseif ($assignment->lesson_id) {
-                            $lesson = $assignment->lesson;
-                            $scopes['unit'] = $lesson?->unit_id;
-                            $scopes['course'] = $lesson?->unit?->course_id;
-                        }
+                    $assignment = Assignment::with('unit.course')->find($sourceId);
+                    if ($assignment && $assignment->unit_id) {
+                        $scopes['unit'] = $assignment->unit_id;
+                        $scopes['course'] = $assignment->unit?->course_id;
                     }
                     break;
 
