@@ -37,6 +37,17 @@ class SubmissionCompletionProcessor
                 'answer_text' => $data['answer_text'] ?? $submission->answer_text,
             ]);
 
+            if (isset($data['files']) && is_array($data['files'])) {
+                $updated->clearMediaCollection('submission_files');
+
+                foreach ($data['files'] as $file) {
+                    if ($file instanceof UploadedFile) {
+                        $updated->addMedia($file)
+                            ->toMediaCollection('submission_files');
+                    }
+                }
+            }
+
             return $updated->fresh(['assignment', 'user', 'enrollment', 'media']);
         });
     }

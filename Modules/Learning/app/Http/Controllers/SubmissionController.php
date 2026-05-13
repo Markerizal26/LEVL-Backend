@@ -68,7 +68,14 @@ class SubmissionController extends Controller
     public function update(UpdateSubmissionRequest $request, Submission $submission): JsonResponse
     {
         $this->authorize('update', $submission);
-        $updated = $this->service->update($submission, $request->validated());
+
+        $data = $request->validated();
+
+        if ($request->hasFile('files')) {
+            $data['files'] = $request->file('files');
+        }
+
+        $updated = $this->service->update($submission, $data);
 
         return $this->success(SubmissionResource::make($updated), __('messages.submissions.updated'));
     }
