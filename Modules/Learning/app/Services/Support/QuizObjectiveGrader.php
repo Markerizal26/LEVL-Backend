@@ -35,7 +35,7 @@ class QuizObjectiveGrader
 
         $correctKey = $answerKey[0] ?? null;
 
-        return ($selected[0] ?? null) === $correctKey ? $weight : 0.0;
+        return (string) ($selected[0] ?? '') === (string) $correctKey ? $weight : 0.0;
     }
 
     private function gradeTrueFalse(?array $selected, array $answerKey, float $weight): float
@@ -67,9 +67,9 @@ class QuizObjectiveGrader
             return 0.0;
         }
 
-        $selectedSorted = array_values($selected);
+        $selectedSorted = array_map('strval', array_values($selected));
         sort($selectedSorted);
-        $keySorted = array_values($answerKey);
+        $keySorted = array_map('strval', array_values($answerKey));
         sort($keySorted);
 
         return $selectedSorted === $keySorted ? $weight : 0.0;

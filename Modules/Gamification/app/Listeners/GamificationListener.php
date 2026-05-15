@@ -15,6 +15,8 @@ abstract class GamificationListener implements ShouldQueue
 
     public string $queue = 'notifications';
 
+    public bool $afterCommit = true;
+
     public int $tries = 3;
 
     public int $maxExceptions = 2;

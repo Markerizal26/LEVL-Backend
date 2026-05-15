@@ -20,6 +20,8 @@ class UpdateProgressOnQuizCompleted implements ShouldQueue
 
     public array $backoff = [5, 30, 60];
 
+    public bool $afterCommit = true;
+
     public function __construct(private readonly ProgressionService $progression) {}
 
     public function handle(QuizCompleted $event): void

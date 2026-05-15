@@ -11,6 +11,8 @@ use Modules\Learning\Events\QuizCompleted;
 
 class RecordQuizCompletedActivity implements ShouldQueue
 {
+    public bool $afterCommit = true;
+
     public function handle(QuizCompleted $event): void
     {
         $submission = $event->submission->fresh(['quiz']);
