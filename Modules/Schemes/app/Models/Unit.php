@@ -7,6 +7,8 @@ namespace Modules\Schemes\Models;
 use App\Models\Concerns\TracksTrashBin;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Modules\Common\Traits\PgSearchable;
 use Spatie\Activitylog\LogOptions;
@@ -57,27 +59,32 @@ class Unit extends Model
         'status' => \Modules\Schemes\Enums\PublishStatus::class,
     ];
 
-    public function course()
+    public function course(): BelongsTo
     {
         return $this->belongsTo(\Modules\Schemes\Models\Course::class);
     }
 
-    public function lessons()
+    public function lessons(): HasMany
     {
         return $this->hasMany(\Modules\Schemes\Models\Lesson::class);
     }
 
-    public function assignments()
+    public function assignments(): HasMany
     {
         return $this->hasMany(\Modules\Learning\Models\Assignment::class);
     }
 
-    public function quizzes()
+    public function quizzes(): HasMany
     {
         return $this->hasMany(\Modules\Learning\Models\Quiz::class);
     }
 
-    public function contents()
+    public function contents(): HasMany
+    {
+        return $this->elements();
+    }
+
+    public function elements(): HasMany
     {
         return $this->hasMany(UnitContent::class)->orderBy('order');
     }
