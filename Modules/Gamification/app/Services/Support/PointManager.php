@@ -45,6 +45,7 @@ class PointManager
                         ->where('reason', $reason)
                         ->where('source_type', $sourceType)
                         ->where('source_id', $sourceId)
+                        ->lockForUpdate()
                         ->first();
 
                     if ($existingPoint) {

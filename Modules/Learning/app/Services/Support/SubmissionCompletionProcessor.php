@@ -112,7 +112,7 @@ class SubmissionCompletionProcessor
     public function submitAnswers(int $submissionId, array $answers): Submission
     {
         $submission = DB::transaction(function () use ($submissionId, $answers) {
-            $submission = Submission::findOrFail($submissionId);
+            $submission = Submission::lockForUpdate()->findOrFail($submissionId);
 
             if ($submission->state !== SubmissionState::InProgress) {
                 throw SubmissionException::notAllowed(__('messages.submissions.cannot_modify'));

@@ -21,6 +21,8 @@ class CheckHighScoreOnSubmissionStateChanged implements ShouldQueue
 
     public array $backoff = [5, 30, 120];
 
+    public bool $afterCommit = true;
+
     public function __construct(
         private readonly SubmissionServiceInterface $submissionService
     ) {}

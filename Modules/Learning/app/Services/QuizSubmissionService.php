@@ -168,50 +168,51 @@ class QuizSubmissionService implements QuizSubmissionServiceInterface
 
     public function submit(QuizSubmission $submission, int $actorId): QuizSubmission
     {
-
-        if ($submission->status !== QuizSubmissionStatus::Draft) {
-            throw \Illuminate\Validation\ValidationException::withMessages([
-                'submission' => [__('messages.quiz_submissions.not_draft')],
-            ]);
-        }
-
-        if ($this->isTimeLimitExceeded($submission)) {
-            throw \Illuminate\Validation\ValidationException::withMessages([
-                'submission' => [__('messages.quiz_submissions.time_limit_exceeded')],
-            ]);
-        }
-
-        $accessCheck = $this->prerequisiteService->checkQuizAccess($submission->quiz, $submission->user_id);
-        if (! $accessCheck['accessible']) {
-            throw \Illuminate\Validation\ValidationException::withMessages([
-                'quiz' => [__('messages.quizzes.locked_cannot_submit')],
-            ]);
-        }
-
-        $questions = $this->listQuestions($submission, $submission->user_id);
-        $answeredCount = QuizAnswer::where('quiz_submission_id', $submission->id)->count();
-
-        if ($answeredCount < $questions->count()) {
-            $unansweredCount = $questions->count() - $answeredCount;
-            throw \Illuminate\Validation\ValidationException::withMessages([
-                'answers' => [trans_choice('messages.quiz_submissions.unanswered_questions', $unansweredCount, ['count' => $unansweredCount])],
-            ]);
-        }
-
         return DB::transaction(function () use ($submission) {
-            $timeSpent = 0;
-            if ($submission->started_at) {
-                $timeSpent = max(0, (int) now()->diffInSeconds($submission->started_at, false));
+            $lockedSubmission = QuizSubmission::lockForUpdate()->find($submission->id);
+
+            if (! $lockedSubmission || $lockedSubmission->status !== QuizSubmissionStatus::Draft) {
+                throw \Illuminate\Validation\ValidationException::withMessages([
+                    'submission' => [__('messages.quiz_submissions.not_draft')],
+                ]);
             }
 
-            $this->repository->updateSubmission($submission, [
+            if ($this->isTimeLimitExceeded($lockedSubmission)) {
+                throw \Illuminate\Validation\ValidationException::withMessages([
+                    'submission' => [__('messages.quiz_submissions.time_limit_exceeded')],
+                ]);
+            }
+
+            $accessCheck = $this->prerequisiteService->checkQuizAccess($lockedSubmission->quiz, $lockedSubmission->user_id);
+            if (! $accessCheck['accessible']) {
+                throw \Illuminate\Validation\ValidationException::withMessages([
+                    'quiz' => [__('messages.quizzes.locked_cannot_submit')],
+                ]);
+            }
+
+            $questions = $this->listQuestions($lockedSubmission, $lockedSubmission->user_id);
+            $answeredCount = QuizAnswer::where('quiz_submission_id', $lockedSubmission->id)->count();
+
+            if ($answeredCount < $questions->count()) {
+                $unansweredCount = $questions->count() - $answeredCount;
+                throw \Illuminate\Validation\ValidationException::withMessages([
+                    'answers' => [trans_choice('messages.quiz_submissions.unanswered_questions', $unansweredCount, ['count' => $unansweredCount])],
+                ]);
+            }
+
+            $timeSpent = 0;
+            if ($lockedSubmission->started_at) {
+                $timeSpent = max(0, (int) now()->diffInSeconds($lockedSubmission->started_at, false));
+            }
+
+            $this->repository->updateSubmission($lockedSubmission, [
                 'status' => QuizSubmissionStatus::Submitted->value,
                 'submitted_at' => now(),
                 'time_spent_seconds' => $timeSpent,
                 'session_token' => null,
             ]);
 
-            $gradedSubmission = $this->autoGrade($submission);
+            $gradedSubmission = $this->autoGrade($lockedSubmission);
 
             event(new \Modules\Learning\Events\QuizSubmitted($gradedSubmission));
 
@@ -332,13 +333,18 @@ class QuizSubmissionService implements QuizSubmissionServiceInterface
     {
         $finalScore = $gradingStatus === QuizGradingStatus::Graded ? $objectiveScore : null;
 
+        $submissionStatus = QuizSubmissionStatus::Submitted->value;
+        if ($gradingStatus === QuizGradingStatus::Graded) {
+            $submissionStatus = $submission->quiz->auto_grading
+                ? QuizSubmissionStatus::Released->value
+                : QuizSubmissionStatus::Graded->value;
+        }
+
         $this->repository->updateSubmission($submission, [
             'grading_status' => $gradingStatus->value,
             'score' => $objectiveScore,
             'final_score' => $finalScore,
-            'status' => $gradingStatus === QuizGradingStatus::Graded
-                ? QuizSubmissionStatus::Graded->value
-                : QuizSubmissionStatus::Submitted->value,
+            'status' => $submissionStatus,
         ]);
 
         return $submission->fresh();
