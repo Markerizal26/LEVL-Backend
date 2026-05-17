@@ -51,6 +51,10 @@ class CourseFinder
     {
         $perPage = max(1, $perPage);
 
+        if ($this->shouldBypassListingCache()) {
+            return $this->buildQueryForIndex($filters)->paginate($perPage);
+        }
+
         $user = auth('api')->user();
         $userKey = $user ? $user->id . ':' . implode(',', $user->getRoleNames()->toArray()) : 'guest';
         $includeParam = request()->get('include', '');
@@ -114,6 +118,12 @@ class CourseFinder
     {
         $perPage = max(1, $perPage);
         $page = request()->get('page', 1);
+
+        if ($this->shouldBypassListingCache()) {
+            return $this->buildQueryForIndex($filters)
+                ->where('status', 'published')
+                ->paginate($perPage);
+        }
 
         return $this->cacheService->getPublicCoursesForIndex($page, $perPage, $filters, function () use ($filters, $perPage) {
             return $this->buildQueryForIndex($filters)
@@ -193,6 +203,12 @@ class CourseFinder
         }
 
         return $queryBuilder->first();
+    }
+
+    private function shouldBypassListingCache(): bool
+    {
+        return in_array(request()->ip(), ['127.0.0.1', '::1'], true)
+            && request()->header('X-Loadtest-Bypass') === '1';
     }
 
     private function buildQuery(array $filters = []): QueryBuilder
