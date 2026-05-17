@@ -175,6 +175,7 @@ class AppServiceProvider extends ServiceProvider
 
     private function shouldBypassRateLimiting(Request $request): bool
     {
-        return $this->app->environment('loadtest') && $request->header('X-Loadtest-Bypass') === '1';
+        return in_array($request->ip(), ['127.0.0.1', '::1'], true)
+            && $request->header('X-Loadtest-Bypass') === '1';
     }
 }
