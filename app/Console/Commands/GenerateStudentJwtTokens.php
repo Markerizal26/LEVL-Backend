@@ -6,6 +6,7 @@ namespace App\Console\Commands;
 
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\File;
+use Illuminate\Support\Str;
 use Modules\Auth\Enums\UserStatus;
 use Modules\Auth\Models\User;
 use Spatie\Permission\Models\Role;
@@ -30,6 +31,7 @@ class GenerateStudentJwtTokens extends Command
 
         $originalTtl = $jwt->factory()->getTTL();
         $tokens = [];
+        $studentRole = Role::findOrCreate('Student', 'api');
 
         $this->info("Generating {$count} active student accounts with JWT TTL {$ttl} minutes.");
 
@@ -37,14 +39,17 @@ class GenerateStudentJwtTokens extends Command
             $jwt->factory()->setTTL($ttl);
 
             for ($index = 1; $index <= $count; $index++) {
+                $identity = (string) Str::ulid();
                 $user = User::factory()->active()->create([
+                    'name' => 'Load Test Student '.$index,
+                    'username' => 'loadtest_student_'.$identity,
+                    'email' => 'loadtest.'.$identity.'@peserta.demo.levl.id',
                     'status' => UserStatus::Active->value,
                     'is_password_set' => true,
                     'password' => $password,
                     'email_verified_at' => now(),
                 ]);
 
-                $studentRole = Role::findOrCreate('Student', 'api');
                 $user->syncRoles([$studentRole]);
 
                 $token = $jwt->fromUser($user);
