@@ -133,6 +133,10 @@ class AppServiceProvider extends ServiceProvider
 
         RateLimiter::for('api', function (Request $request) {
 
+            if ($this->shouldBypassRateLimiting($request)) {
+                return Limit::none();
+            }
+
             if ($this->app->environment('testing')) {
                 return Limit::none();
             }
@@ -143,6 +147,10 @@ class AppServiceProvider extends ServiceProvider
         });
 
         RateLimiter::for('auth', function (Request $request) {
+            if ($this->shouldBypassRateLimiting($request)) {
+                return Limit::none();
+            }
+
             if ($this->app->environment('testing')) {
                 return Limit::none();
             }
@@ -151,6 +159,10 @@ class AppServiceProvider extends ServiceProvider
         });
 
         RateLimiter::for('enrollment', function (Request $request) {
+            if ($this->shouldBypassRateLimiting($request)) {
+                return Limit::none();
+            }
+
             if ($this->app->environment('testing')) {
                 return Limit::none();
             }
@@ -159,5 +171,10 @@ class AppServiceProvider extends ServiceProvider
 
             return Limit::perMinutes(1, 5)->by($key);
         });
+    }
+
+    private function shouldBypassRateLimiting(Request $request): bool
+    {
+        return $this->app->environment('loadtest') && $request->header('X-Loadtest-Bypass') === '1';
     }
 }
