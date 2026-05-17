@@ -10,6 +10,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use Modules\Enrollments\Models\UnitProgress;
 use Modules\Common\Traits\PgSearchable;
 use Spatie\Activitylog\LogOptions;
 use Spatie\Activitylog\Traits\LogsActivity;
@@ -67,6 +68,11 @@ class Unit extends Model
     public function lessons(): HasMany
     {
         return $this->hasMany(\Modules\Schemes\Models\Lesson::class);
+    }
+
+    public function progress(): HasMany
+    {
+        return $this->hasMany(UnitProgress::class);
     }
 
     public function assignments(): HasMany
