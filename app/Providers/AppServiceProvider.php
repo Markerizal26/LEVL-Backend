@@ -6,6 +6,7 @@ namespace App\Providers;
 
 use App\Contracts\EnrollmentKeyHasherInterface;
 use App\Support\EnrollmentKeyHasher;
+use App\Support\LoadtestBypass;
 use Illuminate\Cache\RateLimiting\Limit;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -175,7 +176,6 @@ class AppServiceProvider extends ServiceProvider
 
     private function shouldBypassRateLimiting(Request $request): bool
     {
-        return in_array($request->ip(), ['127.0.0.1', '::1'], true)
-            && $request->header('X-Loadtest-Bypass') === '1';
+        return LoadtestBypass::isEnabled($request);
     }
 }

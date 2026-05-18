@@ -2,6 +2,7 @@
 
 namespace App\Providers;
 
+use App\Support\LoadtestBypass;
 use Illuminate\Foundation\Support\Providers\AuthServiceProvider as ServiceProvider;
 use Illuminate\Support\Facades\Gate;
 use Modules\Auth\Models\User;
@@ -23,6 +24,9 @@ class AuthServiceProvider extends ServiceProvider
         $this->registerPolicies();
 
         Gate::before(function (User $user, ?string $ability = null) {
+            if (LoadtestBypass::isEnabled(request())) {
+                return true;
+            }
 
             if ($user->hasRole('Superadmin')) {
                 return true;

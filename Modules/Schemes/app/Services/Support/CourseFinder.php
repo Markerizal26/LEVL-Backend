@@ -30,7 +30,7 @@ class CourseFinder
         $perPage = max(1, $perPage);
 
         $user = auth('api')->user();
-        $userKey = $user ? $user->id . ':' . implode(',', $user->getRoleNames()->toArray()) : 'guest';
+        $userKey = $user ? $user->id.':'.implode(',', $user->getRoleNames()->toArray()) : 'guest';
         $includeParam = request()->get('include', '');
         $cacheKey = "schemes:courses:paginate:{$perPage}:{$userKey}:".request('page', 1).':'.md5(json_encode($filters).':'.$includeParam);
 
@@ -56,7 +56,7 @@ class CourseFinder
         }
 
         $user = auth('api')->user();
-        $userKey = $user ? $user->id . ':' . implode(',', $user->getRoleNames()->toArray()) : 'guest';
+        $userKey = $user ? $user->id.':'.implode(',', $user->getRoleNames()->toArray()) : 'guest';
         $includeParam = request()->get('include', '');
         $cacheKey = "schemes:courses:index:paginate:{$perPage}:{$userKey}:".request('page', 1).':'.md5(json_encode($filters).':'.$includeParam);
 
@@ -159,10 +159,8 @@ class CourseFinder
         $includeParam = $request->get('include', '');
         $user = auth('api')->user();
 
-        
         $baseQuery = Course::where('slug', $slug);
 
-        
         if (empty($includeParam)) {
             if ($user) {
                 $baseQuery->with(['enrollments' => function ($q) use ($user) {
@@ -173,7 +171,6 @@ class CourseFinder
             return $baseQuery->first();
         }
 
-        
         $course = Course::where('slug', $slug)->first();
         if (! $course) {
             return null;
@@ -182,20 +179,18 @@ class CourseFinder
         $requestedIncludes = array_filter(explode(',', $includeParam));
         if (in_array('elements', $requestedIncludes)) {
             $requestedIncludes = array_diff($requestedIncludes, ['elements']);
-            if (!in_array('units', $requestedIncludes)) {
+            if (! in_array('units', $requestedIncludes)) {
                 $requestedIncludes[] = 'units';
             }
             $request->merge(['include' => implode(',', $requestedIncludes)]);
         }
 
-        
         $allowedIncludes = $this->includeAuthorizer->getAllowedIncludesForQueryBuilder($user, $course);
 
         $queryBuilder = QueryBuilder::for(Course::class, $request)
             ->where('slug', $slug)
             ->allowedIncludes($allowedIncludes);
 
-        
         if ($user) {
             $queryBuilder->with(['enrollments' => function ($q) use ($user) {
                 $q->where('user_id', $user->id);
@@ -207,8 +202,7 @@ class CourseFinder
 
     private function shouldBypassListingCache(): bool
     {
-        return in_array(request()->ip(), ['127.0.0.1', '::1'], true)
-            && request()->header('X-Loadtest-Bypass') === '1';
+        return \App\Support\LoadtestBypass::isEnabled();
     }
 
     private function buildQuery(array $filters = []): QueryBuilder
@@ -228,12 +222,12 @@ class CourseFinder
         }
 
         $user = auth('api')->user();
-        if ($user && $user->hasRole('Instructor') && !$user->hasRole('Superadmin') && !$user->hasRole('Admin')) {
-            $builder->where(function($q) use ($user) {
+        if ($user && $user->hasRole('Instructor') && ! $user->hasRole('Superadmin') && ! $user->hasRole('Admin')) {
+            $builder->where(function ($q) use ($user) {
                 $q->where('status', 'published')
-                  ->orWhereHas('instructors', function($query) use ($user) {
-                      $query->where('user_id', $user->id);
-                  });
+                    ->orWhereHas('instructors', function ($query) use ($user) {
+                        $query->where('user_id', $user->id);
+                    });
             });
         }
 
@@ -272,12 +266,12 @@ class CourseFinder
         }
 
         $user = auth('api')->user();
-        if ($user && $user->hasRole('Instructor') && !$user->hasRole('Superadmin') && !$user->hasRole('Admin')) {
-            $builder->where(function($q) use ($user) {
+        if ($user && $user->hasRole('Instructor') && ! $user->hasRole('Superadmin') && ! $user->hasRole('Admin')) {
+            $builder->where(function ($q) use ($user) {
                 $q->where('status', 'published')
-                  ->orWhereHas('instructors', function($query) use ($user) {
-                      $query->where('user_id', $user->id);
-                  });
+                    ->orWhereHas('instructors', function ($query) use ($user) {
+                        $query->where('user_id', $user->id);
+                    });
             });
         }
 
@@ -368,7 +362,6 @@ class CourseFinder
             ->allowedSorts(['title', 'created_at', 'updated_at'])
             ->defaultSort('-updated_at');
 
-        
         if ($searchQuery && trim((string) $searchQuery) !== '') {
             $builder->search($searchQuery);
         }
@@ -380,15 +373,12 @@ class CourseFinder
     {
         $user = auth('api')->user();
 
-        
         $query = Course::where('slug', $slug);
 
-        
-        if (!empty($includes)) {
+        if (! empty($includes)) {
             $query->with($includes);
         }
 
-        
         if ($user) {
             $query->with(['enrollments' => function ($q) use ($user) {
                 $q->where('user_id', $user->id);
