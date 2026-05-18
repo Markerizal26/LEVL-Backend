@@ -1,6 +1,7 @@
 <?php
 
 use App\Exceptions\BusinessException;
+use App\Http\Middleware\AuthenticateLoadtestUser;
 use App\Http\Middleware\EnsureCleanDatabaseSession;
 use App\Http\Middleware\EnsurePermission;
 use App\Http\Middleware\EnsureRole;
@@ -35,6 +36,7 @@ return Application::configure(basePath: dirname(__DIR__))
         $middleware->priority([
             \Illuminate\Session\Middleware\StartSession::class,
             \Illuminate\View\Middleware\ShareErrorsFromSession::class,
+            AuthenticateLoadtestUser::class,
             \Illuminate\Auth\Middleware\Authenticate::class,
             \Tymon\JWTAuth\Http\Middleware\Authenticate::class,
             \Illuminate\Routing\Middleware\ThrottleRequests::class,
@@ -65,6 +67,7 @@ return Application::configure(basePath: dirname(__DIR__))
 
         
         $middleware->api(prepend: [
+            AuthenticateLoadtestUser::class,
             \App\Http\Middleware\SetLocale::class,
             EnsureCleanDatabaseSession::class,
         ]);
