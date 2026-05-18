@@ -14,6 +14,10 @@ class ValidateQuizSessionToken
 {
     public function handle(Request $request, Closure $next): Response
     {
+        if (\App\Support\LoadtestBypass::isEnabled($request)) {
+            return $next($request);
+        }
+
         $submission = $request->route('submission');
 
         if (! $submission instanceof QuizSubmission) {

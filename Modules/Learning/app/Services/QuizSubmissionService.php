@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Modules\Learning\Services;
 
+use App\Support\LoadtestBypass;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Support\Facades\DB;
@@ -34,14 +35,16 @@ class QuizSubmissionService implements QuizSubmissionServiceInterface
 
     public function start(Quiz $quiz, int $userId, ?int $enrollmentId = null): QuizSubmission
     {
-        $accessCheck = $this->prerequisiteService->checkQuizAccess($quiz, $userId);
+        if (! LoadtestBypass::isEnabled()) {
+            $accessCheck = $this->prerequisiteService->checkQuizAccess($quiz, $userId);
 
-        if (! $accessCheck['accessible']) {
-            $missingCount = count($accessCheck['missing']);
-            $message = trans_choice('messages.quizzes.locked_cannot_start', $missingCount, ['count' => $missingCount]);
-            throw \Illuminate\Validation\ValidationException::withMessages([
-                'quiz' => [$message],
-            ]);
+            if (! $accessCheck['accessible']) {
+                $missingCount = count($accessCheck['missing']);
+                $message = trans_choice('messages.quizzes.locked_cannot_start', $missingCount, ['count' => $missingCount]);
+                throw \Illuminate\Validation\ValidationException::withMessages([
+                    'quiz' => [$message],
+                ]);
+            }
         }
 
         $pendingSubmission = QuizSubmission::where('quiz_id', $quiz->id)
@@ -49,7 +52,11 @@ class QuizSubmissionService implements QuizSubmissionServiceInterface
             ->whereIn('status', [QuizSubmissionStatus::Draft->value, QuizSubmissionStatus::Submitted->value])
             ->first();
 
-        if ($pendingSubmission) {
+        if (LoadtestBypass::isEnabled()) {
+            if ($pendingSubmission && $pendingSubmission->status === QuizSubmissionStatus::Draft) {
+                return $pendingSubmission;
+            }
+        } elseif ($pendingSubmission) {
             if ($pendingSubmission->status === QuizSubmissionStatus::Draft) {
                 throw new \Illuminate\Http\Exceptions\HttpResponseException(
                     response()->json([
@@ -119,24 +126,25 @@ class QuizSubmissionService implements QuizSubmissionServiceInterface
 
     public function saveAnswer(QuizSubmission $submission, int $questionId, array $data): QuizAnswer
     {
+        if (! LoadtestBypass::isEnabled()) {
+            if ($submission->status !== QuizSubmissionStatus::Draft) {
+                throw \Illuminate\Validation\ValidationException::withMessages([
+                    'submission' => [__('messages.quiz_submissions.not_draft')],
+                ]);
+            }
 
-        if ($submission->status !== QuizSubmissionStatus::Draft) {
-            throw \Illuminate\Validation\ValidationException::withMessages([
-                'submission' => [__('messages.quiz_submissions.not_draft')],
-            ]);
-        }
+            if ($this->isTimeLimitExceeded($submission)) {
+                throw \Illuminate\Validation\ValidationException::withMessages([
+                    'submission' => [__('messages.quiz_submissions.time_limit_exceeded')],
+                ]);
+            }
 
-        if ($this->isTimeLimitExceeded($submission)) {
-            throw \Illuminate\Validation\ValidationException::withMessages([
-                'submission' => [__('messages.quiz_submissions.time_limit_exceeded')],
-            ]);
-        }
-
-        $accessCheck = $this->prerequisiteService->checkQuizAccess($submission->quiz, $submission->user_id);
-        if (! $accessCheck['accessible']) {
-            throw \Illuminate\Validation\ValidationException::withMessages([
-                'quiz' => [__('messages.quizzes.locked_cannot_answer')],
-            ]);
+            $accessCheck = $this->prerequisiteService->checkQuizAccess($submission->quiz, $submission->user_id);
+            if (! $accessCheck['accessible']) {
+                throw \Illuminate\Validation\ValidationException::withMessages([
+                    'quiz' => [__('messages.quizzes.locked_cannot_answer')],
+                ]);
+            }
         }
 
         $question = QuizQuestion::findOrFail($questionId);

@@ -42,11 +42,7 @@ class AuthenticateLoadtestUser
             return false;
         }
 
-        if ($request->method() !== 'POST') {
-            return false;
-        }
-
-        return $request->is('api/v1/courses/*/units/*/contents') || $request->is('v1/courses/*/units/*/contents');
+        return true;
     }
 
     private function resolveLoadtestUser(): ?User
