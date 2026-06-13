@@ -705,6 +705,7 @@ return [
         'bulk_feedback_queued' => 'Bulk feedback application has been queued for processing.',
         'queue_fetched' => 'Grading queue retrieved successfully.',
         'submission_fetched' => 'Submission details retrieved successfully.',
+        'batch_fetched' => 'Essay submissions retrieved successfully.',
         'not_found' => 'Grade not found.',
         'already_graded' => 'This submission has already been graded.',
         'cannot_draft_finalized' => 'Cannot save draft because this submission already has a finalized grade.',

@@ -20,8 +20,12 @@ class SaveDraftGradeRequest extends FormRequest
             'grades.*.question_id' => ['required_with:grades', 'integer', 'exists:quiz_questions,id'],
             'grades.*.score' => ['required_with:grades', 'numeric', 'min:0'],
             'grades.*.feedback' => ['nullable', 'string'],
+            'grades.*.is_ai_assisted' => ['nullable', 'boolean'],
+            'grades.*.ai_suggested_score' => ['nullable', 'numeric', 'min:0'],
             'score' => ['nullable', 'numeric', 'min:0'],
             'feedback' => ['nullable', 'string'],
+            'is_ai_assisted' => ['nullable', 'boolean'],
+            'ai_suggested_score' => ['nullable', 'numeric', 'min:0'],
         ];
     }
 

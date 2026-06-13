@@ -7,11 +7,11 @@ namespace Modules\Grading\Http\Controllers;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Routing\Controller;
+use Modules\Grading\Http\Requests\BatchEssayRequest;
 use Modules\Grading\Http\Requests\BulkFeedbackRequest;
 use Modules\Grading\Http\Requests\BulkReleaseGradesRequest;
 use Modules\Grading\Http\Requests\GradingQueueRequest;
 use Modules\Grading\Http\Requests\ManualGradeRequest;
-use Modules\Grading\Http\Requests\OverrideGradeRequest;
 use Modules\Grading\Http\Requests\SaveDraftGradeRequest;
 use Modules\Grading\Services\GradingOrchestratorService;
 use Modules\Learning\Models\QuizSubmission;
@@ -93,6 +93,11 @@ class GradingController extends Controller
         $this->authorize('view', $quizSubmission);
 
         return $this->orchestrator->showQuizEssayQuestion($quizSubmission, $questionId);
+    }
+
+    public function batchEssays(BatchEssayRequest $request): JsonResponse
+    {
+        return $this->orchestrator->batchEssays($request->validated()['items'], auth('api')->user());
     }
 
     public function returnToQueue(Submission $submission): JsonResponse

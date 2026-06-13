@@ -7,6 +7,7 @@ namespace Modules\Grading\Services;
 use App\Support\ApiResponse;
 use Illuminate\Http\JsonResponse;
 use InvalidArgumentException;
+use Modules\Auth\Models\User;
 use Modules\Grading\DTOs\BulkOperationDTO;
 use Modules\Grading\DTOs\SubmissionGradeDTO;
 use Modules\Grading\Http\Resources\GradeResource;
@@ -190,7 +191,14 @@ class GradingOrchestratorService
             return $this->error('Essay question not found for this submission.', [], 404);
         }
 
-        return $this->success(new GradingQueueItemResource($row));
+        return $this->success(new GradingQueueItemResource($row, true));
+    }
+
+    public function batchEssays(array $items, User $actor): JsonResponse
+    {
+        $results = $this->queueService->getEssaysBatch($items, $actor);
+
+        return $this->success($results, __('messages.grading.batch_fetched'));
     }
 
     public function returnToQueue(Submission $submission): JsonResponse
@@ -216,7 +224,9 @@ class GradingOrchestratorService
                 answers: $validated['grades'] ?? [],
                 scoreOverride: $hasGrades ? null : (float) ($validated['score'] ?? 0),
                 feedback: $validated['feedback'] ?? null,
-                graderId: auth('api')->id()
+                graderId: auth('api')->id(),
+                isAiAssisted: (bool) ($validated['is_ai_assisted'] ?? false),
+                aiSuggestedScore: isset($validated['ai_suggested_score']) ? (float) $validated['ai_suggested_score'] : null
             );
 
             $this->entryService->saveDraftGrade($dto);

@@ -710,6 +710,7 @@ return [
         'bulk_feedback_queued' => 'Proses penerapan umpan balik massal telah diantrekan untuk diproses.',
         'queue_fetched' => 'Antrian penilaian berhasil diambil.',
         'submission_fetched' => 'Detail pengumpulan berhasil diambil.',
+        'batch_fetched' => 'Data esai berhasil diambil.',
         'not_found' => 'Nilai tidak ditemukan.',
         'already_graded' => 'Pengumpulan ini sudah dinilai sebelumnya.',
         'cannot_draft_finalized' => 'Tidak dapat menyimpan draf karena pengumpulan ini sudah memiliki nilai final.',

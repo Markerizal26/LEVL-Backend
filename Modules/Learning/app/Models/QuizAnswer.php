@@ -18,6 +18,8 @@ class QuizAnswer extends Model
         'selected_options',
         'score',
         'is_auto_graded',
+        'is_ai_assisted',
+        'ai_suggested_score',
         'feedback',
     ];
 
@@ -25,6 +27,8 @@ class QuizAnswer extends Model
         'selected_options' => 'array',
         'score' => 'decimal:2',
         'is_auto_graded' => 'integer',
+        'is_ai_assisted' => 'boolean',
+        'ai_suggested_score' => 'decimal:2',
     ];
 
     public function submission(): BelongsTo

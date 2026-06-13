@@ -13,6 +13,8 @@ class SubmissionGradeDTO extends Data
         public array $answers,
         public ?float $scoreOverride = null,
         public ?string $feedback = null,
-        public ?int $graderId = null
+        public ?int $graderId = null,
+        public bool $isAiAssisted = false,
+        public ?float $aiSuggestedScore = null
     ) {}
 }

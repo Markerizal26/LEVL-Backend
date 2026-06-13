@@ -31,6 +31,8 @@ class Grade extends Model
         'is_override',
         'override_reason',
         'is_draft',
+        'is_ai_assisted',
+        'ai_suggested_score',
         'feedback',
         'status',
         'graded_at',
@@ -45,6 +47,8 @@ class Grade extends Model
         'max_score' => 'decimal:2',
         'is_override' => 'boolean',
         'is_draft' => 'boolean',
+        'is_ai_assisted' => 'boolean',
+        'ai_suggested_score' => 'decimal:2',
         'graded_at' => 'datetime',
         'released_at' => 'datetime',
     ];

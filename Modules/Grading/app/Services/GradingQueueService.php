@@ -8,6 +8,8 @@ use Closure;
 use Illuminate\Http\Request;
 use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\Gate;
+use Modules\Auth\Models\User;
 use Modules\Grading\Models\Grade;
 use Modules\Learning\Enums\QuizGradingStatus;
 use Modules\Learning\Enums\QuizQuestionType;
@@ -48,7 +50,7 @@ class GradingQueueService
             ? collect()
             : $this->buildQuizQuery($filterData, $actorId, $isInstructor, $search)
                 ->get()
-            ->flatMap(fn (QuizSubmission $submission) => $this->expandQuizToEssayRows($submission, $questionId));
+                ->flatMap(fn (QuizSubmission $submission) => $this->expandQuizToEssayRows($submission, $questionId));
 
         $all = $assignmentSubmissions->concat($quizSubmissions)
             ->sortByDesc('submitted_at')
@@ -125,6 +127,114 @@ class GradingQueueService
             'essay_answer' => $essayAnswer,
             'submitted_at' => $submission->submitted_at,
         ];
+    }
+
+    public function getEssaysBatch(array $items, User $actor): array
+    {
+        $quizIds = [];
+        $assignmentIds = [];
+
+        foreach ($items as $item) {
+            $submissionId = (int) ($item['submission_id'] ?? 0);
+            $type = $item['type'] ?? null;
+
+            if ($submissionId <= 0) {
+                continue;
+            }
+
+            if ($type === 'quiz' || $type === null) {
+                $quizIds[] = $submissionId;
+            }
+
+            if ($type === 'assignment' || $type === null) {
+                $assignmentIds[] = $submissionId;
+            }
+        }
+
+        $quizSubmissions = empty($quizIds) ? collect() : QuizSubmission::with([
+            'user:id,name,email',
+            'answers.question',
+        ])->whereIn('id', array_unique($quizIds))->get()->keyBy('id');
+
+        $assignmentSubmissions = empty($assignmentIds) ? collect() : Submission::with([
+            'user:id,name,email',
+            'assignment:id,unit_id,title,max_score,description',
+            'assignment.unit:id,course_id',
+            'assignment.unit.course:id',
+            'grade',
+        ])->whereIn('id', array_unique($assignmentIds))->get()->keyBy('id');
+
+        return array_map(
+            fn (array $item) => $this->resolveBatchEssay($item, $quizSubmissions, $assignmentSubmissions, $actor),
+            $items
+        );
+    }
+
+    private function resolveBatchEssay(array $item, Collection $quizSubmissions, Collection $assignmentSubmissions, User $actor): array
+    {
+        $submissionId = (int) ($item['submission_id'] ?? 0);
+        $questionId = (int) ($item['question_id'] ?? 0);
+        $type = $item['type'] ?? null;
+
+        $notFound = [
+            'submission_id' => $submissionId,
+            'question_id' => $questionId,
+            'type' => $type,
+            'found' => false,
+        ];
+
+        if ($type === 'quiz' || $type === null) {
+            $submission = $quizSubmissions->get($submissionId);
+
+            if ($submission !== null) {
+                $answer = $submission->answers->first(fn ($candidate) => (int) $candidate->quiz_question_id === $questionId
+                    && $candidate->question?->type?->value === QuizQuestionType::Essay->value);
+
+                if ($answer !== null) {
+                    if (! Gate::forUser($actor)->allows('view', $submission)) {
+                        return $notFound;
+                    }
+
+                    return [
+                        'submission_id' => $submissionId,
+                        'question_id' => $questionId,
+                        'type' => 'quiz',
+                        'found' => true,
+                        'question_text' => $answer->question?->content,
+                        'student_answer' => $answer->content,
+                        'max_score' => $answer->question?->max_score,
+                        'current_score' => $answer->score,
+                        'is_ai_assisted' => (bool) $answer->is_ai_assisted,
+                        'ai_suggested_score' => $answer->ai_suggested_score,
+                    ];
+                }
+            }
+        }
+
+        if ($type === 'assignment' || $type === null) {
+            $submission = $assignmentSubmissions->get($submissionId);
+
+            if ($submission !== null) {
+                if (! Gate::forUser($actor)->allows('grade', $submission)) {
+                    return $notFound;
+                }
+
+                return [
+                    'submission_id' => $submissionId,
+                    'question_id' => $questionId > 0 ? $questionId : null,
+                    'type' => 'assignment',
+                    'found' => true,
+                    'question_text' => $submission->assignment?->description,
+                    'student_answer' => $submission->answer_text,
+                    'max_score' => $submission->assignment?->max_score,
+                    'current_score' => $submission->grade?->score ?? $submission->score,
+                    'is_ai_assisted' => (bool) ($submission->grade?->is_ai_assisted ?? false),
+                    'ai_suggested_score' => $submission->grade?->ai_suggested_score,
+                ];
+            }
+        }
+
+        return $notFound;
     }
 
     private function validateFilters(array $filterData): void

@@ -69,11 +69,14 @@ class GradingQueueItemResource extends JsonResource
                 'max_score' => $this->grade->max_score,
                 'feedback' => $this->grade->feedback,
                 'is_draft' => (bool) $this->grade->is_draft,
+                'is_ai_assisted' => (bool) $this->grade->is_ai_assisted,
+                'ai_suggested_score' => $this->grade->ai_suggested_score,
                 'graded_at' => $this->grade->graded_at,
             ] : null),
         ];
 
         if ($this->isDetailView) {
+            $data['question_text'] = $this->assignment?->description;
             $data['text'] = in_array($submissionType, ['text', 'mixed'], true)
                 ? $this->answer_text
                 : null;
@@ -156,6 +159,7 @@ class GradingQueueItemResource extends JsonResource
             'score' => $submission->score,
             'final_score' => $submission->final_score,
             'question_id' => $essayAnswer->quiz_question_id,
+            'question_text' => $question?->content,
             'question_type' => $question?->type?->value,
             'question_order' => $question?->order,
             'question_weight' => $question?->weight,
@@ -171,6 +175,8 @@ class GradingQueueItemResource extends JsonResource
             $data['answer_selected_options'] = $essayAnswer->selected_options;
             $data['answer_is_auto_graded'] = $essayAnswer->is_auto_graded;
             $data['answer_score'] = $essayAnswer->score;
+            $data['answer_is_ai_assisted'] = (bool) $essayAnswer->is_ai_assisted;
+            $data['answer_ai_suggested_score'] = $essayAnswer->ai_suggested_score;
         }
 
         return $data;

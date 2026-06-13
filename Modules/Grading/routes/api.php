@@ -10,6 +10,7 @@ Route::middleware(['auth:api'])->prefix('v1')->group(function () {
         Route::get('grading/quiz-submissions/{quizSubmission}/questions/{questionId}', [GradingController::class, 'showQuizEssayQuestion'])
             ->middleware('can:view,quizSubmission')
             ->name('grading.quiz-essay-question.show');
+        Route::post('grading/essays/batch', [GradingController::class, 'batchEssays'])->name('grading.essays.batch');
         Route::get('grading/{submissionId}', [GradingController::class, 'show'])->name('grading.show');
         Route::post('submissions/{submissionId}/grades', [GradingController::class, 'manualGradeUnified'])->name('grading.store');
         Route::put('submissions/{submissionId}/grades/draft', [GradingController::class, 'saveDraftGradeUnified'])->name('grading.save-draft');

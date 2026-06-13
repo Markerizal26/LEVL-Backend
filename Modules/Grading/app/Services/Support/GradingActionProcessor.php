@@ -76,7 +76,7 @@ class GradingActionProcessor
         return $grade;
     }
 
-    public function saveDraft(Submission $submission, array $answersData, ?int $graderId, ?float $scoreOverride = null, ?string $feedback = null): void
+    public function saveDraft(Submission $submission, array $answersData, ?int $graderId, ?float $scoreOverride = null, ?string $feedback = null, bool $isAiAssisted = false, ?float $aiSuggestedScore = null): void
     {
         if ($submission->grade && ! $submission->grade->is_draft) {
             throw new \InvalidArgumentException(__('messages.grading.cannot_draft_finalized'));
@@ -122,6 +122,8 @@ class GradingActionProcessor
                 'max_score' => $submission->assignment?->max_score ?? 100,
                 'feedback' => $feedback,
                 'is_draft' => \DB::raw('true'),
+                'is_ai_assisted' => $isAiAssisted,
+                'ai_suggested_score' => $aiSuggestedScore,
             ]
         );
     }

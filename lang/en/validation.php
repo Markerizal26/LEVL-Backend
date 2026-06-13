@@ -208,6 +208,8 @@ return [
         'option_text' => 'option text',
         'is_correct' => 'is correct',
         'question_id' => 'question ID',
+        'submission_id' => 'submission ID',
+        'items' => 'items',
         'selected_option_id' => 'selected option ID',
         'answer_text' => 'answer text',
         'feedback' => 'feedback',

@@ -17,6 +17,8 @@ class DraftGradeResource extends JsonResource
                 'graded_by' => $this->resource['graded_by'] ?? null,
                 'grades' => $this->resource['grades'] ?? [],
                 'overall_feedback' => $this->resource['overall_feedback'] ?? null,
+                'is_ai_assisted' => (bool) ($this->resource['is_ai_assisted'] ?? false),
+                'ai_suggested_score' => $this->resource['ai_suggested_score'] ?? null,
             ];
         }
 
@@ -25,6 +27,8 @@ class DraftGradeResource extends JsonResource
             'graded_by' => $this->graded_by,
             'grades' => $this->grades ?? [],
             'overall_feedback' => $this->overall_feedback,
+            'is_ai_assisted' => (bool) $this->is_ai_assisted,
+            'ai_suggested_score' => $this->ai_suggested_score,
         ];
     }
 }
