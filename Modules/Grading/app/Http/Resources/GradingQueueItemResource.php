@@ -165,6 +165,8 @@ class GradingQueueItemResource extends JsonResource
             'question_weight' => $question?->weight,
             'question_max_score' => $question?->max_score,
             'is_graded' => $essayAnswer->score !== null,
+            'is_ai_assisted' => (bool) $essayAnswer->is_ai_assisted,
+            'ai_suggested_score' => $essayAnswer->ai_suggested_score,
             'answered_at' => $essayAnswer->created_at,
             'answered_updated_at' => $essayAnswer->updated_at,
         ];
