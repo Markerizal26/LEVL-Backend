@@ -2,38 +2,23 @@
 
 return [
 
-    
-
     'driver' => Stevebauman\Location\Drivers\IpApi::class,
 
-    
-
     'fallbacks' => [
-        Stevebauman\Location\Drivers\Ip2locationio::class,
         Stevebauman\Location\Drivers\IpInfo::class,
-        Stevebauman\Location\Drivers\GeoPlugin::class,
-        Stevebauman\Location\Drivers\MaxMind::class,
     ],
-
-    
 
     'position' => Stevebauman\Location\Position::class,
 
-    
-
     'http' => [
-        'timeout' => 3,
-        'connect_timeout' => 3,
+        'timeout' => 1,
+        'connect_timeout' => 1,
     ],
-
-    
 
     'testing' => [
         'ip' => '66.102.0.0',
         'enabled' => env('LOCATION_TESTING', true),
     ],
-
-    
 
     'maxmind' => [
         'license_key' => env('MAXMIND_LICENSE_KEY'),
@@ -67,8 +52,6 @@ return [
     'ip2locationio' => [
         'token' => env('IP2LOCATIONIO_TOKEN'),
     ],
-
-    
 
     'kloudend' => [
 
