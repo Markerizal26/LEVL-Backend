@@ -25,7 +25,6 @@ class StoreSubmissionRequest extends FormRequest
 
         $rules = [];
 
-        
         switch ($assignment->submission_type) {
             case SubmissionType::Text:
                 $rules['answer_text'] = ['required', 'string', 'min:10'];
@@ -33,9 +32,8 @@ class StoreSubmissionRequest extends FormRequest
                 break;
 
             case SubmissionType::File:
-                $rules['answer_text'] = ['nullable', 'string'];
                 $rules['files'] = ['required', 'array', 'min:1'];
-                $rules['files.*'] = ['file', 'max:10240']; 
+                $rules['files.*'] = ['file', 'max:10240'];
                 break;
 
             case SubmissionType::Mixed:

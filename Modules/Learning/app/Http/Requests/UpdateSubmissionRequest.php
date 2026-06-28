@@ -16,9 +16,9 @@ class UpdateSubmissionRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'answer_text' => ['sometimes', 'string'],
-            'files'       => ['sometimes', 'array'],
-            'files.*'     => ['file'],
+            'answer_text' => ['sometimes', 'nullable', 'string'],
+            'files' => ['sometimes', 'array'],
+            'files.*' => ['file'],
         ];
     }
 
@@ -26,8 +26,8 @@ class UpdateSubmissionRequest extends FormRequest
     {
         return [
             'answer_text' => __('validation.attributes.answer_text'),
-            'files'       => __('validation.attributes.files'),
-            'files.*'     => __('validation.attributes.file'),
+            'files' => __('validation.attributes.files'),
+            'files.*' => __('validation.attributes.file'),
         ];
     }
 }
