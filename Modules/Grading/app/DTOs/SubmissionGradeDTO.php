@@ -15,6 +15,7 @@ class SubmissionGradeDTO extends Data
         public ?string $feedback = null,
         public ?int $graderId = null,
         public bool $isAiAssisted = false,
-        public ?float $aiSuggestedScore = null
+        public ?float $aiSuggestedScore = null,
+        public ?string $aiReasoning = null
     ) {}
 }

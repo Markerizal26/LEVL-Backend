@@ -20,6 +20,7 @@ class QuizAnswer extends Model
         'is_auto_graded',
         'is_ai_assisted',
         'ai_suggested_score',
+        'ai_reasoning',
         'feedback',
     ];
 

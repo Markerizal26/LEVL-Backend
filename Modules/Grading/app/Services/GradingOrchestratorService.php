@@ -226,7 +226,8 @@ class GradingOrchestratorService
                 feedback: $validated['feedback'] ?? null,
                 graderId: auth('api')->id(),
                 isAiAssisted: (bool) ($validated['is_ai_assisted'] ?? false),
-                aiSuggestedScore: isset($validated['ai_suggested_score']) ? (float) $validated['ai_suggested_score'] : null
+                aiSuggestedScore: isset($validated['ai_suggested_score']) ? (float) $validated['ai_suggested_score'] : null,
+                aiReasoning: $validated['ai_reasoning'] ?? null
             );
 
             $this->entryService->saveDraftGrade($dto);

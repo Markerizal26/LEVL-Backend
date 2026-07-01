@@ -91,7 +91,7 @@ class GradingEntryService
     public function saveDraftGrade(SubmissionGradeDTO $data): void
     {
         $submission = Submission::with(['answers.question', 'assignment', 'grade'])->findOrFail($data->submissionId);
-        $this->actionProcessor->saveDraft($submission, $data->answers, $data->graderId, $data->scoreOverride, $data->feedback, $data->isAiAssisted, $data->aiSuggestedScore);
+        $this->actionProcessor->saveDraft($submission, $data->answers, $data->graderId, $data->scoreOverride, $data->feedback, $data->isAiAssisted, $data->aiSuggestedScore, $data->aiReasoning);
     }
 
     public function returnToQueue(int $submissionId): void
@@ -149,6 +149,7 @@ class GradingEntryService
                 'is_auto_graded' => 0,
                 'is_ai_assisted' => (bool) ($gradeData['is_ai_assisted'] ?? false),
                 'ai_suggested_score' => $gradeData['ai_suggested_score'] ?? null,
+                'ai_reasoning' => $gradeData['ai_reasoning'] ?? null,
             ]);
         }
 
@@ -180,6 +181,7 @@ class GradingEntryService
                 'is_auto_graded' => 0,
                 'is_ai_assisted' => (bool) ($gradeData['is_ai_assisted'] ?? false),
                 'ai_suggested_score' => $gradeData['ai_suggested_score'] ?? null,
+                'ai_reasoning' => $gradeData['ai_reasoning'] ?? null,
             ]);
         }
 

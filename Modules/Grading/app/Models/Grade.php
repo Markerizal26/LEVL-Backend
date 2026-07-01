@@ -33,6 +33,7 @@ class Grade extends Model
         'is_draft',
         'is_ai_assisted',
         'ai_suggested_score',
+        'ai_reasoning',
         'feedback',
         'status',
         'graded_at',
