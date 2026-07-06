@@ -13,6 +13,31 @@ class SaveDraftGradeRequest extends FormRequest
         return true;
     }
 
+    protected function prepareForValidation(): void
+    {
+        $data = [];
+
+        // Normalize top-level is_ai_assisted
+        if ($this->has('is_ai_assisted')) {
+            $data['is_ai_assisted'] = filter_var($this->input('is_ai_assisted'), FILTER_VALIDATE_BOOLEAN, FILTER_NULL_ON_FAILURE);
+        }
+
+        // Normalize is_ai_assisted inside each grade entry
+        if ($this->has('grades') && is_array($this->input('grades'))) {
+            $grades = $this->input('grades');
+            foreach ($grades as $index => $grade) {
+                if (array_key_exists('is_ai_assisted', $grade)) {
+                    $grades[$index]['is_ai_assisted'] = filter_var($grade['is_ai_assisted'], FILTER_VALIDATE_BOOLEAN, FILTER_NULL_ON_FAILURE);
+                }
+            }
+            $data['grades'] = $grades;
+        }
+
+        if (! empty($data)) {
+            $this->merge($data);
+        }
+    }
+
     public function rules(): array
     {
         return [
