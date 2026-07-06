@@ -52,6 +52,11 @@ class QuizAnswer extends Model
         return ! $this->isGraded() && ! $this->question->canAutoGrade();
     }
 
+    public function setIsAiAssistedAttribute($value)
+    {
+        $this->attributes['is_ai_assisted'] = $value ? 'true' : 'false';
+    }
+
     public function getAnswerValueAttribute(): mixed
     {
         $question = $this->question;
