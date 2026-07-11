@@ -156,8 +156,4 @@ class Grade extends Model
         return $query->where('submission_id', $submissionId);
     }
 
-    public function setIsAiAssistedAttribute($value)
-    {
-        $this->attributes['is_ai_assisted'] = $value ? 'true' : 'false';
-    }
 }
