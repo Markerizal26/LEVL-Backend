@@ -156,4 +156,18 @@ class Grade extends Model
         return $query->where('submission_id', $submissionId);
     }
 
+    public function setIsAiAssistedAttribute($value)
+    {
+        $this->attributes['is_ai_assisted'] = $value ? '1' : '0';
+    }
+
+    public function setIsDraftAttribute($value)
+    {
+        $this->attributes['is_draft'] = $value ? '1' : '0';
+    }
+
+    public function setIsOverrideAttribute($value)
+    {
+        $this->attributes['is_override'] = $value ? '1' : '0';
+    }
 }

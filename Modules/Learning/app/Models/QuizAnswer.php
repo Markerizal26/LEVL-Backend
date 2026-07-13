@@ -91,4 +91,9 @@ class QuizAnswer extends Model
     {
         return $query->where('is_auto_graded', false)->whereNotNull('score');
     }
+
+    public function setIsAiAssistedAttribute($value)
+    {
+        $this->attributes['is_ai_assisted'] = $value ? '1' : '0';
+    }
 }
