@@ -122,7 +122,7 @@ class GradingActionProcessor
                 'max_score' => $submission->assignment?->max_score ?? 100,
                 'feedback' => $feedback,
                 'is_draft' => \DB::raw('true'),
-                'is_ai_assisted' => $isAiAssisted,
+                'is_ai_assisted' => $isAiAssisted ? \DB::raw('true') : \DB::raw('false'),
                 'ai_suggested_score' => $aiSuggestedScore,
                 'ai_reasoning' => $aiReasoning,
             ]

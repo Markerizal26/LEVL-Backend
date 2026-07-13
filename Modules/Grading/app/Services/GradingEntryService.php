@@ -147,7 +147,7 @@ class GradingEntryService
                 'score' => $score,
                 'feedback' => $gradeData['feedback'] ?? null,
                 'is_auto_graded' => 0,
-                'is_ai_assisted' => (bool) ($gradeData['is_ai_assisted'] ?? false),
+                'is_ai_assisted' => ($gradeData['is_ai_assisted'] ?? false) ? \DB::raw('true') : \DB::raw('false'),
                 'ai_suggested_score' => $gradeData['ai_suggested_score'] ?? null,
                 'ai_reasoning' => $gradeData['ai_reasoning'] ?? null,
             ]);
@@ -179,7 +179,7 @@ class GradingEntryService
                 'score' => $gradeData['score'] ?? null,
                 'feedback' => $gradeData['feedback'] ?? null,
                 'is_auto_graded' => 0,
-                'is_ai_assisted' => (bool) ($gradeData['is_ai_assisted'] ?? false),
+                'is_ai_assisted' => ($gradeData['is_ai_assisted'] ?? false) ? \DB::raw('true') : \DB::raw('false'),
                 'ai_suggested_score' => $gradeData['ai_suggested_score'] ?? null,
                 'ai_reasoning' => $gradeData['ai_reasoning'] ?? null,
             ]);
