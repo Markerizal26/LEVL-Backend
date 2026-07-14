@@ -113,7 +113,15 @@ class CoursePolicy
 
     public function manageContent(User $user, Course $course): bool
     {
-        return $this->update($user, $course);
+        if ($this->update($user, $course)) {
+            return true;
+        }
+
+        if ($user->hasRole('Instructor')) {
+            return $course->instructors()->where('user_id', $user->id)->exists();
+        }
+
+        return false;
     }
 
     public function viewUnits(?User $user, Course $course): bool

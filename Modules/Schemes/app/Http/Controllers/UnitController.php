@@ -49,7 +49,7 @@ class UnitController extends Controller
 
     public function store(UnitRequest $request, Course $course)
     {
-        $this->authorize('update', $course);
+        $this->authorize('manageContent', $course);
         $unit = $this->service->create($course->id, $request->validated());
 
         return $this->created(new UnitResource($unit), __('messages.units.created'));
@@ -115,7 +115,7 @@ class UnitController extends Controller
 
     public function reorder(Request $request, Course $course)
     {
-        $this->authorize('update', $course);
+        $this->authorize('manageContent', $course);
         $this->service->reorder($course->id, $request->all());
 
         return $this->success([], __('messages.units.reordered'));
@@ -197,7 +197,7 @@ class UnitController extends Controller
         $courseSlug = $validated['course_slug'];
 
         $course = Course::where('slug', $courseSlug)->firstOrFail();
-        $this->authorize('update', $course);
+        $this->authorize('manageContent', $course);
 
         $unit = $this->service->create($course->id, $validated);
 

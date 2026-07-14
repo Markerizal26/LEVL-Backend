@@ -64,6 +64,10 @@ class UnitPolicy
             return true;
         }
 
+        if ($user->hasRole('Instructor')) {
+            return $course->instructors()->where('user_id', $user->id)->exists();
+        }
+
         return false;
     }
 
@@ -82,6 +86,10 @@ class UnitPolicy
             return true;
         }
 
+        if ($user->hasRole('Instructor')) {
+            return $course->instructors()->where('user_id', $user->id)->exists();
+        }
+
         return false;
     }
 
@@ -98,6 +106,10 @@ class UnitPolicy
 
         if ($user->hasRole('Admin')) {
             return true;
+        }
+
+        if ($user->hasRole('Instructor')) {
+            return $course->instructors()->where('user_id', $user->id)->exists();
         }
 
         return false;
