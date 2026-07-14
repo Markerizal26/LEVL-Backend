@@ -48,7 +48,7 @@ class LessonPolicy
         }
 
         
-        return $user->hasRole('Instructor') && $course->instructor_id === $user->id;
+        return $user->hasRole('Instructor') && $course->isAssignedInstructor($user);
     }
 
     public function update(User $user, Lesson $lesson): bool
@@ -68,7 +68,7 @@ class LessonPolicy
         }
 
         
-        return $user->hasRole('Instructor') && $course->instructor_id === $user->id;
+        return $user->hasRole('Instructor') && $course->isAssignedInstructor($user);
     }
 
     public function delete(User $user, Lesson $lesson): bool
@@ -88,7 +88,7 @@ class LessonPolicy
         }
 
         
-        return $user->hasRole('Instructor') && $course->instructor_id === $user->id;
+        return $user->hasRole('Instructor') && $course->isAssignedInstructor($user);
     }
 
     public function reorder(User $user, Lesson $lesson): bool

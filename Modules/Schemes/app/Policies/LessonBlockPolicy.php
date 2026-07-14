@@ -53,7 +53,7 @@ class LessonBlockPolicy
         }
 
         
-        return $user->hasRole('Instructor') && $course->instructor_id === $user->id;
+        return $user->hasRole('Instructor') && $course->isAssignedInstructor($user);
     }
 
     public function delete(User $user, LessonBlock $block): bool
@@ -73,6 +73,6 @@ class LessonBlockPolicy
         }
 
         
-        return $user->hasRole('Instructor') && $course->instructor_id === $user->id;
+        return $user->hasRole('Instructor') && $course->isAssignedInstructor($user);
     }
 }
