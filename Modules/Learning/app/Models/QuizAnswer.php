@@ -21,6 +21,7 @@ class QuizAnswer extends Model
         'is_ai_assisted',
         'ai_suggested_score',
         'ai_reasoning',
+        'ai_scoring_reference',
         'feedback',
     ];
 
@@ -51,8 +52,6 @@ class QuizAnswer extends Model
     {
         return ! $this->isGraded() && ! $this->question->canAutoGrade();
     }
-
-
 
     public function getAnswerValueAttribute(): mixed
     {

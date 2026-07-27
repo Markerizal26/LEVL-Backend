@@ -48,11 +48,13 @@ class SaveDraftGradeRequest extends FormRequest
             'grades.*.is_ai_assisted' => ['nullable', 'boolean'],
             'grades.*.ai_suggested_score' => ['nullable', 'numeric', 'min:0'],
             'grades.*.ai_reasoning' => ['nullable', 'string'],
+            'grades.*.ai_scoring_reference' => ['nullable', 'string'],
             'score' => ['nullable', 'numeric', 'min:0'],
             'feedback' => ['nullable', 'string'],
             'is_ai_assisted' => ['nullable', 'boolean'],
             'ai_suggested_score' => ['nullable', 'numeric', 'min:0'],
             'ai_reasoning' => ['nullable', 'string'],
+            'ai_scoring_reference' => ['nullable', 'string'],
         ];
     }
 

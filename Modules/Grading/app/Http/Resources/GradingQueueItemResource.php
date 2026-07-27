@@ -72,6 +72,7 @@ class GradingQueueItemResource extends JsonResource
                 'is_ai_assisted' => (bool) $this->grade->is_ai_assisted,
                 'ai_suggested_score' => $this->grade->ai_suggested_score,
                 'ai_reasoning' => $this->grade->ai_reasoning,
+                'ai_scoring_reference' => $this->grade->ai_scoring_reference,
                 'graded_at' => $this->grade->graded_at,
             ] : null),
         ];
@@ -169,6 +170,7 @@ class GradingQueueItemResource extends JsonResource
             'is_ai_assisted' => (bool) $essayAnswer->is_ai_assisted,
             'ai_suggested_score' => $essayAnswer->ai_suggested_score,
             'ai_reasoning' => $essayAnswer->ai_reasoning,
+            'ai_scoring_reference' => $essayAnswer->ai_scoring_reference,
             'answered_at' => $essayAnswer->created_at,
             'answered_updated_at' => $essayAnswer->updated_at,
         ];
@@ -179,9 +181,6 @@ class GradingQueueItemResource extends JsonResource
             $data['answer_selected_options'] = $essayAnswer->selected_options;
             $data['answer_is_auto_graded'] = $essayAnswer->is_auto_graded;
             $data['answer_score'] = $essayAnswer->score;
-            $data['answer_is_ai_assisted'] = (bool) $essayAnswer->is_ai_assisted;
-            $data['answer_ai_suggested_score'] = $essayAnswer->ai_suggested_score;
-            $data['answer_ai_reasoning'] = $essayAnswer->ai_reasoning;
         }
 
         return $data;

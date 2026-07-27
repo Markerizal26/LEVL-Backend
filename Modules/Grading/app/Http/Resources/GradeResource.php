@@ -36,6 +36,7 @@ class GradeResource extends JsonResource
             'is_ai_assisted' => (bool) $this->is_ai_assisted,
             'ai_suggested_score' => $this->ai_suggested_score,
             'ai_reasoning' => $this->ai_reasoning,
+            'ai_scoring_reference' => $this->ai_scoring_reference,
             'status' => $submissionStatus,
             'status_value' => $submissionStatus,
             'workflow_state' => $workflowState,

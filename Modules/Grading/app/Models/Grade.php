@@ -34,6 +34,7 @@ class Grade extends Model
         'is_ai_assisted',
         'ai_suggested_score',
         'ai_reasoning',
+        'ai_scoring_reference',
         'feedback',
         'status',
         'graded_at',

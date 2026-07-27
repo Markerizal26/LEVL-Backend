@@ -76,7 +76,7 @@ class GradingActionProcessor
         return $grade;
     }
 
-    public function saveDraft(Submission $submission, array $answersData, ?int $graderId, ?float $scoreOverride = null, ?string $feedback = null, bool $isAiAssisted = false, ?float $aiSuggestedScore = null, ?string $aiReasoning = null): void
+    public function saveDraft(Submission $submission, array $answersData, ?int $graderId, ?float $scoreOverride = null, ?string $feedback = null, bool $isAiAssisted = false, ?float $aiSuggestedScore = null, ?string $aiReasoning = null, ?string $aiScoringReference = null): void
     {
         if ($submission->grade && ! $submission->grade->is_draft) {
             throw new \InvalidArgumentException(__('messages.grading.cannot_draft_finalized'));
@@ -125,6 +125,7 @@ class GradingActionProcessor
                 'is_ai_assisted' => $isAiAssisted,
                 'ai_suggested_score' => $aiSuggestedScore,
                 'ai_reasoning' => $aiReasoning,
+                'ai_scoring_reference' => $aiScoringReference,
             ]
         );
     }
