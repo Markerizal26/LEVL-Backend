@@ -160,9 +160,15 @@ jobs:
             $KUBECTL apply -f "$K8S_TMP/worker.yaml"
             $KUBECTL apply -f "$K8S_TMP/scheduler.yaml"
             $KUBECTL apply -f "$K8S_TMP/ingress.yaml"
+            $KUBECTL apply -f "$K8S_TMP/certificate.yaml"
 
             $KUBECTL -n levl rollout status deployment/levl-app --timeout=300s
             $KUBECTL -n levl rollout status deployment/levl-queue --timeout=300s
+            $KUBECTL -n levl wait --for=condition=Ready certificate/levl-ip --timeout=300s
+
+            curl --fail --silent --show-error --retry 10 --retry-delay 5 --retry-connrefused \
+              --output /dev/null --write-out 'health endpoint HTTP %{http_code}\n' \
+              https://139.190.99.232/be/up
 
             sudo k3s crictl rmi --prune || true
 

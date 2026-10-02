@@ -20,6 +20,13 @@ spec:
         - name: migrate
           image: IMAGE_PLACEHOLDER
           command: ["php", "artisan", "migrate", "--force"]
+          resources:
+            requests:
+              cpu: "100m"
+              memory: "256Mi"
+            limits:
+              cpu: "1000m"
+              memory: "768Mi"
           envFrom:
             - configMapRef:
                 name: levl-config

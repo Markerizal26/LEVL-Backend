@@ -6,7 +6,7 @@ metadata:
 data:
   APP_ENV: "production"
   APP_DEBUG: "false"
-  APP_URL: "https://api.domain-anda.com"
+  APP_URL: "https://139.190.99.232/be"
 
   OCTANE_SERVER: "frankenphp"
   OCTANE_HOST: "0.0.0.0"

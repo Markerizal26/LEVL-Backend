@@ -4,21 +4,29 @@ metadata:
   name: levl-ingress
   namespace: levl
   annotations:
-    cert-manager.io/cluster-issuer: letsencrypt-prod
+    traefik.ingress.kubernetes.io/router.tls: "true"
+    traefik.ingress.kubernetes.io/router.middlewares: levl-levl-strip-be@kubernetescrd
 spec:
   ingressClassName: traefik
   tls:
-    - hosts:
-        - api.domain-anda.com
-      secretName: levl-tls
+    - secretName: levl-tls
   rules:
-    - host: api.domain-anda.com
-      http:
+    - http:
         paths:
-          - path: /
+          - path: /be
             pathType: Prefix
             backend:
               service:
                 name: levl-app
                 port:
                   number: 80
+---
+apiVersion: traefik.io/v1alpha1
+kind: Middleware
+metadata:
+  name: levl-strip-be
+  namespace: levl
+spec:
+  stripPrefix:
+    prefixes:
+      - /be

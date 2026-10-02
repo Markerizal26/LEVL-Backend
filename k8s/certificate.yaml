@@ -1,0 +1,15 @@
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  name: levl-ip
+  namespace: levl
+spec:
+  secretName: levl-tls
+  duration: 160h
+  renewBeforePercentage: 30
+  ipAddresses:
+    - 139.190.99.232
+  issuerRef:
+    name: letsencrypt-prod
+    kind: ClusterIssuer
+    group: cert-manager.io
