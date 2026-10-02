@@ -74,9 +74,9 @@ class ProductionSeeder extends Seeder
         $this->command->info('  • Users:          1 (superadmin)');
         $this->command->info('');
         $this->command->info('🔗 Next Steps:');
-        $this->command->info('  1. Start the development server');
-        $this->command->info('  2. Log in with: admin@levl.local / ChangeMe123!');
-        $this->command->info('  3. Change the superadmin password immediately');
+        $this->command->info('  1. Verify the production API is healthy');
+        $this->command->info('  2. Log in with the SUPERADMIN_EMAIL credentials');
+        $this->command->info('  3. Keep SUPERADMIN_PASSWORD private');
         $this->command->info('');
     }
 }

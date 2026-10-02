@@ -30,14 +30,14 @@ class LearningContentSeeder extends Seeder
         $this->command->info('   Course → Unit → Lesson → Lesson Block (with files)');
 
         try {
-            $disk = \Storage::disk('do');
+            $disk = \Storage::disk(config('media-library.disk_name', 'public'));
             $testFile = 'test-connection-'.time().'.txt';
             $disk->put($testFile, 'test');
             $disk->delete($testFile);
-            $this->command->info('  ✓ DigitalOcean Spaces connection successful');
+            $this->command->info('  ✓ Local VPS storage is writable');
         } catch (\Exception $e) {
-            $this->command->error('  ❌ DigitalOcean Spaces connection failed: '.$e->getMessage());
-            $this->command->warn('  ⚠️  Media upload will be skipped. Please check DO credentials.');
+            $this->command->error('  ❌ Local VPS storage check failed: '.$e->getMessage());
+            $this->command->warn('  ⚠️  Media upload will be skipped. Please check the storage volume permissions.');
 
             return;
         }
@@ -290,7 +290,7 @@ class LearningContentSeeder extends Seeder
                     }
                     $block->addMedia($this->dummyFiles['video'])
                         ->preservingOriginal()
-                        ->toMediaCollection('media', 'do');
+                        ->toMediaCollection('media', config('media-library.disk_name', 'public'));
 
                     if ($attemptCount <= 5) {
                         $this->command->info("    ✅ Successfully uploaded video for block {$block->id}");
@@ -319,7 +319,7 @@ class LearningContentSeeder extends Seeder
                     }
                     $block->addMedia($filePath)
                         ->preservingOriginal()
-                        ->toMediaCollection('media', 'do');
+                        ->toMediaCollection('media', config('media-library.disk_name', 'public'));
 
                     if ($attemptCount <= 5) {
                         $this->command->info("    ✅ Successfully uploaded {$fileType} for block {$block->id}");
@@ -340,7 +340,7 @@ class LearningContentSeeder extends Seeder
                     }
                     $block->addMedia($this->dummyFiles['image'])
                         ->preservingOriginal()
-                        ->toMediaCollection('media', 'do');
+                        ->toMediaCollection('media', config('media-library.disk_name', 'public'));
 
                     if ($attemptCount <= 5) {
                         $this->command->info("    ✅ Successfully uploaded image for block {$block->id}");

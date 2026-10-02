@@ -7,6 +7,7 @@ namespace Modules\Learning\Http\Requests;
 use Illuminate\Foundation\Http\FormRequest;
 use Modules\Learning\Enums\QuizStatus;
 use Modules\Learning\Enums\ReviewMode;
+use App\Support\ValidationRules\UploadSizeRule;
 
 class UpdateQuizRequest extends FormRequest
 {
@@ -30,7 +31,7 @@ class UpdateQuizRequest extends FormRequest
             'question_bank_count' => ['nullable', 'integer', 'min:1'],
             'review_mode' => ['nullable', 'string', ReviewMode::rule()],
             'attachments' => ['nullable', 'array'],
-            'attachments.*' => ['file'],
+            'attachments.*' => ['file', new UploadSizeRule()],
             'delete_attachments' => ['nullable', 'array'],
             'delete_attachments.*' => ['integer'],
         ];

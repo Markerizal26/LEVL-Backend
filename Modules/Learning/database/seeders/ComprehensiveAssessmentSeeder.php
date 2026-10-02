@@ -519,7 +519,7 @@ class ComprehensiveAssessmentSeeder extends Seeder
                 ->preservingOriginal()
                 ->usingName('submission-'.$submission->id)
                 ->usingFileName('submission-'.$submission->id.'.pdf')
-                ->toMediaCollection('submission_files', 'do');
+                ->toMediaCollection('submission_files', config('media-library.disk_name', 'public'));
         } catch (\Throwable) {
 
         }
@@ -794,8 +794,8 @@ class ComprehensiveAssessmentSeeder extends Seeder
                 'name' => 'assignment-attachment-'.$i,
                 'file_name' => 'document-'.rand(1000, 9999).'.pdf',
                 'mime_type' => 'application/pdf',
-                'disk' => 'do',
-                'conversions_disk' => 'do',
+                'disk' => config('media-library.disk_name', 'public'),
+                'conversions_disk' => config('media-library.disk_name', 'public'),
                 'size' => rand(100000, 5000000),
                 'manipulations' => '[]',
                 'custom_properties' => '[]',

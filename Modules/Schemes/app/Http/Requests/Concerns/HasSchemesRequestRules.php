@@ -60,8 +60,8 @@ trait HasSchemesRequestRules
             'outcomes' => ['sometimes', 'array'],
             'outcomes.*' => ['string'],
             'prereq' => ['sometimes', 'nullable', 'string'],
-            'thumbnail' => ['sometimes', 'file', 'image', 'mimes:jpg,jpeg,png,webp', 'max:4096'],
-            'banner' => ['sometimes', 'file', 'image', 'mimes:jpg,jpeg,png,webp', 'max:6144'],
+            'thumbnail' => ['sometimes', 'file', 'image', 'mimes:jpg,jpeg,png,webp', 'max:2048'],
+            'banner' => ['sometimes', 'file', 'image', 'mimes:jpg,jpeg,png,webp', 'max:2048'],
             'status' => ['sometimes', Rule::enum(CourseStatus::class)],
             'instructor_id' => [
                 'sometimes',

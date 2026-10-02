@@ -1,10 +1,19 @@
 name: CI/CD Pipeline
+
 on:
   push:
     branches: [main]
   pull_request:
     branches: [main]
   workflow_dispatch:
+
+permissions:
+  contents: read
+  packages: write
+
+concurrency:
+  group: production-deploy
+  cancel-in-progress: true
 
 jobs:
   validate:
@@ -15,203 +24,179 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Notify CI Trigger
-        continue-on-error: true
-        env:
-          COMMIT_MSG: ${{ github.event.head_commit.message || github.event.pull_request.title || 'N/A' }}
-        run: |
-          SHORT_SHA=$(echo "${{ github.sha }}" | cut -c1-7)
-          SAFE_MSG=$(echo "$COMMIT_MSG" | tr '\n' ' ' | head -c 200)
-          MESSAGE="🚀 *CI/CD TRIGGERED*
-          📦 *Repository:* \`${{ github.repository }}\`
-          🌿 *Branch:* \`${{ github.ref_name }}\`
-          👤 *By:* \`${{ github.actor }}\`
-          🆔 *Commit:* \`${SHORT_SHA}\`
-          📝 *Message:* ${SAFE_MSG}
-          🔗 [View Commit](https://github.com/${{ github.repository }}/commit/${{ github.sha }})
-          🔗 [Workflow](https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }})"
-          bash .github/scripts/telegram.sh \
-            "${{ secrets.TELEGRAM_BOT_TOKEN }}" \
-            "${{ secrets.TELEGRAM_CHAT_ID }}" \
-            "$MESSAGE"
-
       - name: Setup PHP
         uses: shivammathur/setup-php@v2
         with:
           php-version: "8.4"
-          extensions: pdo, pdo_pgsql, pgsql, zip, gd, bcmath, exif, intl
+          extensions: pdo, pdo_pgsql, pgsql, redis, zip, gd, bcmath, exif, intl
           coverage: none
 
-      - name: Cache Composer dependencies
-        uses: actions/cache@v3
-        with:
-          path: vendor
-          key: ${{ runner.os }}-composer-${{ hashFiles('**/composer.lock') }}
-          restore-keys: ${{ runner.os }}-composer-
-
-      - name: Install dependencies
+      - name: Install Composer dependencies
         run: composer install --no-interaction --no-progress --prefer-dist --optimize-autoloader
         env:
           COMPOSER_PROCESS_TIMEOUT: 0
           COMPOSER_NO_INTERACTION: 1
           COMPOSER_NO_AUDIT: 1
 
-      - name: Validate composer.json
+      - name: Validate Composer manifest
         run: composer validate --strict
 
-  deploy:
-    name: Deploy to VPS
+      - name: Validate PHP syntax
+        run: |
+          find app Modules config routes bootstrap -type f -name '*.php' -print0 \
+            | xargs -0 -n1 php -l
+
+      - name: Run upload size tests
+        run: |
+          cp .env.example .env
+          ./vendor/bin/pest tests/Unit/Support/ValidationRules/UploadSizeRuleTest.php --compact
+
+      - name: Build frontend assets
+        run: |
+          npm ci
+          npm run build
+
+  build:
+    name: Build and Push Production Image
     needs: validate
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
     runs-on: ubuntu-latest
-    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+    outputs:
+      image: ${{ steps.image_name.outputs.image }}
 
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Notify Deploy Start
+      - name: Normalize image name
+        id: image_name
+        run: echo "image=ghcr.io/${GITHUB_REPOSITORY,,}" >> "$GITHUB_OUTPUT"
+
+      - name: Login to GHCR
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Build and push image
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          push: true
+          tags: |
+            ${{ steps.image_name.outputs.image }}:${{ github.sha }}
+            ${{ steps.image_name.outputs.image }}:main
+          provenance: false
+          sbom: false
+
+  deploy:
+    name: Deploy to Production Kubernetes
+    needs: build
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Notify deploy start
         continue-on-error: true
         run: |
-          SHORT_SHA=$(echo "${{ github.sha }}" | cut -c1-7)
-          MESSAGE="🔨 *DEPLOYMENT STARTED*
-          📦 *Repository:* \`${{ github.repository }}\`
-          🌿 *Branch:* \`main\`
-          🖥 *Server:* \`${{ secrets.DEPLOY_SERVER }}\`
-          🆔 *Commit:* \`${SHORT_SHA}\`
-          ⚙️ Status: *Deploying to VPS...*"
           bash .github/scripts/telegram.sh \
             "${{ secrets.TELEGRAM_BOT_TOKEN }}" \
             "${{ secrets.TELEGRAM_CHAT_ID }}" \
-            "$MESSAGE"
+            "🚀 LEVL production deployment started: ${GITHUB_SHA}"
 
-      - name: Deploy to VPS via SSH
+      - name: Deploy image and manifests through SSH
         uses: appleboy/ssh-action@v1.0.0
+        env:
+          IMAGE: ${{ needs.build.outputs.image }}:${{ github.sha }}
+          DEPLOY_SHA: ${{ github.sha }}
         with:
           host: ${{ secrets.DEPLOY_SERVER }}
           username: ${{ secrets.DEPLOY_USER }}
           key: ${{ secrets.SSH_PRIVATE_KEY }}
           timeout: 60m
           command_timeout: 60m
+          envs: IMAGE,DEPLOY_SHA
           script: |
-            set -e
-            cd ${{ secrets.DEPLOY_PATH }}
+            set -eu
 
-            # ── Rollback: save current commit before pulling ──────────────────
-            PREVIOUS_COMMIT=$(git rev-parse HEAD)
-            echo "Previous commit: $PREVIOUS_COMMIT"
+            cd "${{ secrets.DEPLOY_PATH }}"
+            git fetch origin main
+            git checkout main
+            git pull --ff-only origin main
 
-            # ── Rollback handler: restore if anything fails ───────────────────
-            rollback() {
-              echo "⚠️  Deployment failed — rolling back to $PREVIOUS_COMMIT"
-              git reset --hard "$PREVIOUS_COMMIT"
-              composer install --no-dev --optimize-autoloader --quiet
+            SHORT_SHA=$(printf '%s' "$DEPLOY_SHA" | cut -c1-12)
+            MIGRATION_JOB="levl-migrate-${SHORT_SHA}"
+            K8S_TMP=$(mktemp -d)
 
-              # Rollback last migration batch through direct PostgreSQL port
-              php artisan migrate:rollback --database=pgsql_migrate --force --quiet || true
-
-              # Clear all caches only — skip rebuilding to avoid stale cache errors
-              php artisan optimize:clear --quiet || true
-
-              php artisan up
-              sudo systemctl restart octane
-              echo "✅ Rollback complete"
-              exit 1
+            cleanup() {
+              rm -rf "$K8S_TMP"
             }
-            trap rollback ERR
+            trap cleanup EXIT
 
-            # ── Enable maintenance mode ───────────────────────────────────────
-            php artisan down --retry=10 --render="errors::503"
+            cp -R k8s/. "$K8S_TMP/"
+            find "$K8S_TMP" -type f -name '*.yaml' -exec sed -i \
+              -e "s#IMAGE_PLACEHOLDER#${IMAGE}#g" \
+              -e "s#MIGRATION_JOB_NAME#${MIGRATION_JOB}#g" {} +
 
-            # ── Pull latest code ──────────────────────────────────────────────
-            git reset --hard HEAD
-            git pull origin main
+            KUBECTL="sudo k3s kubectl"
 
-            # ── Install dependencies ──────────────────────────────────────────
-            composer install --no-dev --optimize-autoloader
+            $KUBECTL apply -f "$K8S_TMP/namespace.yaml"
+            $KUBECTL apply -f "$K8S_TMP/configmap.yaml"
+            $KUBECTL apply -f "$K8S_TMP/cluster-issuer.yaml"
+            $KUBECTL apply -f "$K8S_TMP/media-pv.yaml"
+            $KUBECTL apply -f "$K8S_TMP/media-pvc.yaml"
+            $KUBECTL apply -f "$K8S_TMP/redis.yaml"
 
-            # ── Run migrations via direct PostgreSQL (bypass PgBouncer) ─────
-            php artisan migrate --database=pgsql_migrate --force
+            $KUBECTL -n levl delete job -l app=levl-migrate --ignore-not-found
+            $KUBECTL -n levl create -f "$K8S_TMP/migrate-job.yaml"
+            $KUBECTL -n levl wait --for=condition=complete \
+              "job/${MIGRATION_JOB}" --timeout=300s
 
-            # ── Clear & rebuild all caches (no view:cache — pure API) ──────────
-            php artisan optimize:clear
-            php artisan config:cache
-            php artisan event:cache
-            php artisan route:cache
+            $KUBECTL apply -f "$K8S_TMP/app.yaml"
+            $KUBECTL apply -f "$K8S_TMP/worker.yaml"
+            $KUBECTL apply -f "$K8S_TMP/scheduler.yaml"
+            $KUBECTL apply -f "$K8S_TMP/ingress.yaml"
 
-            # ── Write log monitor env file from GitHub Secrets ───────────────
-            # Reuses the same tokens already configured for CI/CD notifications
-            printf 'TELEGRAM_BOT_TOKEN=%s\nTELEGRAM_CHAT_ID=%s\nDEPLOY_PATH=%s\nCOOLDOWN=30\n' \
-              '${{ secrets.TELEGRAM_BOT_TOKEN }}' \
-              '${{ secrets.TELEGRAM_CHAT_ID }}' \
-              '${{ secrets.DEPLOY_PATH }}' \
-              | sudo tee /etc/levl-log-monitor.env > /dev/null
-            sudo chmod 600 /etc/levl-log-monitor.env
+            $KUBECTL -n levl rollout status deployment/levl-app --timeout=300s
+            $KUBECTL -n levl rollout status deployment/levl-queue --timeout=300s
 
-            # ── Install systemd service if not already present ────────────────
-            if [ ! -f /etc/systemd/system/levl-log-monitor.service ]; then
-              sudo cp ${{ secrets.DEPLOY_PATH }}/.github/scripts/levl-log-monitor.service /etc/systemd/system/
-              sudo systemctl daemon-reload
-              sudo systemctl enable levl-log-monitor
-              echo "✅ levl-log-monitor service installed"
-            fi
+            sudo k3s crictl rmi --prune || true
 
-            # ── Restart Octane via systemd ────────────────────────────────────
-            sudo systemctl restart octane
+            $KUBECTL -n levl get pods -o wide
 
-            # ── Restart queue workers (long-lived processes) ─────────────────
-            # Avoid shell glob expansion issues on zsh by restarting explicit names from supervisor status.
-            QUEUE_PROCESSES=$(sudo supervisorctl status | awk '/^levl-queue-worker:/{print $1}')
-
-            if [ -n "$QUEUE_PROCESSES" ]; then
-              while read -r PROC; do
-                echo "Restarting $PROC..."
-                sudo supervisorctl restart "$PROC" || echo "Skipping failed restart for $PROC"
-              done <<< "$QUEUE_PROCESSES"
-            else
-              echo "⚠️ No levl-queue-worker processes found"
-            fi
-
-            # ── Restart log monitor (picks up new log file after rotate) ─────
-            sudo systemctl restart levl-log-monitor || echo "⚠️ levl-log-monitor not installed, skipping"
-
-            # ── Bring application back online ─────────────────────────────────
-            php artisan up
-
-            # Deployment succeeded — disarm the rollback trap
-            trap - ERR
-            echo "✅ Deployment successful"
-
-      - name: Notify Deploy Success
+      - name: Notify deploy success
         if: success()
         continue-on-error: true
         run: |
-          SHORT_SHA=$(echo "${{ github.sha }}" | cut -c1-7)
-          MESSAGE="✅ *DEPLOYMENT SUCCESS*
-          📦 *Repository:* \`${{ github.repository }}\`
-          🌿 *Branch:* \`main\`
-          🖥 *Server:* \`${{ secrets.DEPLOY_SERVER }}\`
-          🆔 *Commit:* \`${SHORT_SHA}\`
-          🟢 Status: *Application is LIVE*
-          🔗 [View Commit](https://github.com/${{ github.repository }}/commit/${{ github.sha }})
-          🔗 [Workflow](https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }})"
           bash .github/scripts/telegram.sh \
             "${{ secrets.TELEGRAM_BOT_TOKEN }}" \
             "${{ secrets.TELEGRAM_CHAT_ID }}" \
-            "$MESSAGE"
+            "✅ LEVL production deployment succeeded: ${GITHUB_SHA}"
 
-      - name: Notify Deploy Failure
+      - name: Notify deploy failure
         if: failure()
         continue-on-error: true
         run: |
-          SHORT_SHA=$(echo "${{ github.sha }}" | cut -c1-7)
-          MESSAGE="❌ *DEPLOYMENT FAILED*
-          📦 *Repository:* \`${{ github.repository }}\`
-          🌿 *Branch:* \`main\`
-          🖥 *Server:* \`${{ secrets.DEPLOY_SERVER }}\`
-          🆔 *Commit:* \`${SHORT_SHA}\`
-          🔴 Status: *Deployment failed — rollback executed*
-          🔗 [View Logs](https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }})"
           bash .github/scripts/telegram.sh \
             "${{ secrets.TELEGRAM_BOT_TOKEN }}" \
             "${{ secrets.TELEGRAM_CHAT_ID }}" \
-            "$MESSAGE"
+            "❌ LEVL production deployment failed: ${GITHUB_SHA}"
+
+  cleanup-registry:
+    name: Delete Previous Images
+    needs: deploy
+    if: success()
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Keep only the current GHCR image version
+        uses: actions/delete-package-versions@v5
+        with:
+          package-name: levl-backend
+          package-type: container
+          min-versions-to-keep: 1
+          token: ${{ secrets.GITHUB_TOKEN }}

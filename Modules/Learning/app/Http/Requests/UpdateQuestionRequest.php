@@ -26,7 +26,7 @@ class UpdateQuestionRequest extends FormRequest
             'weight' => ['sometimes', 'numeric', 'gt:0'],
             'order' => ['nullable', 'integer', 'min:0'],
             'max_score' => ['nullable', 'numeric', 'gt:0'],
-            'max_file_size' => ['nullable', 'integer', 'min:1', 'max:104857600'],
+            'max_file_size' => ['nullable', 'integer', 'min:1', 'max:52428800'],
             'allowed_file_types' => ['nullable', 'array'],
             'allowed_file_types.*' => ['string', 'max:50'],
             'allow_multiple_files' => ['nullable', 'boolean'],

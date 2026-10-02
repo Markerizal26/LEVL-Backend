@@ -33,7 +33,7 @@ class Certificate extends Model implements HasMedia
     {
         $this->addMediaCollection('certificate')
             ->singleFile()
-            ->useDisk('do')
+            ->useDisk(config('media-library.disk_name', 'public'))
             ->acceptsMimeTypes(['application/pdf', 'image/jpeg', 'image/png']);
     }
 

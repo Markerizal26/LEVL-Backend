@@ -544,7 +544,7 @@ class SequentialProgressSeeder extends Seeder
                 ->preservingOriginal()
                 ->usingName('submission-'.$submission->id)
                 ->usingFileName('submission-'.$submission->id.'.pdf')
-                ->toMediaCollection('submission_files', 'do');
+                ->toMediaCollection('submission_files', config('media-library.disk_name', 'public'));
 
             if ($media) {
                 echo "✓ File attached to submission {$submission->id}\n";

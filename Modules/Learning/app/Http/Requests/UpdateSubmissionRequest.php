@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Modules\Learning\Http\Requests;
 
 use Illuminate\Foundation\Http\FormRequest;
+use App\Support\ValidationRules\UploadSizeRule;
 
 class UpdateSubmissionRequest extends FormRequest
 {
@@ -18,7 +19,7 @@ class UpdateSubmissionRequest extends FormRequest
         return [
             'answer_text' => ['sometimes', 'nullable', 'string'],
             'files' => ['sometimes', 'array'],
-            'files.*' => ['file'],
+            'files.*' => ['file', new UploadSizeRule()],
         ];
     }
 

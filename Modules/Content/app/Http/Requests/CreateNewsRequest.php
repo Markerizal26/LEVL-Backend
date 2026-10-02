@@ -4,6 +4,7 @@ namespace Modules\Content\Http\Requests;
 
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
+use App\Support\ValidationRules\UploadSizeRule;
 use Modules\Content\Enums\ContentStatus;
 
 class CreateNewsRequest extends FormRequest
@@ -20,7 +21,7 @@ class CreateNewsRequest extends FormRequest
             'slug' => 'nullable|string|max:255|unique:news,slug',
             'excerpt' => 'nullable|string',
             'content' => 'required|string',
-            'featured_image' => 'nullable|image|max:5120',
+            'featured_image' => ['nullable', 'image', new UploadSizeRule()],
             'is_featured' => 'nullable|boolean',
             'status' => ['nullable', Rule::enum(ContentStatus::class)->only([ContentStatus::Draft, ContentStatus::Published, ContentStatus::Scheduled])],
             'scheduled_at' => 'nullable|date|after:now',

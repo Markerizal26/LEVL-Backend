@@ -5,7 +5,7 @@ use Illuminate\Support\Facades\Storage;
 use Modules\Auth\app\Models\User;
 
 test('user can upload avatar', function () {
-    Storage::fake('do');
+    Storage::fake('public');
 
     $user = User::factory()->create();
     $token = auth()->login($user);
@@ -22,7 +22,7 @@ test('user can upload avatar', function () {
 });
 
 test('upload avatar replaces old avatar', function () {
-    Storage::fake('do');
+    Storage::fake('public');
 
     $user = User::factory()->create();
     $token = auth()->login($user);
@@ -39,7 +39,7 @@ test('upload avatar replaces old avatar', function () {
 });
 
 test('user can delete avatar', function () {
-    Storage::fake('do');
+    Storage::fake('public');
     $user = User::factory()->create();
     $token = auth()->login($user);
     $file = UploadedFile::fake()->image('avatar.jpg');
@@ -55,7 +55,7 @@ test('user can delete avatar', function () {
 });
 
 test('upload avatar accepts specific types', function () {
-    Storage::fake('do');
+    Storage::fake('public');
     $user = User::factory()->create();
     $token = auth()->login($user);
 
@@ -73,7 +73,7 @@ test('upload avatar accepts specific types', function () {
 });
 
 test('upload avatar fails with non image', function () {
-    Storage::fake('do');
+    Storage::fake('public');
     $user = User::factory()->create();
     $token = auth()->login($user);
     $file = UploadedFile::fake()->create('document.pdf', 100);
@@ -85,7 +85,7 @@ test('upload avatar fails with non image', function () {
 });
 
 test('upload avatar fails with too large file', function () {
-    Storage::fake('do');
+    Storage::fake('public');
     $user = User::factory()->create();
     $token = auth()->login($user);
     $file = UploadedFile::fake()->create('large.jpg', 10000);

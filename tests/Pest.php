@@ -5,8 +5,6 @@ uses(
     Tests\TestCase::class,
 )
     ->in('Feature', 'Unit');
-pest()->extend(Tests\TestCase::class)->in('Unit');
-
 
 pest()->extend(Tests\TestCase::class)->in('../Modules/Auth/tests');
 pest()->extend(Tests\TestCase::class)->in('../Modules/Common/tests');

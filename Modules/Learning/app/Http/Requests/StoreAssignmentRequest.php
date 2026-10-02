@@ -6,6 +6,7 @@ namespace Modules\Learning\Http\Requests;
 
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
+use App\Support\ValidationRules\UploadSizeRule;
 use Modules\Learning\Enums\AssignmentStatus;
 use Modules\Learning\Enums\SubmissionType;
 
@@ -27,7 +28,7 @@ class StoreAssignmentRequest extends FormRequest
             'passing_grade' => ['nullable', 'numeric', 'min:0', 'max:100'],
             'status' => ['nullable', Rule::enum(AssignmentStatus::class)],
             'attachments' => ['nullable', 'array', 'max:5'],
-            'attachments.*' => ['file', 'max:10240'],
+            'attachments.*' => ['file', new UploadSizeRule()],
         ];
     }
 

@@ -57,7 +57,7 @@ class Badge extends Model implements HasMedia
     {
         $this->addMediaCollection('icon')
             ->singleFile()
-            ->useDisk('do')
+            ->useDisk(config('media-library.disk_name', 'public'))
             ->acceptsMimeTypes(['image/jpeg', 'image/png', 'image/svg+xml', 'image/webp']);
     }
 

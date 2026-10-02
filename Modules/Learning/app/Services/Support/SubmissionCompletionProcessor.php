@@ -194,7 +194,7 @@ class SubmissionCompletionProcessor
         foreach ($files as $file) {
             if ($file instanceof UploadedFile) {
                 $media = $createdAnswer->addMedia($file)
-                    ->toMediaCollection('answers', config('filesystems.default', 'do'));
+                        ->toMediaCollection('answers', config('media-library.disk_name', 'public'));
                 $paths[] = $media->getUrl();
             }
         }

@@ -1,300 +1,133 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Console\Commands;
 
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
-use Illuminate\Support\Facades\Http;
 
 class DiagnoseStorageBucket extends Command
 {
-    protected $signature = 'storage:diagnose 
-                          {--bucket= : Specific bucket to check (default: from config)}
-                          {--test-upload : Test file upload}';
+    protected $signature = 'storage:diagnose
+                          {--disk= : Disk to check, defaulting to the configured media disk}
+                          {--test-upload : Write and remove a temporary local file}';
 
-    protected $description = 'Diagnose storage bucket configuration and connectivity';
+    protected $description = 'Diagnose local VPS media storage configuration and connectivity';
 
-    public function handle()
+    public function handle(): int
     {
-        $this->info('=== Storage Bucket Diagnostics ===');
+        $disk = (string) ($this->option('disk') ?: config('media-library.disk_name', 'public'));
+
+        $this->info('=== Local Storage Diagnostics ===');
         $this->newLine();
 
-        
-        $this->checkEnvironmentConfig();
+        $this->checkEnvironmentConfig($disk);
+        $this->newLine();
+        $this->checkDatabaseMedia($disk);
+        $this->newLine();
+        $this->checkLocalDisk($disk);
         $this->newLine();
 
-        
-        $this->checkDatabaseMedia();
-        $this->newLine();
-
-        
-        $this->testBucketConnectivity();
-        $this->newLine();
-
-        
-        $this->checkSampleMediaUrls();
-        $this->newLine();
-
-        
         if ($this->option('test-upload')) {
-            $this->testFileUpload();
+            $this->testFileUpload($disk);
             $this->newLine();
         }
 
         $this->info('=== Diagnostics Complete ===');
+
+        return self::SUCCESS;
     }
 
-    protected function checkEnvironmentConfig()
+    protected function checkEnvironmentConfig(string $disk): void
     {
-        $this->info('📋 Environment Configuration:');
-        $this->line('─────────────────────────────');
-
-        $configs = [
-            'FILESYSTEM_DISK' => env('FILESYSTEM_DISK'),
-            'DO_BUCKET' => env('DO_BUCKET'),
-            'DO_DEFAULT_REGION' => env('DO_DEFAULT_REGION'),
-            'DO_ENDPOINT' => env('DO_ENDPOINT'),
-            'DO_CDN_URL' => env('DO_CDN_URL'),
-            'DO_USE_CDN' => env('DO_USE_CDN') ? 'true' : 'false',
-            'MEDIA_DISK' => env('MEDIA_DISK'),
-        ];
-
-        foreach ($configs as $key => $value) {
-            $status = $value ? '✓' : '✗';
-            $color = $value ? 'green' : 'red';
-            $this->line("<fg={$color}>{$status}</> {$key}: " . ($value ?: '<not set>'));
-        }
-
-        
-        $hasAccessKey = !empty(env('DO_ACCESS_KEY_ID'));
-        $hasSecretKey = !empty(env('DO_SECRET_ACCESS_KEY'));
-        
-        $this->line($hasAccessKey ? '<fg=green>✓</> DO_ACCESS_KEY_ID: <configured>' : '<fg=red>✗</> DO_ACCESS_KEY_ID: <not set>');
-        $this->line($hasSecretKey ? '<fg=green>✓</> DO_SECRET_ACCESS_KEY: <configured>' : '<fg=red>✗</> DO_SECRET_ACCESS_KEY: <not set>');
+        $this->info('Environment Configuration:');
+        $this->line('──────────────────────────');
+        $this->line('FILESYSTEM_DISK: '.(env('FILESYSTEM_DISK') ?: '<not set>'));
+        $this->line('MEDIA_DISK: '.(env('MEDIA_DISK') ?: '<not set>'));
+        $this->line('Selected disk: '.$disk);
+        $this->line('Disk driver: '.(config("filesystems.disks.{$disk}.driver") ?: '<not configured>'));
+        $this->line('Disk root: '.(config("filesystems.disks.{$disk}.root") ?: '<not applicable>'));
+        $this->line('Max regular file: '.((int) config('uploads.max_file_size_kb', 2048) / 1024).' MB');
+        $this->line('Max video file: '.((int) config('uploads.max_video_size_kb', 51200) / 1024).' MB');
     }
 
-    protected function checkDatabaseMedia()
+    protected function checkDatabaseMedia(string $disk): void
     {
-        $this->info('💾 Database Media Records:');
-        $this->line('─────────────────────────────');
+        $this->info('Database Media Records:');
+        $this->line('────────────────────────');
 
         try {
-            
             $totalMedia = DB::table('media')->count();
             $this->line("Total media records: {$totalMedia}");
 
-            
             $byDisk = DB::table('media')
                 ->select('disk', DB::raw('count(*) as count'))
                 ->groupBy('disk')
                 ->get();
 
-            $this->line("\nMedia by disk:");
-            foreach ($byDisk as $disk) {
-                $this->line("  - {$disk->disk}: {$disk->count} files");
+            foreach ($byDisk as $record) {
+                $this->line("  - {$record->disk}: {$record->count} files");
             }
 
-            
-            $buckets = ['levl-assets', 'prep-lsp'];
-            $this->line("\nBucket references in custom_properties:");
-            
-            foreach ($buckets as $bucket) {
-                $count = DB::table('media')
-                    ->where(DB::raw('custom_properties::text'), 'like', "%{$bucket}%")
-                    ->count();
-                
-                if ($count > 0) {
-                    $this->line("  - {$bucket}: {$count} references");
-                }
+            $legacyDiskCount = DB::table('media')->whereNotIn('disk', [$disk])->count();
+            if ($legacyDiskCount > 0) {
+                $this->warn("Media records still point to another disk: {$legacyDiskCount}");
             }
 
-            
-            $samples = DB::table('media')
-                ->select('id', 'model_type', 'collection_name', 'file_name', 'disk')
-                ->limit(3)
-                ->get();
-
-            if ($samples->isNotEmpty()) {
-                $this->line("\nSample media records:");
-                foreach ($samples as $sample) {
-                    $this->line("  ID: {$sample->id} | {$sample->model_type} | {$sample->collection_name} | {$sample->file_name}");
-                }
-            }
-
-        } catch (\Exception $e) {
-            $this->error("Error checking database: " . $e->getMessage());
+            $this->line('Configured media disk: '.$disk);
+        } catch (\Throwable $exception) {
+            $this->error('Database media check failed: '.$exception->getMessage());
         }
     }
 
-    protected function testBucketConnectivity()
+    protected function checkLocalDisk(string $disk): void
     {
-        $this->info('🔌 Bucket Connectivity Test:');
-        $this->line('─────────────────────────────');
+        $this->info('Local Disk Check:');
+        $this->line('─────────────────');
 
-        $disk = env('FILESYSTEM_DISK', 'do');
-        $bucket = env('DO_BUCKET');
-        $endpoint = env('DO_ENDPOINT');
-        $cdnUrl = env('DO_CDN_URL');
+        $filesystem = config("filesystems.disks.{$disk}");
+        if (! is_array($filesystem)) {
+            $this->error("Disk '{$disk}' is not configured.");
+            return;
+        }
 
-        try {
-            
-            $this->line("Testing disk: {$disk}");
-            
-            if (!config("filesystems.disks.{$disk}")) {
-                $this->error("✗ Disk '{$disk}' not configured in filesystems.php");
-                return;
-            }
-            $this->line("<fg=green>✓</> Disk configuration found");
+        if (($filesystem['driver'] ?? null) !== 'local') {
+            $this->warn("Disk '{$disk}' is not using the local driver.");
+        }
 
-            
-            $this->line("\nTesting bucket access...");
-            try {
-                $files = Storage::disk($disk)->files('/', false);
-                $this->line("<fg=green>✓</> Successfully connected to bucket");
-                $this->line("  Found " . count($files) . " files in root directory");
-            } catch (\Exception $e) {
-                $this->error("✗ Cannot access bucket: " . $e->getMessage());
-                $this->line("  This usually means:");
-                $this->line("  - Invalid credentials");
-                $this->line("  - Bucket doesn't exist");
-                $this->line("  - Wrong region/endpoint");
-            }
-
-            
-            if ($cdnUrl) {
-                $this->line("\nTesting CDN URL accessibility...");
-                try {
-                    $response = Http::timeout(5)->head($cdnUrl);
-                    if ($response->successful() || $response->status() === 403) {
-                        $this->line("<fg=green>✓</> CDN URL is accessible");
-                    } else {
-                        $this->warn("⚠ CDN URL returned status: " . $response->status());
-                    }
-                } catch (\Exception $e) {
-                    $this->error("✗ Cannot reach CDN URL: " . $e->getMessage());
-                }
-            }
-
-            
-            $this->line("\nChecking alternative buckets...");
-            $bucketsToCheck = ['levl-assets', 'prep-lsp'];
-            
-            foreach ($bucketsToCheck as $testBucket) {
-                if ($testBucket === $bucket) {
-                    continue; 
-                }
-                
-                $testUrl = str_replace($bucket, $testBucket, $cdnUrl ?: $endpoint);
-                try {
-                    $response = Http::timeout(5)->head($testUrl);
-                    if ($response->successful() || $response->status() === 403) {
-                        $this->line("<fg=yellow>!</> Bucket '{$testBucket}' exists and is accessible");
-                        $this->line("    URL: {$testUrl}");
-                    }
-                } catch (\Exception $e) {
-                    $this->line("<fg=gray>-</> Bucket '{$testBucket}' not accessible or doesn't exist");
-                }
-            }
-
-        } catch (\Exception $e) {
-            $this->error("Error during connectivity test: " . $e->getMessage());
+        $root = $filesystem['root'] ?? null;
+        if (is_string($root) && is_dir($root)) {
+            $this->line('<fg=green>✓</> Storage root exists: '.$root);
+            $this->line('  Writable: '.(is_writable($root) ? 'yes' : 'no'));
+            $files = Storage::disk($disk)->allFiles();
+            $this->line('  Files: '.count($files));
+        } else {
+            $this->error('Storage root does not exist: '.($root ?: '<empty>'));
         }
     }
 
-    protected function checkSampleMediaUrls()
+    protected function testFileUpload(string $disk): void
     {
-        $this->info('🔗 Sample Media URLs Test:');
-        $this->line('─────────────────────────────');
+        $this->info('Local Test Upload:');
+        $this->line('──────────────────');
+
+        $path = 'diagnostics/test-'.now()->timestamp.'.txt';
+        $content = 'LEVL local storage diagnostic';
 
         try {
-            $samples = DB::table('media')
-                ->select('id', 'file_name', 'disk')
-                ->limit(5)
-                ->get();
+            Storage::disk($disk)->put($path, $content);
+            $verified = Storage::disk($disk)->get($path) === $content;
+            Storage::disk($disk)->delete($path);
 
-            if ($samples->isEmpty()) {
-                $this->line("No media records found in database");
-                return;
-            }
-
-            foreach ($samples as $sample) {
-                try {
-                    $media = \Spatie\MediaLibrary\MediaCollections\Models\Media::find($sample->id);
-                    if ($media) {
-                        $url = $media->getUrl();
-                        $this->line("\nFile: {$sample->file_name}");
-                        $this->line("URL: {$url}");
-                        
-                        
-                        try {
-                            $response = Http::timeout(5)->head($url);
-                            if ($response->successful()) {
-                                $this->line("<fg=green>✓</> Accessible (Status: {$response->status()})");
-                            } else {
-                                $this->error("✗ Not accessible (Status: {$response->status()})");
-                            }
-                        } catch (\Exception $e) {
-                            $this->error("✗ Cannot reach URL: " . $e->getMessage());
-                        }
-                    }
-                } catch (\Exception $e) {
-                    $this->error("Error checking media ID {$sample->id}: " . $e->getMessage());
-                }
-            }
-
-        } catch (\Exception $e) {
-            $this->error("Error checking sample URLs: " . $e->getMessage());
-        }
-    }
-
-    protected function testFileUpload()
-    {
-        $this->info('📤 Test File Upload:');
-        $this->line('─────────────────────────────');
-
-        try {
-            $disk = env('FILESYSTEM_DISK', 'do');
-            $testFileName = 'test-' . time() . '.txt';
-            $testContent = 'This is a test file created by storage:diagnose command at ' . now();
-
-            $this->line("Attempting to upload test file: {$testFileName}");
-            
-            Storage::disk($disk)->put($testFileName, $testContent);
-            $this->line("<fg=green>✓</> File uploaded successfully");
-
-            
-            $content = Storage::disk($disk)->get($testFileName);
-            if ($content === $testContent) {
-                $this->line("<fg=green>✓</> File content verified");
+            if ($verified) {
+                $this->line('<fg=green>✓</> Write, read, and delete succeeded.');
             } else {
-                $this->warn("⚠ File content mismatch");
+                $this->error('File content verification failed.');
             }
-
-            
-            $url = Storage::disk($disk)->url($testFileName);
-            $this->line("File URL: {$url}");
-
-            
-            try {
-                $response = Http::timeout(5)->get($url);
-                if ($response->successful()) {
-                    $this->line("<fg=green>✓</> File accessible via URL");
-                } else {
-                    $this->warn("⚠ File not accessible via URL (Status: {$response->status()})");
-                }
-            } catch (\Exception $e) {
-                $this->error("✗ Cannot access file via URL: " . $e->getMessage());
-            }
-
-            
-            if ($this->confirm('Delete test file?', true)) {
-                Storage::disk($disk)->delete($testFileName);
-                $this->line("<fg=green>✓</> Test file deleted");
-            }
-
-        } catch (\Exception $e) {
-            $this->error("Upload test failed: " . $e->getMessage());
+        } catch (\Throwable $exception) {
+            $this->error('Local storage test failed: '.$exception->getMessage());
         }
     }
 }

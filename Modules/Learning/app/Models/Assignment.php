@@ -30,7 +30,7 @@ class Assignment extends Model implements HasMedia
     public function registerMediaCollections(): void
     {
         $this->addMediaCollection('attachments')
-            ->useDisk('do')
+            ->useDisk(config('media-library.disk_name', 'public'))
             ->acceptsFile(static fn (): bool => true);
     }
 

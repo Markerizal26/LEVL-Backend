@@ -348,7 +348,7 @@ class AssignmentAndSubmissionSeeder extends Seeder
                     ->preservingOriginal()
                     ->usingName('submission-'.$submission->id)
                     ->usingFileName('submission-'.$submission->id.'.pdf')
-                    ->toMediaCollection('submissions', 'do');
+                    ->toMediaCollection('submissions', config('media-library.disk_name', 'public'));
 
                 $fileCount++;
 

@@ -15,6 +15,16 @@ class ProductionSuperAdminSeeder extends Seeder
     {
         $this->command->info('👤 Creating superadmin user...');
 
+        $email = env('SUPERADMIN_EMAIL');
+        $password = env('SUPERADMIN_PASSWORD');
+
+        if (! is_string($email) || trim($email) === '' || ! is_string($password) || strlen($password) < 12) {
+            throw new \RuntimeException('SUPERADMIN_EMAIL and SUPERADMIN_PASSWORD (minimum 12 characters) are required.');
+        }
+
+        $username = (string) env('SUPERADMIN_USERNAME', 'superadmin');
+        $name = (string) env('SUPERADMIN_NAME', 'Superadmin');
+
         // Ensure Superadmin role exists
         $superadminRole = Role::where('name', 'Superadmin')->where('guard_name', 'api')->first();
         if (! $superadminRole) {
@@ -24,11 +34,11 @@ class ProductionSuperAdminSeeder extends Seeder
 
         // Create superadmin user
         $superadmin = User::firstOrCreate(
-            ['email' => 'admin@levl.local'],
+            ['email' => $email],
             [
-                'username' => 'superadmin',
-                'name' => 'Superadmin',
-                'password' => Hash::make('ChangeMe123!'),
+                'username' => $username,
+                'name' => $name,
+                'password' => Hash::make($password),
                 'status' => 'active',
                 'email_verified_at' => now(),
             ]
@@ -41,11 +51,11 @@ class ProductionSuperAdminSeeder extends Seeder
         $this->command->info('✅ Superadmin user created successfully!');
         $this->command->info('');
         $this->command->info('🔐 Login Credentials:');
-        $this->command->info('   Email:    admin@levl.local');
-        $this->command->info('   Username: superadmin');
-        $this->command->info('   Password: ChangeMe123!');
+        $this->command->info('   Email:    '.$email);
+        $this->command->info('   Username: '.$username);
+        $this->command->info('   Password: value from SUPERADMIN_PASSWORD');
         $this->command->info('');
-        $this->command->warn('⚠️  IMPORTANT: Change the superadmin password immediately after first login!');
+        $this->command->warn('⚠️  Keep the superadmin password private and rotate it periodically.');
         $this->command->info('');
     }
 }

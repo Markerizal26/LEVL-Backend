@@ -7,6 +7,7 @@ namespace Modules\Learning\Http\Requests;
 use Illuminate\Foundation\Http\FormRequest;
 use Modules\Learning\Enums\RandomizationType;
 use Modules\Learning\Enums\ReviewMode;
+use App\Support\ValidationRules\UploadSizeRule;
 
 class StoreQuizRequest extends FormRequest
 {
@@ -29,7 +30,7 @@ class StoreQuizRequest extends FormRequest
             'question_bank_count' => ['nullable', 'integer', 'min:1'],
             'review_mode' => ['nullable', 'string', ReviewMode::rule()],
             'attachments' => ['nullable', 'array'],
-            'attachments.*' => ['file'],
+            'attachments.*' => ['file', new UploadSizeRule()],
         ];
     }
 

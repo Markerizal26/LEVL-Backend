@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Modules\Common\Http\Requests;
 
 use Illuminate\Foundation\Http\FormRequest;
+use App\Support\ValidationRules\UploadSizeRule;
 
 class UploadMediaRequest extends FormRequest
 {
@@ -15,7 +16,7 @@ class UploadMediaRequest extends FormRequest
                 'required',
                 'file',
                 'mimes:jpeg,jpg,png,gif,svg,webp,bmp,mp4,webm,ogg,mov,avi,mkv,mpeg,pdf,txt,csv,doc,docx,xls,xlsx,ppt,pptx,rtf,zip,rar,7z,tar,gz,json,xml',
-                'max:51200',
+                new UploadSizeRule(),
             ],
         ];
     }

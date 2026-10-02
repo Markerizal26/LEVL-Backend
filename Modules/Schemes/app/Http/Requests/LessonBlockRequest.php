@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Modules\Schemes\Http\Requests;
 
 use App\Support\ApiResponse;
+use App\Support\ValidationRules\UploadSizeRule;
 use Illuminate\Foundation\Http\FormRequest;
 use Modules\Schemes\Enums\BlockType;
 
@@ -19,9 +20,6 @@ class LessonBlockRequest extends FormRequest
 
     public function rules(): array
     {
-        $maxMb = config('app.lesson_block_max_upload_mb', 50);
-        $maxKb = $maxMb * 1024;
-
         $isUpdate = $this->isMethod('PUT') || $this->isMethod('PATCH');
 
         return [
@@ -61,7 +59,7 @@ class LessonBlockRequest extends FormRequest
             'media' => [
                 'nullable',
                 'file',
-                'max:'.$maxKb,
+                new UploadSizeRule(),
                 function ($attribute, $value, $fail) use ($isUpdate) {
                     $resolvedType = $this->resolveBlockType();
                     if (! $resolvedType) {
@@ -125,7 +123,6 @@ class LessonBlockRequest extends FormRequest
             'external_url.url' => __('validation.url', ['attribute' => __('validation.attributes.external_url')]),
             'external_url.max' => __('validation.max.string', ['attribute' => __('validation.attributes.external_url'), 'max' => 500]),
             'media.file' => __('validation.file', ['attribute' => __('validation.attributes.media')]),
-            'media.max' => __('validation.max.file', ['attribute' => __('validation.attributes.media'), 'max' => config('app.lesson_block_max_upload_mb', 50)]),
         ];
     }
 

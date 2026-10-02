@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Modules\Forums\Http\Requests;
 
 use Illuminate\Foundation\Http\FormRequest;
+use App\Support\ValidationRules\UploadSizeRule;
 use Modules\Enrollments\Models\Enrollment;
 use Modules\Schemes\Models\Course;
 
@@ -36,7 +37,11 @@ class CreateThreadRequest extends FormRequest
                 },
             ],
             'attachments' => 'nullable|array|max:5',
-            'attachments.*' => 'file|mimes:jpeg,png,jpg,gif,pdf,mp4,webm,ogg,mov,avi|max:51200',
+            'attachments.*' => [
+                'file',
+                'mimes:jpeg,png,jpg,gif,pdf,mp4,webm,ogg,mov,avi',
+                new UploadSizeRule(),
+            ],
         ];
     }
 
@@ -56,7 +61,6 @@ class CreateThreadRequest extends FormRequest
             'attachments.max' => __('validation.max.array', ['attribute' => 'attachments', 'max' => 5]),
             'attachments.*.file' => __('validation.file', ['attribute' => 'attachment']),
             'attachments.*.mimes' => __('validation.mimes', ['attribute' => 'attachment', 'values' => 'jpeg,png,jpg,gif,pdf,mp4,webm,ogg,mov,avi']),
-            'attachments.*.max' => __('validation.max.file', ['attribute' => 'attachment', 'max' => '50MB']),
         ];
     }
 

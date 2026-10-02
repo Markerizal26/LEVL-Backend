@@ -1,0 +1,37 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: levl-config
+  namespace: levl
+data:
+  APP_ENV: "production"
+  APP_DEBUG: "false"
+  APP_URL: "https://api.domain-anda.com"
+
+  OCTANE_SERVER: "frankenphp"
+  OCTANE_HOST: "0.0.0.0"
+  OCTANE_PORT: "8000"
+  OCTANE_WORKERS: "2"
+  OCTANE_MAX_REQUESTS: "1000"
+  OCTANE_LOG_LEVEL: "warn"
+  PHP_MEMORY_LIMIT: "512M"
+  GOMEMLIMIT: "256MiB"
+
+  LOG_CHANNEL: "stderr"
+  LOG_LEVEL: "warning"
+  FILESYSTEM_DISK: "public"
+  MEDIA_DISK: "public"
+  UPLOAD_MAX_FILE_SIZE_KB: "2048"
+  UPLOAD_MAX_VIDEO_SIZE_KB: "51200"
+  LESSON_BLOCK_MAX_UPLOAD_MB: "50"
+
+  CACHE_STORE: "redis"
+  QUEUE_CONNECTION: "redis"
+  SESSION_DRIVER: "database"
+  REDIS_CLIENT: "phpredis"
+  REDIS_HOST: "levl-redis"
+  REDIS_PORT: "6379"
+
+  TELESCOPE_ENABLED: "false"
+  CLOCKWORK_ENABLE: "false"
+  QUERY_DETECTOR_ENABLED: "false"

@@ -194,7 +194,7 @@ class Thread extends Model implements HasMedia
     public function registerMediaCollections(): void
     {
         $this->addMediaCollection('attachments')
-            ->useDisk('do');
+            ->useDisk(config('media-library.disk_name', 'public'));
     }
 
     public function registerMediaConversions(?\Spatie\MediaLibrary\MediaCollections\Models\Media $media = null): void

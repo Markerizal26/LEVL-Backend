@@ -47,11 +47,11 @@ class News extends Model implements HasMedia
     {
         $this->addMediaCollection('featured_image')
             ->singleFile()
-            ->useDisk('do')
+            ->useDisk(config('media-library.disk_name', 'public'))
             ->acceptsMimeTypes(['image/jpeg', 'image/png', 'image/webp']);
 
         $this->addMediaCollection('gallery')
-            ->useDisk('do')
+            ->useDisk(config('media-library.disk_name', 'public'))
             ->acceptsMimeTypes(['image/jpeg', 'image/png', 'image/gif', 'image/webp']);
     }
 

@@ -34,7 +34,7 @@ class ImageRules
             'nullable',
             'image',
             'mimes:jpeg,png,jpg',
-            'max:5120', 
+            'max:2048',
         ];
     }
 
@@ -45,7 +45,7 @@ class ImageRules
             'nullable',
             'image',
             'mimes:jpeg,png,jpg',
-            'max:10240', 
+            'max:2048',
         ];
     }
 
@@ -56,7 +56,7 @@ class ImageRules
             'nullable',
             'image',
             'mimes:jpeg,png,jpg,gif,webp',
-            'max:5120',
+            'max:2048',
         ];
     }
 
@@ -67,7 +67,7 @@ class ImageRules
             'required',
             'image',
             'mimes:jpeg,png,jpg',
-            'max:3072', 
+            'max:2048',
             'dimensions:min_width=100,min_height=100,max_width=2000,max_height=2000',
         ];
     }
@@ -79,7 +79,7 @@ class ImageRules
             'nullable',
             'image',
             'mimes:jpeg,png,jpg,svg',
-            'max:512', 
+            'max:2048',
         ];
     }
 

@@ -7,6 +7,7 @@ namespace Modules\Learning\Http\Requests;
 use Illuminate\Foundation\Http\FormRequest;
 use Modules\Learning\Enums\SubmissionType;
 use Modules\Learning\Models\Assignment;
+use App\Support\ValidationRules\UploadSizeRule;
 
 class StoreSubmissionRequest extends FormRequest
 {
@@ -33,13 +34,13 @@ class StoreSubmissionRequest extends FormRequest
 
             case SubmissionType::File:
                 $rules['files'] = ['required', 'array', 'min:1'];
-                $rules['files.*'] = ['file', 'max:10240'];
+                $rules['files.*'] = ['file', new UploadSizeRule()];
                 break;
 
             case SubmissionType::Mixed:
                 $rules['answer_text'] = ['nullable', 'string'];
                 $rules['files'] = ['nullable', 'array'];
-                $rules['files.*'] = ['file', 'max:10240'];
+                $rules['files.*'] = ['file', new UploadSizeRule()];
                 break;
         }
 

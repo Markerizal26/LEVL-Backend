@@ -1,0 +1,53 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: levl-queue
+  namespace: levl
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: levl-queue
+  template:
+    metadata:
+      labels:
+        app: levl-queue
+    spec:
+      terminationGracePeriodSeconds: 60
+      securityContext:
+        fsGroup: 33
+      imagePullSecrets:
+        - name: ghcr-auth
+      containers:
+        - name: worker
+          image: IMAGE_PLACEHOLDER
+          imagePullPolicy: IfNotPresent
+          command:
+            - php
+            - artisan
+            - queue:work
+            - redis
+            - --queue=emails-critical,emails-transactional,grading,notifications,file-processing,trash,logging,audit,gamification,default
+            - --sleep=3
+            - --tries=3
+            - --max-time=3600
+            - --timeout=900
+          envFrom:
+            - configMapRef:
+                name: levl-config
+            - secretRef:
+                name: levl-env
+          resources:
+            requests:
+              cpu: "100m"
+              memory: "256Mi"
+            limits:
+              cpu: "500m"
+              memory: "512Mi"
+          volumeMounts:
+            - name: media-storage
+              mountPath: /app/storage/app
+      volumes:
+        - name: media-storage
+          persistentVolumeClaim:
+            claimName: levl-media

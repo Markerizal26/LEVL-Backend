@@ -29,7 +29,7 @@ class Quiz extends Model implements HasMedia
     public function registerMediaCollections(): void
     {
         $this->addMediaCollection('attachments')
-            ->useDisk('do')
+            ->useDisk(config('media-library.disk_name', 'public'))
             ->acceptsMimeTypes([
                 'application/pdf',
                 'application/msword',

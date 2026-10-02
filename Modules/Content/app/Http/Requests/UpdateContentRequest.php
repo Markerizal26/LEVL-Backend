@@ -4,6 +4,7 @@ namespace Modules\Content\Http\Requests;
 
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
+use App\Support\ValidationRules\UploadSizeRule;
 use Modules\Content\Enums\Priority;
 use Modules\Content\Enums\TargetType;
 
@@ -24,7 +25,7 @@ class UpdateContentRequest extends FormRequest
         
         if ($this->route('news')) {
             $rules['excerpt'] = 'nullable|string';
-            $rules['featured_image'] = 'nullable|image|max:5120';
+            $rules['featured_image'] = ['nullable', 'image', new UploadSizeRule()];
             $rules['is_featured'] = 'nullable|boolean';
             $rules['category_ids'] = 'nullable|array';
             $rules['category_ids.*'] = 'exists:content_categories,id';

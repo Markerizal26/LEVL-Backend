@@ -43,8 +43,9 @@ class QuizQuestion extends Model implements HasMedia
 
     public function registerMediaCollections(): void
     {
-        $this->addMediaCollection('option_images')->useDisk('do');
-        $this->addMediaCollection('question_attachments')->useDisk('do');
+        $disk = config('media-library.disk_name', 'public');
+        $this->addMediaCollection('option_images')->useDisk($disk);
+        $this->addMediaCollection('question_attachments')->useDisk($disk);
     }
 
     public function quiz(): BelongsTo

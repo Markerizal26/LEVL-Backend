@@ -27,7 +27,7 @@ class LessonBlock extends Model implements HasMedia
     {
         $this->addMediaCollection('media')
             ->singleFile()
-            ->useDisk('do')
+            ->useDisk(config('media-library.disk_name', 'public'))
             ->acceptsMimeTypes([
 
                 'image/jpeg',
