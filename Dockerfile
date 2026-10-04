@@ -44,6 +44,10 @@ COPY . .
 COPY --from=frontend /app/public/build ./public/build
 COPY docker/php.ini /usr/local/etc/php/conf.d/zz-levl.ini
 
+RUN cp vendor/laravel/octane/src/Commands/stubs/frankenphp-worker.php \
+       public/frankenphp-worker.php \
+    && chmod 0644 public/frankenphp-worker.php
+
 RUN composer dump-autoload \
         --no-dev \
         --optimize \
