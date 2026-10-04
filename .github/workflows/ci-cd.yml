@@ -124,6 +124,14 @@ jobs:
             set -eu
 
             cd "${{ secrets.DEPLOY_PATH }}"
+
+            # The SSH key used by this action logs into the VPS. The repository
+            # itself is fetched from GitHub with the separate read-only key
+            # provisioned on the VPS user.
+            GITHUB_DEPLOY_KEY=/home/levl/.ssh/github_deploy
+            test -r "$GITHUB_DEPLOY_KEY"
+            export GIT_SSH_COMMAND="ssh -i $GITHUB_DEPLOY_KEY -o IdentitiesOnly=yes -o BatchMode=yes -o StrictHostKeyChecking=yes"
+
             git fetch origin main
             git checkout main
             git pull --ff-only origin main
