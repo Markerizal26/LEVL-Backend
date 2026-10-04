@@ -153,6 +153,15 @@ jobs:
             KUBECTL="sudo k3s kubectl"
 
             $KUBECTL apply -f "$K8S_TMP/namespace.yaml"
+
+            # Keep production secrets outside the repository while refreshing
+            # the Kubernetes Secret on every deployment.
+            ENV_FILE=/opt/levl/.env.production
+            test -r "$ENV_FILE"
+            $KUBECTL -n levl create secret generic levl-env \
+              --from-env-file="$ENV_FILE" \
+              --dry-run=client -o yaml | $KUBECTL apply -f -
+
             $KUBECTL apply -f "$K8S_TMP/configmap.yaml"
             $KUBECTL apply -f "$K8S_TMP/cluster-issuer.yaml"
             $KUBECTL apply -f "$K8S_TMP/media-pv.yaml"
