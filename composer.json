@@ -9,7 +9,7 @@
   ],
   "license": "MIT",
   "require": {
-    "php": "^8.2",
+    "php": "^8.4",
     "darkaonline/l5-swagger": "^10.0",
     "dedoc/scramble": "^0.13.10",
     "dompdf/dompdf": "^3.0",

@@ -10,7 +10,7 @@ COPY vite.config.js ./
 
 RUN npm run build
 
-FROM dunglas/frankenphp:php8.3-bookworm
+FROM dunglas/frankenphp:php8.4-bookworm
 
 COPY --from=composer:2 /usr/bin/composer /usr/bin/composer
 
